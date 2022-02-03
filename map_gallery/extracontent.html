@@ -1,0 +1,115 @@
+<html>
+<head>
+<title>Map Gallery</title>
+
+<style>
+
+a img{
+border:0;
+}
+
+.map-thumbnail {
+	width: 296x;
+	height: 296px;
+	display: inline-block;
+	margin: 8px;
+	border: 1px solid #888;
+	background-color:#fff;
+	box-shadow: 0px 0px 10px #ccc;    
+	position: relative;
+	cursor: pointer;
+	text-decoration: none;
+}
+
+a :hover {
+	box-shadow: 2px 2px 15px #888;    
+}
+
+.map-app {
+	font-size: 14px;
+	overflow: hidden;
+	text-align: center;
+	padding-top: 5px;
+	padding-bottom: 5px;	
+	color: #333333;
+	position: absolute;
+	bottom: 0px;
+	border-top:1px solid #888;
+	left: 0px;
+	width: 296px;
+	z-index: 1;
+	background: #f0f0f0;
+	font-family:"Verdana",Serif;
+	  pointer-events: none;
+}
+
+h1 {
+margin-top: -6px;
+margin-bottom: 0px;
+color: rgb(68,121,170);
+font-family: Copse, Georgia, serif;
+font-style: normal;
+font-variant: normal;
+font-weight: normal;
+letter-spacing: normal;
+outline-color: rgb(143, 2, 6);
+outline-style: none;
+outline-width: 0px;
+text-decoration: none;
+text-shadow: rgb(252, 249, 238) 0px 1px 0px, rgba(0, 0, 0, 0.14902) 0px 2px 0px;
+}
+
+.attrib {
+font-size: 80%;
+}
+
+</style>
+	
+<script>
+
+function styleparent(element){
+
+var thenode=element.parentNode;
+thenode.style.boxShadow='2px 2px 15px grey';
+
+}
+
+
+function styleout(element){
+
+var thenode=element.parentNode;
+thenode.style.boxShadow='0px 0px 10px #ccc';
+
+}
+
+</script>
+
+</head>
+<body>
+
+<h1>Visualizations - Outside Sources</h1>
+<div class="map-thumbnail" id="numnode1">
+	<a onmouseout="styleout(this);" onmouseover="styleparent(this);" href="http://vizynary.com/2013/11/18/restless-america-state-to-state-migration-in-2012/" title="Discover State to State Migration Trends" target="_blank"><img alt="Thumbnail of 2012 State Migration Flows Visualization" src="extra_img/migflows.png" /></a><span class="map-app" onmouseout="styleout(this);" onmouseover="styleparent(this);"><b>2012 State Migration Flows</b><br /><span class="attrib">vizynary.com - Chris Walker</span></span></div>
+<div class="map-thumbnail" id="numnode2">
+	<a onmouseout="styleout(this);" onmouseover="styleparent(this);" href="http://www.forbes.com/special-report/2011/migration.html" title="Visualize County to County Migration for the USA" target="_blank"><img alt="Thumbnail of US County to County Visualization" src="extra_img/amermig.png" /></a><span class="map-app" onmouseout="styleout(this);" onmouseover="styleparent(this);"><b>US County to County Migration</b><br /><span class="attrib">forbes.com - Forbes</span></span></div>
+<!--<div class="map-thumbnail" id="numnode3">
+	<a onmouseout="styleout(this);" onmouseover="styleparent(this);" href="http://www.forbes.com/special-report/2011/migration.html" title="Visualize County to County Migration for the USA" target="_blank"><img alt="Thumbnail of US County to County Visualization" src="http://dola.colorado.gov/cms-base/sites/dola.colorado.gov.gis-cms/files/html/extracontent/amermig.png" /></a><span class="map-app" onmouseout="styleout(this);" onmouseover="styleparent(this);"><b>US County to County Migration</b><br /><span class="attrib">forbes.com</span></span></div>
+<div class="map-thumbnail" id="numnode4">
+	<a onmouseout="styleout(this);" onmouseover="styleparent(this);" href="http://www.forbes.com/special-report/2011/migration.html" title="Visualize County to County Migration for the USA" target="_blank"><img alt="Thumbnail of US County to County Visualization" src="http://dola.colorado.gov/cms-base/sites/dola.colorado.gov.gis-cms/files/html/extracontent/amermig.png" /></a><span class="map-app" onmouseout="styleout(this);" onmouseover="styleparent(this);"><b>US County to County Migration</b><br /><span class="attrib">forbes.com</span></span></div>-->
+
+	<br />	<br />
+	
+	<h1>Maps - Outside Sources</h1>
+<div class="map-thumbnail" id="numnode5">
+	<a onmouseout="styleout(this);" onmouseover="styleparent(this);" href="http://projects.nytimes.com/census/2010/explorer" title="Discover Patterns of Race and Ethnicity in the USA" target="_blank"><img alt="Thumbnail of NY Times Mapping America" src="extra_img/dotdensity.png" /></a><span class="map-app" onmouseout="styleout(this);" onmouseover="styleparent(this);"><b>Race / Ethnicity - Dot Density</b><br /><span class="attrib">projects.nytimes.com - New York Times</span></span></div>
+<!--<div class="map-thumbnail" id="numnode6">
+	<a onmouseout="styleout(this);" onmouseover="styleparent(this);" href="http://www.forbes.com/special-report/2011/migration.html" title="Visualize County to County Migration for the USA" target="_blank"><img alt="Thumbnail of US County to County Visualization" src="http://dola.colorado.gov/cms-base/sites/dola.colorado.gov.gis-cms/files/html/extracontent/amermig.png" /></a><span class="map-app" onmouseout="styleout(this);" onmouseover="styleparent(this);"><b>US County to County Migration</b><br /><span class="attrib">forbes.com -</span></span></div>
+<div class="map-thumbnail" id="numnode7">
+	<a onmouseout="styleout(this);" onmouseover="styleparent(this);" href="http://www.forbes.com/special-report/2011/migration.html" title="Visualize County to County Migration for the USA" target="_blank"><img alt="Thumbnail of US County to County Visualization" src="http://dola.colorado.gov/cms-base/sites/dola.colorado.gov.gis-cms/files/html/extracontent/amermig.png" /></a><span class="map-app" onmouseout="styleout(this);" onmouseover="styleparent(this);"><b>US County to County Migration</b><br /><span class="attrib">forbes.com</span></span></div>
+<div class="map-thumbnail" id="numnode8">
+	<a onmouseout="styleout(this);" onmouseover="styleparent(this);" href="http://www.forbes.com/special-report/2011/migration.html" title="Visualize County to County Migration for the USA" target="_blank"><img alt="Thumbnail of US County to County Visualization" src="http://dola.colorado.gov/cms-base/sites/dola.colorado.gov.gis-cms/files/html/extracontent/amermig.png" /></a><span class="map-app" onmouseout="styleout(this);" onmouseover="styleparent(this);"><b>US County to County Migration</b><br /><span class="attrib">forbes.com</span></span></div>-->
+
+  <p>Test</p>
+  
+</body>
+</html>
