@@ -1,0 +1,97 @@
+<!-- American Community Survey Map Archive Secondary Page A Bickford 7/2021 -->
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>SDO American Community Survey Map Archive Resource Page</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
+<!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
+<!-- SDO CSS -->
+<link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
+<!-- adding d3.js  for data manipulation-->
+ <script src="https://d3js.org/d3.v6.min.js"></script>
+<!-- SDO suport functions, genSYA, insertHTML, -->
+<script src="../js/funct.js"></script>
+</head>
+<body>
+<div>
+<a href="https://cdola.colorado.gov/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt="Department of Local Affairs Homepage"></a>
+</div>
+<div w3-include-html="./navheader.html"></div>
+<!-- First Grid, linked images -->
+<div class="grid-container2">
+  <div class="grid-item panel2_1_1">
+	<div w3-include-html="./sdotitle.html"></div>
+  </div>
+  <div class="grid-item panel2_2_1" id="leftHand">
+	<div w3-include-html="./left_hand.html"></div>
+  </div> <!-- Grid  panel2_2_1 -->
+  <div class="grid-item panel2_2_2">
+      <a href="https://coloradodemography.github.io/CensusAPI_Map_2018/?lat=39&lng=-104.8&z=9&s=50&v=mhi&sn=jenks&cs=mh1&cl=7" title="ACS 2014-2018 Interactive Map"><img class="map-thumbnail" alt="ACS 2014-2018 Interactive Map" src="../../map_gallery/img/acs1418.png"></a>
+	  <a href="https://coloradodemography.github.io/CensusAPI_Map_2018/?lat=39&lng=-104.8&z=9&s=50&v=mhi&sn=jenks&cs=mh1&cl=7" title="ACS 2014-2018 Interactive Map"><p style="font-size:9pt;text-align:center;">ACS 2014-2018 Interactive Map</p></a>
+  </div>
+  <div class="grid-item panel2_2_3">
+      <a href="https://coloradodemography.github.io/CensusAPI_Map_2017/?lat=39&lng=-104.8&z=9&s=50&v=mhi&sn=jenks&cs=mh1&cl=7" title="ACS 2013-2017 Interactive Map"><img class="map-thumbnail" alt="ACS 2013-2017 Interactive Map" src="../../map_gallery/img/acs1317.png"></a>
+	  <a href="https://coloradodemography.github.io/CensusAPI_Map_2017/?lat=39&lng=-104.8&z=9&s=50&v=mhi&sn=jenks&cs=mh1&cl=7" title="ACS 2013-2017 Interactive Map"><p style="font-size:9pt;text-align:center;">ACS 2013-2017 Interactive Map</p></a>
+  </div>
+  <div class="grid-item panel2_2_4">
+      <a href="https://coloradodemography.github.io/CensusAPI_Map_2016/?lat=39&lng=-104.8&z=9&s=50&v=mhi&sn=jenks&cs=mh1&cl=7" title="ACS 2012-2016 Interactive Map"><img class="map-thumbnail" alt="ACS 2012-2016 Interactive Map" src="../../map_gallery/img/acs1216.png"></a>
+	  <a href="https://coloradodemography.github.io/CensusAPI_Map_2016/?lat=39&lng=-104.8&z=9&s=50&v=mhi&sn=jenks&cs=mh1&cl=7" title="ACS 2012-2016 Interactive Map"><p style="font-size:9pt;text-align:center;">ACS 2012-2016 Interactive Map</p></a>
+  </div>
+  <div class="grid-item panel2_2_5">
+      <a href="https://coloradodemography.github.io/CensusAPI_Map_2015/?lat=39&lng=-104.8&z=9&s=50&v=mhi&sn=jenks&cs=mh1&cl=7" title="ACS 2011-2015 Interactive Map"><img class="map-thumbnail" alt="ACS 2011-2015 Interactive Map" src="../../map_gallery/img/acs1115.png"></a>
+	  <a href="https://coloradodemography.github.io/CensusAPI_Map_2015/?lat=39&lng=-104.8&z=9&s=50&v=mhi&sn=jenks&cs=mh1&cl=7" title="ACS 2011-2015 Interactive Map"><p style="font-size:9pt;text-align:center;">ACS 2011-2015 Interactive Map</p></a>
+  </div>
+  <div class="grid-item panel2_2_6">
+      <a href="https://coloradodemography.github.io/CensusAPI_Map_2014/?lat=39&lng=-104.8&z=9&s=50&v=mhi&sn=jenks&cs=mh1&cl=7" title="ACS 2010-2014 Interactive Map"><img class="map-thumbnail" alt="ACS 2010-2014 Interactive Map" src="../../map_gallery/img/acs1014.png"></a>
+	  <a href="https://coloradodemography.github.io/CensusAPI_Map_2014/?lat=39&lng=-104.8&z=9&s=50&v=mhi&sn=jenks&cs=mh1&cl=7" title="ACS 2010-2014 Interactive Map"><p style="font-size:9pt;text-align:center;">ACS 2010-2014 Interactive Map</p></a>
+  </div>
+  <div class="grid-item panel2_2_7">
+      <a href="https://coloradodemography.github.io/CensusAPI_Map_2013/?lat=39&lng=-104.8&z=9&s=50&v=mhi&sn=jenks&cs=mh1&cl=7" title="ACS 2009-2013 Interactive Map"><img class="map-thumbnail" alt="ACS 2009-2013 Interactive Map" src="../../map_gallery/img/acs0913.png"></a>
+	  <a href="https://coloradodemography.github.io/CensusAPI_Map_2013/?lat=39&lng=-104.8&z=9&s=50&v=mhi&sn=jenks&cs=mh1&cl=7" title="ACS 2009-2013 Interactive Map"><p style="font-size:9pt;text-align:center;">ACS 2009-2013 Interactive Map</p></a>
+  </div>
+  <div class="grid-item panel2_3_2">
+      <a href="https://coloradodemography.github.io/CensusAPI_Map_2012/?lat=39&lng=-104.8&z=9&s=50&v=mhi&sn=jenks&cs=mh1&cl=7" title="ACS 2008-2012 Interactive Map"><img class="map-thumbnail" alt="ACS 2008-2012 Interactive Map" src="../../map_gallery/img/acs0812.png"></a>
+	  <a href="https://coloradodemography.github.io/CensusAPI_Map_2012/?lat=39&lng=-104.8&z=9&s=50&v=mhi&sn=jenks&cs=mh1&cl=7" title="ACS 2008-2012 Interactive Map"><p style="font-size:9pt;text-align:center;">ACS 2008-2012 Interactive Map</p></a>
+  </div>
+  <div class="grid-item panel2_3_3">
+      <a href="https://coloradodemography.github.io/CensusAPI_Map_2011/?lat=39&lng=-104.8&z=9&s=50&v=mhi&sn=jenks&cs=mh1&cl=7" title="ACS 2007-2011 Interactive Map"><img class="map-thumbnail" alt="ACS 2007-2011 Interactive Map" src="../../map_gallery/img/acs0711.png"></a>
+	  <a href="https://coloradodemography.github.io/CensusAPI_Map_2011/?lat=39&lng=-104.8&z=9&s=50&v=mhi&sn=jenks&cs=mh1&cl=7" title="ACS 2007-2011 Interactive Map"><p style="font-size:9pt;text-align:center;">ACS 2007-2011 Interactive Map</p></a>
+  </div>
+ <div class="grid-item panel2_3_4">
+      <a href="https://coloradodemography.github.io/CensusAPI_Map_2010/?lat=39&lng=-104.8&z=9&s=50&v=mhi&sn=jenks&cs=mh1&cl=7" title="ACS 2006-2010 Interactive Map"><img class="map-thumbnail" alt="ACS 2006-2010 Interactive Map" src="../../map_gallery/img/acs0610.png"></a>
+	  <a href="https://coloradodemography.github.io/CensusAPI_Map_2010/?lat=39&lng=-104.8&z=9&s=50&v=mhi&sn=jenks&cs=mh1&cl=7" title="ACS 2006-2010 Interactive Map"><p style="font-size:9pt;text-align:center;">ACS 2006-2010 Interactive Map</p></a>
+ </div>
+ <div class="grid-item panel2_3_5">
+   <p></p>
+ </div>
+  <div class="grid-item panel2_3_6">
+   <p></p>
+  </div>
+  <div class="grid-item panel2_3_7">
+	<p></p>
+  </div>
+ <div class="grid-item panel2_4_2">
+		<div w3-include-html="./bodycontent1.html"></div>
+</div>
+	<div class="grid-item panel2_4_4">
+		<div w3-include-html="./bodycontent2.html"></div>
+</div>
+<div class="grid-item panel2_4_6">
+	<div w3-include-html="./bodycontent3.html"></div>
+</div>
+</div>  <!-- End of Grid -->
+
+
+<script>
+
+//Setting HTML include and Accordion
+includeHTML(); 
+
+</script>
+
+</body>
+</html> 

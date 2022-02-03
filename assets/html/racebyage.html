@@ -1,0 +1,180 @@
+<!-- Race by Age Page A Bickford 6/2021 -->
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>SDO Race by Age Visualization</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
+<!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
+<!-- SDO CSS -->
+<link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
+<!-- adding d3.js  for data manipulation-->
+ <script src="https://d3js.org/d3.v6.min.js"></script>
+<!-- Adding Plotly.js for  charting -->
+ <script src="https://cdn.plot.ly/plotly-2.2.0.min.js" charset="utf-8"></script>
+<!-- SDO suport functions, genSYA, insertHTML, -->
+<script src="../js/funct.js"></script>
+</head>
+<body>
+<div>
+<a href="https://cdola.colorado.gov/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt="Department of Local Affairs Homepage"></a>
+</div>
+<div w3-include-html="./navheader.html"></div>
+
+<!-- First Grid, linked images -->
+<div class="grid-container2">
+  <div class="grid-item panel2_1_1">
+	<div w3-include-html="./sdotitle.html"></div>
+  </div>
+   <div class="grid-item app-panel_2_1" id="leftHand">
+	<div w3-include-html="./left_hand.html"></div>
+  </div> <!-- Grid  panel2_2_1 -->
+  <div class="grid-item app-panel_2_2">
+  <b>Race by Age Visualization</b>
+   <br><br>INSTRUCTIONS:
+   <p>
+   The following page provides charts showing single year estimates of age by racial and ethnic groups for counties from 2010 to the current year.
+   For your convenience, you are able to download the graphs by clicking on the camera icon in the upper right of the graph while hovering over the chart. 
+   This will download an exact copy, including zooming, of the chart on the page.
+   </p>
+   Click on the download icon on the left of each chart to download the chart, the underlying data, and links to the data source.
+   <br><br>
+   <b><i>This data visualization can only be viewed on a tablet or desktop.</i></b>
+   <br><br>
+ 	 <label for="county-dropdown"><b>Select County:</b></label>
+	 <select class="county-dropdown" id="county-dropdown"></select>
+	 <label for="year-dropdown"><b>Select Year:</b></label>
+	 <select class="year-dropdown" id="year-dropdown"></select>
+  </div>
+  <div class="grid-item app-panel_3_2">
+      <div class="dropdown AClass">
+		  <button class="dropbtn"  id="line"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+		  <div class="dropdown-content">
+		    <ul class='dd-list'>
+			<li><a href="#" id='line_csv'>Download Data (CSV)</a></li>
+			<li><a href="#" id='line_png'>Download Image (PNG)</a></li>
+			<li><a href='https://coloradodemography.github.io/population/data/race-estimate/#county-race-by-age-estimates' id='line_src'>County Race and Ethnicity by Age Lookup</a></li>
+			</ul>
+		  </div>
+	  </div>
+	 <div id="line_output"></div>
+  </div>
+  <div class="grid-item app-panel_4_2">
+	<div class="dropdown AClass">
+		<button class="dropbtn" id="white"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+	<div class="dropdown-content">
+	    <ul class='dd-list'>
+		<li><a href="#" id='white_csv'>Download Data (CSV)</a></li>
+		<li><a href="#" id='white_png'>Download Image (PNG)</a></li>
+		<li><a href='https://coloradodemography.github.io/population/data/race-estimate/#county-race-by-age-estimates' id='white_src'>County Race and Ethnicity by Age Lookup</a></li>
+		</ul>
+	 </div>
+	</div>
+    <div id="white_output"></div>
+  </div>
+  <div class="grid-item app-panel_5_2">
+  	<div class="dropdown AClass">
+		<button class="dropbtn" id="hisp"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+	<div class="dropdown-content">
+	    <ul class='dd-list'>
+		<li><a href="#" id='hisp_csv'>Download Data (CSV)</a></li>
+		<li><a href="#" id='hisp_png'>Download Image (PNG)</a></li>
+		<li><a href='https://coloradodemography.github.io/population/data/race-estimate/#county-race-by-age-estimates' id='hisp_src'>County Race and Ethnicity by Age Lookup</a></li>
+		</ul>
+	 </div>
+	</div>
+    <div id="hisp_output"></div>
+  </div>
+  <div class="grid-item app-panel_6_2">
+    <div class="dropdown AClass">
+		<button class="dropbtn" id="black"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+	<div class="dropdown-content">
+	    <ul class='dd-list'>
+		<li><a href="#" id='black_csv'>Download Data (CSV)</a></li>
+		<li><a href="#" id='black_png'>Download Image (PNG)</a></li>
+		<li><a href='https://coloradodemography.github.io/population/data/race-estimate/#county-race-by-age-estimates' id='black_src'>County Race and Ethnicity by Age Lookup</a></li>
+		</ul>
+	 </div>
+	</div>
+	<div id="black_output"></div>
+  </div>
+  <div class="grid-item app-panel_7_2">
+    <div class="dropdown AClass">
+		<button class="dropbtn" id="asian"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+	<div class="dropdown-content">
+	    <ul class='dd-list'>
+		<li><a href="#" id='asian_csv'>Download Data (CSV)</a></li>
+		<li><a href="#" id='asian_png'>Download Image (PNG)</a></li>
+		<li><a href='https://coloradodemography.github.io/population/data/race-estimate/#county-race-by-age-estimates' id='asian_src'>County Race and Ethnicity by Age Lookup</a></li>
+		</ul>
+	 </div>
+	</div>
+    <div id="asian_output"></div>
+  </div>  
+  <div class="grid-item app-panel_8_2">
+      <div class="dropdown AClass">
+		<button class="dropbtn" id="amind"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+	  <div class="dropdown-content">
+	    <ul class='dd-list'>
+		<li><a href="#" id='amind_csv'>Download Data (CSV)</a></li>
+		<li><a href="#" id='amind_png'>Download Image (PNG)</a></li>
+		<li><a href='https://coloradodemography.github.io/population/data/race-estimate/#county-race-by-age-estimates' id='amind_src'>County Race and Ethnicity by Age Lookup</a></li>
+		</ul>
+	 </div>
+	</div>
+    <div id="amind_output"></div> 
+ </div>
+</div>  <!-- End of Grid -->
+
+
+<script>
+
+//Setting HTML include and Accordion
+includeHTML(); 
+//hide Buttons
+hideButtons();
+/* Populate County Dropdown */
+popDropdown('county','county-dropdown','')
+
+//generating maximum year value for estimates
+var urlstr = "https://gis.dola.colorado.gov/lookups/componentYRS";
+d3.json(urlstr).then(function(yeardata){
+
+    var yrsList = yeardata.filter(function(d){return (d.datatype == 'Estimate') && (d.year >= 2010);});
+	var yrList = yrsList.map(function(d){return d.year;});
+	var yrvalue = d3.min(yrList);
+
+	d3.select('#year-dropdown')
+    .selectAll('option')
+    .data(yrsList)
+    .enter()
+    .append('option')
+    .attr('value', d => d.year) 
+    .text(d => d.year);
+
+	
+//Generate Initial Tables
+
+genRACEVIS("000","Colorado", yrvalue);
+showButtons();
+d3.select("#county-dropdown").on("change", function(d,i) {
+        var selectedfips = d3.select("#county-dropdown").property('value');
+		var selectedcounty = d3.select('#county-dropdown option:checked').text();
+		var yrvalue = d3.select("#year-dropdown").property('value');
+        genRACEVIS(selectedfips,selectedcounty,yrvalue);
+    });
+	
+d3.select("#year-dropdown").on("change", function(d,i) {
+        var selectedfips = d3.select("#county-dropdown").property('value');
+		var selectedcounty = d3.select('#county-dropdown option:checked').text();
+		var yrvalue = d3.select("#year-dropdown").property('value');
+        genRACEVIS(selectedfips,selectedcounty,yrvalue);
+    });
+}); //end of maximum year value
+
+</script>
+
+</body>
+</html> 

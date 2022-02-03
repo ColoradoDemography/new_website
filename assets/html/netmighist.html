@@ -1,0 +1,119 @@
+<!-- Net Migration Historical Page A Bickford 6/2021 -->
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>SDO Long Term Net Migraiton</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
+<!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
+<!-- SDO CSS -->
+<link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
+<!-- adding d3.js  for data manipulation-->
+ <script src="https://d3js.org/d3.v6.min.js"></script>
+<!-- Adding Plotly.js for  charting -->
+ <script src="https://cdn.plot.ly/plotly-2.2.0.min.js" charset="utf-8"></script>
+<!-- SDO suport functions, genSYA, insertHTML, -->
+<script src="../js/funct.js"></script>
+</head>
+<body>
+<div class="alert__bar--covid-19" style="text-color:black;font-size:12px;">
+    <h2 style="background-color:#8fc6e8;text-align:center;">
+      Visit <a href="https://covid19.colorado.gov/for-coloradans/vaccine/where-can-i-get-vaccinated">"Where can I get vaccinated"</a> or call 1-877-COVAXCO (1-877-268-2926) for vaccine information.
+    </h2>
+</div>    
+<div>
+<a href="https://cdola.colorado.gov/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt="Department of Local Affairs Homepage"></a>
+</div>
+	<div w3-include-html="./navheader.html"></div>
+<!-- First Grid, linked images -->
+<div class="grid-container2">
+  <div class="grid-item panel2_1_1">
+	<div w3-include-html="./sdotitle.html"></div>
+  </div>
+   <div class="grid-item app-panel_2_1" id="leftHand">
+	<div w3-include-html="./left_hand.html"></div>
+  </div> <!-- Grid  panel2_2_1 -->
+  <div class="grid-item app-panel_2_2">
+  <b>Long Term Trends: Births, Deaths, and Net Migration by County</b>
+   <br><br>INSTRUCTIONS:
+   <p>
+   The following page shows births, deaths, and net migration estimates and forecasts for counties from 1970 to 2050.
+   </p>
+   Click on the download icon on the left of each chart to download the chart, the underlying data and links to the data source.
+   <br><br>
+   <b><i>This data visualization can only be viewed on a tablet or desktop.</i></b>
+   <br><br>
+ 	 <label for="county-dropdown"><b>Select County:</b></label>
+	 <select class="county-dropdown" id="county-dropdown"></select>
+  </div>
+  <div class="grid-item app-panel_3_2">
+      <div class="dropdown AClass">
+		  <button class="dropbtn"  id="births"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+		  <div class="dropdown-content">
+			<a href="#" id='birth_csv'>Download Data (CSV)</a>
+			<a href='#' id='birth_png'>Download Image (PNG)</a>
+		<a href='https://coloradodemography.github.io/births-deaths-migration/data/components-change/#components-of-change' id='birth_src'><u>Data Source:</u>County Births, Deaths, and Migration Lookup</a>
+
+		  </div>
+	  </div>
+	 <div id="birth_output"></div>
+  </div>
+  <div class="grid-item app-panel_4_2">
+	<div class="dropdown AClass">
+		<button class="dropbtn" id="death"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+	<div class="dropdown-content">
+		<a href="#" id='death_csv'>Download Data (CSV)</a>
+		<a href='#' id='death_png'>Download Image (PNG)</a>
+		<a href='https://coloradodemography.github.io/births-deaths-migration/data/components-change/#components-of-change' id='death_src'><u>Data Source:</u>County Births, Deaths, and Migration Lookup</a>
+	 </div>
+	</div>
+    <div id="death_output"></div>
+  </div>
+  <div class="grid-item app-panel_5_2">
+  	<div class="dropdown AClass">
+		<button class="dropbtn" id="netmig"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+	<div class="dropdown-content">
+		<a href="#" id='netmig_csv'>Download Data (CSV)</a>
+		<a href='#' id='netmig_png'>Download Image (PNG)</a>
+		<a href='https://coloradodemography.github.io/births-deaths-migration/data/components-change/#components-of-change' id='netmig_src'><u>Data Source:</u>County Births, Deaths, and Migration Lookup</a>
+	 </div>
+	</div>
+    <div id="netmig_output"></div>
+  </div>
+</div>  <!-- End of Grid -->
+
+
+<script>
+
+//Setting HTML include and Accordion
+includeHTML(); 
+
+hideButtons();
+/* Populate County Dropdown */
+popDropdown('county','county-dropdown','')
+
+//generating maximum year value for estimates
+var urlstr = "https://gis.dola.colorado.gov/lookups/componentYRS";
+d3.json(urlstr).then(function(yeardata){
+    var maxest = yeardata.filter(function(d){return d.datatype == 'Estimate'});
+	var yrsList = maxest.map(function(d){return d.year;});
+    var yrvalue = d3.max(yrsList);
+	
+//Generate Initial Tables
+showButtons();
+genCOCHIST("000","Colorado");
+
+d3.select("#county-dropdown").on("change", function(d,i) {
+        var selectedfips = d3.select("#county-dropdown").property('value');
+		var selectedcounty = d3.select('#county-dropdown option:checked').text();
+
+        genCOCHIST(selectedfips,selectedcounty);
+    });
+}); //end of maximum year value
+
+</script>
+
+</body>
+</html> 

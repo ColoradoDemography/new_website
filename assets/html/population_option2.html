@@ -1,0 +1,104 @@
+<!-- Population Secondary Page A Bickford 5/2021 -->
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>SDO Population Resource Page</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
+<!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
+<!-- SDO CSS -->
+<link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
+<!-- adding d3.js  for data manipulation-->
+ <script src="https://d3js.org/d3.v6.min.js"></script>
+<!-- SDO suport functions, genSYA, insertHTML, -->
+<script src="../js/funct.js"></script>
+</head>
+<body>
+<div class="alert__bar--covid-19" style="text-color:black;font-size:12px;">
+    <h2 style="background-color:#8fc6e8;text-align:center;">
+      Visit <a href="https://covid19.colorado.gov/for-coloradans/vaccine/where-can-i-get-vaccinated">"Where can I get vaccinated"</a> or call 1-877-COVAXCO (1-877-268-2926) for vaccine information.
+    </h2>
+</div>    
+<div>
+<a href="https://cdola.colorado.gov/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt="Department of Local Affairs Homepage"></a>
+</div>
+	<div w3-include-html="./navheader.html"></div>
+<!-- First Grid, linked images -->
+<div class="grid-container2">
+  <div class="grid-item panel2_1_1">
+	<div w3-include-html="./sdotitle.html"></div>
+  </div>
+  <div class="grid-item panel2_2_1" id="leftHand">
+	<div w3-include-html="./left_hand_pop.html"></div>
+  </div> <!-- Grid  panel2_2_1 -->
+  <div class="grid-item panel2_2_2">
+      <a href="https://coloradodemography.github.io/AgeMap/" title='Interactive map showing population change by age group by Colorado Counties, 1990 to 2050. Questions? Click on the "Contact Us" link below to contact a SDO Demographer.'><img class="map-thumbnail" alt="Thumbnail of Age Map" src="../../map_gallery/img/AgeMap.PNG" ></a>
+	  <a href="https://coloradodemography.github.io/AgeMap/" title='Interactive map showing population change by age group by Colorado Counties, 1990 to 2050. Questions? Click on the "Contact Us" link below to contact a SDO Demographer.'><p style="font-size:9pt;text-align:center;">Population Change By Age: 1990-2050</p></a>	
+  </div>
+  <div class="grid-item panel2_2_3">
+      <a href="https://coloradodemography.github.io/ComponentsOfChange/" title='Interactive map showing births, deaths and net migration for Colorado Counties, 1970 to 2050. Questions? Click on the "Contact Us" link below to contact a SDO Demographer.'><img class="map-thumbnail" alt="Thumbnail of Components of Change Map" src="../../map_gallery/img/components.png"></a>
+	  <a href="https://coloradodemography.github.io/ComponentsOfChange/" title='Interactive map showing births, deaths and net migration for Colorado Counties, 1970 to 2050. Questions? Click on the "Contact Us" link below to contact a SDO Demographer.'><p style="font-size:9pt;text-align:center;">Population Change: Births, Deaths, and Migration</p></a>
+  </div>
+  <div class="grid-item panel2_2_4">
+    <a href="racebyage.html" title='Application showing Race/Ethnicity by Age for Colorado Counties, 2010 to 2019. Questions? Click on the "Contact Us" link below to contact a SDO Demographer.'><img class="map-thumbnail" alt="Race Ethnicity by Age Visualization" src="../../map_gallery/img/race_age.png" ></a>
+    <a href="racebyage.html" title='Application showing Race/Ethnicity by Age for Colorado Counties, 2010 to 2019. Questions? Click on the "Contact Us" link below to contact a SDO Demographer.'><p style="font-size:9pt;text-align:center;">Race/Ethnicity by Age</p></a>
+  </div>
+  <div class="grid-item panel2_2_5">	
+      <a href="https://coloradodemography.github.io/Age-Animation-Bars" title='Application showing population change by age group by Colorado Counties, 1990 to 2050. Questions? Click on the "Contact Us" link below to contact a SDO Demographer.'><img class="map-thumbnail" alt="Age Animation" src="../../map_gallery/img/agebars.png" ></a>
+	  <a href="https://coloradodemography.github.io/Age-Animation-Bars" title='Application showing population change by age group by Colorado Counties, 1990 to 2050. Questions? Click on the "Contact Us" link below to contact a SDO Demographer.'><p style="font-size:9pt;text-align:center;">Age Animation</p></a>
+ </div>
+  <div class="grid-item panel2_2_6">
+     <a href="https://coloradodemography.github.io/density_2010/" title='Interactive map showing Population and Housing Density at the Census Block Level, 2010. Questions? Click on the "Contact Us" link below to contact a SDO Demographer.'><img class="map-thumbnail" alt="Thumbnail of Density" src="../../map_gallery/img/density.png" ></a>
+	 <a href="https://coloradodemography.github.io/density_2010/" title='Interactive map showing Population and Housing Density at the Census Block Level, 2010. Questions? Click on the "Contact Us" link below to contact a SDO Demographer.'><p style="font-size:9pt;text-align:center;">Population and Housing Density 2010</p></a>
+  </div>
+  <div class="grid-item panel2_2_7">
+   <p></p>
+  </div>
+  <div class="grid-item panel2_3_2">
+    <a href="https://arcg.is/1KXX05" title='Interactive map showing Colorado County population, 1870 to 2019. Questions? Click on the "Contact Us" link below to contact a SDO Demographer.'><img class="map-thumbnail" alt="Historical County Populations" src="../../map_gallery/img/1870.png" ></a>
+	<a href="https://arcg.is/1KXX05" title='Interactive map showing Colorado County population, 1870 to 2019. Questions? Click on the "Contact Us" link below to contact a SDO Demographer.'><p style="font-size:9pt;text-align:center;">Historical County Populations</p></a>
+  </div>
+  <div class="grid-item panel2_3_3">
+    <a href="https://coloradodemography.github.io/Population-Bubbles" title='Application showing Historic Colorado County Population by Decade, 1870 to 2010. Questions? Click on the "Contact Us" link below to contact a SDO Demographer.'><img class="map-thumbnail" alt="Thumbnail of Population Animation" src="../../map_gallery/img/popvis.png" ></a>
+	<a href="https://coloradodemography.github.io/Population-Bubbles" title='Application showing Historic Colorado County Population by Decade, 1870 to 2010. Questions? Click on the "Contact Us" link below to contact a SDO Demographer.'><p style="font-size:9pt;text-align:center;">Colorado County Population</p></a>
+  </div>
+ <div class="grid-item panel2_3_4">
+    <a href="https://coloradodemography.github.io/Animated-Pie/" title='Application showing the population proportion of Colorado countes by decade, 1870 to 2010. Questions? Click on the "Contact Us" link below to contact a SDO Demographer.'><img class="map-thumbnail" alt="Animated Population Chart" src="../../map_gallery/img/pop_pie.png" ></a>
+	<a href="https://coloradodemography.github.io/Animated-Pie/" title='Application showing the population proportion of Colorado countes by decade, 1870 to 2010. Questions? Click on the "Contact Us" link below to contact a SDO Demographer.'><p style="font-size:9pt;text-align:center;">Animated Population Chart</p></a>
+ </div>
+ <div class="grid-item panel2_3_5">
+    <a href="https://public.flourish.studio/visualisation/3775693/" title='Application showing the Historical Birthplace of Colorado Residents, 1860 to 2010. Questions? Click on the "Contact Us" link below to contact a SDO Demographer.'><img class="map-thumbnail" alt="Thumbnail of Birthplace Chart" src="../../map_gallery/img/Birthplace.png" ></a>
+    <a href="https://public.flourish.studio/visualisation/3775693/" title='Application showing the Historical Birthplace of Colorado Residents, 1860 to 2010. Questions? Click on the "Contact Us" link below to contact a SDO Demographer.'><p style="font-size:9pt;text-align:center;">Historical Birthplace of Colorado Residents</p></a>
+  </div>
+  <div class="grid-item panel2_3_6">
+   <a href="https://public.flourish.studio/visualisation/3832584/" title='Application showing the Historical Residence of persons born in Colorado, 1870 to 2010. Questions? Click on the "Contact Us" link below to contact a SDO Demographer.'><img class="map-thumbnail" alt="Thumbnail of Residence Chart" src="../../map_gallery/img/Residence.png" ></a>
+   <a href="https://public.flourish.studio/visualisation/3832584/" title="Historical Residence of Colorado Born"title='Application showing the Historical Residence of persons born in Colorado, 1870 to 2010. Questions? Click on the "Contact Us" link below to contact a SDO Demographer.'><p style="font-size:9pt;text-align:center;">Historical Residence of Colorado Born</p></a>
+   </div>
+  <div class="grid-item panel2_3_7">
+   <a href="https://coloradodemography.github.io/Bracketology/" title="Application testing knowledge of Colorado County population size in the current year."><img class="map-thumbnail" alt= "Colorade County Bracketology" src="../../map_gallery/img/Bracketology.PNG"></a>
+   <a href="https://coloradodemography.github.io/Bracketology/" title="Application testing knowledge of Colorado County population size in the current year."><p style="font-size:9pt;text-align:center;">Colorado County Bracketology</p></a>
+  </div>
+ <div class="grid-item panel2_4_2">
+		<div w3-include-html="./bodycontent1.html"></div>
+</div>
+	<div class="grid-item panel2_4_4">
+		<div w3-include-html="./bodycontent2.html"></div>
+</div>
+<div class="grid-item panel2_4_6">
+	<div w3-include-html="./bodycontent3.html"></div>
+</div>
+</div>  <!-- End of Grid -->
+
+
+<script>
+
+//Setting HTML include and Accordion
+includeHTML(); 
+
+</script>
+
+</body>
+</html> 
