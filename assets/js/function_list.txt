@@ -1,0 +1,25 @@
+function hideButtons() {
+function showButtons() {
+function restructure(inData) {
+function popDropdown(level,ddid) {
+function includeHTML() {
+function transpose(data) {
+function exportToCsv(cname, type, rows, yr) {
+function exportToPng(cname, type, graphDiv, yr){
+function educData(indata,fips) {
+function povData(indata,fips) {
+function incData(indata, type, fips) {  //Type: HH: Household Income, MORT: home value, RENT : gross rent
+function returnRank(indata,fips){
+function chkDiff(curpct,curmoe, prevpct, prevmoe) {
+function genSYA(fips,yrvalue){
+function genCOC(fips,yrvalue){
+function genRaceEth(fips,yrvalue){
+function genACS(fips,yrvalue){
+function genHousing(fips, yrvalue) {
+function genDEMO(fips, ctyName, yrvalue){
+function genRACEVIS(fips,ctyName, yrvalue) {
+function genNETMIGCOMP(fips, ctyName, yrvalue) {
+function genNETMIG1864(fipsVal, ctyName, ageSeries, chartType, yrvalue){
+function genCOCHIST(fipsVal, ctyName) {
+function genHOUSEAGE(fipsVal,ctyName, varType, seriesType){
+function genProfile(fipsVal,ctyName, varType, seriesType){
