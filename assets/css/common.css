@@ -893,7 +893,7 @@ details main {
 /* Revised Sectional Panels */
 .sect-container {
   display: grid;
-  grid-template-columns: 20% repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   grid-gap: 1px;
   background-color: #7a853b; 
   padding: 1px;
