@@ -2353,7 +2353,7 @@ for(i = 2; i <= 4; i++){
 	outname = COC_fint[i][0][0]['name'];
 	prevVal = COC_fint[i][0][0]['value'];
 	curVal = COC_fint[i][1][0]['value'];
-	pctchg = (curVal - prevVal)/prevVal;
+	pctchg = preVal  -- 0 ?  0 : (curVal - prevVal)/prevVal;
 	tbl_arr.push({'coc_name' : outname, 'prevval' : fmt_comma(prevVal), 'curval' : fmt_comma(curVal), 'pct_chg' : fmt_pct(pctchg)});
 }
 //Generate Table
