@@ -1810,7 +1810,7 @@ function exportToPng(cname, type, graphDiv, yr){
 			var fileName = "Household Projections Household Type x Age Group " + cname 
 		};
 	
-	  Plotly.downloadImage(graphDiv, {format: 'png', width: 1280, height: 720, filename: fileName});
+	  Plotly.downloadImage(graphDiv, {format: 'png', width: 844, height: 475, filename: fileName});
 	
 };
 
