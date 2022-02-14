@@ -1809,12 +1809,9 @@ function exportToPng(cname, type, graphDiv, yr){
 		if(type == 'agechart') {
 			var fileName = "Household Projections Household Type x Age Group " + cname 
 		};
-	if(type == 'age') {	
-	  Plotly.downloadImage(graphDiv, {format: 'png', filename: fileName});
-	} else {
-	  Plotly.downloadImage(graphDiv, {format: 'png', width: 1000, height: 400, filename: fileName});
-
-	}
+	
+	  Plotly.downloadImage(graphDiv, {format: 'png', width: 1280, height: 720, filename: fileName});
+	
 };
 
 //educData reads in the ACS Education data file and output the summary file information
