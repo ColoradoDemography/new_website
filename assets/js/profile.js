@@ -301,7 +301,6 @@ $("#growthtab2").append(tabgr_fin);
 function bin_age5(inData){
 
 //Preliminaries
-//FIX THIS
 
 	var age_min = [0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95];
 	var age_max = [4,9,14,19,24,29,34,39,44,49,54,59,64,69,74,79,84,89,94,100];
@@ -340,23 +339,52 @@ binraw.forEach( d => {d.age_bin = age_labs[d.bin]})
 var columnsToSum = ['malepopulation', 'femalepopulation', 'totalpopulation'];
 
 //Rolling up data for table
-var binroll =  d3.rollup(binraw, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year, d => d.fips, d => d.bin, d => d.age_bin)
+var binroll =  d3.rollup(binraw, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year, d => d.fips, d => d.name, d => d.bin, d => d.age_bin)
 
 var bindata = [];
 for (let [key1, value] of binroll) {
 for (let[key2, value2] of value) {
 for (let [key3, value3] of value2) {
 for (let [key4, value4] of value3) {
-   bindata.push({'fips' : key2, 'name' : countyName(key2), 'year' : key1, 'age_bin_no' : key3, 'age_bin' : key4,
-     'malepopulation' : value4.malepopulation, 'femalepopulation' : value4.femalepopulation, 'totalpopulation' : value4.totalpopulation});
+for (let [key5, value5] of value4){
+   bindata.push({'fips' : key2, 'name' : key3, 'year' : key1, 'age_bin_no' : key4, 'age_bin' : key5,
+     'malepopulation' : value5.malepopulation, 'femalepopulation' : value5.femalepopulation, 'totalpopulation' : value5.totalpopulation});
 }
 };
 };
 };
+};
 
-var bindatafin = bindata.sort(function(a, b){ return d3.ascending(a['fips'], b['fips']); })
-		.sort(function(a, b){ return d3.ascending(a['age_bin_no'], b['age_gin_no']); })
-		.sort(function(a, b){ return d3.ascending(a['year'], b['year']); });
+
+//Calculating age base
+
+//Need to calculate percentages...
+var pct_base = d3.rollup(bindata, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.fips, d => d.year)
+var age_base = [];
+for (let [key1, value] of pct_base) {
+for (let[key2, value2] of value) {
+   age_base.push({'fips' : key1, 'year' : key2, 
+     'tot_malepopulation' : value2.malepopulation, 'tot_femalepopulation' : value2.femalepopulation, 'tot_totalpopulation' : value2.totalpopulation});
+}
+};
+		
+//Base totals for percentages
+
+var bindatafin = [];
+for(i = 0 ; i < fipsList.length; i++){
+	for(j = 0; j < yearList.length;j++){
+	tmp_base = age_base.filter( d => (d.fips == fipsList[i] && d.year == yearList[j]));	
+    tmp_age = bindata.filter( d => (d.fips == fipsList[i] && d.year == yearList[j]));
+
+    for(k = 0; k < tmp_age.length;k++){
+        bindatafin.push({'fips' : tmp_age[k].fips, 'name' : tmp_age[k].name, 'year' : tmp_age[k].year, 'age_bin' : tmp_age[k].age_bin,
+             'malepopulation' : tmp_age[k].malepopulation, 'pct_malepopulation' : 	tmp_age[k].malepopulation/tmp_base[0].tot_malepopulation,	
+             'femalepopulation' : tmp_age[k].femalepopulation, 'pct_femalepopulation' : 	tmp_age[k].femalepopulation/tmp_base[0].tot_femalepopulation,
+             'totalpopulation' : tmp_age[k].totalpopulation, 'pct_totalpopulation' : 	tmp_age[k].totalpopulation/tmp_base[0].tot_totalpopulation
+		})
+	}
+	}
+}
 
 return (bindatafin);
 }; //bin_age5
@@ -1044,8 +1072,8 @@ var PlaceNames = [...new Set(pltData.map(d => d.name))];
 
 var profileDat2 = document.getElementById('profileDat2');
 var profileImg2 = document.getElementById('profileImg2');
-profileDat2.onclick = function() {exportToCsv(ctyNames, 'age', pltData,0)};
-profileImg2.onclick = function() {exportToPng(ctyNames, 'age', ageDiv,0)};
+profileDat2.onclick = function() {exportToCsv(ctyNames, 'ageest', pltData,0)};
+profileImg2.onclick = function() {exportToPng(ctyNames, 'ageest', ageDiv,0)};
 	
 }; //genAgeEst			
 
@@ -1138,8 +1166,8 @@ var PlaceNames = [...new Set(pltData.map(d => d.name))];
 
 var profileDat3 = document.getElementById('profileDat3');
 var profileImg3 = document.getElementById('profileImg3');
-profileDat3.onclick = function() {exportToCsv(ctyNames, 'age', pltData,0)};
-profileImg3.onclick = function() {exportToPng(ctyNames, 'age', ageDiv,0)};
+profileDat3.onclick = function() {exportToCsv(ctyNames, 'agefor', pltData,0)};
+profileImg3.onclick = function() {exportToPng(ctyNames, 'agefor', ageDiv,0)};
 	
 }; //genAgeFor
 
@@ -1164,42 +1192,68 @@ var year_data = [...new Set(inData.map(d => d.year))];
 var age_arr = [...new Set(inData.map(d => d.age_bin))];
 
 
-var N_subplots = fipsList.length;
- nrows = Math.floor(N_subplots/4);
- ncols = N_subplots%4;
- if(nrows == 0) {nrows = 1};
- if(ncols == 0) {ncols = 4};
+//assigning main div
+
+ var outdiv = document.getElementById(ageDiv);
+    	  
+	 var plotdiv = document.createElement('div');
+		 plotdiv.id = 'pyramid-container';
+		 plotdiv.className = 'pyramid-continer';
+	 outdiv.appendChild(plotdiv);
+	 
+ for(i= 0; i <fipsList.length; i++){
+	 	 //Creating plotdiv
+	 if(i < 3) {
+		 var divID = "grid-item .pyramid_1_" + (i + 1);
+	    } else {
+	 if(i < 6){
+		var divID = "grid-item .pyramid_2_" + (i + 1); 
+	 } else {
+		 var divID = "grid-item .pyramid_3_" + (i + 1);
+	 }
+	 }
+		 
+     var plot_grid = document.createElement('div');
+	 plot_grid.id = 'plotGrid'+i;
+	 plot_grid.className = divID;
+	 plotdiv.appendChild(plot_grid);
+ }
  
-var pyr_data = [];
- //Building trace loop
+ var plotArr = [];
+ var outData = [];
  for(i = 0; i < fipsList.length; i ++ ){
+
+	var outPlot = 'plotGrid'+i;	
+				
 	 var pltData = inData.filter(d => d.fips == fipsList[i]);
+	 
+	 outData = outData.concat(pltData);
+
 	 var ctyNames = [...new Set(pltData.map(d => d.name))]; 
- 
+//Adding Plots for output...
+    plotArr.push({'loc' : ctyNames[0],
+	'plot' : outPlot})
+	
 	var year0 = pltData.filter(d => d.year == year_data[0]);
 	var year1 = pltData.filter(d => d.year == year_data[1]); 
 
 
 	var pct_male_0 = year0.map(d => d.pct_malepopulation * -1);
-	var pct_male_0d = year0.map(d => 'Men ' + year_data[0] + ', ' + fmt_pct(d.pct_malepopulation));
+	var pct_male_0d = year0.map(d => 'Men ' + d.age_bin + ' ' + year_data[0] + ', ' + fmt_pct(d.pct_malepopulation));
 	var pct_female_0 = year0.map(d => d.pct_femalepopulation);
-	var pct_female_0d = year0.map(d => 'Women ' + year_data[0] + ', ' + fmt_pct(d.pct_femalepopulation));
-    var combined_0 = pct_male_0.concat(pct_female_0);
-    var combined_0d = pct_male_0d.concat(pct_female_0d);	
-
+	var pct_female_0d = year0.map(d => 'Women ' + d.age_bin + ' ' + year_data[0] + ', ' + fmt_pct(d.pct_femalepopulation));
+  
 	var pct_male_1 = year1.map(d => d.pct_malepopulation * -1);
-	var pct_male_1d = year1.map(d => 'Men ' + year_data[1] + ', ' + fmt_pct(d.pct_malepopulation));
+	var pct_male_1d = year1.map(d => 'Men ' + d.age_bin + ' ' + year_data[1] + ', ' + fmt_pct(d.pct_malepopulation));
 	var pct_female_1 = year1.map(d => d.pct_femalepopulation);
-	var pct_female_1d = year1.map(d => 'Women ' + year_data[1] + ', ' + fmt_pct(d.pct_femalepopulation));
-    var combined_1 = pct_male_1.concat(pct_female_1);
-    var combined_1d = pct_male_1d.concat(pct_female_1d);	
-
+	var pct_female_1d = year1.map(d => 'Women ' + d.age_bin + ' ' + year_data[1] + ', ' + fmt_pct(d.pct_femalepopulation));
+   
 	trace1 = {
 	  name: year_data[0], 
 	  type: 'bar', 
-	  x: combined_0,
+	  x: pct_male_0,
 	  y: age_arr, 
-	  customdata : combined_0d,
+	  customdata : pct_male_0d,
 	  hovertemplate : '%{customdata}',
 	  hoverlabel : {namelength :0},
 	  marker: {
@@ -1212,109 +1266,155 @@ var pyr_data = [];
 	  orientation: 'h'
 	};
 	trace2 = {
+	  name: year_data[0], 
+	  type: 'bar', 
+	  x: pct_female_0,
+	  y: age_arr, 
+	  customdata : pct_female_0d,
+	  hovertemplate : '%{customdata}',
+	  hoverlabel : {namelength :0},
+	  marker: {
+		color : 'white',
+		line: {
+		  opacity : 1,
+		  color: 'black',
+		  width: 2
+	  } }, 
+	  orientation: 'h'
+	};
+	trace3 = {
 	  name: year_data[1], 
 	  type: 'bar', 
-	  x: combined_1, 
+	  x: pct_male_1, 
 	  y: age_arr, 
-	  customdata : combined_1d,
+	  customdata : pct_male_1d,
 	  hovertemplate : '%{customdata}',
 	  hoverlabel : {namelength :0},
 	   marker: {
+		   opacity : .40,
 		   color : 'blue',
 		line: {
 		  opacity : 1,
-		  color: 'blue',
+		  color: 'black',
 		  width: 2
 	   } }, 
 	  orientation: 'h'
 	};
-
+	trace4 = {
+	  name: year_data[1], 
+	  type: 'bar', 
+	  x: pct_female_1, 
+	  y: age_arr, 
+	  customdata : pct_female_1d,
+	  hovertemplate : '%{customdata}',
+	  hoverlabel : {namelength :0},
+	   marker: {
+		   opacity : .40,
+		   color : 'blue',
+		line: {
+		  opacity : 1,
+		  color: 'black',
+		  width: 2
+	   } }, 
+	  orientation: 'h'
+	};
 	
-	pyr_data.push(trace1, trace2);
+	var pyr_data = [trace1, trace2, trace3, trace4];
+	
+	var pyr_layout = {
+	title: "Age by Sex, " + year_data[0] + ' and ' + year_data[1] + '<br>' + ctyNames[0],
+	  autosize: false,
+	 width: '20vw',
+	 height: '30vh', 
+	  barmode :'overlay',
+	  bargap : 0.0,
+	  xaxis: {
+		range :[-0.15, 0.15],
+		tickvals : [-.15, -.10, -.05,0, .05,.10,.15],
+		ticktext : ['15%','10%', '5%', '0%', '5%','10%','15%'],
+		showgrid: true,
+		zeroline: true,
+		showline: true,
+		mirror: 'ticks',
+		gridcolor: '#bdbdbd',
+		gridwidth: 2,
+		linecolor: 'black',
+		linewidth: 2,
+		tickformat:  '.1%'
+	  },
+	  yaxis: {
+		title : 'Age Group',
+		automargin : true,
+		showgrid: false,
+		showline: false,
+		tickvals : age_arr,
+		mirror: 'ticks',
+		gridcolor: '#bdbdbd',
+		gridwidth: 2,
+		linecolor: 'black',
+		linewidth: 2,
+	  },
+	  showlegend: false,
+		annotations : [
+		{text :  'Men          Women' , 
+		   xref : 'paper', 
+		   x : 0.5, 
+		   yref : 'paper', 
+		   y : -0.15, 
+		   align : 'center', 
+		   font : { size : 14},
+		   showarrow : false},
+		   {text :  'Data and Visualization by the Colorado State Demography Office. Print Date: ' +  fmt_date(new Date) , 
+		   xref : 'paper', 
+		   x : 0, 
+		   yref : 'paper', 
+		   y : -0.25, 
+		   align : 'left', 
+		   showarrow : false}]
+	};
+	Plotly.newPlot(outPlot, pyr_data, pyr_layout,config);
  } //i
 
-
-debugger;
-console.log(pyr_data)
-
-	var pyr_layout = {
-		title: "Age by Sex, " + year_data[0] + ' and ' + year_data[1],
-		  autosize: false,
-		  width: 500,
-		  height: 400, 
-          barmode :'overlay',
-          bargap : 0.0,
-		  xaxis: {
-			range :[-0.6, 0.6],
-			tickvals : [-.6, -.4, -.2,0, .2,.4,.6],
-			ticktext : ['60%','40%', '20%', '0%', '20%','40%','60%'],
-			showgrid: true,
-			zeroline: true,
-			showline: true,
-			mirror: 'ticks',
-			gridcolor: '#bdbdbd',
-			gridwidth: 2,
-			linecolor: 'black',
-			linewidth: 2,
-			tickformat:  '.1%'
-		  },
-		  yaxis: {
-			title : 'Age Group',
-			automargin : true,
-			showgrid: true,
-			showline: true,
-			tickvals : age_arr,
-			mirror: 'ticks',
-			gridcolor: '#bdbdbd',
-			gridwidth: 2,
-			linecolor: 'black',
-			linewidth: 2,
-		  },
-		  showlegend: false,
-		 grid: {rows: 1, columns: 2, pattern: 'independent'},
-			annotations : [
-			{text :  'Men          Women' , 
-               xref : 'paper', 
-			   x : 0.5, 
-			   yref : 'paper', 
-			   y : -0.2, 
-			   align : 'center', 
-			   font : { size : 14},
-			   showarrow : false},
-			   {text :  'Data and Visualization by the<br>Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
-               xref : 'paper', 
-			   x : 0, 
-			   yref : 'paper', 
-			   y : -0.37, 
-			   align : 'left', 
-			   showarrow : false}]
-		};
-	Plotly.newPlot(ageDiv, pyr_data, pyr_layout,config);
-	
 	var profileDat4 = document.getElementById('profileDat4');
 	var profileImg4 = document.getElementById('profileImg4');
-	profileDat4.onclick = function() {exportToCsv(ctyNames, 'age', pltData,0)};
-	profileImg4.onclick = function() {exportToPng(ctyNames, 'age', ageDiv,0)};
+	profileDat4.onclick = function() {exportToCsv(ctyNames, 'agepyr', outData,0)};
+	profileImg4.onclick = function() {exportToPng(ctyNames, 'agepyr', plotArr,0)};
 } //genAgePyr	
 
 //genAgeSetup sets up the regional estimates plot
-function genAgeSetup(level, inData, pyrData, age_div, age_div2, age_div3, fipsList, ctyNameList) {
-	age_div.innerHTML = "";
+function genAgeSetup(level, inData, pyrData, age_div0, age_div1, age_div2, age_div3, fipsList, ctyNameList) {
+	age_div0.innerHTML = "";
+	age_div1.innerHTML = "";
 	age_div2.innerHTML = "";
 	age_div3.innerHTML = "";
+	
 if(level == "Region") {	
-  pgSetup(level, age_div,"Regional Age Estimates",true,fipsList, ctyNameList)
-  pgSetup(level, age_div2,"Regional Age Forecasts",true,fipsList, ctyNameList)
-  pgSetup(level, age_div3,"Regional Age Pyramid",true,fipsList, ctyNameList)
+  pgSetup(level, age_div1,"Regional Age Estimates",true,fipsList, ctyNameList)
+  //Add a second chart div here
+  var chartdiv_1 = document.createElement('div')
+  chartdiv_1.id = 'AgeChart1'
+  var chdiv_a = document.getElementById(age_div1)
+  chdiv_a.appendChild(chartdiv_1)
+  
+  pgSetup(level, age_div2,"Regional Age Forecasts",true,fipsList, ctyNameList);
+  var chartdiv_2 = document.createElement('div')
+  chartdiv_2.id = 'AgeChart2'
+  var chdiv_b = document.getElementById(age_div2)
+  chdiv_b.appendChild(chartdiv_2)
+  
+  pgSetup(level, age_div3,"Regional Age Pyramid",true,fipsList, ctyNameList);
+  var chartdiv_3 = document.createElement('div')
+  chartdiv_3.id = 'AgeChart3'
+  var chdiv_c = document.getElementById(age_div3)
+  chdiv_c.appendChild(chartdiv_3)
 } 
 
 if(level == 'County'){
-	pgSetup(level, age_div,"County Age Estimates and Forecasts",false,fipsList, ctyNameList)
+	pgSetup(level, age_div0,"County Age Estimates and Forecasts",false,fipsList, ctyNameList)
 }
 
    //Initial Plot
-    var dd0 = document.getElementById("RegSelect2");
-;
+   var dd0 = document.getElementById("RegSelect2");
    var btn0 = document.getElementById("RegBtn2");
 
   if(level == "Region"){
@@ -1323,16 +1423,15 @@ if(level == 'County'){
           $("#RegSelect2 option[value='" + e + "']").prop("selected", true);
        });	
   }
- 
 
-   genAgeEst(inData,dd0, "PlotDiv2");
-   genAgeFor(inData,dd0, "PlotDiv3");
-   genAgePyr(pyrData,dd0, "PlotDiv4");
+   genAgeEst(inData,dd0, chartdiv_1.id);
+   genAgeFor(inData,dd0, chartdiv_2.id);
+   genAgePyr(pyrData,dd0, chartdiv_3.id);
    
    btn0.addEventListener('click', function() {
-	   genAgeEst(inData,dd0, "PlotDiv2")
-	   genAgeFor(inData,dd0, "PlotDiv3");
-	   genAgePyr(pyrData,dd0, "PlotDiv4");
+	   genAgeEst(inData,dd0, chartdiv_1.id)
+	   genAgeFor(inData,dd0, chartdiv_2.id);
+	   genAgePyr(pyrData,dd0, chartdiv_3.id);
        });
   
 	   
@@ -3347,59 +3446,61 @@ for(i = 0; i < age_base.length;i++){
 //Creating dataset for age Pyramids 
 //Colorado
 
-var CO_pyr_data = bin_age5(CO_age_raw);
-//Counties
-var cty_pyr_data = bin_age5(cty_age_raw);
+// Convert data to numbers
+var CO_age_tmp = []
+data[0].forEach( item => {
+	CO_age_tmp.push({'fips' : item.reg_num,
+	                'name' : item.region,
+					'year' : item.year,
+					'age' : item.age,
+					'malepopulation' : parseInt(item.malepopulation),
+					'femalepopulation' : parseInt(item.femalepopulation),
+					'totalpopulation' : parseInt(item.totalpopulation)
+	})})
+			   
+var CO_age_SYA = CO_age_tmp.sort(function(a, b){ return d3.ascending(a['age'], b['age']); })
+		.sort(function(a, b){ return d3.ascending(a['year'], b['year']); });
+					
+var cty_age_tmp = []
+data[1].forEach( item => {
+	cty_age_tmp.push({'fips' : item.countyfips,
+	                'name' : countyName(item.countyfips),
+					'year' : item.year,
+					'age' : item.age,
+					'malepopulation' : parseInt(item.malepopulation),
+					'femalepopulation' : parseInt(item.femalepopulation),
+					'totalpopulation' : parseInt(item.totalpopulation)
+	})})
+	
+	
+var cty_age_SYA = cty_age_tmp.sort(function(a, b){ return d3.ascending(a['age'], b['age']); })
+        .sort(function(a, b){ return d3.ascending(a['fips'], b['fips']); }) 
+		.sort(function(a, b){ return d3.ascending(a['year'], b['year']); });					
 
 //Region 
 //Rolling up regional data for table
-var reg_pyr_sum =  d3.rollup(cty_pyr_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year, d => d.age_bin_no, d => d.age_bin)
+var reg_age_tmp =  d3.rollup(cty_age_SYA, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year, d => d.age)
 
 //Flatten Arrays for output
-var reg_pyr_data = [];
+var reg_age_temp_s = [];
 var regionNum = -101;
 
-for (let [key1, value] of reg_pyr_sum) {
+for (let [key, value] of reg_age_tmp) {
 for (let[key2, value2] of value) {
-for (let[key3, value3] of value2) {
-   reg_pyr_data.push({'fips' : regionNum, 'name' : regionName(fipsArr), 'year' : key1, 'age_bin_no' : key2, 'age_bin' : key3,
-     'malepopulation' : value3.malepopulation, 'femalepopulation' : value3.femalepopulation, 'totalpopulation' : value3.totalpopulation});
+   reg_age_temp_s.push({'fips' : regionNum, 'name' : regionName(fipsArr), 'year' : key, 'age' : key2, 
+     'malepopulation' : value2.malepopulation, 'femalepopulation' : value2.femalepopulation, 'totalpopulation' : value2.totalpopulation});
 }
 };
-};
 
-var reg_pyr_data_s = reg_pyr_data.sort(function(a, b){ return d3.ascending(a['age_bin_no'], b['age_bin_no']); })
+var reg_age_SYA = reg_age_temp_s.sort(function(a, b){ return d3.ascending(a['age'], b['age']); })
 		.sort(function(a, b){ return d3.ascending(a['year'], b['year']); });
 
-var reg_pyr_data = reg_pyr_data_s;
+var fin_age_pyr = bin_age5(CO_age_SYA.concat(reg_age_SYA).concat(cty_age_SYA));
 
-var fin_age_pyr_tmp = CO_pyr_data.concat(reg_pyr_data).concat(cty_pyr_data)
-//Base totals for percentages
+var fipsList = [...new Set(fin_age_pct.map(d => d.fips))];
+var ctyNameList = [...new Set(fin_age_pct.map(d => d.name))];
 
-var fipsList_pyr = [...new Set(fin_age_pyr_tmp.map(d => d.fips))];
-var yearList_pyr = [...new Set(fin_age_pyr_tmp.map(d => d.year))];
-
-var fin_age_pyr = [];
-for(i = 0 ; i < fipsList_pyr.length; i++){
-	for(j = 0; j < yearList_pyr.length;j++){
-	tmp_base = age_base.filter( d => (d.fips == fipsList_pyr[i] && d.year == yearList_pyr[j]));	
-    tmp_age = fin_age_pyr_tmp.filter( d => (d.fips == fipsList_pyr[i] && d.year == yearList_pyr[j]));
-
-    for(k = 0; k < tmp_age.length;k++){
-        fin_age_pyr.push({'fips' : tmp_age[k].fips, 'name' : tmp_age[k].name, 'year' : tmp_age[k].year, 'age_bin' : tmp_age[k].age_bin,
-             'malepopulation' : tmp_age[k].malepopulation, 'pct_malepopulation' : 	tmp_age[k].malepopulation/tmp_base[0].tot_malepopulation,	
-             'femalepopulation' : tmp_age[k].femalepopulation, 'pct_femalepopulation' : 	tmp_age[k].femalepopulation/tmp_base[0].tot_femalepopulation,
-             'totalpopulation' : tmp_age[k].totalpopulation, 'pct_totalpopulation' : 	tmp_age[k].totalpopulation/tmp_base[0].tot_totalpopulation
-		})
-	}
-	}
-}
-
-
-var fipsList = [...new Set(fin_age_data.map(d => d.fips))];
-var ctyNameList = [...new Set(fin_age_data.map(d => d.name))];
-
-genAgeSetup(geotype,fin_age_pct,fin_age_pyr,PRO_2.id, PRO_3.id, PRO_4.id, fipsList, ctyNameList);
+genAgeSetup(geotype,fin_age_pct,fin_age_pyr,PRO_1.id, PRO_2.id, PRO_3.id, PRO_4.id, fipsList, ctyNameList);
 };  //Region
 	
 }); //End of Promise

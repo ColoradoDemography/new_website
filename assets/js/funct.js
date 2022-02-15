@@ -1665,6 +1665,9 @@ function transpose(data) {
 function exportToCsv(cname, type, rows, yr) {
 
         var csvFile = d3.csvFormat(rows);
+		if(type == 'test'){
+			var fileName = "Test values.csv";
+			}
 		if(type == 'estimate') {
 			var fileName = "Population Estimates " + cname + ".csv";
 		};
@@ -1680,6 +1683,16 @@ function exportToCsv(cname, type, rows, yr) {
 		if(type == 'age') {
 			var fileName = "Age Categories " + cname + ".csv";
 		};
+		if(type == 'ageest') {
+			var fileName = "Age Estimate " + cname;
+		};
+		if(type == 'agefor') {
+			var fileName = "Age Forecast " + cname;
+		};
+		if(type == 'agepyr') {
+			var fileName = "Age Pyramid " + cname;
+		};
+
 		if(type == 'popchng') {
 			var fileName = "Population Change by Age Group " + cname + ".csv";
 		};
@@ -1744,7 +1757,7 @@ function exportToCsv(cname, type, rows, yr) {
 
 //exportToPng  Exports plotly trace and layout to PNG file
 function exportToPng(cname, type, graphDiv, yr){
-	
+
 	  	if(type == 'estimate') {
 			var fileName = "Population Estimates " + cname;
 		};
@@ -1758,7 +1771,16 @@ function exportToPng(cname, type, graphDiv, yr){
 			var fileName = "Net Migration by Age 2000-2010 " + cname;
 		};
 		if(type == 'age') {
-			var fileName = "Age Categories " + cname;
+			var filename = "Age Categories " + cname;
+		}
+		if(type == 'ageest') {
+			var fileName = "Age Estimate " + cname;
+		};
+		if(type == 'agefor') {
+			var fileName = "Age Forecast " + cname;
+		};
+		if(type == 'agepyr') {
+			var fileName = "Age Pyramid " ;
 		};
 		if(type == 'popchng') {
 			var fileName = "Population Change by Age Group " + cname;
@@ -1810,8 +1832,13 @@ function exportToPng(cname, type, graphDiv, yr){
 			var fileName = "Household Projections Household Type x Age Group " + cname 
 		};
 	
+	if(type == "agepyr") {
+		for(i = 0; i < graphDiv.length; i++){
+		Plotly.downloadImage(graphDiv[i].plot, {format: 'png', width: 844, height: 475, filename: fileName + graphDiv[i].loc})
+		}
+	} else {
 	  Plotly.downloadImage(graphDiv, {format: 'png', width: 844, height: 475, filename: fileName});
-	
+	}
 };
 
 //educData reads in the ACS Education data file and output the summary file information
