@@ -998,10 +998,6 @@ var config = {responsive: true,
       fipsList.push(+opt.value);
     }
   }
-if(fipsList.length == 1 && fipsList[0] == 0){ //the first run through
-   fipsList.push(-101);
-}
-
 
 var year_data = [...new Set(inData.map(d => d.year))];	
 var pltData = inData.filter(d => fipsList.includes(d.fips) && d.year == year_data[0]);
@@ -1026,11 +1022,13 @@ var PlaceNames = [...new Set(pltData.map(d => d.name))];
 					});
 	} //i
 
-	
-	 
+if(PlaceNames.length == 1){
+  var PltTitle = "Age Estimates, " + year_data[0] + ": " + PlaceNames[0];
+} else {
+  var PltTitle = "Age Estimates: " + year_data[0];
+}	 
 	var age_layout = {
-		title: "Age Estimates: " + year_data[0],
-		  autosize: false,
+		title: PltTitle,
 		  width: 1000,
 		  height: 400, 
 		  barmode : 'group',
@@ -1092,10 +1090,6 @@ var config = {responsive: true,
       fipsList.push(+opt.value);
     }
   }
-if(fipsList.length == 1 && fipsList[0] == 0){ //the first run through
-   fipsList.push(-101);
-}
-
 
 var year_data = [...new Set(inData.map(d => d.year))];	
 var pltData = inData.filter(d => fipsList.includes(d.fips) && d.year == year_data[1]);
@@ -1121,9 +1115,13 @@ var PlaceNames = [...new Set(pltData.map(d => d.name))];
 	} //i
 
 	
-	 
+if(PlaceNames.length == 1){
+  var PltTitle = "Age Forecast, " + year_data[0] + ": " + PlaceNames[0];
+} else {
+  var PltTitle = "Age Forecast: " + year_data[0];
+}	 
 	var age_layout = {
-		title: "Age Forecast: " + year_data[1],
+		title: PltTitle,
 		  autosize: false,
 		  width: 1000,
 		  height: 400, 
@@ -1195,7 +1193,7 @@ var age_arr = [...new Set(inData.map(d => d.age_bin))];
 //assigning main div
 
  var outdiv = document.getElementById(ageDiv);
-    	  
+ outdiv.innerHTML = "";   	  
 	 var plotdiv = document.createElement('div');
 		 plotdiv.id = 'pyramid-container';
 		 plotdiv.className = 'pyramid-continer';
