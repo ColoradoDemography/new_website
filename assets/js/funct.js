@@ -1834,13 +1834,13 @@ function exportToPng(cname, type, graphDiv, yr){
 	if(type == "agepyr") {
 		if(Array.isArray(graphDiv)){
 			for(i = 0; i < graphDiv.length; i++){
-				Plotly.downloadImage(graphDiv[i].plot, {format: 'png', width: 844, height: 475, filename: fileName + graphDiv[i].loc})
+				Plotly.downloadImage(graphDiv[i].plot, {format: 'png', width: 844, height: 500 filename: fileName + graphDiv[i].loc})
 			}
 		} else {
-			Plotly.downloadImage(graphDiv, {format: 'png', width: 844, height: 475, filename: fileName});
+			Plotly.downloadImage(graphDiv, {format: 'png', width: 844, height: 500, filename: fileName});
 		};
 	} else {
-	  Plotly.downloadImage(graphDiv, {format: 'png', width: 844, height: 475, filename: fileName});
+	  Plotly.downloadImage(graphDiv, {format: 'png', width: 844, height: 500, filename: fileName});
 	}
 };
 
