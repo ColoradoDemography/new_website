@@ -1835,14 +1835,14 @@ function exportToPng(cname, type, graphDiv, yr){
 		if(Array.isArray(graphDiv)){
 			for(i = 0; i < graphDiv.length; i++){
 				var fn = fileName + graphDiv[i].loc;
-				Plotly.downloadImage(graphDiv[i].plot, {format: 'png', width:900, height:500, filename: fn});
+				Plotly.downloadImage(graphDiv[i].plot, {format: 'png', width:960, height:540, filename: fn});
 			};
 		} else {
 			var fn = fileName + cname;
-			Plotly.downloadImage(graphDiv, {format: 'png', width:900, height:500, filename: fn});
+			Plotly.downloadImage(graphDiv, {format: 'png', width:960, height:540, filename: fn});
 		};
 	} else {
-	  Plotly.downloadImage(graphDiv, {format: 'png', width:900, height:500, filename: fileName});
+	  Plotly.downloadImage(graphDiv, {format: 'png', width:960, height:540, filename: fileName});
 	}
 };
 
