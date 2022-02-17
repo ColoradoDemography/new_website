@@ -58,6 +58,8 @@ function growth_tab(level, inData,fileName, outDiv1){
 	const regList = ['Region', 'Regional Comparison'];
 	
 
+outDiv1.innerHTNL = "";
+
 var geomap = [...new Set(inData.map(d => d.fips))];
 var outDataPop = [];
 var outDataGr = [];
@@ -161,6 +163,7 @@ var tabpop_fin = headString + tabpop + ftrString;
 var tabgr_fin = headString + tabgr + ftrString;
 
 //Appending tables to the DOM and processing them with DataTables
+$(outDiv1).html("");
 $(outDiv1).append("<h3>Population Growth Rate</h3>");
 $(outDiv1).append("<table id='growthtab1' class='DTTable' width='100%'></table>");
 $(outDiv1).append("<table id='growthtab2' class='DTTable' width='100%'></table>");
@@ -1584,10 +1587,10 @@ for(i = 0; i < tick_val.length; i ++){
 
 //genAgeSetup sets up the regional estimates plot
 function genAgeSetup(level, inData, pyrData, age_div0, age_div1, age_div2, age_div3, fipsList, ctyNameList, yrvalue) {
-	age_div0.innerHTML = "";
-	age_div1.innerHTML = "";
-	age_div2.innerHTML = "";
-	age_div3.innerHTML = "";
+	document.getElementById(age_div0).innerHTML = "";
+	document.getElementById(age_div1).innerHTML = "";
+	document.getElementById(age_div2).innerHTML = "";
+	document.getElementById(age_div3).innerHTML = "";
 	
 
 if(level == "Region") {	
@@ -2330,6 +2333,8 @@ if(firstbtn == 'sel1') {
 
    PROFILE_1.innerHTML = "";
    PROFILE_2.innerHTML = "";
+   PROFILE_3.innerHTML = "";
+   PROFILE_4.innerHTML = "";
    
      //Add Download buttons...
    AddProfileBtns(PROFILE_1,'sel1');
@@ -2366,7 +2371,9 @@ if(firstbtn == 'sel3') {
 //Setting Event Listeners  For a click on a section button...
 document.getElementById("sel1btn").addEventListener("click", function() {
   PROFILE_1.innerHTML = "";
-   PROFILE_2.innerHTML = "";
+  PROFILE_2.innerHTML = "";
+  PROFILE_3.innerHTML = "";
+  PROFILE_4.innerHTML = "";
    
      //Add Download buttons...
    AddProfileBtns(PROFILE_1,'sel1');
@@ -3200,7 +3207,12 @@ function genSel2display(geotype, fipsArr, names, curyear, PRO_1, PRO_2, PRO_3, P
 	var forc_yrs = range(2020,2050);	
 	var state_list = [1,3,5,7,9,11,13,14,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49,51,53,55,57,59,61,63,65,67,69,71,73,75,77,79,81,83,85,87,89,91,93,95,97,99,101,103,105,107,109,111,113,115,117,119,121,123,125];
 	var stateurl = "https://gis.dola.colorado.gov/lookups/profile?county=" + state_list + "&year=" + yr_list + "&vars=totalpopulation,births,deaths,netmigration";
+//Clear out Divs
 
+  PRO_1.innerHTML = "";
+  PRO_2.innerHTML = "";
+  PRO_3.innerHTML = "";
+  PRO_4.innerHTML = "";
 
 //Regions
 if(regList.includes(geotype)){
@@ -3508,6 +3520,13 @@ function genSel3display(geotype, fipsArr, names, curyear, PRO_1, PRO_2, PRO_3, P
     const muniList = ['Municipality', 'Municipal Comparison'];
 	const placeList = ['Census Designated Place', 'Census Designated Place Comparison'];
     const range = (min, max) => Array.from({ length: max - min + 1 }, (_, i) => min + i);
+
+//Clear out Divs
+
+  PRO_1.innerHTML = "";
+  PRO_2.innerHTML = "";
+  PRO_3.innerHTML = "";
+  PRO_4.innerHTML = "";
 
 //This code Generates data for refions and counties...
 if(regList.includes(geotype)){
