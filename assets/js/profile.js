@@ -519,17 +519,16 @@ function pgSetup(level, gridPanel,headerTxt, multi, ctyFips,ctyName, yrvalue) {
 					  if(headerTxt === "Municipal Age Estimates"){
 						var src_txt = document.createTextNode('ACS Age Eatimates');
 						src_link.href = "https://data.census.gov/cedsci/table?q=B01001&g=0500000US08"+ strFips +"_1600000US08" + strFips + "&tid=ACSDT5Y" + yrvalue + ".B01001"
-						src_link.setAttribute('target', '_blank');
                      };
 					  if(headerTxt === "Municipal Age Pyramid"){
 						var src_txt = document.createTextNode('ACS Age Estimates');
 						src_link.href = "https://data.census.gov/cedsci/table?q=B01001&g=0500000US08"+ strFips +"_1600000US08" + strFips + "&tid=ACSDT5Y" + yrvalue + ".B01001"
-						src_link.setAttribute('target', '_blank');
 						};
 				 };
 				 
 				 src_link.appendChild(src_txt);
 				 src_link.id = 'profileSrc' + idxval;
+				 src_link.setAttribute('target', '_blank');
 			     src_li.appendChild(src_link);
 
 			 //Download List
