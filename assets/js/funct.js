@@ -1779,7 +1779,7 @@ function exportToPng(cname, type, graphDiv, yr){
 			var fileName = "Age Forecast " + cname;
 		};
 		if(type == 'agepyr') {
-			var fileName = "Age Pyramid " + cname;
+			var fileName = "Age Pyramid ";
 		};
 		if(type == 'popchng') {
 			var fileName = "Population Change by Age Group " + cname;
@@ -1834,13 +1834,15 @@ function exportToPng(cname, type, graphDiv, yr){
 	if(type == "agepyr") {
 		if(Array.isArray(graphDiv)){
 			for(i = 0; i < graphDiv.length; i++){
-				Plotly.downloadImage(graphDiv[i].plot, {format: 'png', width: 844, height: 500 filename: fileName + graphDiv[i].loc})
-			}
+				var fn = fileName + graphDiv[i].loc;
+				Plotly.downloadImage(graphDiv[i].plot, {format: 'png', width:900, height:500, filename: fn});
+			};
 		} else {
-			Plotly.downloadImage(graphDiv, {format: 'png', width: 844, height: 500, filename: fileName});
+			var fn = fileName + cname;
+			Plotly.downloadImage(graphDiv, {format: 'png', width:900, height:500, filename: fn});
 		};
 	} else {
-	  Plotly.downloadImage(graphDiv, {format: 'png', width: 844, height: 500, filename: fileName});
+	  Plotly.downloadImage(graphDiv, {format: 'png', width:900, height:500, filename: fileName});
 	}
 };
 
