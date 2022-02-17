@@ -228,15 +228,23 @@ document.getElementById('genprofile').onclick = function changeContent() {
      var selected = document.querySelectorAll('#location-dropdown option:checked');
      var selectedloc = Array.from(selected).map(el => el.value);
 	 var selectedname = Array.from(selected).map(el => el.text);
+//Clear out Divs
+	      document.getElementById("profile-content1").innerHTML = "";
+		  document.getElementById("profile-content2").innerHTML = "";
+          document.getElementById("profile-content3").innerHTML = "";
+          document.getElementById("profile-content4").innerHTML = "";
 
-     
-
-//Checking for complete inputs
+//Checking for complete inputs and Clearing out divs
 	 if(selectedloc == ""){
 	      document.getElementById("profile-content1").innerHTML = "Please select a Profile Type and Location";
 		  } else {
 	      document.getElementById("profile-content1").innerHTML = "";
+		  document.getElementById("profile-content2").innerHTML = "";
+          document.getElementById("profile-content3").innerHTML = "";
+          document.getElementById("profile-content4").innerHTML = "";
 		 } 
+		 
+
 
 //Creating tabs
 
