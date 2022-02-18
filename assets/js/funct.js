@@ -4651,7 +4651,7 @@ var line_layout = {
                xref : 'paper', 
 			   x : 0, 
 			   yref : 'paper', 
-			   y : -0.50, 
+			   y : -0.45, 
 			   align : 'left', 
 			   showarrow : false}]
 		};
