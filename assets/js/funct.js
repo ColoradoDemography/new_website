@@ -1757,7 +1757,6 @@ function exportToCsv(cname, type, rows, yr) {
 
 //exportToPng  Exports plotly trace and layout to PNG file
 function exportToPng(cname, type, graphDiv, yr){
-	debugger;
 	  	if(type == 'estimate') {
 			var fileName = "Population Estimates " + cname;
 		};
@@ -1835,26 +1834,38 @@ function exportToPng(cname, type, graphDiv, yr){
 	if(type == "agepyr") {
 		if(Array.isArray(graphDiv)){
 			for(i = 0; i < graphDiv.length; i++){
-				var fn = fileName + graphDiv[i].loc;
-				Plotly.downloadImage(graphDiv[i].plot, {format: 'png', width:600, height:400, filename: fn});
+				var fn = fileName + graphDiv[i].loc + ".png";
+				Plotly.toImage(graphDiv[i].plot, { format: 'png', width: 600, height: 400 }).then(function (dataURL) {
+					var a = document.createElement('a');
+					a.href = dataURL;
+					a.download = fn;
+					document.body.appendChild(a);
+					 a.click();
+					document.body.removeChild(a);
+				});
 			};
 		} else {
-			var fn = fileName + cname;
-			Plotly.downloadImage(graphDiv, {format: 'png', width:600, height:400, filename: fn});
-		};
-	} else {
-	debugger;
-	  var fn =  "xx" + fileName + ".png";
-	  
-
-	   Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 400 }).then(function (dataURL) {
+			var fn = fileName + cname + ".png";
+		Plotly.toImage(graphDiv, { format: 'png', width: 600, height: 400 }).then(function (dataURL) {
         var a = document.createElement('a');
         a.href = dataURL;
         a.download = fn;
         document.body.appendChild(a);
          a.click();
         document.body.removeChild(a);
-        //img_png.attr("src", dataURL);
+    });
+		};
+	} else {
+	  var fn =  fileName + ".png";
+	  
+
+	   Plotly.toImage(graphDiv, { format: 'png', width: 800, height: 360 }).then(function (dataURL) {
+        var a = document.createElement('a');
+        a.href = dataURL;
+        a.download = fn;
+        document.body.appendChild(a);
+         a.click();
+        document.body.removeChild(a);
     });
 	}
 };
@@ -4346,7 +4357,6 @@ est_csv.onclick = function() {
 	  exportToCsv(ctyName, 'estimate', est_out,0);
      }; 
 est_png.onclick = function() {
-	debugger;
 	   exportToPng(ctyName, 'estimate', ESTIMATE,0);
      };
 	 
