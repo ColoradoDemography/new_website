@@ -672,7 +672,7 @@ var pltData = pltSort.filter(d => fipsList.includes(d.fips));
                xref : 'paper', 
 			   x : 0, 
 			   yref : 'paper', 
-			   y : -0.45, 
+			   y : -0.35, 
 			   align : 'left', 
 			   showarrow : false}]
 		};
@@ -785,7 +785,7 @@ var pltData = pltSort.filter(d => fipsList.includes(d.fips));
                xref : 'paper', 
 			   x : 0, 
 			   yref : 'paper', 
-			   y : -0.45, 
+			   y : -0.35, 
 			   align : 'left', 
 			   showarrow : false}]
 		};
@@ -978,7 +978,7 @@ var coc_layout = {
                xref : 'paper', 
 			   x : 0, 
 			   yref : 'paper', 
-			   y : -0.45, 
+			   y : -0.35, 
 			   align : 'left', 
 			   showarrow : false}]
 		};
@@ -1104,7 +1104,7 @@ if(PlaceNames.length == 1){
                xref : 'paper', 
 			   x : 0, 
 			   yref : 'paper', 
-			   y : -0.45, 
+			   y : -0.35, 
 			   align : 'left', 
 			   showarrow : false}]
 		};
@@ -1201,7 +1201,7 @@ if(PlaceNames.length == 1){
                xref : 'paper', 
 			   x : 0, 
 			   yref : 'paper', 
-			   y : -0.45, 
+			   y : -0.35, 
 			   align : 'left', 
 			   showarrow : false}]
 		};
@@ -1408,7 +1408,7 @@ for(i = 0; i < tick_val.length; i ++){
 		   xref : 'paper', 
 		   x : 0, 
 		   yref : 'paper', 
-		   y : -0.45, 
+		   y : -0.35, 
 		   align : 'left', 
 		   showarrow : false}]
 	};
@@ -1570,7 +1570,7 @@ for(i = 0; i < tick_val.length; i ++){
 		   xref : 'paper', 
 		   x : 0, 
 		   yref : 'paper', 
-		   y : -0.45, 
+		   y : -0.35, 
 		   align : 'left', 
 		   showarrow : false}]
 	};
