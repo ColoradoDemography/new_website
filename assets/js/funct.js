@@ -1757,6 +1757,7 @@ function exportToCsv(cname, type, rows, yr) {
 
 //exportToPng  Exports plotly trace and layout to PNG file
 function exportToPng(cname, type, graphDiv, yr){
+	debugger;
 	  	if(type == 'estimate') {
 			var fileName = "Population Estimates " + cname;
 		};
@@ -1770,7 +1771,7 @@ function exportToPng(cname, type, graphDiv, yr){
 			var fileName = "Net Migration by Age 2000-2010 " + cname;
 		};
 		if(type == 'age') {
-			var filename = "Age Categories " + cname;
+			var fileName = "Age Categories " + cname;
 		}
 		if(type == 'ageest') {
 			var fileName = "Age Estimate " + cname;
@@ -1835,14 +1836,26 @@ function exportToPng(cname, type, graphDiv, yr){
 		if(Array.isArray(graphDiv)){
 			for(i = 0; i < graphDiv.length; i++){
 				var fn = fileName + graphDiv[i].loc;
-				Plotly.downloadImage(graphDiv[i].plot, {format: 'png', width:960, height:540, filename: fn});
+				Plotly.downloadImage(graphDiv[i].plot, {format: 'png', width:600, height:400, filename: fn});
 			};
 		} else {
 			var fn = fileName + cname;
-			Plotly.downloadImage(graphDiv, {format: 'png', width:960, height:540, filename: fn});
+			Plotly.downloadImage(graphDiv, {format: 'png', width:600, height:400, filename: fn});
 		};
 	} else {
-	  Plotly.downloadImage(graphDiv, {format: 'png', width:960, height:540, filename: fileName});
+	debugger;
+	  var fn =  "xx" + fileName + ".png";
+	  
+
+	   Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 400 }).then(function (dataURL) {
+        var a = document.createElement('a');
+        a.href = dataURL;
+        a.download = fn;
+        document.body.appendChild(a);
+         a.click();
+        document.body.removeChild(a);
+        //img_png.attr("src", dataURL);
+    });
 	}
 };
 
@@ -4333,6 +4346,7 @@ est_csv.onclick = function() {
 	  exportToCsv(ctyName, 'estimate', est_out,0);
      }; 
 est_png.onclick = function() {
+	debugger;
 	   exportToPng(ctyName, 'estimate', ESTIMATE,0);
      };
 	 
@@ -4367,6 +4381,7 @@ mig_png.onclick = function() {
      };
 	 
 //Age
+
 var age_csv = document.getElementById('age_csv');
 var age_png = document.getElementById('age_png');
 age_csv.onclick = function() {
