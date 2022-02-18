@@ -672,7 +672,7 @@ var pltData = pltSort.filter(d => fipsList.includes(d.fips));
                xref : 'paper', 
 			   x : 0, 
 			   yref : 'paper', 
-			   y : -0.35, 
+			   y : -0.45, 
 			   align : 'left', 
 			   showarrow : false}]
 		};
@@ -785,7 +785,7 @@ var pltData = pltSort.filter(d => fipsList.includes(d.fips));
                xref : 'paper', 
 			   x : 0, 
 			   yref : 'paper', 
-			   y : -0.35, 
+			   y : -0.45, 
 			   align : 'left', 
 			   showarrow : false}]
 		};
@@ -978,7 +978,7 @@ var coc_layout = {
                xref : 'paper', 
 			   x : 0, 
 			   yref : 'paper', 
-			   y : -0.35, 
+			   y : -0.45, 
 			   align : 'left', 
 			   showarrow : false}]
 		};
@@ -1058,7 +1058,7 @@ var PlaceNames = [...new Set(pltData.map(d => d.name))];
 					});
 	} //i
 	
-//Creating Souce citation
+//Creating Source citation
 if(level == "Municipality"){
 	var yrrange = (yrvalue - 4) + "-"+ yrvalue;
 	var citation = 'U.S. Census Bureau. ' + yrrange + ' American Community Survey, 5-year data file. Table B01001. Print Date: ' +  fmt_date(new Date); 
@@ -1104,7 +1104,7 @@ if(PlaceNames.length == 1){
                xref : 'paper', 
 			   x : 0, 
 			   yref : 'paper', 
-			   y : -0.35, 
+			   y : -0.45, 
 			   align : 'left', 
 			   showarrow : false}]
 		};
@@ -1201,7 +1201,7 @@ if(PlaceNames.length == 1){
                xref : 'paper', 
 			   x : 0, 
 			   yref : 'paper', 
-			   y : -0.35, 
+			   y : -0.45, 
 			   align : 'left', 
 			   showarrow : false}]
 		};
@@ -1404,11 +1404,11 @@ for(i = 0; i < tick_val.length; i ++){
 		   align : 'center', 
 		   font : { size : 14},
 		   showarrow : false},
-		   {text :  'U.S. Census Bureau. ' + yrrange + ' American Community Survey, 5-year data file.<br>Table B01001. Print Date: ' +  fmt_date(new Date),
+		   {text :  'U.S. Census Bureau. ' + yrrange + ' American Community Survey, 5-year data file.<br>Table B01001.<br>Print Date: ' +  fmt_date(new Date),
 		   xref : 'paper', 
 		   x : 0, 
 		   yref : 'paper', 
-		   y : -0.35, 
+		   y : -0.45, 
 		   align : 'left', 
 		   showarrow : false}]
 	};
@@ -1566,11 +1566,11 @@ for(i = 0; i < tick_val.length; i ++){
 		   align : 'center', 
 		   font : { size : 14},
 		   showarrow : false},
-		   {text :  'Data and Visualization by the Colorado State Demography Office. Print Date: ' +  fmt_date(new Date) , 
+		   {text :  'Data and Visualization by the Colorado State Demography Office.<br>Print Date: ' +  fmt_date(new Date) , 
 		   xref : 'paper', 
 		   x : 0, 
 		   yref : 'paper', 
-		   y : -0.25, 
+		   y : -0.45, 
 		   align : 'left', 
 		   showarrow : false}]
 	};
