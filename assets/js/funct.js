@@ -1846,7 +1846,7 @@ function exportToPng(cname, type, graphDiv, yr){
 			};
 		} else {
 			var fn = fileName + cname + ".png";
-		Plotly.toImage(graphDiv, { format: 'png', width: 600, height: 400 }).then(function (dataURL) {
+		Plotly.toImage(graphDiv, { format: 'png', width: 900, height: 400 }).then(function (dataURL) {
         var a = document.createElement('a');
         a.href = dataURL;
         a.download = fn;
@@ -4651,7 +4651,7 @@ var line_layout = {
                xref : 'paper', 
 			   x : 0, 
 			   yref : 'paper', 
-			   y : -0.35, 
+			   y : -0.50, 
 			   align : 'left', 
 			   showarrow : false}]
 		};
