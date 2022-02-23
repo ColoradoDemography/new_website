@@ -1755,6 +1755,17 @@ function exportToCsv(cname, type, rows, yr) {
         }
     };
 
+function plotDownload(plotdiv,filename){
+		Plotly.toImage(plotdiv, { format: 'png', width: 600, height: 400 }).then(function (dataURL) {
+			var a = document.createElement('a');
+			a.href = dataURL;
+			a.download = filename;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+		});
+}
+
 //exportToPng  Exports plotly trace and layout to PNG file
 function exportToPng(cname, type, graphDiv, yr){
 	  	if(type == 'estimate') {
@@ -1834,16 +1845,8 @@ function exportToPng(cname, type, graphDiv, yr){
 	if(type == "agepyr") {
 		if(Array.isArray(graphDiv)){
 			for(i = 0; i < graphDiv.length; i++){
-				var fn = fileName + graphDiv[i].loc + ".png";
-				Plotly.toImage(graphDiv[i].plot, { format: 'png', width: 600, height: 400 }).then(function (dataURL) {
-					var a = document.createElement('a');
-					a.href = dataURL;
-					a.download = fn;
-					document.body.appendChild(a);
-					 a.click();
-					document.body.removeChild(a);
-				});
-			};
+               plotDownload(graphDiv[i].plot,graphDiv[i].fName);
+			};  //i
 		} else {
 			var fn = fileName + cname + ".png";
 		Plotly.toImage(graphDiv, { format: 'png', width: 900, height: 400 }).then(function (dataURL) {
@@ -1857,8 +1860,6 @@ function exportToPng(cname, type, graphDiv, yr){
 		};
 	} else {
 	  var fn =  fileName + ".png";
-	  
-
 	   Plotly.toImage(graphDiv, { format: 'png', width: 800, height: 360 }).then(function (dataURL) {
         var a = document.createElement('a');
         a.href = dataURL;
@@ -2276,18 +2277,23 @@ var total_ann = d3.rollup(totaldata, v => d3.sum(v, d => d.totalpopulation), d =
 var total_age = d3.rollup(totaldata, v => d3.sum(v, d => d.totalpopulation), d => d.year, d => d.age_cat);
 
 //Flatten Arrays for output
-var total_ann_flat = [];
+
+var total_ann_tmp = [];
 for (let [key, value] of total_ann) {
-  total_ann_flat.push({'year' : key, 'totalpopulation' : value});
+  total_ann_tmp.push({'year' : key, 'totalpopulation' : value});
     };
 
+var total_ann_flat = total_ann_tmp.sort(function(a, b){ return d3.ascending(a['year'], b['year']); });
 
-var total_age_flat = [];
+var total_age_tmp = [];
 for (let [key1, value] of total_age) {
 for (let[key2, value2] of value) {
-   total_age_flat.push({'year' : key1, 'age_cat' : key2, 'totalpopulation' : value2});
+   total_age_tmp.push({'year' : key1, 'age_cat' : key2, 'totalpopulation' : value2});
 }
 };
+
+var total_age_flat = total_age_tmp.sort(function(a,b) {return d3.ascending(a['age_cat'],b['age_cat']);})
+            .sort(function(a, b){ return d3.ascending(a['year'], b['year']); });
 
 // Create table array for output
 var tbl_arr = []

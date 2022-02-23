@@ -24,6 +24,19 @@ function join(lookupTable, mainTable, lookupKey, mainKey, select) {
     return output;
 };
 
+//range geneates string array of values between start and stop
+function range(start, end, step) {
+  let output = [];
+  if (typeof end === 'undefined') {
+    end = start;
+    start = 0;
+  }
+  for (let i = start; i < end; i += step) {
+    output.push(Number(i.toFixed(2)));
+  }
+  return output;
+}; //range
+
 //fixNEG fixes formatting ssue for negative numbers in word tables  based on fmt type (pct, num, cur) returns formatted value 
 function fixNEG(invalue,fmt){
 	const fmt_pct = d3.format(".1%")
@@ -313,8 +326,6 @@ function bin_age5(inData){
 		age_labs.push(age_min[i] + ' to ' + age_max[i]);
 	}
 
-
-
 var fipsList = [...new Set(inData.map(d => d.fips))];
 var yearList = [...new Set(inData.map(d => d.year))];
 
@@ -336,14 +347,14 @@ for(i = 0; i < fipsList.length; i++){
 	} //j
 } //i
 
-binraw.forEach( d => {d.age_bin = age_labs[d.bin]})
+binraw.forEach( d => {d.age_cat = age_labs[d.bin]})
 
 
 //binraw has the binning variable  binsum is the rolled up file; bindata containes the flattened data records
-var columnsToSum = ['malepopulation', 'femalepopulation', 'totalpopulation'];
+var columnsToSum = ['malepopulation_e', 'femalepopulation_e', 'totalpopulation_e'];
 
 //Rolling up data for table
-var binroll =  d3.rollup(binraw, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year, d => d.fips, d => d.name, d => d.bin, d => d.age_bin)
+var binroll =  d3.rollup(binraw, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year, d => d.fips, d => d.name, d => d.bin, d => d.age_cat)
 
 var bindata = [];
 for (let [key1, value] of binroll) {
@@ -351,8 +362,8 @@ for (let[key2, value2] of value) {
 for (let [key3, value3] of value2) {
 for (let [key4, value4] of value3) {
 for (let [key5, value5] of value4){
-   bindata.push({'fips' : key2, 'name' : key3, 'year' : key1, 'age_bin_no' : key4, 'age_bin' : key5,
-     'malepopulation' : value5.malepopulation, 'femalepopulation' : value5.femalepopulation, 'totalpopulation' : value5.totalpopulation});
+   bindata.push({'fips' : key2, 'name' : key3, 'year' : key1, 'age_cat_no' : key4, 'age_cat' : key5,
+     'malepopulation_e' : value5.malepopulation_e, 'femalepopulation_e' : value5.femalepopulation_e, 'totalpopulation_e' : value5.totalpopulation_e});
 }
 };
 };
@@ -368,7 +379,7 @@ var age_base = [];
 for (let [key1, value] of pct_base) {
 for (let[key2, value2] of value) {
    age_base.push({'fips' : key1, 'year' : key2, 
-     'tot_malepopulation' : value2.malepopulation, 'tot_femalepopulation' : value2.femalepopulation, 'tot_totalpopulation' : value2.totalpopulation});
+     'tot_malepopulation_e' : value2.malepopulation_e, 'tot_femalepopulation_e' : value2.femalepopulation_e, 'tot_totalpopulation_e' : value2.totalpopulation_e});
 }
 };
 		
@@ -381,10 +392,10 @@ for(i = 0 ; i < fipsList.length; i++){
     tmp_age = bindata.filter( d => (d.fips == fipsList[i] && d.year == yearList[j]));
 
     for(k = 0; k < tmp_age.length;k++){
-        bindatafin.push({'fips' : tmp_age[k].fips, 'name' : tmp_age[k].name, 'year' : tmp_age[k].year, 'age_bin' : tmp_age[k].age_bin,
-             'malepopulation' : tmp_age[k].malepopulation, 'pct_malepopulation' : 	tmp_age[k].malepopulation/tmp_base[0].tot_malepopulation,	
-             'femalepopulation' : tmp_age[k].femalepopulation, 'pct_femalepopulation' : 	tmp_age[k].femalepopulation/tmp_base[0].tot_femalepopulation,
-             'totalpopulation' : tmp_age[k].totalpopulation, 'pct_totalpopulation' : 	tmp_age[k].totalpopulation/tmp_base[0].tot_totalpopulation
+        bindatafin.push({'fips' : tmp_age[k].fips, 'name' : tmp_age[k].name, 'year' : tmp_age[k].year, 'age_cat' : tmp_age[k].age_cat,
+             'malepopulation_e' : tmp_age[k].malepopulation_e, 'pct_malepopulation_e' : 	tmp_age[k].malepopulation_e/tmp_base[0].tot_malepopulation_e,	
+             'femalepopulation_e' : tmp_age[k].femalepopulation_e, 'pct_femalepopulation_e' : 	tmp_age[k].femalepopulation_e/tmp_base[0].tot_femalepopulation_e,
+             'totalpopulation_e' : tmp_age[k].totalpopulation_e, 'pct_totalpopulation_e' : 	tmp_age[k].totalpopulation_e/tmp_base[0].tot_totalpopulation_e
 		})
 	}
 	}
@@ -1016,7 +1027,9 @@ function genRegcocSetup(level, inData, coc_div, fipsList, ctyNameList) {
 
 ///genAgeEst Generates Age plot for regions...
 function genAgeEst(inData,level, DDsel,ageDiv,yrvalue) {
-	   const fmt_date = d3.timeFormat("%B %d, %Y");
+	const fmt_date = d3.timeFormat("%B %d, %Y");
+	const fmt_pct = d3.format(".1%");
+	const fmt_comma = d3.format(",");
 var config = {responsive: true,
               displayModeBar: false};
 			  
@@ -1044,18 +1057,47 @@ var PlaceNames = [...new Set(pltData.map(d => d.name))];
 	for(i = 0; i < PlaceNames.length; i++) {
 		var filtPlot = pltData.filter(d => d.name == PlaceNames[i]);
 		var age_est_arr = filtPlot.map(d => d.age_cat);
-		var pct_est_arr = filtPlot.map(d => d.pct_totalpopulation);
+		var pct_est_arr = filtPlot.map(d => d.pct_totalpopulation_e);
+			
 		if(i == 0){
            ctyNames = PlaceNames[i];
 		} else {
 			ctyNames = ctyNames + ", " + PlaceNames[i];
 		}
-		
-	 age_data.push({x : age_est_arr,
+		// Mouseover description
+
+		var pct_est_0d = filtPlot.map(d => PlaceNames[i] + " " + d.age_cat + '<br>Percent: ' + fmt_pct(d.pct_totalpopulation_e) + '<br>Persons: ' + fmt_comma(d.totalpopulation_e));
+
+		if(level == "Municipality") {
+			var pct_est_moe = filtPlot.map(d => d.pct_totalpopulation_m);
+			var pct_est_0d = filtPlot.map(d => PlaceNames[i] + ' ' + d.age_cat + '<br>Percent: ' + fmt_pct(d.pct_totalpopulation_e) + ' ±' + fmt_pct(d.pct_totalpopulation_m) + '<br>Persons: ' + fmt_comma(d.totalpopulation_e) + ' ±' + fmt_comma(Math.ceil(d.totalpopulation_m)));
+			age_data.push({x : age_est_arr,
 	                y : pct_est_arr,
+					error_y: {
+						type: 'data',
+						array: pct_est_moe,
+						color: 'black',
+						thickness: 0.75,
+						visible: true
+					},
+					customdata : pct_est_0d,
+					hovertemplate : '%{customdata}',
+					hoverlabel : {namelength :0},
 					name : PlaceNames[i],
 	                type : 'bar'
 					});
+		} else {
+					age_data.push({x : age_est_arr,
+	                y : pct_est_arr,
+					customdata : pct_est_0d,
+					hovertemplate : '%{customdata}',
+					hoverlabel : {namelength :0},
+					name : PlaceNames[i],
+	                type : 'bar'
+					});	
+		}
+
+
 	} //i
 	
 //Creating Source citation
@@ -1089,7 +1131,6 @@ if(PlaceNames.length == 1){
 		  },
 		  yaxis: {
 			title : 'Percent',
-			range :[0, 0.75],
 			automargin : true,
 			showgrid: true,
 			showline: true,
@@ -1121,7 +1162,10 @@ profileImg2.onclick = function() {exportToPng(ctyNames, 'ageest', ageDiv,0)};
 
 ///genAgeFor Generates Age plot for regions...
 function genAgeFor(inData,level, DDsel,ageDiv) {
-const fmt_date = d3.timeFormat("%B %d, %Y");
+	const fmt_date = d3.timeFormat("%B %d, %Y");
+	const fmt_pct = d3.format(".1%");
+	const fmt_comma = d3.format(",");
+
 var config = {responsive: true,
               displayModeBar: false};
 			  
@@ -1147,15 +1191,19 @@ var PlaceNames = [...new Set(pltData.map(d => d.name))];
 	for(i = 0; i < PlaceNames.length; i++) {
 		var filtPlot = pltData.filter(d => d.name == PlaceNames[i]);
 		var age_for_arr = filtPlot.map(d => d.age_cat);
-		var pct_for_arr = filtPlot.map(d => d.pct_totalpopulation);
+		var pct_for_arr = filtPlot.map(d => d.pct_totalpopulation_e);
+		var pct_for_0d = filtPlot.map(d => PlaceNames[i] + " " + d.age_cat + '<br>Percent: ' + fmt_pct(d.pct_totalpopulation_e) + '<br>Persons: ' + fmt_comma(d.totalpopulation_e));
 		if(i == 0){
            ctyNames = PlaceNames[i];
 		} else {
 			ctyNames = ctyNames + ", " + PlaceNames[i];
 		}
-		
+
 	 age_data.push({x : age_for_arr,
 	                y : pct_for_arr,
+					customdata : pct_for_0d,
+					hovertemplate : '%{customdata}',
+					hoverlabel : {namelength :0},
 					name : PlaceNames[i],
 	                type : 'bar'
 					});
@@ -1239,8 +1287,8 @@ if(level == "Region") {
 }
 
 var year_data = [...new Set(inData.map(d => d.year))];	
-var age_arr = [...new Set(inData.map(d => d.age_bin))];
-
+var age_arr = [...new Set(inData.map(d => d.age_cat))];
+var ctyNames = [...new Set(inData.map(d => d.name))];
 
 //assigning main div
 
@@ -1251,7 +1299,9 @@ var age_arr = [...new Set(inData.map(d => d.age_bin))];
 		 plotdiv.className = 'pyramid-continer';
 	 outdiv.appendChild(plotdiv);
 	 
- for(i= 0; i <fipsList.length; i++){
+
+ var plot_array = [];	 
+ for(i= 0; i < fipsList.length; i++){
 	 	 //Creating plotdiv
 	 if(i < 3) {
 		 var divID = "grid-item .pyramid_1_" + (i + 1);
@@ -1261,67 +1311,77 @@ var age_arr = [...new Set(inData.map(d => d.age_bin))];
 	 } else {
 		 var divID = "grid-item .pyramid_3_" + (i + 1);
 	 }
-	 }
+	 };
 		 
      var plot_grid = document.createElement('div');
 	 plot_grid.id = 'plotGrid'+i;
 	 plot_grid.className = divID;
 	 plotdiv.appendChild(plot_grid);
- }
+	 
+	plot_array.push({'loc' : ctyNames[i],
+	'fName' : "Age Pyramid " + ctyNames[i] + ".png",
+	'plot' : 'plotGrid'+i});
+ } //i
  
+var outData = [];
  if(level == "Municipality"){
 	var yrrange = (yrvalue - 4) + "-"+ yrvalue;
-	var outPlot = plot_grid.id;				
-	var pltData = inData.filter(d => d.fips == fipsList[0]);
-
-	 var ctyNames = [...new Set(pltData.map(d => d.name))]; 
-
+  for(i = 0; i < fipsList.length; i++) {
+	var outPlot = plot_array[i].plot;
+	var pltData = inData.filter(d => d.fips == fipsList[i]);
 	var year0 = pltData.filter(d => d.year == year_data[0]);
-
+ outData = outData.concat(pltData);
 //Determine number of ticks
 
-const range = (start, end, step) => {
-  let output = [];
-  if (typeof end === 'undefined') {
-    end = start;
-    start = 0;
-  }
-  for (let i = start; i < end; i += step) {
-    output.push(Number(i.toFixed(2)));
-  }
-  return output;
-};
+var male_pct = year0.map(d => d.pct_malepopulation_e);
+var male_pct_moe = year0.map(d => d.pct_malepopulation_m);
+var male_sum = [];
+for(j = 0; j < male_pct.length; j++){
+    male_sum.push( male_pct[j] + male_pct_moe[j] );
+ }
 
-var male_pct = year0.map(d => d.pct_malepopulation);
-var female_pct = year0.map(d => d.pct_femalepopulation);
-var pct = male_pct.concat(female_pct);
+var female_pct = year0.map(d => d.pct_femalepopulation_e);
+var female_pct_moe = year0.map(d => d.pct_femalepopulation_m);
+var female_sum = [];
+for(j = 0; j < female_pct.length; j++){
+    female_sum.push( female_pct[j] + female_pct_moe[j] );
+ }
+
+var pct = male_sum.concat(female_sum);
 var max_pct = Math.max(...pct);
 var adj_pct = Math.ceil(max_pct/0.05)*0.05;
 var rnd_pct = Number(adj_pct.toFixed(2));
 
 var tick_range = [(rnd_pct * -1), rnd_pct];
+if(rnd_pct >0.3) {
+	var tick_neg = range((rnd_pct * -1),0,.10)
+	var tick_pos = range(0,rnd_pct, .10)
+} else {
+	var tick_neg = range((rnd_pct * -1),0,.05)
+	var tick_pos = range(0,rnd_pct, .05)
+}
 
-var tick_neg = range((rnd_pct * -1),0,.05)
-tick_neg.pop();
-var tick_pos = range(0,rnd_pct, .05)
+if(tick_neg.includes(-0)) {tick_neg.pop()};
 
 if(!tick_neg.includes(tick_range[0])) {tick_neg.unshift((rnd_pct * -1))}
 if(!tick_pos.includes(tick_range[1])) {tick_pos.push(rnd_pct)}
 
 var tick_val = tick_neg.concat(tick_pos);
 var tick_text = [];
-for(i = 0; i < tick_val.length; i ++){
-	 if(tick_val[i] < 0) {
-		 tick_text.push((tick_val[i] * -100) + "%");
+for(j = 0; j < tick_val.length; j++){
+	 if(tick_val[j] < 0) {
+		 tick_text.push((tick_val[j] * -100) + "%");
 	 } else {
-		 tick_text.push((tick_val[i] * 100) + "%");
+		 tick_text.push((tick_val[j] * 100) + "%");
 	 }
 }
 
-	var pct_male_0 = year0.map(d => d.pct_malepopulation * -1);
-	var pct_male_0d = year0.map(d => 'Men ' + d.age_bin + ' ' + year_data[0] + '<br>' + fmt_pct(d.pct_malepopulation) + ', ' + fmt_comma(d.malepopulation) + ' Persons');
-	var pct_female_0 = year0.map(d => d.pct_femalepopulation);
-	var pct_female_0d = year0.map(d => 'Women ' + d.age_bin + ' ' + year_data[0] + '<br>' + fmt_pct(d.pct_femalepopulation)+ ', ' + fmt_comma(d.femalepopulation) + ' Persons');
+	var pct_male_0 = year0.map(d => d.pct_malepopulation_e * -1);
+	var pct_male_moe = year0.map(d => d.pct_malepopulation_m * -1);
+	var pct_male_0d = year0.map(d => 'Men' + ' ' + year_data[0] + " " + d.age_cat + '<br>Percent: ' + fmt_pct(d.pct_malepopulation_e) + ' ±' + fmt_pct(d.pct_malepopulation_m) + '<br>Persons: ' + fmt_comma(d.malepopulation_e) + ' ±' + fmt_comma(Math.ceil(d.malepopulation_m)));
+	var pct_female_0 = year0.map(d => d.pct_femalepopulation_e);
+	var pct_female_moe = year0.map(d => d.pct_femalepopulation_m);
+	var pct_female_0d = year0.map(d => 'Women' + ' ' + year_data[0] + " " + d.age_cat + '<br>Percent: ' + fmt_pct(d.pct_femalepopulation_e) + ' ±' + fmt_pct(d.pct_femalepopulation_m) + '<br>Persons: ' + fmt_comma(d.femalepopulation_e) + ' ±' + fmt_comma(Math.ceil(d.femalepopulation_m)));
   
 	trace1 = {
 	  name: year_data[0], 
@@ -1329,11 +1389,19 @@ for(i = 0; i < tick_val.length; i ++){
 	  type: 'bar', 
 	  x: pct_male_0,
 	  y: age_arr, 
+	  error_x: {
+		type: 'data',
+		array: pct_male_moe,
+		color: 'black',
+        thickness: 0.75,
+		visible: true
+					},
 	  customdata : pct_male_0d,
 	  hovertemplate : '%{customdata}',
 	  hoverlabel : {namelength :0},
 	  marker: {
 		color : 'lightblue',
+		opacity : 0.5,
 		line: {
 		  opacity : 1,
 		  color: 'black',
@@ -1346,12 +1414,20 @@ for(i = 0; i < tick_val.length; i ++){
 	  type: 'bar', 
 	  showlegend : false, 
 	  x: pct_female_0,
-	  y: age_arr, 
+	  y: age_arr,
+	  error_x: {
+			type: 'data',
+			array: pct_female_moe,
+			color: 'black',
+			thickness: 0.75,
+			visible: true
+		},
 	  customdata : pct_female_0d,
 	  hovertemplate : '%{customdata}',
 	  hoverlabel : {namelength :0},
 	  marker: {
 		color : 'lightblue',
+		opacity : 0.5,
 		line: {
 		  opacity : 1,
 		  color: 'black',
@@ -1364,7 +1440,7 @@ for(i = 0; i < tick_val.length; i ++){
 	var pyr_data = [trace1, trace2];
 	
 	var pyr_layout = {
-	title: "Age by Sex, " + year_data[0] + '<br>' + ctyNames[0],
+	title: "Age by Sex, " + year_data[0] + '<br>' + ctyNames[i],
 	  width: 600,
 	  height: 400, 
 	  barmode :'overlay',
@@ -1404,25 +1480,25 @@ for(i = 0; i < tick_val.length; i ++){
 		   align : 'center', 
 		   font : { size : 14},
 		   showarrow : false},
-		   {text :  'U.S. Census Bureau. ' + yrrange + ' American Community Survey, 5-year data file.<br>Table B01001.<br>Print Date: ' +  fmt_date(new Date),
+		   {text :  'U.S. Census Bureau. ' + yrrange + ' American Community Survey, 5-year data file.<br>Table B01001. Print Date: ' +  fmt_date(new Date),
 		   xref : 'paper', 
 		   x : 0, 
 		   yref : 'paper', 
-		   y : -0.35, 
+		   y : -0.37, 
 		   align : 'left', 
 		   showarrow : false}]
 	};
 	Plotly.newPlot(outPlot, pyr_data, pyr_layout,config);
 
+  } //i
+  
 	var profileDat4 = document.getElementById('profileDat4');
 	var profileImg4 = document.getElementById('profileImg4');
-	profileDat4.onclick = function() {exportToCsv(ctyNames, 'agepyr', pltData,0)};
-	profileImg4.onclick = function() {exportToPng(ctyNames, 'agepyr', outPlot,0)};	
+	profileDat4.onclick = function() {exportToCsv(ctyNames, 'agepyr', outData,0)};
+	profileImg4.onclick = function() {exportToPng(ctyNames, 'agepyr', plot_array,0)};	
 	
 } else {
 
- var plotArr = [];
- var outData = [];
  for(i = 0; i < fipsList.length; i ++ ){
 
 	var outPlot = 'plotGrid'+i;	
@@ -1432,23 +1508,19 @@ for(i = 0; i < tick_val.length; i ++){
 	 outData = outData.concat(pltData);
 
 	 var ctyNames = [...new Set(pltData.map(d => d.name))]; 
-//Adding Plots for output...
-    plotArr.push({'loc' : ctyNames[0],
-	'plot' : outPlot})
 	
 	var year0 = pltData.filter(d => d.year == year_data[0]);
 	var year1 = pltData.filter(d => d.year == year_data[1]); 
 
-
-	var pct_male_0 = year0.map(d => d.pct_malepopulation * -1);
-	var pct_male_0d = year0.map(d => 'Men ' + d.age_bin + ' ' + year_data[0] + '<br>' + fmt_pct(d.pct_malepopulation) + ', ' + fmt_comma(d.malepopulation) + ' Persons');
-	var pct_female_0 = year0.map(d => d.pct_femalepopulation);
-	var pct_female_0d = year0.map(d => 'Women ' + d.age_bin + ' ' + year_data[0] + '<br>' + fmt_pct(d.pct_femalepopulation) + ', ' + fmt_comma(d.femalepopulation) + ' Persons');
+	var pct_male_0 = year0.map(d => d.pct_malepopulation_e * -1);
+	var pct_male_0d = year0.map(d => 'Men ' + d.age_cat + ' ' + year_data[0] + '<br>Percent: ' + fmt_pct(d.pct_malepopulation_e) + '<br>Persons: ' + fmt_comma(d.malepopulation_e));
+	var pct_female_0 = year0.map(d => d.pct_femalepopulation_e);
+	var pct_female_0d = year0.map(d => 'Women ' + d.age_cat + ' ' + year_data[0] + '<br>Percent: ' + fmt_pct(d.pct_femalepopulation_e) + '<br>Persons: ' + fmt_comma(d.femalepopulation_e));
   
-	var pct_male_1 = year1.map(d => d.pct_malepopulation * -1);
-	var pct_male_1d = year1.map(d => 'Men ' + d.age_bin + ' ' + year_data[1] + '<br>' + fmt_pct(d.pct_malepopulation) + ', ' + fmt_comma(d.malepopulation) + ' Persons');
-	var pct_female_1 = year1.map(d => d.pct_femalepopulation);
-	var pct_female_1d = year1.map(d => 'Women ' + d.age_bin + ' ' + year_data[1] + '<br>' + fmt_pct(d.pct_femalepopulation) + ', ' + fmt_comma(d.femalepopulation) + ' Persons');
+	var pct_male_1 = year1.map(d => d.pct_malepopulation_e * -1);
+	var pct_male_1d = year1.map(d => 'Men ' + d.age_cat + ' ' + year_data[1] + '<br>Percent: ' + fmt_pct(d.pct_malepopulation_e) + '<br>Persons: ' + fmt_comma(d.malepopulation_e));
+	var pct_female_1 = year1.map(d => d.pct_femalepopulation_e);
+	var pct_female_1d = year1.map(d => 'Women ' + d.age_cat + ' ' + year_data[1] + '<br>Percent: ' + fmt_pct(d.pct_femalepopulation_e) + '<br>Persons: ' + fmt_comma(d.femalepopulation_e));
     
 	trace1 = {
 	  name: year_data[0], 
@@ -1497,6 +1569,7 @@ for(i = 0; i < tick_val.length; i ++){
 	  hoverlabel : {namelength :0},
 	   marker: {
 		   color : 'lightblue',
+		   opacity : 0.5,
 		line: {
 		  opacity : 1,
 		  color: 'black',
@@ -1515,6 +1588,7 @@ for(i = 0; i < tick_val.length; i ++){
 	  hoverlabel : {namelength :0},
 	   marker: {
 		   color : 'lightblue',
+		   opacity : 0.5,
 		line: {
 		  opacity : 1,
 		  color: 'black',
@@ -1580,7 +1654,7 @@ for(i = 0; i < tick_val.length; i ++){
 	var profileDat4 = document.getElementById('profileDat4');
 	var profileImg4 = document.getElementById('profileImg4');
 	profileDat4.onclick = function() {exportToCsv(ctyNames, 'agepyr', outData,0)};
-	profileImg4.onclick = function() {exportToPng(ctyNames, 'agepyr', plotArr,0)};
+	profileImg4.onclick = function() {exportToPng(ctyNames, 'agepyr', plot_array,0)};
 } //region and county
 } //genAgePyr	
 
@@ -1666,7 +1740,7 @@ pgSetup(level, age_div1,"Municipal Age Estimates",true,fipsList, ctyNameList, yr
    btn0.addEventListener('click', function() {
 	   genAgeEst(inData,level, dd0, chartdiv_1.id,0)
 	   genAgeFor(inData,level,dd0, chartdiv_2.id,0);
-	   genAgePyr(pyrData,leveldd0, chartdiv_3.id,0);
+	   genAgePyr(pyrData,level,dd0, chartdiv_3.id,0);
        });
   
   } 
@@ -3502,6 +3576,297 @@ var coc_data = coc_cty_data; //This is single year data
 
 }; //end genSel2display
 
+
+//acsPct creates age percentage data from ACS inputs for Age Bar Charts
+function acsPct(inData,fips, yrvalue, type) {
+	
+	var numData = [];
+	for(i = 0; i < inData[1].length; i++){
+		numData.push(parseInt(inData[1][i]));
+	}
+	
+	var tot_totalpopulation_e = numData[0];
+	var tot_totalpopulation_m = numData[2];
+	var tot_malepopulation_e  = numData[4];
+	var tot_malepopulation_m = numData[6] 
+	var tot_femalepopulation_e = numData[100];
+	var tot_femalepopulation_m = numData[102];
+	  var fips_val = parseInt(fips);
+	
+	if (type == "county") {
+		var out_name = countyName(fips_val);
+	} else {
+	    var out_name = muniName(fips_val);
+	};
+//Output Bar chart data 
+	var outData = [];
+
+//dataArr has the addresses of column names, male, female
+for(i = 0; i <= 7; i++){
+    if(i == 0){ 
+	       var age_cat = '0 to 4';
+			var malepopulation_e = numData[8];
+			var malepopulation_m  = numData[10] 
+			var femalepopulation_e  = numData[104];
+			var femalepopulation_m  = numData[106];
+   };
+	if(i == 1){
+	    var age_cat = '5 to 17';
+		var malepopulation_e =  numData[12] + numData[16] + numData[20];
+		var malepopulation_m =  Math.sqrt(Math.pow(numData[14],2) + Math.pow(numData[18],2) + Math.pow(numData[22],2));
+		var femalepopulation_e =  numData[108] + numData[112] + numData[116];
+		var femalepopulation_m =  Math.sqrt(Math.pow(numData[110],2) + Math.pow(numData[114],2) + Math.pow(numData[118],2));
+    };
+    if(i == 2){
+	    var age_cat = '18 to 24';
+		var malepopulation_e =  numData[24] + numData[28] + numData[32] + numData[36];
+		var malepopulation_m = Math.sqrt(Math.pow(numData[26],2) + Math.pow(numData[30],2) + Math.pow(numData[34],2) + Math.pow(numData[38],2));
+		var femalepopulation_e =  numData[120] + numData[124] + numData[128] + numData[132];
+		var femalepopulation_m =  Math.sqrt(Math.pow(numData[122],2) + Math.pow(numData[126],2) + Math.pow(numData[130],2) + Math.pow(numData[134],2));
+
+		};
+    if(i == 3){
+	    var age_cat = '25 to 54';
+		var malepopulation_e =  numData[40] + numData[44] + numData[48] + numData[52] + numData[56] + numData[60];
+		var malepopulation_m =  Math.sqrt(Math.pow(numData[42],2) + Math.pow(numData[46],2) + Math.pow(numData[50],2) + Math.pow(numData[54],2) + Math.pow(numData[58],2) + Math.pow(numData[62],2));
+		var femalepopulation_e =  numData[136] + numData[140] + numData[144] + numData[148] + numData[152] + numData[156];
+		var femalepopulation_m =  Math.sqrt(Math.pow(numData[138],2) + Math.pow(numData[142],2) + Math.pow(numData[146],2) + Math.pow(numData[150],2) + Math.pow(numData[154],2) + Math.pow(numData[158],2));
+		};
+    if(i == 4){
+	    var age_cat = '55 to 64';
+		var malepopulation_e =   numData[64] + numData[68] + numData[72];
+		var malepopulation_m =   Math.sqrt(Math.pow(numData[66],2) + Math.pow(numData[70],2) + Math.pow(numData[74],2));
+		var femalepopulation_e =   numData[160] + numData[164] + numData[168];
+		var femalepopulation_m =   Math.sqrt(Math.pow(numData[162],2) + Math.pow(numData[166],2) + Math.pow(numData[170],2));
+		};
+    if(i == 5){
+	    var age_cat = '65 to 74';
+		var malepopulation_e = numData[76] + numData[80] + numData[84];
+		var malepopulation_m = Math.sqrt(Math.pow(numData[78],2) + Math.pow(numData[82],2) + Math.pow(numData[86],2));
+		var femalepopulation_e = numData[172] + numData[176] + numData[180];
+		var femalepopulation_m = Math.sqrt(Math.pow(numData[174],2) + Math.pow(numData[178],2) + Math.pow(numData[182],2));
+		};
+	 if(i == 6){
+	    var age_cat = '75 to 84';
+		var malepopulation_e = numData[88] + numData[92];
+		var malepopulation_m =  Math.sqrt(Math.pow(numData[90],2) + Math.pow(numData[94],2));
+		var femalepopulation_e =  numData[184] + numData[188];
+		var femalepopulation_m =  Math.sqrt(Math.pow(numData[186],2) + Math.pow(numData[190],2));
+		};
+	 if(i == 7){
+	     var age_cat = '85 +';
+		var malepopulation_e =  numData[96];
+		var malepopulation_m =  numData[98];
+		var femalepopulation_e =  numData[192];
+		var femalepopulation_m = numData[194];
+		};	
+
+	 var totalpopulation_e = malepopulation_e + femalepopulation_e;
+	 var totalpopulation_m = Math.sqrt(Math.pow(malepopulation_m,2) + Math.pow(femalepopulation_m,2));
+	 var pct_malepopulation_e =  malepopulation_e/tot_malepopulation_e;
+	 var pct_malepopulation_m =  malepopulation_m/tot_malepopulation_e;
+	 var pct_femalepopulation_e = femalepopulation_e/tot_femalepopulation_e;
+	 var pct_femalepopulation_m = femalepopulation_m/tot_femalepopulation_e;
+     var pct_totalpopulation_e = totalpopulation_e/tot_totalpopulation_e;
+     var pct_totalpopulation_m = totalpopulation_m/tot_totalpopulation_e;
+	 
+	 outData.push({'fips' : fips_val, 'name' : out_name, 'year' : yrvalue, 'age_cat_no' : i, 'age_cat' : age_cat, 
+	         'malepopulation_e' : malepopulation_e, 'malepopulation_m' : malepopulation_m, 
+			 'tot_malepopulation_e' : tot_malepopulation_e, 'tot_malepopulation_m' : tot_malepopulation_m,
+			 'pct_malepopulation_e' : pct_malepopulation_e, 'pct_malepopulation_m' : pct_malepopulation_m,
+			 'femalepopulation_e' : femalepopulation_e, 'femalepopulation_m' : femalepopulation_m, 
+			 'tot_femalepopulation_e' : tot_femalepopulation_e, 'tot_femalepopulation_m' : tot_femalepopulation_m,
+			  'pct_femalepopulation_e' : pct_femalepopulation_e,  'pct_femalepopulation_m' : pct_femalepopulation_m,
+			 'totalpopulation_e' : totalpopulation_e, 'totalpopulation_m' : totalpopulation_m,
+	         'tot_totalpopulation_e' : tot_totalpopulation_e, 'tot_totalpopulation_m' : tot_totalpopulation_m,
+	          'pct_totalpopulation_e' : pct_totalpopulation_e, 'pct_totalpopulation_m' : pct_totalpopulation_m});
+	}; //i
+	return(outData);
+} //acsPct
+
+//acsPyr creates age percentage data from ACS inputs for Age Pyramid Charts
+function acsPyr(inData,fips, yrvalue, type) {
+	var numData = [];
+	for(i = 0; i < inData[1].length; i++){
+		numData.push(parseInt(inData[1][i]));
+	}
+	
+	var tot_totalpopulation_e = numData[0];
+	var tot_totalpopulation_m = numData[2];
+	var tot_malepopulation_e  = numData[4];
+	var tot_malepopulation_m = numData[6] 
+	var tot_femalepopulation_e = numData[100];
+	var tot_femalepopulation_m = numData[102];
+	  var fips_val = parseInt(fips);
+	
+	if (type == "county") {
+		var out_name = countyName(fips_val);
+	} else {
+	    var out_name = muniName(fips_val);
+	};
+//Output Bar chart data 
+	var outData = [];
+    var fips_val = parseInt(fips);
+	if (type == "county") {
+		var out_name = countyName(fips_val);
+	} else {
+	    var out_name = muniName(fips_val);
+	};
+//Output Pyramid data
+var outData = [];
+for(i = 0; i <= 17;  i++){
+    if(i == 0){ 
+	       var age_cat = '0 to 4';
+		   var malepopulation_e = numData[8];
+		   var malepopulation_m = numData[10];
+		   var femalepopulation_e = numData[104]
+		   var femalepopulation_m = numData[106];
+		   };
+	if(i == 1){
+	       var age_cat = '5 to 9';
+		   var malepopulation_e = numData[12];
+		   var malepopulation_m = numData[14];
+		   var femalepopulation_e = numData[108];
+		   var femalepopulation_m = numData[110];
+    };
+	if(i == 2){
+	       var age_cat = '10 to 14';
+		   var malepopulation_e = numData[16];
+		   var malepopulation_m = numData[18];
+		   var femalepopulation_e = numData[112];
+		   var femalepopulation_m = numData[114];
+    };
+	if(i == 3){
+	       var age_cat = '15 to 19';
+		   var malepopulation_e = numData[20] + numData[24] ;
+		   var malepopulation_m = Math.sqrt(Math.pow(numData[22],2) + Math.pow(numData[26],2));
+		   var femalepopulation_e = numData[116] + numData[120];
+		   var femalepopulation_m = Math.sqrt(Math.pow(numData[118],2) + Math.pow(numData[122],2));
+    };
+	if(i == 4){
+	       var age_cat = '20 to 24';
+		   var malepopulation_e = numData[28] + numData[32] + numData[36];
+		   var malepopulation_m = Math.sqrt(Math.pow(numData[30],2) + Math.pow(numData[34],2) + Math.pow(numData[38],2));
+		   var femalepopulation_e = numData[124] + numData[128] + numData[132];
+		   var femalepopulation_m = Math.sqrt(Math.pow(numData[126],2) + Math.pow(numData[130],2) + Math.pow(numData[134],2));
+    };
+	if(i == 5){
+	       var age_cat = '25 to 29';
+		   var malepopulation_e = numData[40];
+		   var malepopulation_m = numData[42];
+		   var femalepopulation_e = numData[136];
+		   var femalepopulation_m = numData[138];
+    };
+	if(i == 6){
+	       var age_cat = '30 to 34';
+		   var malepopulation_e = numData[44];
+		   var malepopulation_m = numData[46];
+		   var femalepopulation_e = numData[140];
+		   var femailepopulation_m = numData[142];
+    };
+	if(i == 7){
+	       var age_cat = '35 to 39';
+		   var malepopulation_e = numData[48] ;
+		   var malepopulation_m = numData[50];
+	       var femalepopulation_e = numData[144];
+	       var femalepopulation_m = numData[146];
+    };
+	if(i == 8){
+	       var age_cat = '40 to 44';
+		   var malepopulation_e = numData[52];
+		   var malepopulation_m = numData[54];
+		   var femalepopulation_e = numData[148];
+		   var femalepopulation_m = numData[150];
+    };
+	if(i == 9){
+	       var age_cat = '45 to 49';
+		   var malepopulation_e = numData[56];
+		   var malepopulation_m = numData[58];
+		   var femalepopulation_e = numData[152];
+		   var femalepopulation_m = numData[154]
+    };
+	if(i == 10){
+	       var age_cat = '50 to 54';
+		   var malepopulation_e = numData[60];
+		   var malepopulation_m = numData[62];
+		   var femalepopulation_e = numData[156];
+		   var femalepopulation_m = numData[158]
+    };
+	if(i == 11){
+	       var age_cat = '55 to 59';
+		   var malepopulation_e = numData[64];
+		   var malepopulation_m = numData[66];
+		   var femalepopulation_e = numData[160];
+		   var femalepopultrion_m = numData[164];
+    };
+	if(i == 12){
+	       var age_cat = '60 to 64';
+		   var malepopulation_e = numData[68] + numData[72];
+		   var malepopulation_m = Math.sqrt(Math.pow(numData[70],2) + Math.pow(numData[74],2))
+		   var femalepopulation_e = numData[164] + numData[168];
+		   var femalepopulation_m = Math.sqrt(Math.pow(numData[166],2) + Math.pow(numData[170],2))
+    };
+	if(i == 13){
+	       var age_cat = '65 to 69';
+		   var malepopulation_e = numData[76] + numData[80];
+		   var malepopulation_m = Math.sqrt(Math.pow(numData[78],2) + Math.pow(numData[82],2))
+		   var femalepopulation_e = numData[172] + numData[176];
+		   var femalepopulation_m = Math.sqrt(Math.pow(numData[174],2) + Math.pow(numData[178],2))
+
+    };
+	if(i == 14){
+	       var age_cat = '70 to 74';
+		   var malepopulation_e = numData[84];
+		   var malepopulation_m = numData[86];
+		   var femalepopulation_e = numData[180];
+		   var femalepopulation_m = numData[182];
+    };
+	if(i == 15){
+	       var age_cat = '75 to 79';
+		   var malepopulation_e = numData[88];
+		   var malepopulation_m = numData[90]
+		   var femalepopulation_e = numData[184];
+		   var femalepopulation_m = numData[186];
+    };
+	if(i == 16){
+	       var age_cat = '80 to 84';
+		   var malepopulation_e = numData[92];
+		   var malepopulation_m = numData[94]
+		   var femalepopulation_e = numData[188];
+		   var femalepopulation_m = numData[190]
+    };
+	if(i == 17){
+	       var age_cat = '85 +';
+		   var malepopulation_e = numData[96];
+		   var malepopulation_m = numData[98];
+		   var femalepopulation_e = numData[192];
+		   var femalepopulation_m = numData[194]
+    };
+
+	 var totalpopulation_e = malepopulation_e + femalepopulation_e;
+	 var totalpopulation_m = Math.sqrt(Math.pow(malepopulation_m,2) + Math.pow(femalepopulation_m,2));
+	 var pct_malepopulation_e =  malepopulation_e/tot_malepopulation_e;
+	 var pct_malepopulation_m =  malepopulation_m/tot_malepopulation_e;
+	 var pct_femalepopulation_e = femalepopulation_e/tot_femalepopulation_e;
+	 var pct_femalepopulation_m = femalepopulation_m/tot_femalepopulation_e;
+     var pct_totalpopulation_e = totalpopulation_e/tot_totalpopulation_e;
+     var pct_totalpopulation_m = totalpopulation_m/tot_totalpopulation_e;
+	 
+	 outData.push({'fips' : fips_val, 'name' : out_name, 'year' : yrvalue, 'age_cat_no' : i, 'age_cat' : age_cat, 
+	         'malepopulation_e' : malepopulation_e, 'malepopulation_m' : malepopulation_m, 
+			 'tot_malepopulation_e' : tot_malepopulation_e, 'tot_malepopulation_m' : tot_malepopulation_m,
+			 'pct_malepopulation_e' : pct_malepopulation_e, 'pct_malepopulation_m' : pct_malepopulation_m,
+			 'femalepopulation_e' : femalepopulation_e, 'femalepopulation_m' : femalepopulation_m, 
+			 'tot_femalepopulation_e' : tot_femalepopulation_e, 'tot_femalepopulation_m' : tot_femalepopulation_m,
+			  'pct_femalepopulation_e' : pct_femalepopulation_e,  'pct_femalepopulation_m' : pct_femalepopulation_m,
+			 'totalpopulation_e' : totalpopulation_e, 'totalpopulation_m' : totalpopulation_m,
+	         'tot_totalpopulation_e' : tot_totalpopulation_e, 'tot_totalpopulation_m' : tot_totalpopulation_m,
+	          'pct_totalpopulation_e' : pct_totalpopulation_e, 'pct_totalpopulation_m' : pct_totalpopulation_m});
+	}; //i
+	return(outData);
+} //acsPyr
+
+
 //genSel3 Display  Produces age panel charts
 //Age estimates and forecasts facet chart
 //Age Pyramid
@@ -3552,177 +3917,21 @@ var prom = [d3.json(forcurlCO), d3.json(forcurlCty)];
 //Estimages and Forecasts --For muniipalities, take  from the ACS No forecast
 if(muniList.includes(geotype)){
 	var acsyr = 2019;  ///CHANGE THIS WHEN 2020 ACS is available
-	var forcurlMuni = "https://api.census.gov/data/"+ acsyr + "/acs/acs5?get=group(B01001)&for=place:" + fipsArr+"&in=state:08&key=08fe07c2a7bf781b7771d7cccb264fe7ff8965ce";
-    var prom = [d3.json(forcurlMuni)];
+	var ctynum = muni_county(fipsArr);
+	var forcurlCty = "https://api.census.gov/data/"+ acsyr + "/acs/acs5?get=group(B01001)&for=county:" + ctynum +"&in=state:08&key=08fe07c2a7bf781b7771d7cccb264fe7ff8965ce";
+ 	var forcurlMuni = "https://api.census.gov/data/"+ acsyr + "/acs/acs5?get=group(B01001)&for=place:" + fipsArr +"&in=state:08&key=08fe07c2a7bf781b7771d7cccb264fe7ff8965ce";
+    var prom = [d3.json(forcurlCty), d3.json(forcurlMuni)];
 }
 
 Promise.all(prom).then(function(data){
 //Selecting year range
 if(muniList.includes(geotype)){
-	// Constant Values
-	  var tot_malepopulation = parseInt(data[0][1][4]);
-	  var tot_femalepopulation = parseInt(data[0][1][100]);
-	  var tot_totalpopulation =  parseInt(data[0][1][0]);
-    var fips_val = parseInt(fipsArr[0]);
-	var muni_name = muniName(fips_val);
-//Output Bar chart data 
-	var fin_age_pct = [];
-
-	for(i = 0; i <= 7; i++){
-    if(i == 0){ 
-	       var age_cat = '0 to 4';
-		   var malepopulation = parseInt(data[0][1][8]);
-		   var femalepopulation = parseInt(data[0][1][104]);
-    };
-	if(i == 1){
-	       var age_cat = '5 to 17';
-		   var malepopulation = parseInt(data[0][1][12]) + parseInt(data[0][1][16]) + parseInt(data[0][1][20]);
-		   var femalepopulation = parseInt(data[0][1][108]) + parseInt(data[0][1][112]) + parseInt(data[0][1][116]);
-    };
-    if(i == 2){
-	       var age_cat = '18 to 24';
-		   var malepopulation = parseInt(data[0][1][24]) + parseInt(data[0][1][28]) + parseInt(data[0][1][32]) + parseInt(data[0][1][36]);
-		   var femalepopulation = parseInt(data[0][1][120]) + parseInt(data[0][1][124]) + parseInt(data[0][1][128]) + parseInt(data[0][1][132]);
-		};
-    if(i == 3){
-	       var age_cat = '25 to 54';
-		   var malepopulation = parseInt(data[0][1][40]) + parseInt(data[0][1][44]) + parseInt(data[0][1][48]) + parseInt(data[0][1][52]) + parseInt(data[0][1][56]) + parseInt(data[0][1][60]);
-		   var femalepopulation = parseInt(data[0][1][136]) + parseInt(data[0][1][140]) + parseInt(data[0][1][144]) + parseInt(data[0][1][148]) + parseInt(data[0][1][152]) + parseInt(data[0][1][156]);
-		};
-    if(i == 4){
-	       var age_cat = '55 to 64';
-		   var malepopulation = parseInt(data[0][1][64]) + parseInt(data[0][1][68]) + parseInt(data[0][1][72]);
-		   var femalepopulation = parseInt(data[0][1][160]) + parseInt(data[0][1][164]) + parseInt(data[0][1][168]);
-		};
-    if(i == 5){
-	       var age_cat = '65 to 74';
-		   var malepopulation = parseInt(data[0][1][76]) + parseInt(data[0][1][80]) + parseInt(data[0][1][84]);
-		   var femalepopulation = parseInt(data[0][1][172]) + parseInt(data[0][1][176]) + parseInt(data[0][1][180]);
-		};
-	 if(i == 6){
-	       var age_cat = '75 to 84';
-		   var malepopulation = parseInt(data[0][1][88]) + parseInt(data[0][1][92]);
-		   var femalepopulation = parseInt(data[0][1][184]) + parseInt(data[0][1][188]);
-		};
-	 if(i == 7){
-	       var age_cat = '85 +';
-		   var malepopulation = parseInt(data[0][1][96]);
-		   var femalepopulation = parseInt(data[0][1][192]);
-		};	
-	 var totalpopulation = malepopulation + femalepopulation;
-	 var pct_malepopulation =  malepopulation/tot_malepopulation;
-	 var pct_femalepopulation = femalepopulation/tot_femalepopulation;
-     var pct_totalpopulation = totalpopulation/tot_totalpopulation;
-	 fin_age_pct.push({'fips' : fips_val, 'name' : muni_name, 'year' : acsyr, 'age_cat_no' : i, 'age_cat' : age_cat, 
-	         'malepopulation' : malepopulation, 'femalepopulation' : femalepopulation, 'totalpopulation' : totalpopulation,
-	         'tot_malepopulation' : tot_malepopulation, 'tot_femalepopulation' : tot_femalepopulation, 'tot_totalpopulation' : tot_totalpopulation,
-	         'pct_malepopulation' : pct_malepopulation, 'pct_femalepopulation' : pct_femalepopulation, 'pct_totalpopulation' : pct_totalpopulation});
-	}; //i
-
-//Output Pyramid data
-var fin_age_pyr = [];
-for(i = 0; i <= 17;  i++){
-    if(i == 0){ 
-	       var age_bin = '0 to 4';
-		   var malepopulation = parseInt(data[0][1][8]);
-		   var femalepopulation = parseInt(data[0][1][104]);
-		   };
-	if(i == 1){
-	       var age_bin = '5 to 9';
-		   var malepopulation = parseInt(data[0][1][12]);
-		   var femalepopulation = parseInt(data[0][1][108]);
-    };
-	if(i == 2){
-	       var age_bin = '10 to 14';
-		   var malepopulation = parseInt(data[0][1][16]);
-		   var femalepopulation = parseInt(data[0][1][112]);
-    };
-	if(i == 3){
-	       var age_bin = '15 to 19';
-		   var malepopulation = parseInt(data[0][1][20]) + parseInt(data[0][1][24]) ;
-		   var femalepopulation = parseInt(data[0][1][116]) + parseInt(data[0][1][120]);
-    };
-	if(i == 4){
-	       var age_bin = '20 to 24';
-		   var malepopulation = parseInt(data[0][1][28]) + parseInt(data[0][1][32]) + parseInt(data[0][1][36]) ;
-		   var femalepopulation = parseInt(data[0][1][124]) + parseInt(data[0][1][128]) + parseInt(data[0][1][132]);
-    };
-	if(i == 5){
-	       var age_bin = '25 to 29';
-		   var malepopulation = parseInt(data[0][1][40]);
-		   var femalepopulation = parseInt(data[0][1][136]);
-    };
-	if(i == 6){
-	       var age_bin = '30 to 34';
-		   var malepopulation = parseInt(data[0][1][44]);
-		   var femalepopulation = parseInt(data[0][1][140]);
-    };
-	if(i == 7){
-	       var age_bin = '35 to 39';
-		   var malepopulation = parseInt(data[0][1][48]) ;
-		   var femalepopulation = parseInt(data[0][1][144]);
-    };
-	if(i == 8){
-	       var age_bin = '40 to 44';
-		   var malepopulation = parseInt(data[0][1][52]) ;
-		   var femalepopulation = parseInt(data[0][1][148]);
-    };
-	if(i == 9){
-	       var age_bin = '45 to 49';
-		   var malepopulation = parseInt(data[0][1][56]) ;
-		   var femalepopulation = parseInt(data[0][1][152]);
-    };
-	if(i == 10){
-	       var age_bin = '50 to 54';
-		   var malepopulation = parseInt(data[0][1][60]) ;
-		   var femalepopulation = parseInt(data[0][1][156]);
-    };
-	if(i == 11){
-	       var age_bin = '55 to 59';
-		   var malepopulation = parseInt(data[0][1][64]) ;
-		   var femalepopulation = parseInt(data[0][1][160]);
-    };
-	if(i == 12){
-	       var age_bin = '60 to 64';
-		   var malepopulation = parseInt(data[0][1][68]) + parseInt(data[0][1][72]) ;
-		   var femalepopulation = parseInt(data[0][1][164]) + parseInt(data[0][1][168]) ;
-    };
-	if(i == 13){
-	       var age_bin = '65 to 69';
-		   var malepopulation = parseInt(data[0][1][76]) + parseInt(data[0][1][80]) ;
-		   var femalepopulation = parseInt(data[0][1][172]) + parseInt(data[0][1][176]) ;
-    };
-	if(i == 14){
-	       var age_bin = '70 to 74';
-		   var malepopulation = parseInt(data[0][1][84]);
-		   var femalepopulation = parseInt(data[0][1][180]);
-    };
-	if(i == 15){
-	       var age_bin = '75 to 79';
-		   var malepopulation = parseInt(data[0][1][88]);
-		   var femalepopulation = parseInt(data[0][1][184]);
-    };
-	if(i == 16){
-	       var age_bin = '80 to 84';
-		   var malepopulation = parseInt(data[0][1][92]);
-		   var femalepopulation = parseInt(data[0][1][188]);
-    };
-	if(i == 17){
-	       var age_bin = '85 +';
-		   var malepopulation = parseInt(data[0][1][96]);
-		   var femalepopulation = parseInt(data[0][1][192]);
-    };
-	 var totalpopulation = malepopulation + femalepopulation;
-	 var pct_malepopulation =  malepopulation/tot_malepopulation;
-	 var pct_femalepopulation = femalepopulation/tot_femalepopulation;
-     var pct_totalpopulation = totalpopulation/tot_totalpopulation;
-	 fin_age_pyr.push({'fips' : fips_val, 'name' : muni_name, 'year' : acsyr, 'age_bin_no' : i, 'age_bin' : age_bin, 
-	         'malepopulation' : malepopulation, 'femalepopulation' : femalepopulation, 'totalpopulation' : totalpopulation,
-	         'tot_malepopulation' : tot_malepopulation, 'tot_femalepopulation' : tot_femalepopulation, 'tot_totalpopulation' : tot_totalpopulation,
-	         'pct_malepopulation' : pct_malepopulation, 'pct_femalepopulation' : pct_femalepopulation, 'pct_totalpopulation' : pct_totalpopulation});
-}; //i
-
-
+     var cty_age_pct = acsPct(data[0],ctynum, acsyr, 'county');
+	 var cty_age_pyr = acsPyr(data[0],ctynum,acsyr,'county');
+	 var muni_age_pct = acsPct(data[1],fipsArr[0], acsyr, 'muni');
+	 var muni_age_pyr = acsPyr(data[1],fipsArr[0], acsyr,'muni');
+     var fin_age_pct = cty_age_pct.concat(muni_age_pct);
+	 var fin_age_pyr = cty_age_pyr.concat(muni_age_pyr);
 } else { //County and Region data files
 //State data
 
@@ -3733,9 +3942,9 @@ for(i = 0; i <= 17;  i++){
 							geo_name : data[0][i].region,
 							year : data[0][i].year,
 							age : data[0][i].age,
-							malepopulation : +data[0][i].malepopulation,
-							femalepopulation : +data[0][i].femalepopulation, 
-							totalpopulation : +data[0][i].totalpopulation });
+							malepopulation_e : +data[0][i].malepopulation,
+							femalepopulation_e : +data[0][i].femalepopulation, 
+							totalpopulation_e : +data[0][i].totalpopulation });
 	};
 	
 //Assigning age categories
@@ -3749,7 +3958,7 @@ for(i = 0; i <= 17;  i++){
 	if(obj.age >= 75 && obj.age <= 84) {obj.age_cat = "75 to 84"; obj.agecatno = 7;}
     if(obj.age >= 85) {obj.age_cat = "85 +"; obj.agecatno = 8;}
     CO_age_data.push({'fips' : obj.fips, 'year' : obj.year, 'age' : obj.age, 'age_cat_no' : obj.agecatno, 'age_cat' : obj.age_cat, 
-	       'malepopulation' : obj.malepopulation, 'femalepopulation' : obj.femalepopulation, 'totalpopulation' : obj.totalpopulation});
+	       'malepopulation_e' : obj.malepopulation_e, 'femalepopulation_e' : obj.femalepopulation_e, 'totalpopulation_e' : obj.totalpopulation_e});
  });
 
 //County data
@@ -3761,9 +3970,9 @@ for(i = 0; i <= 17;  i++){
 							name : data[1][i].county,
 							year : data[1][i].year,
 							age : data[1][i].age,
-							malepopulation : +data[1][i].malepopulation,
-							femalepopulation : +data[1][i].femalepopulation, 
-							totalpopulation : +data[1][i].totalpopulation });
+							malepopulation_e : +data[1][i].malepopulation,
+							femalepopulation_e : +data[1][i].femalepopulation, 
+							totalpopulation_e : +data[1][i].totalpopulation });
 	};
 
 //Assigning age categories
@@ -3777,14 +3986,14 @@ for(i = 0; i <= 17;  i++){
 	if(obj.age >= 75 && obj.age <= 84) {obj.age_cat = "75 to 84"; obj.agecatno = 7;}
     if(obj.age >= 85) {obj.age_cat = "85 +"; obj.agecatno = 8;}
     cty_age_data.push({'fips' : obj.fips, 'year' : obj.year, 'age' : obj.age, 'age_cat_no' : obj.agecatno, 'age_cat' : obj.age_cat, 
-	       'malepopulation' : obj.malepopulation, 'femalepopulation' : obj.femalepopulation, 'totalpopulation' : obj.totalpopulation});
+	       'malepopulation_e' : obj.malepopulation_e, 'femalepopulation_e' : obj.femalepopulation_e, 'totalpopulation_e' : obj.totalpopulation_e});
  });
  
  
  //Rolling up State and County data
 
  
- var columnsToSum = ['malepopulation', 'femalepopulation', 'totalpopulation'];
+ var columnsToSum = ['malepopulation_e', 'femalepopulation_e', 'totalpopulation_e'];
  var age_CO_data = [];
  var CO_age_sum =  d3.rollup(CO_age_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year,  d => d.age_cat_no, d => d.age_cat)
  //Flatten 
@@ -3792,7 +4001,7 @@ for (let [key1, value] of CO_age_sum) {
 for (let[key2, value2] of value) {
 for (let [key3, value3] of value2) {
    age_CO_data.push({'fips' : 0, 'name' : 'Colorado', 'year' : key1, 'age_cat_no' : key2, 'age_cat' : key3,
-     'malepopulation' : value3.malepopulation, 'femalepopulation' : value3.femalepopulation, 'totalpopulation' : value3.totalpopulation});
+     'malepopulation_e' : value3.malepopulation_e, 'femalepopulation_e' : value3.femalepopulation_e, 'totalpopulation_e' : value3.totalpopulation_e});
 }
 };
 };
@@ -3801,15 +4010,13 @@ for (let [key3, value3] of value2) {
  var age_cty_data = [];
  var cty_age_sum =  d3.rollup(cty_age_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.fips, d => d.year, d => d.age_cat_no, d => d.age_cat);
  
- 
- 
- //Flatten 
+  //Flatten 
 for (let [key1, value1] of cty_age_sum) {
 for (let [key2, value2] of value1) {
 for (let [key3, value3] of value2) {
 for (let [key4, value4] of value3) {
    age_cty_data.push({'fips' : key1, 'name' : countyName(key1), 'year' : key2, 'age_cat_no' : key3, 'age_cat' : key4,
-     'malepopulation' : value4.malepopulation, 'femalepopulation' : value4.femalepopulation, 'totalpopulation' : value4.totalpopulation});
+     'malepopulation_e' : value4.malepopulation_e, 'femalepopulation_e' : value4.femalepopulation_e, 'totalpopulation_e' : value4.totalpopulation_e});
 }
 }
 };
@@ -3834,7 +4041,7 @@ for (let [key1, value] of age_reg_sum) {
 for (let[key2, value2] of value) {
 for (let[key3, value3] of value2) {
    age_reg_data.push({'fips' : regionNum, 'name' : regionName(fipsArr), 'year' : key1, 'age_cat_no' : key2, 'age_cat' : key3,
-     'malepopulation' : value3.malepopulation, 'femalepopulation' : value3.femalepopulation, 'totalpopulation' : value3.totalpopulation});
+     'malepopulation_e' : value3.malepopulation_e, 'femalepopulation_e' : value3.femalepopulation_e, 'totalpopulation_e' : value3.totalpopulation_e});
 }
 };
 };
@@ -3852,7 +4059,7 @@ var age_base = [];
 for (let [key1, value] of pct_base) {
 for (let[key2, value2] of value) {
    age_base.push({'fips' : key1, 'year' : key2, 
-     'tot_malepopulation' : value2.malepopulation, 'tot_femalepopulation' : value2.femalepopulation, 'tot_totalpopulation' : value2.totalpopulation});
+     'tot_malepopulation_e' : value2.malepopulation_e, 'tot_femalepopulation_e' : value2.femalepopulation_e, 'tot_totalpopulation_e' : value2.totalpopulation_e});
 }
 };
 
@@ -3860,17 +4067,17 @@ var fin_age_pct = [];
 for(i = 0; i < age_base.length;i++){
 	var selfips = age_base[i].fips;
 	var selyear = age_base[i].year;
-	var selmale = age_base[i].tot_malepopulation;
-	var selfemale = age_base[i].tot_femalepopulation;
-	var seltotal = age_base[i].tot_totalpopulation;
+	var selmale = age_base[i].tot_malepopulation_e;
+	var selfemale = age_base[i].tot_femalepopulation_e;
+	var seltotal = age_base[i].tot_totalpopulation_e;
 	var age_tmp = fin_age_data.filter(d => (d.fips == selfips && d.year == selyear));
 
 	for(j = 0; j < age_tmp.length; j++){
 		  fin_age_pct.push({'fips' : age_tmp[j].fips, 'name' : age_tmp[j].name, 'year' : age_tmp[j].year, 'age_cat_no' : age_tmp[j].age_cat_no, 'age_cat' : age_tmp[j].age_cat,
-		            'malepopulation' : age_tmp[j].malepopulation, 'femalepopulation' : age_tmp[j].femalepopulation, 
-					'totalpopulation' : age_tmp[j].totalpopulation,
-					'pct_malepopulation' : age_tmp[j].malepopulation/selmale, 'pct_femalepopulation' : age_tmp[j].femalepopulation/selfemale,
-					'pct_totalpopulation' : age_tmp[j].totalpopulation/seltotal});
+		            'malepopulation_e' : age_tmp[j].malepopulation_e, 'femalepopulation_e' : age_tmp[j].femalepopulation_e, 
+					'totalpopulation_e' : age_tmp[j].totalpopulation_e,
+					'pct_malepopulation_e' : age_tmp[j].malepopulation_e/selmale, 'pct_femalepopulation_e' : age_tmp[j].femalepopulation_e/selfemale,
+					'pct_totalpopulation_e' : age_tmp[j].totalpopulation_e/seltotal});
 	}; //j
 
 }; //i
@@ -3885,9 +4092,9 @@ data[0].forEach( item => {
 	                'name' : item.region,
 					'year' : item.year,
 					'age' : item.age,
-					'malepopulation' : parseInt(item.malepopulation),
-					'femalepopulation' : parseInt(item.femalepopulation),
-					'totalpopulation' : parseInt(item.totalpopulation)
+					'malepopulation_e' : parseInt(item.malepopulation),
+					'femalepopulation_e' : parseInt(item.femalepopulation),
+					'totalpopulation_e' : parseInt(item.totalpopulation)
 	})})
 			   
 var CO_age_SYA = CO_age_tmp.sort(function(a, b){ return d3.ascending(a['age'], b['age']); })
@@ -3899,9 +4106,9 @@ data[1].forEach( item => {
 	                'name' : countyName(item.countyfips),
 					'year' : item.year,
 					'age' : item.age,
-					'malepopulation' : parseInt(item.malepopulation),
-					'femalepopulation' : parseInt(item.femalepopulation),
-					'totalpopulation' : parseInt(item.totalpopulation)
+					'malepopulation_e' : parseInt(item.malepopulation),
+					'femalepopulation_e' : parseInt(item.femalepopulation),
+					'totalpopulation_e' : parseInt(item.totalpopulation)
 	})})
 	
 	
@@ -3920,7 +4127,7 @@ var regionNum = -101;
 for (let [key, value] of reg_age_tmp) {
 for (let[key2, value2] of value) {
    reg_age_temp_s.push({'fips' : regionNum, 'name' : regionName(fipsArr), 'year' : key, 'age' : key2, 
-     'malepopulation' : value2.malepopulation, 'femalepopulation' : value2.femalepopulation, 'totalpopulation' : value2.totalpopulation});
+     'malepopulation_e' : value2.malepopulation_e, 'femalepopulation_e' : value2.femalepopulation_e, 'totalpopulation_e' : value2.totalpopulation_e});
 }
 };
 
@@ -3934,7 +4141,7 @@ var fin_age_pyr = bin_age5(CO_age_SYA.concat(reg_age_SYA).concat(cty_age_SYA));
 //County charts and pytamids -- State and County data are already rolled up.  age_cty_data 
 if(ctyList.includes(geotype)) {
 //Calclating Percentage Data
-var fin_age_data = age_cty_data; //This is grouped age data
+var fin_age_data = age_CO_data.concat(age_cty_data); //This is grouped age data
 
 //Need to calculate percentages...
 var pct_base = d3.rollup(fin_age_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.fips, d => d.year)
@@ -3942,7 +4149,7 @@ var age_base = [];
 for (let [key1, value] of pct_base) {
 for (let[key2, value2] of value) {
    age_base.push({'fips' : key1, 'year' : key2, 
-     'tot_malepopulation' : value2.malepopulation, 'tot_femalepopulation' : value2.femalepopulation, 'tot_totalpopulation' : value2.totalpopulation});
+     'tot_malepopulation_e' : value2.malepopulation_e, 'tot_femalepopulation_e' : value2.femalepopulation_e, 'tot_totalpopulation_e' : value2.totalpopulation_e});
 }
 };
 
@@ -3950,41 +4157,56 @@ var fin_age_pct = [];
 for(i = 0; i < age_base.length;i++){
 	var selfips = age_base[i].fips;
 	var selyear = age_base[i].year;
-	var selmale = age_base[i].tot_malepopulation;
-	var selfemale = age_base[i].tot_femalepopulation;
-	var seltotal = age_base[i].tot_totalpopulation;
+	var selmale = age_base[i].tot_malepopulation_e;
+	var selfemale = age_base[i].tot_femalepopulation_e;
+	var seltotal = age_base[i].tot_totalpopulation_e;
 	var age_tmp = fin_age_data.filter(d => (d.fips == selfips && d.year == selyear));
 
 	for(j = 0; j < age_tmp.length; j++){
 		  fin_age_pct.push({'fips' : age_tmp[j].fips, 'name' : age_tmp[j].name, 'year' : age_tmp[j].year, 'age_cat_no' : age_tmp[j].age_cat_no, 'age_cat' : age_tmp[j].age_cat,
-		            'malepopulation' : age_tmp[j].malepopulation, 'femalepopulation' : age_tmp[j].femalepopulation, 
-					'totalpopulation' : age_tmp[j].totalpopulation,
-					'pct_malepopulation' : age_tmp[j].malepopulation/selmale, 'pct_femalepopulation' : age_tmp[j].femalepopulation/selfemale,
-					'pct_totalpopulation' : age_tmp[j].totalpopulation/seltotal});
+		            'malepopulation_e' : age_tmp[j].malepopulation_e, 'femalepopulation_e' : age_tmp[j].femalepopulation_e, 
+					'totalpopulation_e' : age_tmp[j].totalpopulation_e,
+					'pct_malepopulation_e' : age_tmp[j].malepopulation_e/selmale, 'pct_femalepopulation_e' : age_tmp[j].femalepopulation_e/selfemale,
+					'pct_totalpopulation_e' : age_tmp[j].totalpopulation_e/seltotal});
 	}; //j
 }; //i
 
 
 //Build data for Pyramid
+//Colorado
 
+// Convert data to numbers
+var CO_age_tmp = []
+data[0].forEach( item => {
+	CO_age_tmp.push({'fips' : item.reg_num,
+	                'name' : item.region,
+					'year' : item.year,
+					'age' : item.age,
+					'malepopulation_e' : parseInt(item.malepopulation),
+					'femalepopulation_e' : parseInt(item.femalepopulation),
+					'totalpopulation_e' : parseInt(item.totalpopulation)
+	})})
+			   
+var CO_age_SYA = CO_age_tmp.sort(function(a, b){ return d3.ascending(a['age'], b['age']); })
+		.sort(function(a, b){ return d3.ascending(a['year'], b['year']); });
+		
 var cty_age_tmp = []
 data[1].forEach( item => {
 	cty_age_tmp.push({'fips' : item.countyfips,
 	                'name' : countyName(item.countyfips),
 					'year' : item.year,
 					'age' : item.age,
-					'malepopulation' : parseInt(item.malepopulation),
-					'femalepopulation' : parseInt(item.femalepopulation),
-					'totalpopulation' : parseInt(item.totalpopulation)
+					'malepopulation_e' : parseInt(item.malepopulation),
+					'femalepopulation_e' : parseInt(item.femalepopulation),
+					'totalpopulation_e' : parseInt(item.totalpopulation)
 	})
 	})
-	
 	
 var cty_age_SYA = cty_age_tmp.sort(function(a, b){ return d3.ascending(a['age'], b['age']); })
         .sort(function(a, b){ return d3.ascending(a['fips'], b['fips']); }) 
 		.sort(function(a, b){ return d3.ascending(a['year'], b['year']); });					
 
-var fin_age_pyr = bin_age5(cty_age_SYA);
+var fin_age_pyr = bin_age5(CO_age_SYA.concat(cty_age_SYA));
 
 
 }; //County
