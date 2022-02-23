@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SDO GIS Resource Page</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
+<!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
+<!-- SDO CSS -->
+<link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
+<!-- adding d3.js  for data manipulation-->
+ <script src="https://d3js.org/d3.v6.min.js"></script>
+<!-- SDO suport functions, genSYA, insertHTML, -->
+<script src="../js/funct.js"></script>
+</head>
+<body>
+<div class="alert__bar--covid-19" style="text-color:black;font-size:12px;">
+    <h2 style="background-color:#8fc6e8;text-align:center;">
+      Visit <a href="https://covid19.colorado.gov/for-coloradans/vaccine/where-can-i-get-vaccinated">"Where can I get vaccinated"</a> or call 1-877-COVAXCO (1-877-268-2926) for vaccine information.
+    </h2>
+</div>    
+<div>
+<a href="https://cdola.colorado.gov/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt="Department of Local Affairs Homepage"></a>
+</div>
+<div w3-include-html="./navheader.html"></div>
+<!-- First Grid, linked images -->
+<div class="grid-container2">
+  <div class="grid-item panel2_1_1">
+	<div w3-include-html="./sdotitle.html"></div>
+  </div>
+  <div class="grid-item panel2_2_1" id="leftHand">
+	<div w3-include-html="./left_hand_index.html"></div>
+  </div> <!-- Grid  panel2_2_1 -->
+ <div class="grid-item app-panel_2_span">
+GIS data and maps from the Colorado State Demography Office.<br>
+<ul>
+<li>Shapefiles for use with GIS software</li>
+<li>Interactive and static maps</li>
+</ul>
+<p>
+You can access visualizations, data and external links by clicking on the buttons below.
+</p>
+<details>
+	<summary>Interactive Web Maps and Data Visualizations</summary>
+<main>
+		<div w3-include-html="./gis_applications.html"></div>
+</main>
+</details>
+<details>
+	<summary>GIS Shapefiles and Downloads</summary>
+<main>
+		<div w3-include-html="./gis_data.html"></div>
+</main>
+</details>
+<details>
+	<summary>Thematic Maps</summary>
+<main>
+		<div w3-include-html="./thematic_maps.html"></div>
+</main>
+</details>
+<details>
+	<summary>GIS External Links and Technical Documentation</summary>
+<main>
+		<div w3-include-html="./gis_links.html"></div>
+</main>
+</details>
+</div> <!-- app -->
+
+ <div class="grid-item panel2_4_2">
+		<div w3-include-html="./bodycontent1.html"></div>
+</div>
+	<div class="grid-item panel2_4_4">
+		<div w3-include-html="./bodycontent2.html"></div>
+</div>
+<div class="grid-item panel2_4_6">
+	<div w3-include-html="./bodycontent3.html"></div>
+</div>
+</div>  <!-- End of Grid -->
+
+
+<script>
+
+//Setting HTML include and Accordion
+includeHTML(); 
+
+</script>
+
+</body>
+</html> 
