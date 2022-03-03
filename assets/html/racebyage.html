@@ -37,7 +37,7 @@
   <b>Race by Age Visualization</b>
    <br><br>INSTRUCTIONS:
    <p>
-   The following page provides charts showing single year estimates of age by racial and ethnic groups for counties from 2010 to the current year.
+   The following page provides charts showing single year estimates of age by racial and ethnic groups for multi-county regions, and counties from 2010 to the current year.
    For your convenience, you are able to download the graphs by clicking on the camera icon in the upper right of the graph while hovering over the chart. 
    This will download an exact copy, including zooming, of the chart on the page.
    </p>
@@ -45,10 +45,40 @@
    <br><br>
    <b><i>This data visualization can only be viewed on a tablet or desktop.</i></b>
    <br><br>
- 	 <label for="county-dropdown"><b>Select County:</b></label>
-	 <select class="county-dropdown" id="county-dropdown"></select>
-	 <label for="year-dropdown"><b>Select Year:</b></label>
-	 <select class="year-dropdown" id="year-dropdown"></select>
+   <table style="border-collapse: collapse; border : none;">
+   <tr>
+ 	<td style="border : none; width: 25%;">
+	<p class="entry_text">Select Geography Type:</p>
+	</td>
+	<td style="border : none; width: 25%;">
+		<p class="entry_text">Select Geography:</p> 
+	</td>
+	<td style="border : none; width: 25%;">
+		<p class="entry_text" id="county-lbl">Select County in Region:</p>
+	</td>
+	<td style="border : none; width: 25%;">
+		<p class="entry_text" id="year-lbl">Select Year:</p>
+	</td>
+
+	</tr>
+	<tr>
+	<td style="border : none; width: 25%;">
+	<select class="geo-dropdown" id="geo-dropdown">
+		<option value="county">County</option>
+		<option value = "region">Region</option>
+	 </select>
+	</td>
+	<td style="border : none; width: 25%;"> 
+	 <select class="location-dropdown" id="location-dropdown"></select>
+	 </td>
+	<td style="border : none; width: 25%;">
+    <select class="county-dropdown" id="county-dropdown"></select>
+    </td>
+		<td style="border : none; width: 25%;">
+    <select class="year-dropdown" id="year-dropdown"></select>
+    </td>
+	</tr>
+	</table>
   </div>
   <div class="grid-item app-panel_3_2">
       <div class="dropdown AClass">
@@ -137,8 +167,14 @@
 includeHTML(); 
 //hide Buttons
 hideButtons();
+
 /* Populate County Dropdown */
-popDropdown('county','county-dropdown','')
+var ctyDrop = document.getElementById("county-dropdown");
+var ctyDroplbl = document.getElementById("county-lbl");
+ctyDroplbl.style.display = 'none';
+ctyDrop.style.display = 'none';
+popDropdown('county','location-dropdown','')
+
 
 //generating maximum year value for estimates
 var urlstr = "https://gis.dola.colorado.gov/lookups/componentYRS";
@@ -158,21 +194,63 @@ d3.json(urlstr).then(function(yeardata){
 
 	
 //Generate Initial Tables
-
-genRACEVIS("000","Colorado", yrvalue);
+var selectedGeo = d3.select("#geo-dropdown").property('value');
+genRACEVIS(selectedGeo,"000","Colorado", yrvalue);
 showButtons();
+d3.select("#geo-dropdown").on("change", function(d,i) {
+      var selectedGeo = d3.select("#geo-dropdown").property('value');
+	  popDropdown(selectedGeo,'location-dropdown','');
+	  var selectedfips = d3.select("#location-dropdown").property('value');
+	  var selectedregion = d3.select("#location-dropdown option:checked").text();
+	  var yrvalue = d3.select("#year-dropdown").property('value');
+	  genRACEVIS(selectedGeo,selectedfips,selectedregion,yrvalue);
+//Display drilldown boxes
+	  if(selectedGeo == 'region') {
+	    if (ctyDrop.style.display === "none") {
+		    ctyDroplbl.style.display = "block";
+			ctyDrop.style.display = "block";
+			popCtyDrop(selectedfips,'county-dropdown');
+		} else {
+		    ctyDroplbl.style.display = "none";
+			ctyDrop.style.display = "none";
+		}
+	  } else {
+	  	 ctyDroplbl.style.display = "none";
+	     ctyDrop.style.display = "none";
+		}
+	  });
+d3.select("#location-dropdown").on("change", function(d,i) {
+	    var selectedGeo = d3.select("#geo-dropdown").property('value');
+        var selectedfips = d3.select("#location-dropdown").property('value');
+			selectedfips = selectedfips.padStart(3, '0');
+		var selectedcounty = d3.select('#location-dropdown option:checked').text();
+		var yrvalue = d3.select("#year-dropdown").property('value');
+        genRACEVIS(selectedGeo,selectedfips,selectedcounty,yrvalue);
+		if(selectedGeo == 'region') {
+		   popCtyDrop(selectedfips,'county-dropdown');
+		}
+    });
+//Drill down for region...
 d3.select("#county-dropdown").on("change", function(d,i) {
+	    var selectedGeo = d3.select("#geo-dropdown").property('value');
         var selectedfips = d3.select("#county-dropdown").property('value');
+			selectedfips = selectedfips.padStart(3, '0');
 		var selectedcounty = d3.select('#county-dropdown option:checked').text();
 		var yrvalue = d3.select("#year-dropdown").property('value');
-        genRACEVIS(selectedfips,selectedcounty,yrvalue);
-    });
+        genRACEVIS('county',selectedfips,selectedcounty,yrvalue); 
+		});
 	
 d3.select("#year-dropdown").on("change", function(d,i) {
-        var selectedfips = d3.select("#county-dropdown").property('value');
-		var selectedcounty = d3.select('#county-dropdown option:checked').text();
+		 if(selectedGeo == 'region') {
+             var selectedfips = d3.select('#county-dropdown').property('value');
+		     var selectedcounty = d3.select('#county-dropdown option:checked').text();
+		  } else {
+		     var selectedfips = d3.select('#location-dropdown').property('value');
+		     var selectedcounty = d3.select('#location-dropdown option:checked').text();
+		  }
 		var yrvalue = d3.select("#year-dropdown").property('value');
-        genRACEVIS(selectedfips,selectedcounty,yrvalue);
+        genRACEVIS(selectedGeo,selectedfips,selectedcounty,yrvalue); 
+	
     });
 }); //end of maximum year value
 
