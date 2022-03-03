@@ -241,6 +241,7 @@ d3.select("#county-dropdown").on("change", function(d,i) {
 		});
 	
 d3.select("#year-dropdown").on("change", function(d,i) {
+      var selectedGeo = d3.select("#geo-dropdown").property('value');
 		 if(selectedGeo == 'region') {
              var selectedfips = d3.select('#county-dropdown').property('value');
 		     var selectedcounty = d3.select('#county-dropdown option:checked').text();
