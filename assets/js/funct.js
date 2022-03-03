@@ -507,53 +507,50 @@ return cty;
 
 
 //RegionNum takes the names of selected regions and returns a list of region numbers
-function RegionNumber(nam) {
-	   var regionlst = '0';
-	   var regNum;
-for(i = 0; i < nam.length; i++) {
-if(nam[i] == 'Central Mountains') {regionNum = 1};
-if(nam[i] == 'Eastern Plains') {regionNum = 2};
-if(nam[i] == 'Front Range') {regionNum = 3};
-if(nam[i] == 'San Luis Valley') {regionNum = 4};
-if(nam[i] == 'Western Slope') {regionNum = 5};
-if(nam[i] == 'Region 1: Northern Eastern Plains') {regionNum = 6};
-if(nam[i] == 'Region 2: Northern Front Range') {regionNum = 7};
-if(nam[i] == 'Region 3: Denver Metropolitan Area') {regionNum = 8};
-if(nam[i] == 'Region 4: Southern Front Range') {regionNum = 9};
-if(nam[i] == 'Region 5: Central Eastern Plains') {regionNum = 10};
-if(nam[i] == 'Region 6: Southern Eastern Plains') {regionNum = 11};
-if(nam[i] == 'Region 7: Pueblo County') {regionNum = 12};
-if(nam[i] == 'Region 8: San Juan Valley') {regionNum = 13};
-if(nam[i] == 'Region 9: Southern Western Slope') {regionNum = 14};
-if(nam[i] == 'Region 10: Central Western Slope') {regionNum = 15};
-if(nam[i] == 'Region 11: Northern Western Slope') {regionNum = 16};
-if(nam[i] == 'Region 12: Northern Mountains') {regionNum = 17};
-if(nam[i] == 'Region 13: Central Mountains') {regionNum = 18};
-if(nam[i] == 'Region 14: Southern Mountains') {regionNum = 19};
-if(nam[i] == 'Boulder') {regionNum = 20};
-if(nam[i] == 'Colorado Springs') {regionNum = 21};
-if(nam[i] == 'Denver-Aurora-Lakewood') {regionNum = 22};
-if(nam[i] == 'Fort Collins') {regionNum = 23};
-if(nam[i] == 'Grand Junction') {regionNum = 24};
-if(nam[i] == 'Greeley') {regionNum = 25};
-if(nam[i] == 'Pueblo') {regionNum = 26};
-if(nam[i] == 'Breckenridge') {regionNum = 27};
-if(nam[i] == 'Ca\u00f1on City') {regionNum = 28};
-if(nam[i] == 'Craig') {regionNum = 29};
-if(nam[i] == 'Durango') {regionNum = 30};
-if(nam[i] == 'Edwards') {regionNum = 31};
-if(nam[i] == 'Fort Morgan') {regionNum = 32};
-if(nam[i] == 'Glenwood Springs') {regionNum = 33};
-if(nam[i] == 'Montrose') {regionNum = 34};
-if(nam[i] == 'Steamboat Springs') {regionNum = 35};
-if(nam[i] == 'Sterling') {regionNum = 36};
-if(nam[i] == 'Denver PMSA') {regionNum = 37};
-if(nam[i] == 'Denver-Boulder Metro Area') {regionNum = 38};
-if(nam[i] == 'Denver-Boulder-Greely CMSA') {regionNum = 39};
-regionlst = regionlst + "," + regionNum;
-};
-return(regionlst);
-}; //End of RegionNumber
+function RegionNum(nam) {
+var regionNum = 0;
+if(nam == 'Central Mountains') {regionNum = 1};
+if(nam == 'Eastern Plains') {regionNum = 2};
+if(nam == 'Front Range') {regionNum = 3};
+if(nam == 'San Luis Valley') {regionNum = 4};
+if(nam == 'Western Slope') {regionNum = 5};
+if(nam == 'Region 1: Northern Eastern Plains') {regionNum = 6};
+if(nam == 'Region 2: Northern Front Range') {regionNum = 7};
+if(nam == 'Region 3: Denver Metropolitan Area') {regionNum = 8};
+if(nam == 'Region 4: Southern Front Range') {regionNum = 9};
+if(nam == 'Region 5: Central Eastern Plains') {regionNum = 10};
+if(nam == 'Region 6: Southern Eastern Plains') {regionNum = 11};
+if(nam == 'Region 7: Pueblo County') {regionNum = 12};
+if(nam == 'Region 8: San Juan Valley') {regionNum = 13};
+if(nam == 'Region 9: Southern Western Slope') {regionNum = 14};
+if(nam == 'Region 10: Central Western Slope') {regionNum = 15};
+if(nam == 'Region 11: Northern Western Slope') {regionNum = 16};
+if(nam == 'Region 12: Northern Mountains') {regionNum = 17};
+if(nam == 'Region 13: Central Mountains') {regionNum = 18};
+if(nam == 'Region 14: Southern Mountains') {regionNum = 19};
+if(nam == 'Boulder') {regionNum = 20};
+if(nam == 'Colorado Springs') {regionNum = 21};
+if(nam == 'Denver-Aurora-Lakewood') {regionNum = 22};
+if(nam == 'Fort Collins') {regionNum = 23};
+if(nam == 'Grand Junction') {regionNum = 24};
+if(nam == 'Greeley') {regionNum = 25};
+if(nam == 'Pueblo') {regionNum = 26};
+if(nam == 'Breckenridge') {regionNum = 27};
+if(nam == 'Ca\u00f1on City') {regionNum = 28};
+if(nam == 'Craig') {regionNum = 29};
+if(nam == 'Durango') {regionNum = 30};
+if(nam == 'Edwards') {regionNum = 31};
+if(nam == 'Fort Morgan') {regionNum = 32};
+if(nam == 'Glenwood Springs') {regionNum = 33};
+if(nam == 'Montrose') {regionNum = 34};
+if(nam == 'Steamboat Springs') {regionNum = 35};
+if(nam == 'Sterling') {regionNum = 36};
+if(nam == 'Denver PMSA') {regionNum = 37};
+if(nam == 'Denver-Boulder Metro Area') {regionNum = 38};
+if(nam == 'Denver-Boulder-Greely CMSA') {regionNum = 39};
+
+return(regionNum);
+}; //End of RegionNum
 
 //RegionName takes the region number and returns the name
 function regionName(reg) {
@@ -2234,6 +2231,67 @@ function chkDiff(curpct,curmoe, prevpct, prevmoe) {
 	}
 return(outcome);
 }; //end of chkDiff
+
+//genACSUrl  Generates ACS call from the Census API
+function genACSUrl(acsyear, table, startidx, endidx, geotype,geolist){
+	if(geotype == "Region"){
+		var geoName = 'county';
+	} else {
+		if(geotype == 'Municipality'){
+		  var geoName = 'place';
+		} else {
+		  var geoName = geotype.toLowerCase();
+		}
+	}
+	
+	//ACS Call has a different structure for tables with more thn 50 vars
+	var acshead = 'https://api.census.gov/data/'+ acsyear;
+	var varArr = ['NAME'];
+	// Geneerating lists of varibles  If table is an array  -- for special cases
+	if(Array.isArray(table)) {
+		for(i = 0; i < table.length; i++){	
+           if(table[i] == "B19051"){ //expand for special cases
+ 		      varArr.push(table[i] + "_001" + "E");
+		      varArr.push(table[i] + "_001" + "M");
+ 		      varArr.push(table[i] + "_002" + "E");
+		      varArr.push(table[i] + "_002" + "M");
+			}  else {
+               if(i > 8){ //This is the B19061 - B19070 series
+				varArr.push(table[i] + "_001" + "E");
+				varArr.push(table[i] + "_001"  + "M");
+			   } else {
+				varArr.push(table[i] + "_002" + "E");
+				varArr.push(table[i] + "_002"  + "M");
+			}
+			}
+		}
+		var varList = varArr.toString();
+	} else {
+		for(i = startidx; i <= endidx; i++){
+		 var idx3 = ('000'+i).slice(-3);
+	     varArr.push(table + "_" + idx3 + "E");
+	     varArr.push(table + "_" + idx3 + "M");
+		}
+		var varList = varArr.toString();
+	}
+//Generating final acstail	
+if(endidx >= 24) {
+	if(geoName == 'state'){
+		var acstail = '/acs/acs5?get=group(' + table +')&for=state:08&key=08fe07c2a7bf781b7771d7cccb264fe7ff8965ce';
+	} else {
+	  var acstail = '/acs/acs5?get=group(' + table +')&for=' + geoName + ':' + geolist + '&in=state:08&key=08fe07c2a7bf781b7771d7cccb264fe7ff8965ce';
+	}
+	} else {
+	if(geotype == 'state'){
+		var acstail = '/acs/acs5?get=' + varList +'&for=state:08&key=08fe07c2a7bf781b7771d7cccb264fe7ff8965ce';
+	} else {
+	  var acstail = '/acs/acs5?get=' + varList +'&for=' + geoName + ':' + geolist + '&in=state:08&key=08fe07c2a7bf781b7771d7cccb264fe7ff8965ce';
+	}
+	}
+
+var acsUrl = acshead + acstail;
+return(acsUrl)
+}; //end of genACSUrl
 
 //Data Aqusition functions
 
@@ -4420,12 +4478,32 @@ popchng_png.onclick = function() {
 } //end of genDEMO
 
 //genRACEVIS Generates the Race/Ethncity visualization
-function genRACEVIS(fips,ctyName, yrvalue) {
-	var fmt_comma = d3.format(",");
+function genRACEVIS(geotype, fips,ctyName, yrvalue) {
+	const fmt_comma = d3.format(",");
     const fmt_date = d3.timeFormat("%B %d, %Y");
+	//Verifying if region is input
+	
+	if(RegionNum(ctyName) == 0) {
+		geotype == 'county'
+	}
+
 
 //Specify fips_list
-var fips_list = parseInt(fips); 
+ var fips_list; 
+	
+	if(geotype == "region"){
+		var fips_tmp = regionCOL(parseInt(fips));
+	    fips_list = fips_tmp[0].fips;
+		for(i = 0; i < fips_list.length; i++){
+			 fips_list[i] = parseInt(fips_list[i]);
+		}
+	} else {
+	if(fips == "000") {
+      fips_list = [1,3,5,7,9,11,13,14,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49,51,53,55,57,59,61,63,65,67,69,71,73,75,77,79,81,83,85,87,89,91,93,95,97,99,101,103,105,107,109,111,113,115,117,119,121,123,125];
+    } else {
+		fips_list = [parseInt(fips)];
+	};		
+	};
    
 //extract year value 
  
@@ -4434,45 +4512,73 @@ for(i = 1; i<= 100; i++){
    age_list = age_list + "," + i;
   };
   
- //Generate url
- if(fips == "000") {
- fips_list = "1,3,5,7,9,11,13,14,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49,51,53,55,57,59,61,63,65,67,69,71,73,75,77,79,81,83,85,87,89,91,93,95,97,99,101,103,105,107,109,111,113,115,117,119,121,123,125";
- } 
+ 
 //estimates urls
 urlstr_hispest = "https://gis.dola.colorado.gov/lookups/sya-race-estimates?age="+ age_list + "&county="+ fips_list +"&year="+ yrvalue +"&race=1,2,3,4&ethnicity=1&sex=b";
 urlstr_nonhispest = "https://gis.dola.colorado.gov/lookups/sya-race-estimates?age="+ age_list + "&county="+ fips_list +"&year="+ yrvalue +"&race=1,2,3,4&ethnicity=2&sex=b";
-
-var hisp_est = [];
-var nonhisp_est = [];
 
 //Promise Structure
 var prom = [d3.json(urlstr_hispest),d3.json(urlstr_nonhispest)];
 
 Promise.all(prom).then(function(data){
-	data[0].forEach(function(obj) {
-hisp_est.push({'year' : obj.year, 'age' : parseInt(obj.age), 'sex' : obj.sex, 'population' : parseInt(obj.count)});
-});
-    data[1].forEach(function(obj) {
-     nonhisp_est.push({'year' : obj.year, 'age' : parseInt(obj.age),'sex' : obj.sex, 'race' : obj.race, 'population' : parseInt(obj.count)});
-});
+	var hisp_est = [];
+    var nonhisp_est = [];
+
+	
+if(fips == "000") {	
+	data[0].forEach(obj => {
+		 hisp_est.push({'fips' : 0,'year' : obj.year, 'age' : parseInt(obj.age), 'sex' : obj.sex, 'population' : parseInt(obj.count)}); 
+	    });
+    data[1].forEach(obj => {
+		nonhisp_est.push({'fips' : 0, 'year' : obj.year, 'age' : parseInt(obj.age),'sex' : obj.sex, 'race' : obj.race, 'population' : parseInt(obj.count)}); 
+	    });
+} else {
+	data[0].forEach(obj => {
+		 hisp_est.push({'fips' : obj.county_fips,'year' : obj.year, 'age' : parseInt(obj.age), 'sex' : obj.sex, 'population' : parseInt(obj.count)}); 
+	    });
+    data[1].forEach(obj => {
+		nonhisp_est.push({'fips' : obj.county_fips, 'year' : obj.year, 'age' : parseInt(obj.age),'sex' : obj.sex, 'race' : obj.race, 'population' : parseInt(obj.count)}); 
+	    });
+};
 
 //Rolling up the hispanic and non-hispanic datasets
-var hisp_total = d3.rollup(hisp_est, v => d3.sum(v, d => d.population), d => d.age);
-var nonhisp_total = d3.rollup(nonhisp_est, v => d3.sum(v, d => d.population), d => d.age, d=> d.race);
-
+var hisp_total = d3.rollup(hisp_est, v => d3.sum(v, d => d.population), d => d.fips, d => d.age);
+var nonhisp_total = d3.rollup(nonhisp_est, v => d3.sum(v, d => d.population), d => d.fips,  d => d.age, d=> d.race);
+	
 //Flattening the datasets
 var hisp_flat = [];
 for (let [key, value] of hisp_total) {
-  hisp_flat.push({'age' : key, 'race_eth' : 'Hispanic',  'population' : value});
-    }
-var nonhisp_flat = [];
-for (let [key1, value] of nonhisp_total) {
 for (let[key2, value2] of value) {
-   nonhisp_flat.push({'age' : key1, 'race_eth' : key2 + ' NH', 'population' : value2});
+        hisp_flat.push({'fips' : key, 'name' : countyName(key), 'age' : key2, 'race_eth' : 'Hispanic',  'population' : value2});
+    }
+}
+var nonhisp_flat = [];
+for (let [key, value] of nonhisp_total) {
+for (let[key2, value2] of value) {
+for (let[key3, value3] of value2) { 
+   nonhisp_flat.push({'fips' : key, 'name' : countyName(key), 'age' : key2, 'race_eth' : key3 + ' NH', 'population' : value3});
+}
 }
 }
 
-var race_flat = hisp_flat.concat(nonhisp_flat);
+var race_flat = hisp_flat.concat(nonhisp_flat).sort(function(a, b){ return d3.ascending(a['race_eth'], b['race_eth']); })
+                .sort(function(a, b){ return d3.ascending(a['age'], b['age']); })
+				.sort(function(a, b){ return d3.ascending(a['fips'], b['fips']); });
+
+if(geotype == 'region') {
+	var race_reg = d3.rollup(race_flat, v => d3.sum(v, d => d.population),  d => d.age, d=> d.race_eth);
+	var race_flat = [];
+	for (let [key, value] of race_reg) {
+	for (let[key2, value2] of value) {
+        race_flat.push({'fips' : -101, 'name' : ctyName, 'age' : key, 'race_eth' : key2,  'population' : value2});
+    }
+    }
+
+	var race_flat = race_flat.sort(function(a, b){ return d3.ascending(a['race_eth'], b['race_eth']); })
+                .sort(function(a, b){ return d3.ascending(a['age'], b['age']); })
+				.sort(function(a, b){ return d3.ascending(a['fips'], b['fips']); });
+};
+
 
 //Plotting 
 var config = {responsive: true,
