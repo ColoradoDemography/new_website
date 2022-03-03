@@ -4482,9 +4482,8 @@ function genRACEVIS(geotype, fips,ctyName, yrvalue) {
 	const fmt_comma = d3.format(",");
     const fmt_date = d3.timeFormat("%B %d, %Y");
 	//Verifying if region is input
-	
 	if(RegionNum(ctyName) == 0) {
-		geotype == 'county'
+		geotype = 'county'
 	}
 
 
