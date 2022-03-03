@@ -1523,10 +1523,10 @@ function popCtyDrop(regnum,ddid){
 	fips_list = regionCOL(reg_num);
 	var outlist = [];
 	outlist.push({'fips' : regnum, 'location' : reg_name});
-	
+
 	for(i = 0; i < fips_list[0].fips.length; i++){
 		var cnum = parseInt(fips_list[0].fips[i]);
-		outlist.push({'fips' : cnum, 'location' : countyName(cnum)});
+		outlist.push({'fips' : fips_list[0].fips[i], 'location' : countyName(cnum)});
 	}
 
 var sel = document.getElementById(ddid);
