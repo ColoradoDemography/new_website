@@ -153,19 +153,12 @@ d3.select("#geo-dropdown").on("change", function(d,i) {
 	  genHOUSEDASH(selectedGeo,selectedfips,selectedcounty,yrvalue);
 	  //Display drilldown boxes
 	  if(selectedGeo == 'region') {
-	    if (ctyDrop.style.display === "none") {
 		    ctyDroplbl.style.display = "block";
 			ctyDrop.style.display = "block";
 			popCtyDrop(selectedfips,'county-dropdown');
 		} else {
 		    ctyDroplbl.style.display = "none";
 			ctyDrop.style.display = "none";
-		}
-	  } else {
-	  	var ctyDrop = document.getElementById("county-dropdown");
-        var ctyDroplbl = document.getElementById("county-lbl");
-        ctyDroplbl.style.display = 'none';
-        ctyDrop.style.display = 'none';
 		}
 	  });
 
