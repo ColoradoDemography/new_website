@@ -1733,6 +1733,9 @@ function exportToCsv(cname, type, rows, yr) {
 		if(type == 'agechart') {
 			var fileName = "Household Projections Household Type x Age Group " + cname + ".csv"
 		};
+		if(type == 'housing'){
+			var fileName = "Household Units " + cname + ".csv"
+		}	
 
         var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
         if (navigator.msSaveBlob) { // IE 10+
@@ -1838,6 +1841,10 @@ function exportToPng(cname, type, graphDiv, yr){
 		if(type == 'agechart') {
 			var fileName = "Household Projections Household Type x Age Group " + cname 
 		};
+		if(type == 'housing') {
+			var fileName = "Household Units " + cname 
+		};
+			
 	
 	if(type == "agepyr") {
 		if(Array.isArray(graphDiv)){
@@ -6151,3 +6158,403 @@ if(varType == "hhold") {
 
 }); //end of d3 json
 }; //end of genHOUSEAGE
+
+//genHOUSEDASH Housing Dashboard
+function genHOUSEDASH(geotype,fips,plName,yrvalue) {
+	const fmt_pct = d3.format(".2%")
+	const fmt_comma = d3.format(",");
+    const fmt_date = d3.timeFormat("%B %d, %Y");
+	
+	//Verifying if region is input
+	if(geotype =='region'){
+	if(RegionNum(plName) == 0) {
+		geotype = 'county'
+	}
+	}
+	
+	if(geotype == "region"){
+		var fips_tmp = regionCOL(parseInt(fips));
+	    fips_list = fips_tmp[0].fips;
+		for(i = 0; i < fips_list.length; i++){
+			 fips_list[i] = parseInt(fips_list[i]);
+		}
+	} else {
+	if(fips == "000") {
+      fips_list = [1,3,5,7,9,11,13,14,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49,51,53,55,57,59,61,63,65,67,69,71,73,75,77,79,81,83,85,87,89,91,93,95,97,99,101,103,105,107,109,111,113,115,117,119,121,123,125];
+    } else {
+		fips_list = [parseInt(fips)];
+	};		
+	};
+
+	//Generating Range of Uears
+	//Estimates and components of change chart
+	var yr_list = 2010;
+	for(i = yr_list; i <= yrvalue; i++){
+		yr_list = yr_list + "," + i;
+	};
+	
+	//Generating URL
+	if(geotype == "region" || geotype == 'county'){
+		huURL = 'https://gis.dola.colorado.gov/lookups/profile?county=' + fips_list + '&year=' + yr_list + '&vars=totalhousingunits,vacanthousingunits';
+	} else { //Municipalities
+		huURL = 'https://gis.dola.colorado.gov/lookups/munipophousing?year=' + yr_list + '&placefips=' + fips_list + '&stats=totalhousingunits,vacanthousingunits&compressed=no';
+	};
+
+//Promise
+d3.json(huURL).then(data => {
+
+	var baseData = [];
+	data.forEach(obj => {
+		baseData.push({
+			fips : (geotype == 'municipality') ? obj.placefips : obj.countyfips, 
+			year : obj.year,
+		    totalhu : parseInt(obj.totalhousingunits),
+			vacanthu : parseInt(obj.vacanthousingunits),
+			occupiedhu : parseInt(obj.totalhousingunits) - parseInt(obj.vacanthousingunits)
+		})
+	});
+
+	var out_data = [];
+	columnsToSum = ['totalhu', 'occupiedhu', 'vacanthu']
+	if(geotype == "region") {
+		var regSum = d3.rollup(baseData, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year)
+	//Flatten Arrays for output
+		for (let [key, value] of regSum) {
+		  out_data.push({'fips' : -101, 'name' : regionName(fips), 'year' : key, 
+		       'totalhu' : value.totalhu, 
+			   'occupiedhu' : value.occupiedhu, 
+			   'vacanthu' : value.vacanthu,
+			   'pct_occ' : value.occupiedhu/value.totalhu,
+			   'pct_vac' : value.vacanthu/value.totalhu});
+			 };
+	};
+
+	if(geotype == "county") {
+		if(fips == '000'){
+		var regSum = d3.rollup(baseData, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year)
+	//Flatten Arrays for output
+		for (let [key, value] of regSum) {
+		  out_data.push({'fips' : 0, 'name' : 'Colorado', 'year' : key, 
+		       'totalhu' : value.totalhu, 
+			   'occupiedhu' : value.occupiedhu, 
+			   'vacanthu' : value.vacanthu,
+			   'pct_occ' : value.occupiedhu/value.totalhu,
+			   'pct_vac' : value.vacanthu/value.totalhu});
+			 };
+	} else {
+		baseData.forEach(obj => {
+			out_data.push({ 'fips' : obj.fips, 
+			    'name' : countyName(obj.fips), 
+				'year' : obj.year, 
+		       'totalhu' : obj.totalhu, 
+			   'occupiedhu' : obj.occupiedhu, 
+			   'vacanthu' : obj.vacanthu,
+			   'pct_occ' : obj.occupiedhu/obj.totalhu,  
+			   'pct_vac' : obj.vacanthu/obj.totalhu});
+		});
+	};
+	};
+	
+	if(geotype == 'municipality'){
+		baseData.forEach(obj => {
+			out_data.push({ 'fips' : obj.fips, 
+			'name' : muniName(obj.fips), 
+			'year' : obj.year, 
+		       'totalhu' : obj.totalhu, 
+			   'occupiedhu' : obj.occupiedhu, 
+			   'vacanthu' : obj.vacanthu,
+			   'pct_occ' : obj.occupiedhu/obj.totalhu,
+			   'pct_vac' : obj.vacanthu/obj.totalhu});
+	});
+	};
+	
+	var out_sort = out_data.sort(function(a, b){ return d3.ascending(a['year'], b['year']); })
+	                       .sort(function(a, b){ return d3.ascending(a['fips'], b['fips']); });
+						   
+
+	//calculating year to year difference
+	var yearList = [];
+	var yty = [];
+	var yty_data = [];
+	
+	//Traces
+	var tr_total_hu = [];
+	var tr_total_lab = [];
+	var tr_occ_hu = [];
+	var tr_occ_lab = [];
+	var tr_vac_hu = [];
+	var tr_occ_pct_lab = [];
+	var tr_vac_pct_lab = [];
+	var tr_tot_yty = [];
+	var tr_occ_yty = [];
+	var tr_tot_yty_lab = [];
+	var tr_occ_yty_lab = [];
+	
+	for(j = 0; j < out_sort.length; j++){
+		   //Creating Traces
+            yearList.push(out_sort[j].year);		   
+			tr_total_hu.push(out_sort[j].totalhu);
+			tr_total_lab.push('Total Housing Units, ' + out_sort[j].year + ': ' + fmt_comma(out_sort[j].totalhu));
+			tr_occ_hu.push(out_sort[j].occupiedhu);
+			tr_occ_lab.push('Occupied Housing Units, ' + out_sort[j].year + ': ' + fmt_comma(out_sort[j].occupiedhu));
+			tr_vac_hu.push(out_sort[j].vacanthu);
+			tr_occ_pct_lab.push('Occupancy Rate, ' + out_sort[j].year + ': ' + fmt_pct(out_sort[j].pct_occ) + '<br>Occupied Housing Units: ' + fmt_comma(out_sort[j].occupiedhu));
+			tr_vac_pct_lab.push('Vacancy Rate, ' + out_sort[j].year + ': ' + fmt_pct(out_sort[j].pct_vac) + '<br>Vacant Housing Units: ' + fmt_comma(out_sort[j].vacanthu));
+ 		  if(j > 0){
+			 yty.push(out_sort[j].year);
+			 tr_tot_yty.push(out_sort[j].totalhu - out_sort[j-1].totalhu);
+			 tr_tot_yty_lab.push('Year over Year Difference<br>Total Housing Units ' + out_sort[j-1].year + " to " + out_sort[j].year + ': ' + fmt_comma(out_sort[j].totalhu - out_sort[j-1].totalhu));
+	         tr_occ_yty.push(out_sort[j].occupiedhu - out_sort[j-1].occupiedhu);
+			 tr_occ_yty_lab.push('Year over Year Difference<br>Occupied Housing Units ' + out_sort[j-1].year + " to " + out_sort[j].year + ': ' + fmt_comma(out_sort[j].occupiedhu - out_sort[j-1].occupiedhu));	         
+		     yty_data.push({
+				 'fips' : out_sort[j].fips, 
+			     'name' : out_sort[j].name, 
+				 'previous_year' : out_sort[j -1].year,
+			     'current_year' : out_sort[j].year, 
+		         'previous_total_hu' : fmt_comma(out_sort[j -1].totalhu),
+		         'current_total_hu' : fmt_comma(out_sort[j].totalhu),				  
+			     'previous_occupied_hu' : fmt_comma(out_sort[j -1].occupiedhu), 
+			   	 'current_occupied_hu' : fmt_comma(out_sort[j].occupiedhu), 
+			     'yty_diff_total_hu' : fmt_comma(out_sort[j].totalhu - out_sort[j-1].totalhu),
+				 'yty_diff_occupied_hu' : fmt_comma(out_sort[j].occupiedhu - out_sort[j-1].occupiedhu)
+				 });
+		  }
+        } //j
+//Prepping the final out_sort data
+var out_fin = [];
+out_sort.forEach(obj => {
+	out_fin.push({
+		'fips' : obj.fips, 
+		'name' : obj.name, 
+		'year' : obj.year, 
+		'total_hu' : fmt_comma(obj.totalhu), 
+	   'occupied_hu' : fmt_comma(obj.occupiedhu), 
+	   'vacant_hu' : fmt_comma(obj.vacanthu),
+	   'pct_occ_hu' : fmt_pct(obj.pct_occ),
+	   'pct_vac_hu' : fmt_pct(obj.pct_vac)
+});
+});
+debugger;
+console.log(out_fin);
+
+//Titles
+var tit_str0 = "Total and Occupied Housing Units, " + plName;
+var tit_str1 = "Year to Year Difference, " + plName;
+var tit_str2 = "Occupied and Vacant Housing Units " + plName;
+
+
+//Chart 1
+	tr_total = {x: yearList,
+			y :  tr_total_hu,
+			customdata : tr_total_lab,
+			hovertemplate : '%{customdata}',
+			hoverlabel : {namelength :0},
+			name : 'Total Housing Units',
+			marker: {color: 'green'},
+			mode : 'lines+markers'
+			};
+
+	tr_occ = {x: yearList,
+			y :  tr_occ_hu,
+			customdata : tr_occ_lab,
+			hovertemplate : '%{customdata}',
+			hoverlabel : {namelength :0},
+			name : 'Occupied Housing Units',
+			marker: {color: 'blue'},
+			mode : 'lines+markers'
+			};
+ var ch_0 = [tr_total, tr_occ];
+ 
+ //Chart 2
+	yty_total = {x: yty,
+			y :  tr_tot_yty,
+			customdata : tr_tot_yty_lab,
+			hovertemplate : '%{customdata}',
+			hoverlabel : {namelength :0},
+			name : 'Total Housing Units',
+			marker: {color: 'green'},
+			mode : 'lines+markers'
+			};
+	
+	yty_occ = {x: yty,
+			y :  tr_occ_yty,
+			customdata : tr_occ_yty_lab,
+			hovertemplate : '%{customdata}',
+			hoverlabel : {namelength :0},
+			name : 'Occupied Housing Units',
+			marker: {color: 'blue'},
+			mode : 'lines+markers'
+			};
+ var ch_1 = [yty_total, yty_occ];
+
+//Chart 3
+	occ_bar = {x: yearList,
+			y :  tr_occ_hu,
+			customdata : tr_occ_pct_lab,
+			hovertemplate : '%{customdata}',
+			hoverlabel : {namelength :0},
+			marker: {color: 'blue', opacity : 0.8},
+			name : 'Occupied Housing Units',
+			type : 'bar'
+			};
+
+	vac_bar = {x: yearList,
+			y :  tr_vac_hu,
+			customdata : tr_vac_pct_lab,
+			hovertemplate : '%{customdata}',
+			hoverlabel : {namelength :0},
+			marker: {color: 'brown', opacity : 0.8},
+			name : 'Vacant Housing Units',
+			type : 'bar'
+			};
+ var ch_2 = [occ_bar, vac_bar];
+ 
+//Generating Chart	
+var config = {responsive: true,
+              displayModeBar: false};
+//layouts
+
+  var layout0 = {
+		title: tit_str0,
+		  autosize: false,
+		  width: 1000,
+		  height: 400, 
+		  xaxis: {
+			title : 'Year',
+			range: [2009, yrvalue+1],
+			showgrid: true,
+			zeroline: true,
+			showline: true,
+			mirror: 'ticks',
+			gridcolor: '#bdbdbd',
+			gridwidth: 2,
+			linecolor: 'black',
+			linewidth: 2
+		  },
+		  yaxis: {
+			title : 'Housing Units',
+			automargin : true,
+			showgrid: true,
+			showline: true,
+			mirror: 'ticks',
+			gridcolor: '#bdbdbd',
+			gridwidth: 2,
+			linecolor: 'black',
+			linewidth: 2,
+			tickformat: ','
+		  },
+			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
+               xref : 'paper', 
+			   x : 0, 
+			   yref : 'paper', 
+			   y : -0.45, 
+			   align : 'left', 
+			   showarrow : false}]
+		};	
+		
+var layout1 = {
+		title: tit_str1,
+		  autosize: false,
+		  width: 1000,
+		  height: 400, 
+		  xaxis: {
+			title : 'Year',
+			range: [2009, yrvalue+1],
+			showgrid: true,
+			zeroline: true,
+			showline: true,
+			mirror: 'ticks',
+			gridcolor: '#bdbdbd',
+			gridwidth: 2,
+			linecolor: 'black',
+			linewidth: 2
+		  },
+		  yaxis: {
+			title : 'Housing Units',
+			automargin : true,
+			showgrid: true,
+			showline: true,
+			mirror: 'ticks',
+			gridcolor: '#bdbdbd',
+			gridwidth: 2,
+			linecolor: 'black',
+			linewidth: 2,
+			tickformat: ','
+		  },
+			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
+               xref : 'paper', 
+			   x : 0, 
+			   yref : 'paper', 
+			   y : -0.45, 
+			   align : 'left', 
+			   showarrow : false}]
+		};	
+		
+var layout2 = {
+	barmode: 'stack',  
+	title: tit_str2,
+	  autosize: false,
+	  width: 1000,
+	  height: 400, 
+	  xaxis: {
+		title : 'Year',
+		range: [2009, yrvalue+1],
+		showgrid: true,
+		zeroline: true,
+		showline: true,
+		mirror: 'ticks',
+		gridcolor: '#bdbdbd',
+		gridwidth: 2,
+		linecolor: 'black',
+		linewidth: 2
+	  },
+	  yaxis: {
+		title : 'Housing Units',
+		automargin : true,
+		showgrid: true,
+		showline: true,
+		mirror: 'ticks',
+		gridcolor: '#bdbdbd',
+		gridwidth: 2,
+		linecolor: 'black',
+		linewidth: 2,
+		tickformat: ','
+	  },
+		annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
+		   xref : 'paper', 
+		   x : 0, 
+		   yref : 'paper', 
+		   y : -0.45, 
+		   align : 'left', 
+		   showarrow : false}]
+	};
+
+		
+
+	
+//Clearing out Divs
+var CHART0 = document.getElementById("huline_output");
+var CHART1 = document.getElementById("yoyline_output");
+var CHART2 = document.getElementById("vacantbar_output");
+
+CHART0.innerHTML = "";
+CHART1.innerHTML = "";
+CHART2.innerHTML = "";
+
+Plotly.newPlot(CHART0, ch_0, layout0, config);
+Plotly.newPlot(CHART1, ch_1, layout1, config);
+Plotly.newPlot(CHART2, ch_2, layout2, config);
+
+//Link to output buttons
+huline_csv.onclick = function() { exportToCsv(plName, 'housing', out_fin, 0); }; 
+ytyline_csv.onclick = function() { exportToCsv(plName, 'housing', yty_data, 0); }; 
+vacantbar_csv.onclick = function() { exportToCsv(plName, 'housing', out_fin, 0); }; 
+ 
+huline_png.onclick = function() { exportToPng(plName, 'housing', CHART0, 0); }; 
+ytyline_png.onclick = function() { exportToPng(plName, 'housing', CHART1, 0); }; 
+vacantbar_png.onclick = function() { exportToPng(plName, 'housing', CHART2, 0); }; 
+
+
+}); //end of Promise
+
+}; //End  of Housdash
