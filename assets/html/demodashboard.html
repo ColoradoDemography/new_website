@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- SDO Demographic Dashboard -->
-<html>
+<html lang="en">
 
 <head>
 <title>SDO Demographic Dashboard</title>
@@ -161,6 +161,12 @@
 		</ul>
 	 </div>
 	</div>
+	<div class="dropdown AClass">
+	<p class="entry_text">Select Unit:</p>
+	 <select class="unit-dropdown" id="unit-dropdown">
+		<option value='percent' selected>Percentage</option>
+		<option value='count'>Counts</option>
+	 </select>
     <div id="popchng_output"></div> 
  </div>
 </div>  <!-- End of Grid -->
@@ -191,13 +197,15 @@ d3.json(urlstr).then(function(yeardata){
 //Generate Initial Tables
 showButtons();
 
-genDEMO("county", "000","Colorado", yrvalue);
+var selectedunit = d3.select("#unit-dropdown").property('value');
+genDEMO("county", "000", selectedunit,"Colorado", yrvalue);
 d3.select("#geo-dropdown").on("change", function(d,i) {
       var selectedGeo = d3.select("#geo-dropdown").property('value');
 	  popDropdown(selectedGeo,'location-dropdown','');
 	  var selectedfips = d3.select("#location-dropdown").property('value');
 	  var selectedregion = d3.select("#location-dropdown option:checked").text();
-	  genDEMO(selectedGeo,selectedfips,selectedregion,yrvalue);
+	  var selectedunit = d3.select("#unit-dropdown").property('value');
+	  genDEMO(selectedGeo,selectedfips,selectedunit, selectedregion,yrvalue);
 //Display drilldown boxes
 	  if(selectedGeo == 'region') {
 	    if (ctyDrop.style.display === "none") {
@@ -218,7 +226,19 @@ d3.select("#location-dropdown").on("change", function(d,i) {
 	    var selectedGeo = d3.select("#geo-dropdown").property('value');
         var selectedfips = d3.select("#location-dropdown").property('value');
 		var selectedcounty = d3.select('#location-dropdown option:checked').text();
-        genDEMO(selectedGeo,selectedfips,selectedcounty,yrvalue);
+		var selectedunit = d3.select("#unit-dropdown").property('value');
+        genDEMO(selectedGeo,selectedfips,selectedunit,selectedcounty,yrvalue);
+		if(selectedGeo == 'region') {
+		   popCtyDrop(selectedfips,'county-dropdown');
+		}
+    });
+	
+d3.select("#unit-dropdown").on("change", function(d,i) {
+	    var selectedGeo = d3.select("#geo-dropdown").property('value');
+        var selectedfips = d3.select("#location-dropdown").property('value');
+		var selectedcounty = d3.select('#location-dropdown option:checked').text();
+		var selectedunit = d3.select("#unit-dropdown").property('value');
+        genDEMO(selectedGeo,selectedfips,selectedunit,selectedcounty,yrvalue);
 		if(selectedGeo == 'region') {
 		   popCtyDrop(selectedfips,'county-dropdown');
 		}
@@ -227,10 +247,11 @@ d3.select("#location-dropdown").on("change", function(d,i) {
 d3.select("#county-dropdown").on("change", function(d,i) {
         var selectedfips = d3.select("#county-dropdown").property('value');
 		var selectedcounty = d3.select('#county-dropdown option:checked').text();
+		var selectedunit = d3.select("#unit-dropdown").property('value');
 		if(selectedcounty.includes("County")){
-             genDEMO("county",selectedfips,selectedcounty,yrvalue); 
+             genDEMO("county",selectedfips,selectedunit,selectedcounty,yrvalue); 
 			 } else {
-			  genDEMO("region",selectedfips,selectedcounty,yrvalue); 
+			  genDEMO("region",selectedfips,selectedunit,selectedcounty,yrvalue); 
 			  }
 		});
 }); //end of maximum year value
