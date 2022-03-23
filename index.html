@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <title>Colorado State Demography Office Home Page</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,10 +13,11 @@
  <script src="https://d3js.org/d3.v6.min.js"></script>
 <!-- SDO suport functions, genSYA, insertHTML, -->
 <script src="./assets/js/funct.js"></script>
+<!-- GoogleAnalytics Script -->
+<script defer src="./assets/js/googleAnalytics.js"></script>
 </head>
 
 <body>
-
 <div class="alert__bar--covid-19" style="text-color:black;font-size:12px;">
     <h2 style="background-color:#8fc6e8;text-align:center;">
       Visit <a href="https://covid19.colorado.gov/for-coloradans/vaccine/where-can-i-get-vaccinated">"Where can I get vaccinated"</a> or call 1-877-COVAXCO (1-877-268-2926) for vaccine information.
@@ -73,15 +74,7 @@
 			<div w3-include-html="./assets/html/bodycontent3.html"></div>
 	</div>
 </div>  <!-- End Grid -->
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-W27DQ8VRCX"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
 
-  gtag('config', 'G-W27DQ8VRCX');
-</script>
 <script>
 //Setting HTML include and Accordion
 includeHTML(); 
@@ -96,9 +89,10 @@ d3.json(urlstr).then(function(yeardata){
     var maxest = yeardata.filter(function(d){return d.datatype == 'Estimate'});
 	var yrsList = maxest.map(function(d){return d.year;});
     var yrvalue = d3.max(yrsList) 
-	var acsyr = 2019;  ///CHANGE THIS WHEN 2020 ACS is available
+	var acsyr = 2020;  ///CHANGE THIS WHEN 2020 ACS is available
 	
 //Generate Initial Tables
+
 genSYA("000",yrvalue);
 genCOC("000",yrvalue);
 genACS("000",acsyr);
@@ -111,7 +105,7 @@ d3.select("#county-dropdown").on("change", function(d,i) {
 
         var selectedfips = d3.select("#county-dropdown").property('value');
 		var selectedcounty = d3.select('#county-dropdown option:checked').text();
-		
+
         genSYA(selectedfips,yrvalue);
 		genCOC(selectedfips,yrvalue);
 		genACS(selectedfips,acsyr);
