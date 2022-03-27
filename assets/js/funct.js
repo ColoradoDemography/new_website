@@ -1864,6 +1864,16 @@ function exportToPng(cname, type, graphDiv, yr){
 		};
 	} else {
 	  var fn =  fileName + ".png";
+	  if(type == 'popchng') {
+		    Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 360 }).then(function (dataURL) {
+        var a = document.createElement('a');
+        a.href = dataURL;
+        a.download = fn;
+        document.body.appendChild(a);
+         a.click();
+        document.body.removeChild(a);
+    });
+	  } else {
 	   Plotly.toImage(graphDiv, { format: 'png', width: 800, height: 360 }).then(function (dataURL) {
         var a = document.createElement('a');
         a.href = dataURL;
@@ -1872,6 +1882,7 @@ function exportToPng(cname, type, graphDiv, yr){
          a.click();
         document.body.removeChild(a);
     });
+	}
 	}
 };
 
@@ -4480,7 +4491,7 @@ var popchng_trace = {
 			   type : 'bar',
 			   orientation : 'h',
 			   text: popchng_pop_fmt.map(String),
-			  textposition: 'auto',
+			  textposition : 'auto',
 			  hoverinfo: 'none',
 			  marker: {
 				color: 'blue',
@@ -4564,15 +4575,12 @@ var popchng_layout = {
  var popchng_out = changeKeyObjects(popchng_shift,popchng_names);
  
 
-//popchng
+//
+
 var popchng_csv = document.getElementById('popchng_csv');
 var popchng_png = document.getElementById('popchng_png');
 popchng_csv.onclick = function() {exportToCsv(ctyName, 'popchng', popchng_out,0)}; 
 popchng_png.onclick = function() {exportToPng(ctyName, 'popchng', POPCHNG,0)};
-var profileDat3 = document.getElementById('profileDat3');
-var profileImg3 = document.getElementById('profileImg3');
-profileDat3.onclick = function() {exportToCsv(ctyName, 'forecast', popchng_out,0)};
-profileImg3.onclick = function() {exportToPng(ctyName, 'forecast', POPCHNG,0)};
 
 }; //popchngPlot
 //netmigPlot  --Currently a place holder for a net mig by age plot...
