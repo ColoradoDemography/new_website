@@ -2174,26 +2174,16 @@ function returnRank(indata,fips){
  return(rval);
 };  //end of returnRank 
 
-//chkDiff checjs for significant increase or decrease in quantity
-function chkDiff(curpct,curmoe, prevpct, prevmoe) {
-	var prev_low = prevpct - prevmoe;
-	var prev_high = prevpct + prevmoe;
-	var outcome = 'equal';
-	
-	if(curpct > prevpct && curpct > prev_high) {
-		outcome = 'increase';
-	}
-	if(curpct < prevpct && curpct < prev_low) {
-		outcome = 'decrease';
-	}
-return(outcome);
-}; //end of chkDiff
+
 
 //ACS Functions:
 //genACSUrl  Generates ACS call from the Census API
 //acsPrep prepares data file for analysis, removing null valuees converting to numbers
 //acsAgePct creates age percentage data from ACS inputs for Age Bar Charts
 //acsAgePyr creates age percentage data from ACS inputs for Age Pyramid Charts
+//acsChkDiff checjs for significant increase or decrease in quantity for ACS values ACS Handbook Chapter 7
+//acsPctMOE Calculates percentage MOE ACS Handbook Chapter 8 pg 6
+
 //genACSIncome ACS data summary functions  Income
 //genACSHHIncome ACS data summary functions  HH Income, Educ, Race
 //genACSEducation ACS data summary functions  Educational Attainment
@@ -2634,6 +2624,38 @@ for(i = 0; i <= 17;  i++){
 	return(outData);
 } //acsAgePyr
 
+//acsChkDiff checjs for significant increase or decrease in quantity for ACS values  ACS Handbook Chapter 7
+function acsChkDiff(curpct,curmoe, prevpct, prevmoe) {
+	var se_cur = curmoe/1.645;
+	var se_prev = prevmoe/1.645;
+	var se_sum = Math.pow(se_cur,2) + Math.pow(se_prev,2);
+	var se_sqrt = Math.sqrt(se_sum);
+	var est_diff = Math.abs(curpct - prevpct);
+	var diff_crit = est_diff/se_sqrt;
+	
+	var outcome = 'equal';
+if(diff_crit > 1.645){
+	if(curpct > prevpct) {
+		outcome = 'increase';
+	} else {
+		outcome = 'decrease';
+	}
+}
+return(outcome);
+}; //end of acsChkDiff
+
+//acsPctMOE Calculates percentage MOE ACS Handbook Chapter 8 pg 6
+
+function acsPct(totest,totmoe,varpct,varmoe) {
+  var fractionY = 1/totest;
+  var moeYsq =  Math.pow(totmoe,2);
+  var moeXsq =  Math.pow(varmoe,2);
+  var Psq = Math.pow(varpct,2);
+  
+  var moePsq = moeXsq - (Psq * moeYsq);
+  var moeP = Math.sqrt(Math.abs(moePsq))  * fractionY;
+  return(moeP)
+}
 //ACS data summary functions  Income, HH Income, Educ, Race
 
 function genACSIncome(inData,type) {
@@ -3528,7 +3550,7 @@ Promise.all(prom).then(function(data){
 		pov_comp.push(pov_prev.filter(function(d) {return d.county == parseInt(fips);}));
     };
 
-	povDiff = chkDiff(pov_comp[0]['pov_est_pct'], pov_comp[0]['pov_moe_pct'], pov_comp[1][0]['pov_est_pct'], pov_comp[1][0]['pov_moe_pct']);
+	povDiff = acsChkDiff(pov_comp[0]['pov_est_pct'], pov_comp[0]['pov_moe_pct'], pov_comp[1][0]['pov_est_pct'], pov_comp[1][0]['pov_moe_pct']);
 
 //Education Processing
 
@@ -3552,7 +3574,7 @@ Promise.all(prom).then(function(data){
 		educ_comp = educ_cur.filter(function(d) {return d.county == parseInt(fips);})
 		educ_comp.push(educ_prev.filter(function(d) {return d.county == parseInt(fips);}));
     };
-	educDiff = chkDiff(educ_comp[0]['baplus_est_pct'], educ_comp[0]['baplus_moe_pct'], educ_comp[1][0]['baplus_est_pct'], educ_comp[1][0]['baplus_moe_pct']);
+	educDiff = acsChkDiff(educ_comp[0]['baplus_est_pct'], educ_comp[0]['baplus_moe_pct'], educ_comp[1][0]['baplus_est_pct'], educ_comp[1][0]['baplus_moe_pct']);
 
 //Median Household Income Processing
 
@@ -3577,7 +3599,7 @@ Promise.all(prom).then(function(data){
 		inc_comp = inc_cur.filter(function(d) {return d.county == parseInt(fips);})
 		inc_comp.push(inc_prev.filter(function(d) {return d.county == parseInt(fips);}));
     };
-	incDiff = chkDiff(inc_comp[0]['inc_est'], inc_comp[0]['inc_moe'], inc_comp[1][0]['inc_est'], inc_comp[1][0]['inc_moe']);
+	incDiff = acsChkDiff(inc_comp[0]['inc_est'], inc_comp[0]['inc_moe'], inc_comp[1][0]['inc_est'], inc_comp[1][0]['inc_moe']);
 	
 //Median Home Value  Processing
 	
@@ -3601,7 +3623,7 @@ Promise.all(prom).then(function(data){
 		home_comp = home_cur.filter(function(d) {return d.county == parseInt(fips);})
 		home_comp.push(home_prev.filter(function(d) {return d.county == parseInt(fips);}));
     };
-	homeDiff = chkDiff(home_comp[0]['inc_est'], home_comp[0]['inc_moe'], home_comp[1][0]['inc_est'], home_comp[1][0]['inc_moe']);
+	homeDiff = acsChkDiff(home_comp[0]['inc_est'], home_comp[0]['inc_moe'], home_comp[1][0]['inc_est'], home_comp[1][0]['inc_moe']);
 	
 //Median Gross Rent Processing
 
@@ -3625,7 +3647,7 @@ Promise.all(prom).then(function(data){
 		rent_comp = rent_cur.filter(function(d) {return d.county == parseInt(fips);})
 		rent_comp.push(rent_prev.filter(function(d) {return d.county == parseInt(fips);}));
     };
-	rentDiff = chkDiff(rent_comp[0]['inc_est'], rent_comp[0]['inc_moe'], rent_comp[1][0]['inc_est'], rent_comp[1][0]['inc_moe']);
+	rentDiff = acsChkDiff(rent_comp[0]['inc_est'], rent_comp[0]['inc_moe'], rent_comp[1][0]['inc_est'], rent_comp[1][0]['inc_moe']);
 	
 //Building Table Array
 var tbl_arr = [];
@@ -4052,12 +4074,16 @@ var profileDat2 = document.getElementById('profileDat2');
 var profileImg2 = document.getElementById('profileImg2');
 profileDat2.onclick = function() {exportToCsv(ctyName, 'estimate', est_flat,0)};
 profileImg2.onclick = function() {exportToPng(ctyName, 'estimate', ESTIMATE,0)};
-} //profile
+} else { //These are the dashboard events
+var est_csv = document.getElementById('est_csv');
+var est_png = document.getElementById('est_png');
+est_csv.onclick = function() {exportToCsv(ctyName, 'estimate', est_flat,0)};
+est_png.onclick = function() {exportToPng(ctyName, 'estimate', ESTIMATE,0)};
+}	//profile
 }; //end of estPlot
 
-//Forecasts    
-function forecastPlot(inData, app, unit, plotdiv,yrvalue,fips,ctyName) {
-
+//Forecast Plot    
+function forecastPlot(inData, app, plotdiv,yrvalue,fips,ctyName) {
 
     const fmt_date = d3.timeFormat("%B %d, %Y");
 	const fmt_pct = d3.format(".0%");
@@ -4067,8 +4093,7 @@ function forecastPlot(inData, app, unit, plotdiv,yrvalue,fips,ctyName) {
               displayModeBar: false};
 //Clearing out divs
 
-if(app == "dashboard") {   //This indivates that the call is the dashboard...
-var FORECAST = document.getElementById(plotdiv[0]);
+var FORECAST = document.getElementById(plotdiv);
 FORECAST.innerHTML = "";
 
 //Population Projections  This data is a single Geo by age...
@@ -4082,6 +4107,7 @@ FORECAST.innerHTML = "";
 		}
 
 
+
 var year_forec_arr =[];
 var pop_forec_arr = [];
 
@@ -4089,13 +4115,22 @@ forec_flat = forecast_data.sort(function(a, b){ return d3.ascending(a['year'], b
 year_forec_arr = forec_flat.map(item => item.year);
 pop_forec_arr = forec_flat.map(item => item.totalpopulation);
 
+
+if(app == 'dashboard'){
 var forec_trace = { 
                x: year_forec_arr,
                y : pop_forec_arr,
 			   type : 'bar'
 			};
-
-var forec_data = [forec_trace];
+} else {
+var forec_trace = { 
+               x: year_forec_arr,
+               y : pop_forec_arr,
+			   mode : 'lines+markers'
+			};
+}
+	
+var forec_tr = [forec_trace];
 
 var forec_layout = {
 		title: "Population Projections 2010 to 2050, " + ctyName ,
@@ -4134,20 +4169,57 @@ var forec_layout = {
 			   showarrow : false}]
 		};
  
-Plotly.newPlot(FORECAST, forec_data, forec_layout,config);
+Plotly.newPlot(FORECAST, forec_tr, forec_layout,config);
+//Data formatting
+var forecast_shift  = [];
+forecast_data.forEach(item => {
+    forecast_shift.push({'fips' : item.fips, 'name' : item.ctyName, 'year' :  item.year, 'totalpopulation' : fmt_comma(item.totalpopulation)});
+});
 
-//Output for Age Plot (Current year by age categories...
-var AGEPLOT = document.getElementById(plotdiv[1]);
+//Forecasts
+var forecast_names = {
+	       fips : 'FIPS',
+		   name : 'Location',
+		   year : 'Year',
+		   totalpopulation : "Population"
+         };
+		 
+var forecast_fin = changeKeyObjects(forecast_shift,forecast_names);
+
+//Data and plot output 
+if(app == 'profile'){
+	var profileDat2 = document.getElementById('profileDat3');
+	var profileImg2 = document.getElementById('profileImg3');
+	profileDat2.onclick = function() {exportToCsv(ctyName, 'forecast', forecast_fin,0)};
+	profileImg2.onclick = function() {exportToPng(ctyName, 'forecast', FORECAST,0)};
+} else { //These are the dashboard events
+	var est_csv = document.getElementById('forec_csv');
+	var est_png = document.getElementById('forec_png');
+	est_csv.onclick = function() {exportToCsv(ctyName, 'forecast', forecast_fin,0)};
+	est_png.onclick = function() {exportToPng(ctyName, 'forecast', FORECAST,0)};
+}	//profile
+
+	
+}; //forecast plot
+
+
+//agePlot
+function agePlot (inData, app, plotdiv,yrvalue,fips,ctyName) {
+	    const fmt_date = d3.timeFormat("%B %d, %Y");
+	const fmt_pct = d3.format(".0%");
+	const fmt_pct1 = d3.format(".1%");
+	const fmt_comma = d3.format(",");
+	var config = {responsive: true,
+              displayModeBar: false};
+	//Output for Age Plot (Current year by age categories...
+var AGEPLOT = document.getElementById(plotdiv);
 
 AGEPLOT.innerHTML = "";
 
-//Creating data
-var endyr = yrvalue + 10;
-var selYr = [yrvalue, endyr];
 
 var popName0 = "Population_" + yrvalue;
-var popName1 = "Population_" + endyr;
-var agedata =  inData.filter(item => selYr.includes(item.year));
+
+var agedata =  inData.filter(d => d.year == yrvalue);
 var totaldata = [];
 agedata.forEach(function(obj) {
     if(obj.age >=  0 && obj.age <= 17) {obj.age_cat = "0 to 17"; }
@@ -4191,8 +4263,8 @@ for (let[key2, value2] of value) {
 }
 
 //calculate percentages for age plot
-var agep = total_age_flat.filter(d => d.year == selYr[0]);
-var agetotal = total_ann_flat.filter(d => d.year == selYr[0]);
+var agep = total_age_flat.filter(d => d.year == yrvalue);
+var agetotal = total_ann_flat.filter(d => d.year == yrvalue);
 var ageplot = [];
 agep.forEach( function(d) {
       ageplot.push({'index' : d.index, 'age_cat' : d.age_cat, 'totalpopulation' : d.totalpopulation, 'percent' : d.totalpopulation/agetotal[0].totalpopulation});
@@ -4258,16 +4330,95 @@ var age_layout = {
 		
 Plotly.newPlot(AGEPLOT, age_data, age_layout,config);
 
-//10-year change plot...
-var POPCHNG = document.getElementById(plotdiv[2]);
+ var agedata_names = {
+	        fips : "FIPS",
+			loc : "Location",
+	        age_cat : "Age Group",
+			totalpopulation : "Total Population " + yrvalue,
+            percent : "Percent"
+			};
+ 
+var agedata_shift =[];
+ageplot_flat.forEach( d => {
+	agedata_shift.push({ fips : fips,
+	                     loc : ctyName,
+	                     age_cat : d.age_cat,
+	                     totalpopulation : fmt_comma(d.totalpopulation),
+	                     percent : fmt_pct1(d.percent) 
+						 });
+});
 
+ var agedata_out  = changeKeyObjects(agedata_shift, agedata_names);
+
+var age_csv = document.getElementById('age_csv');
+var age_png = document.getElementById('age_png');
+age_csv.onclick = function() {exportToCsv(ctyName, 'age', agedata_out,0) }; 
+age_png.onclick = function() {exportToPng(ctyName, 'age', AGEPLOT,0)};
+} //agePlot
+
+function popchngPlot(inData, app, unit, plotdiv,yrvalue,fips,ctyName) {
+	const fmt_date = d3.timeFormat("%B %d, %Y");
+	const fmt_pct = d3.format(".0%");
+	const fmt_pct1 = d3.format(".1%");
+	const fmt_comma = d3.format(",");
+	var config = {responsive: true,
+              displayModeBar: false};
+//10-year change plot...
+
+var POPCHNG = document.getElementById(plotdiv);
 POPCHNG.innerHTML = "";
 
-// Data
-total_age_flat = total_age_flat.sort(function(a, b){ return d3.ascending(a['index'], b['index']); });
+var yr10 = yrvalue + 10;
 
-var agep0 = total_age_flat.filter(d => d.year == selYr[0]);
-var agep1 = total_age_flat.filter(d => d.year == selYr[1]);
+var agedata = inData.filter(d => d.year == yrvalue || d.year == yr10);
+
+// Data
+var totaldata = [];
+agedata.forEach(function(obj) {
+    if(obj.age >=  0 && obj.age <= 17) {obj.age_cat = "0 to 17"; }
+    if(obj.age >= 18 && obj.age <= 24) {obj.age_cat = "18 to 24";}
+    if(obj.age >= 25 && obj.age <= 44) {obj.age_cat = "25 to 44"; }
+    if(obj.age >= 45 && obj.age <= 54) {obj.age_cat = "45 to 54"; }
+    if(obj.age >= 55 && obj.age <= 64) {obj.age_cat = "55 to 64"; }
+	if(obj.age >= 65 && obj.age <= 74) {obj.age_cat = "65 to 74"; }
+	if(obj.age >= 75 && obj.age <= 84) {obj.age_cat = "75 to 84"; }
+    if(obj.age >= 85 ) {obj.age_cat = "85 +";}
+    totaldata.push({'year' : obj.year, 'age_cat' : obj.age_cat, 'totalpopulation' : obj.totalpopulation});
+});
+
+//  Totals
+var total_ann = d3.rollup(totaldata, v => d3.sum(v, d => d.totalpopulation), d => d.year);
+var total_age = d3.rollup(totaldata, v => d3.sum(v, d => d.totalpopulation), d => d.year, d => d.age_cat);
+
+
+//Flatten Arrays for output
+var total_ann_flat = [];
+for (let [key, value] of total_ann) {
+  total_ann_flat.push({'year' : key, 'index' : 0, 'age_cat' : 'Total', 'totalpopulation' : value});
+     };
+
+var age_idx;
+var total_age_flat = [];
+for (let [key1, value] of total_age) {
+for (let[key2, value2] of value) {
+  //Setting index value
+   if(key2 == "0 to 17") {age_idx = 1};
+   if(key2 == "18 to 24") {age_idx = 2};
+   if(key2 == "25 to 44") {age_idx = 3};
+   if(key2 == "45 to 54") {age_idx = 4};
+   if(key2 == "55 to 64") {age_idx = 5};
+   if(key2 == "65 to 74") {age_idx = 6};
+   if(key2 == "75 to 84") {age_idx = 7};
+   if(key2 == "85 +") {age_idx = 8};
+
+   total_age_flat.push({'year' : key1, 'index' : age_idx, 'age_cat' : key2, 'totalpopulation' : value2});
+}
+}
+total_age_flat = total_ann_flat.concat(total_age_flat).sort(function(a, b){ return d3.ascending(a['index'], b['index']); });
+
+var agep0 = total_age_flat.filter(d => d.year == yrvalue);
+var agep1 = total_age_flat.filter(d => d.year == yr10);
+
 var popchng = [];
 for(i = 0; i < agep0.length; i++){
     popchng.push({ 'index' : agep0[i].index, 'age_cat' : agep0[i].age_cat, 'p0' : agep0[i].totalpopulation, 'p1' : agep1[i].totalpopulation, 
@@ -4275,13 +4426,6 @@ for(i = 0; i < agep0.length; i++){
 	'pctchng' : ((agep1[i].totalpopulation - agep0[i].totalpopulation)/agep0[i].totalpopulation) });
 }
 
-//Adding total change
-var total_chng =[];
- total_chng.push({ 'index' : -1, 'age_cat' : 'All Ages', 'p0' : total_ann_flat[0].totalpopulation, 'p1' : total_ann_flat[1].totalpopulation, 
-	 'popchng' : (total_ann_flat[1].totalpopulation - total_ann_flat[0].totalpopulation),
-	'pctchng' : ((total_ann_flat[1].totalpopulation - total_ann_flat[0].totalpopulation)/total_ann_flat[0].totalpopulation) });
-
-popchng = total_chng.concat(popchng)
 
 
 //Plotting
@@ -4296,7 +4440,8 @@ popchng_cat_arr = popchng_flat.map(item => item.age_cat);
 popchng_pop_arr = popchng_flat.map(item => item.popchng);
 popchng_pop_fmt = popchng_flat.map(item => fmt_comma(item.popchng));
 popchng_pct_arr = popchng_flat.map(item => item.pctchng);
-popchng_pct_fmt = popchng_flat.map(item => fmt_pct(item.pctchng));
+popchng_pct_fmt = popchng_flat.map(item => fmt_pct1(item.pctchng));
+
 
 if(unit == 'percent') {
 var popchng_trace = { 
@@ -4360,10 +4505,10 @@ var axis_spec = {
 	tickformat: ','
 };	
 };		
-var popchng_data = [popchng_trace];
+var popchng_tr = [popchng_trace];
 
 var popchng_layout = {
-		title: "Projected Population Change by Age Group, " + selYr[0] + " to "+ selYr[1] + ", " + ctyName,
+		title: "Projected Population Change by Age Group, " + yrvalue + " to "+ yr10 + ", " + ctyName,
 		  autosize: false,
 		  width: 1000,
 		  height: 400,
@@ -4388,95 +4533,59 @@ var popchng_layout = {
 			   align : 'left', 
 			   showarrow : false}]
 		};
- Plotly.newPlot(POPCHNG, popchng_data, popchng_layout,config);
- 
- return([forec_flat, ageplot_flat, popchng_flat]);
-}  //Dashboard
-if(app == "profile") {
-	var FORECAST = document.getElementById(plotdiv);
-	FORECAST.innerHTML = "";
-	
-//Population Projections  This data is a single Geo by age...
-pgSetup('County', plotdiv,"County Population Forecasts",false,fips, ctyName)
-var FORECAST = document.getElementById('PlotDiv3');
-//Rollup
-	var columnsFor = ['totalpopulation'];
-	var forecast_sum = d3.rollup(inData, v => Object.fromEntries(columnsFor.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year);
-
-	var forecast_data = [];
-		for (let[key, value] of forecast_sum) {
-		   forecast_data.push({'fips' : fips, 'name' : ctyName, 'year' :  key, 'totalpopulation' : value.totalpopulation});
-		}
+ Plotly.newPlot(POPCHNG, popchng_tr, popchng_layout,config);
 
 
-var year_forec_arr =[];
-var pop_forec_arr = [];
-
-forec_flat = forecast_data.sort(function(a, b){ return d3.ascending(a['year'], b['year']); });
-year_forec_arr = forec_flat.map(item => item.year);
-pop_forec_arr = forec_flat.map(item => item.totalpopulation);
-
-var forec_trace = { 
-               x: year_forec_arr,
-               y : pop_forec_arr,
-			   mode : 'lines+markers'
+//Popchng
+ var popchng_names = {
+	        fips : "FIPS",
+			loc : "Location",
+	        age_cat : "Age Group",
+			p0 : "Population " + yrvalue,
+			p1 : "Population " + yr10,
+			popchng : "Population Change",
+            pctchng : "Percent Change"
 			};
 
-var forec_data = [forec_trace];
 
-var forec_layout = {
-		title: "Population Projections 2010 to 2050, " + ctyName ,
-		  autosize: false,
-		  width: 1000,
-		  height: 400,
-		  xaxis: {
-			title : 'Year',
-			showgrid: true,
-			zeroline: false,
-			showline: true,
-			mirror: 'ticks',
-			gridcolor: '#bdbdbd',
-			gridwidth: 2,
-			linecolor: 'black',
-			linewidth: 2
-		  },
-		  yaxis: {
-			title : 'Total Population',
-			automargin: true,
-			showgrid: true,
-			showline: true,
-			mirror: 'ticks',
-			gridcolor: '#bdbdbd',
-			gridwidth: 2,
-			linecolor: 'black',
-			linewidth: 2,
-			 tickformat: ','
-		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
-               xref : 'paper', 
-			   x : 0, 
-			   yref : 'paper', 
-			   y : -0.45, 
-			   align : 'left', 
-			   showarrow : false}]
-		};
+ var popchng_shift = [];
+ popchng.forEach( d => {
+	 popchng_shift.push({
+		               fips : fips,
+					   loc : ctyName,
+		               age_cat : d.age_cat,
+	                   p0 : fmt_comma(d.p0),
+					   p1 : fmt_comma(d.p1),
+					   popchng : d.popchng < 0 ? ("-" + fmt_comma(Math.abs(d.popchng))) : fmt_comma(d.popchng),
+	                   pctchng: d.pctchng <0 ? ("-" + fmt_pct1(Math.abs(d.pctchng))) : fmt_pct1(d.pctchng)
+	 })
+ });
  
-Plotly.newPlot(FORECAST, forec_data, forec_layout,config);
+ var popchng_out = changeKeyObjects(popchng_shift,popchng_names);
+ 
+
+//popchng
+var popchng_csv = document.getElementById('popchng_csv');
+var popchng_png = document.getElementById('popchng_png');
+popchng_csv.onclick = function() {exportToCsv(ctyName, 'popchng', popchng_out,0)}; 
+popchng_png.onclick = function() {exportToPng(ctyName, 'popchng', POPCHNG,0)};
 var profileDat3 = document.getElementById('profileDat3');
 var profileImg3 = document.getElementById('profileImg3');
-profileDat3.onclick = function() {exportToCsv(ctyName, 'forecast', forec_flat,0)};
-profileImg3.onclick = function() {exportToPng(ctyName, 'forecast', FORECAST,0)};
-return(forec_flat);
-}  //profile
-}; //forecast plot
+profileDat3.onclick = function() {exportToCsv(ctyName, 'forecast', popchng_out,0)};
+profileImg3.onclick = function() {exportToPng(ctyName, 'forecast', POPCHNG,0)};
 
+}; //popchngPlot
 //netmigPlot  --Currently a place holder for a net mig by age plot...
 function netmigPlot(inData, app, plotdiv, fips, ctyName) {
- const fmt_date = d3.timeFormat("%B %d, %Y");
- 
+
 //Plotting 
-var config = {responsive: true,
+	const fmt_date = d3.timeFormat("%B %d, %Y");
+	const fmt_pct = d3.format(".0%");
+	const fmt_pct1 = d3.format(".1%");
+	const fmt_comma = d3.format(",");
+	var config = {responsive: true,
               displayModeBar: false};
+
 //Clearing out divs
 var NETMIG = document.getElementById(plotdiv);
 
@@ -4597,11 +4706,56 @@ var NetMig_layout = {
 		};
 
 Plotly.newPlot(NETMIG, NetMig_data, NetMig_layout,config);
+
+//Netmig 
+var netmig_names = {
+			fips : "FIPS",
+			loc : "Location",
+	        age : "Age Group",
+			NetMig9500 : "Net Migration 1995-2000",
+			NetMig0010 : "Net Migration 2000 -2010",
+			NetMig1020 : "Net Migration 2010-2020"
+		}
+var netmig_shift = [];
+if(app == 'dashboard') {
+	netmig_flat.forEach( d => {
+    netmig_shift.push({ fips : fips,
+	                    loc : ctyName,
+	                    age : d.age,
+						NetMig0010 : fmt_comma(d.NetMig0010)
+	})
+	}) 
+} else {
+	netmig_flat .forEach( d => {
+    netmig_shift.push({ fips : fips,
+	                    loc : ctyName,
+	                    age : d.age,
+						NetMig9500 : fmt_comma(d.NetMig9500),
+						NetMig0010 : fmt_comma(d.NetMig0010),
+						NetMig1020 : fmt_comma(d.NetMig1020)
+	})
+	})
+	}
+	var netmig_out = changeKeyObjects(netmig_shift, netmig_names);
+
+//Net Migration
+if(app == 'dashboard'){
+var mig_csv = document.getElementById('mig_csv');
+var mig_png = document.getElementById('mig_png');
+mig_csv.onclick = function() {exportToCsv(ctyName, 'netmig', netmig_out,0)}; 
+mig_png.onclick = function() {exportToPng(ctyName, 'netmig', NETMIG,0)};
+}	 
+
 }; //netmigPlot
 
 //Coc Plot
 function cocPlot(inData,app, plotdiv,yrvalue,fips,ctyName) {
-	    const fmt_date = d3.timeFormat("%B %d, %Y");
+	const fmt_date = d3.timeFormat("%B %d, %Y");
+	const fmt_pct = d3.format(".0%");
+	const fmt_pct1 = d3.format(".1%");
+	const fmt_comma = d3.format(",");
+	var config = {responsive: true,
+              displayModeBar: false};
 
 var coc_flat = inData;
 
@@ -4749,15 +4903,50 @@ var coc_layout = {
 		};
  
 Plotly.newPlot(COC, coc_data, coc_layout,config);	
+//Coc   HERE
+var coc_names = {
+	    fips : 'FIPS',
+		name : 'Location',
+		year : 'Year',
+		totalpopulation : 'Total Population',
+		births : 'Births',
+		death : 'Deaths',
+		naturalincrease : 'Natural Increase',
+		netmigration : 'Net Migration'
+}
+
+var coc_shift = [];
+coc_flat.forEach( d => {
+	coc_shift.push({
+		   fips : fips,
+		   name : ctyName,
+		   year : d.year,
+		   totalpopulation : fmt_comma(d.totalpopulation),
+		   births : fmt_comma(d.births),
+		   deaths : fmt_comma(d.deaths),
+           naturalincrease : fmt_comma(d.naturalincrease),
+		   netmigration : fmt_comma(d.netmigration)
+	})
+});
+	
+var coc_out = changeKeyObjects(coc_shift,coc_names);
 if(app == 'profile') {
 	var profileDat4 = document.getElementById('profileDat4');
 	var profileImg4 = document.getElementById('profileImg4');
-	profileDat4.onclick = function() {exportToCsv(ctyName, 'coc', coc_flat,0)};
+	profileDat4.onclick = function() {exportToCsv(ctyName, 'coc', coc_out,0)};
     profileImg4.onclick = function() {exportToPng(ctyName, 'coc', COC,0)};
-}
+} else {
+	var coc_csv = document.getElementById('coc_csv');
+	var coc_png = document.getElementById('coc_png');
+	coc_csv.onclick = function() { exportToCsv(ctyName, 'coc', coc_out,0)}; 
+	coc_png.onclick = function() {exportToPng(ctyName, 'coc', COC,0)};
+}	
 }; //cocplot
 
 //genDEMO outputs Plotly charts for the Demographic Dashboard
+//genDEMO Creates 3 datasets, one for estimates (pop by year), 
+// one for net migration by age for 2000-2010, and
+// one for forecasts population by age and year
 function genDEMO(geotype, fips, unit, ctyName, yrvalue){
 
     const fmt_date = d3.timeFormat("%B %d, %Y");
@@ -4898,218 +5087,16 @@ var netmig_data = [];
 			}
 };
 }; 
+
 //Plotting 
-
-var fore_output = ["forec_output","ageest_output", "popchng_output"];
-
 	estPlot(est_data, "dashboard", "County",  "est_output", yrvalue, fips, ctyName);
-	
-var	fore_Data = forecastPlot(forecast_data, "dashboard", unit, fore_output, yrvalue, fips, ctyName);
-	netmigPlot(netmig_data, "dashboard","mig_output", fips, ctyName);
+	forecastPlot(forecast_data, "dashboard", "forec_output", yrvalue, fips, ctyName);
 	cocPlot(est_data, "dashboard","coc_output", yrvalue, fips, ctyName);
-
-//Preparing final datafiles
-//Estimates
-var est_names = {
-	   fips : "FIPS",
-	   name : "Location",
-	   year : "Year",
-	   totalpopulation : "Population Estimate"
-       };
+	netmigPlot(netmig_data, "dashboard","mig_output", fips, ctyName);
+    agePlot(forecast_data,"dashboard", "ageest_output", yrvalue, fips, ctyName);
+    popchngPlot(forecast_data,"dashboard", unit, "popchng_output", yrvalue, fips, ctyName);
  
-var est_shift =[];  
-for(i = 0; i < est_data.length; i++){
-    est_shift.push({ fips : fips,
-                     name : ctyName,
-					 year : est_data[i].year,
-					 totalpopulation : fmt_comma(est_data[i].totalpopulation)
-	})
-}
 
-var est_out = changeKeyObjects(est_shift, est_names);
-
-//Forecasts
-var forecast_names = {
-	       fips : 'FIPS',
-		   name : 'Location',
-		   year : 'Year',
-		   totalpopulation : "Population"
-         };
-		 
-var forecast_shift = [];
- for(i = 0; i < fore_Data[0].length; i++){
-	 forecast_shift.push({fips : fips,
-	                      name : ctyName,
-						  year : fore_Data[0][i].year,
-						  totalpopulation : fmt_comma(fore_Data[0][i].totalpopulation)
-	 });
- }
-var forecast_out = changeKeyObjects(forecast_shift,forecast_names);
-
-//Coc
-var coc_names = {
-	    fips : 'FIPS',
-		name : 'Location',
-		year : 'Year',
-		totalpopulation : 'Total Population',
-		births : 'Births',
-		death : 'Deaths',
-		naturalincrease : 'Natural Increase',
-		netmigration : 'Net Migration'
-}
-
-var coc_shift = [];
-for(i = 0; i < est_data.length; i++){
-	coc_shift.push({
-		   fips : fips,
-		   name : ctyName,
-		   year : est_data[i].year,
-		   totalpopulation : fmt_comma(est_data[i].totalpopulation),
-		   births : fmt_comma(est_data[i].births),
-		   deaths : fmt_comma(est_data[i].deaths),
-           naturalincrease : fmt_comma(est_data[i].naturalincrease),
-		   netmigration : fmt_comma(est_data[i].netmigration)
-	})
-}	
-var coc_out = changeKeyObjects(coc_shift,coc_names);
-	
-//Netmig 
-var netmig_names = {
-			fips : "FIPS",
-			loc : "Location",
-	        age : "Age Group",
-			NetMig9500 : "Net Migration 1995-2000",
-			NetMig0010 : "Net Migration 2000 -2010",
-			NetMig1020 : "Net Migration 2010-2020"
-		}
-var netmig_shift = [];
-for(i = 0; i < netmig_data.length; i++){
-    netmig_shift.push({ fips : fips,
-	                    loc : ctyName,
-	                    age : netmig_data[i].age,
-						NetMig9500 : fmt_comma(netmig_data[i].NetMig9500),
-						NetMig0010 : fmt_comma(netmig_data[i].NetMig0010),
-						NetMig1020 : fmt_comma(netmig_data[i].NetMig1020)
-	})
-	}
-	var netmig_out = changeKeyObjects(netmig_shift, netmig_names);
-	
-//Age change
-
- var agedata_names = {
-	        fips : "FIPS",
-			loc : "Location",
-	        age_cat : "Age Group",
-			totalpopulation : "Total Population " + yrvalue,
-            percent : "Percent"
-			};
- 
-var agedata_shift =[];
-for(i = 0; i < fore_Data[1].length; i++){
-	agedata_shift.push({ fips : fips,
-	                     loc : ctyName,
-	                     age_cat : fore_Data[1][i].age_cat,
-	                     totalpopulation : fmt_comma(fore_Data[1][i].totalpopulation),
-	                     percent : fmt_pct1(fore_Data[1][i].percent) 
-						 });
-};
-
- var agedata_out  = changeKeyObjects(agedata_shift, agedata_names);
- 
-//Popchng
- var popchng_names = {
-	        fips : "FIPS",
-			loc : "Location",
-	        age_cat : "Age Group",
-			p0 : "Population " + yrvalue,
-			p1 : "Population " + endyr,
-            pctchng : "Percent Change"
-			};
-
-
- var popchng_shift = [];
- for(i = 0; i < fore_Data[2].length;  i++){
-	 popchng_shift.push({
-		               fips : fips,
-					   loc : ctyName,
-		               age_cat : fore_Data[2][i].age_cat,
-	                   p0 : fmt_comma(fore_Data[2][i].p0),
-					   p1 : fmt_comma(fore_Data[2][i].p1),
-	                   pctchng: (fore_Data[2][i].pctchng < 0) ? "-" + fmt_pct1(fore_Data[2][i].pctchng * -1) : fmt_pct1(fore_Data[2][i].pctchng)
-	 })
- };
- 
- var popchng_out = changeKeyObjects(popchng_shift,popchng_names);
- 
-//Download trigger events
-//Generating DOM links
-var ESTIMATE = document.getElementById("est_output");
-var FORECAST = document.getElementById("forec_output")
-var AGEPLOT = document.getElementById("ageest_output");
-var POPCHNG = document.getElementById("popchng_output");
-var NETMIG = document.getElementById("mig_output");
-var COC = document.getElementById("coc_output");
-
-//Estimates
-var est_csv = document.getElementById('est_csv');
-var est_png = document.getElementById('est_png');
-est_csv.onclick = function() {
-	  exportToCsv(ctyName, 'estimate', est_out,0);
-     }; 
-est_png.onclick = function() {
-	   exportToPng(ctyName, 'estimate', ESTIMATE,0);
-     };
-	 
-//Forecasts
-var forec_csv = document.getElementById('forec_csv');
-var forec_png = document.getElementById('forec_png');
-forec_csv.onclick = function() {
-	  exportToCsv(ctyName, 'forecast', forecast_out,0);
-     }; 
-forec_png.onclick = function() {
-	   exportToPng(ctyName, 'forecast', FORECAST,0);
-     };
-	 
-//Components of Change
-var coc_csv = document.getElementById('coc_csv');
-var coc_png = document.getElementById('coc_png');
-coc_csv.onclick = function() {
-	  exportToCsv(ctyName, 'coc', coc_out,0);
-     }; 
-coc_png.onclick = function() {
-	   exportToPng(ctyName, 'coc', COC,0);
-     };
-	 
-//Net Migration
-var mig_csv = document.getElementById('mig_csv');
-var mig_png = document.getElementById('mig_png');
-mig_csv.onclick = function() {
-	  exportToCsv(ctyName, 'netmig', netmig_out,0);
-     }; 
-mig_png.onclick = function() {
-	   exportToPng(ctyName, 'netmig', NETMIG,0);
-     };
-	 
-//Age
-
-var age_csv = document.getElementById('age_csv');
-var age_png = document.getElementById('age_png');
-age_csv.onclick = function() {
-	  exportToCsv(ctyName, 'age', agedata_out,0);
-     }; 
-age_png.onclick = function() {
-	   exportToPng(ctyName, 'age', AGEPLOT,0);
-     };
-	 
-//popchng
-var popchng_csv = document.getElementById('popchng_csv');
-var popchng_png = document.getElementById('popchng_png');
-popchng_csv.onclick = function() {
-	  exportToCsv(ctyName, 'popchng', popchng_out,0);
-     }; 
-popchng_png.onclick = function() {
-	   exportToPng(ctyName, 'popchng', POPCHNG,0);
-     };
 }); //end of promise
 } //end of genDEMO
 
