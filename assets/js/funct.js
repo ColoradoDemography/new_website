@@ -1890,7 +1890,7 @@ function exportToPng(cname, type, graphDiv, yr){
 //educData reads in the ACS Education data file and output the summary file information
 function educData(indata,fips) {
 	var outdata = [];
-	 
+
 	for(a = 0; a < indata.length; a++){ 
 	 	 var temp = [];
 	 if(fips == "000"){
@@ -1899,9 +1899,8 @@ function educData(indata,fips) {
 			 'total_est' : indata[a].B15003_001E,
 			 'total_moe' : indata[a].B15003_001M,
 			 'baplus_est' : indata[a].B15003_022E + indata[a].B15003_023E + indata[a].B15003_024E + indata[a].B15003_025E,
-			 'baplus_moe' : Math.pow(indata[a].B15003_022M,2) + Math.pow(indata[a].B15003_023M,2) + Math.pow(indata[a].B15003_024M,2) + Math.pow(indata[a].B15003_025M,2),
-			 'baplus_est_pct' : 0,
-			 'baplus_moe_pct' : 0
+			 'baplus_moe' : Math.sqrt(Math.pow(indata[a].B15003_022M,2) + Math.pow(indata[a].B15003_023M,2) + Math.pow(indata[a].B15003_024M,2) + Math.pow(indata[a].B15003_025M,2)),
+			 'baplus_est_pct' : (indata[a].B15003_022E + indata[a].B15003_023E + indata[a].B15003_024E + indata[a].B15003_025E)/indata[a].B15003_001E,
 		});
 	 } else {
 			temp.push({
@@ -1909,15 +1908,13 @@ function educData(indata,fips) {
 			 'total_est' : indata[a].B15003_001E,
 			 'total_moe' : indata[a].B15003_001M,
 			 'baplus_est' : indata[a].B15003_022E + indata[a].B15003_023E + indata[a].B15003_024E + indata[a].B15003_025E,
-			 'baplus_moe' : Math.pow(indata[a].B15003_022M,2) + Math.pow(indata[a].B15003_023M,2) + Math.pow(indata[a].B15003_024M,2) + Math.pow(indata[a].B15003_025M,2),
-			 'baplus_est_pct' : 0,
-			 'baplus_moe_pct' : 0
+			 'baplus_moe' : Math.sqrt(Math.pow(indata[a].B15003_022M,2) + Math.pow(indata[a].B15003_023M,2) + Math.pow(indata[a].B15003_024M,2) + Math.pow(indata[a].B15003_025M,2)),
+			 'baplus_est_pct' : (indata[a].B15003_022E + indata[a].B15003_023E + indata[a].B15003_024E + indata[a].B15003_025E)/indata[a].B15003_001E,
 			 });
 	 };
 
-	 temp[0]['baplus_moe'] = Math.sqrt(temp[0]['baplus_moe']);
-	 temp[0]['baplus_est_pct'] = temp[0]['baplus_est']/temp[0]['total_est'];
-	 temp[0]['baplus_moe_pct'] = temp[0]['baplus_moe']/temp[0]['total_est'];
+	 temp[0].baplus_moe_pct = acsPctMOE(temp[0].total_est,temp[0].total_moe, temp[0].baplus_est_pct,temp[0].baplus_moe);
+
 	 outdata.push(temp);	
     }; //end of a loop
 
@@ -1967,8 +1964,7 @@ function povData(indata,fips) {
 			 'total_moe' : indata[a].B06012_001M,
 			 'pov_est' : indata[a].B06012_002E,
 			 'pov_moe' : indata[a].B06012_002M,
-			 'pov_est_pct' : indata[a].B06012_002E/indata[a].B06012_001E,
-			 'pov_moe_pct' : indata[a].B06012_002M/indata[a].B06012_001E
+			 'pov_est_pct' : indata[a].B06012_002E/indata[a].B06012_001E
 		});
 	 } else {
 		temp.push({
@@ -1977,13 +1973,14 @@ function povData(indata,fips) {
 			 'total_moe' : indata[a].B06012_001M,
 			 'pov_est' : indata[a].B06012_002E,
 			 'pov_moe' : indata[a].B06012_002M,
-			 'pov_est_pct' : indata[a].B06012_002E/indata[a].B06012_001E,
-			 'pov_moe_pct' : indata[a].B06012_002M/indata[a].B06012_001E
+			 'pov_est_pct' : indata[a].B06012_002E/indata[a].B06012_001E
 		 });
 	 };
-	
+	 temp[0].pov_moe_pct = acsPctMOE(temp[0].total_est,temp[0].total_moe, temp[0].pov_est_pct,temp[0].pov_moe);
 	 outdata.push(temp);	
     }; //end of a loop
+	
+	
 
  //flatten 
 var outdata_flat = [];
@@ -2030,11 +2027,9 @@ function tenureData(indata,fips) {
 			 'oo_est' : indata[a].B25003_002E,
 			 'oo_moe' : indata[a].B25003_002M,
 			 'oo_est_pct' : indata[a].B25003_002E/indata[a].B25003_001E,
-			 'oo_moe_pct' : indata[a].B25003_002M/indata[a].B25003_001E,
 			 'rent_est' : indata[a].B25003_003E,
 			 'rent_moe' : indata[a].B25003_003M,
 			 'rent_est_pct' : indata[a].B25003_003E/indata[a].B25003_001E,
-			 'rent_moe_pct' : indata[a].B25003_003M/indata[a].B25003_001E 
 		});
 	 } else {
 		temp.push({
@@ -2044,14 +2039,15 @@ function tenureData(indata,fips) {
 			 'oo_est' : indata[a].B25003_002E,
 			 'oo_moe' : indata[a].B25003_002M,
 			 'oo_est_pct' : indata[a].B25003_002E/indata[a].B25003_001E,
-			 'oo_moe_pct' : indata[a].B25003_002M/indata[a].B25003_001E,
 			 'rent_est' : indata[a].B25003_003E,
 			 'rent_moe' : indata[a].B25003_003M,
 			 'rent_est_pct' : indata[a].B25003_003E/indata[a].B25003_001E,
-			 'rent_moe_pct' : indata[a].B25003_003M/indata[a].B25003_001E 
 		 });
 	 };
 	
+	 temp[0].oo_moe_pct = acsPctMOE(temp[0].total_est,temp[0].total_moe, temp[0].oo_est_pct,temp[0].oo_moe);
+	 temp[0].rent_moe_pct = acsPctMOE(temp[0].total_est,temp[0].total_moe, temp[0].rent_est_pct,temp[0].rent_moe);
+
 	 outdata.push(temp);	
     }; //end of a loop
 
@@ -2657,7 +2653,7 @@ return(outcome);
 
 //acsPctMOE Calculates percentage MOE ACS Handbook Chapter 8 pg 6
 
-function acsPct(totest,totmoe,varpct,varmoe) {
+function acsPctMOE(totest,totmoe,varpct,varmoe) {
   var fractionY = 1/totest;
   var moeYsq =  Math.pow(totmoe,2);
   var moeXsq =  Math.pow(varmoe,2);
