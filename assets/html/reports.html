@@ -1,0 +1,80 @@
+<!-- Reports Secondary Page A Bickford 5/2021 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>SDO Publications and Reports Page</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
+<!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
+<!-- SDO CSS -->
+<link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
+<!-- adding d3.js  for data manipulation-->
+ <script src="https://d3js.org/d3.v6.min.js"></script>
+<!-- SDO suport functions, genSYA, insertHTML, -->
+<script src="../js/funct.js"></script>
+<!-- GoogleAnalytics Script -->
+<script defer src="../js/googleAnalytics.js"></script>
+</head>
+<body>
+<div class="alert__bar--covid-19" style="text-color:black;font-size:12px;">
+    <h2 style="background-color:#8fc6e8;text-align:center;">
+      Visit <a href="https://covid19.colorado.gov/for-coloradans/vaccine/where-can-i-get-vaccinated">"Where can I get vaccinated"</a> or call 1-877-COVAXCO (1-877-268-2926) for vaccine information.
+    </h2>
+</div>    
+<div>
+<a href="https://cdola.colorado.gov/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt="Department of Local Affairs Homepage"></a>
+</div>
+	<div w3-include-html="./navheader.html"></div>
+<!-- First Grid, linked images -->
+<div class="grid-container2">
+  <div class="grid-item panel2_1_1">
+	<div w3-include-html="./sdotitle.html"></div>
+  </div>
+  <div class="grid-item panel2_2_1" id="leftHand">
+	<div w3-include-html="./left_hand_index.html"></div>
+  </div> <!-- Grid  panel2_2_1 -->
+
+<div class="grid-item app-panel_2_span">
+<p>
+<b>Publications and Reports</b><br>
+</p>
+<main>
+	<ul class='accordion-ul'>
+		<li><a class='accordion-link' href=' https://drive.google.com/uc?export=download&id=1Klq9pdHjeGTFaol2VCabKnLJVB4Ksx0g'>2020 Population Summary (2022) <i class='fas fa-file-pdf' style='color:red;'></i></a></li>
+		<li><a class='accordion-link' href='https://drive.google.com/uc?export=download&id=1UaUuhTWxQiX7Kdu-b3vJn8J9V10BtOFn'>Characteristics of Colorado Migrants (2018)  <i class='fas fa-file-pdf' style='color:red;'></i></a></li>
+		<li><a class='accordion-link' href='https://drive.google.com/uc?export=download&id=1cT9svV10PxlrC46ucauNJttgJc0GS4sN'>Colorado Non-Renewable Resources Update (2018)  <i class='fas fa-file-pdf' style='color:red;'></i></a></li>
+		<li><a class='accordion-link' href='https://drive.google.com/uc?export=download&id=0B2FMBVetYCVCSDBQVlE1WkQxUlE'>Employment Impact from Senior Spending in Colorado (2017)  <i class='fas fa-file-pdf' style='color:red;'></i></a></li>
+		<li><a class='accordion-link' href='https://drive.google.com/uc?export=download&id=0B2FMBVetYCVCRUxUQjg0R0NKSkU'>Colorado Fertility: Recent Trends and Expectations of Change (2017)  <i class='fas fa-file-pdf' style='color:red;'></i></a></li>
+		<li><a class='accordion-link' href='https://drive.google.com/uc?export=download&id=0ByjImPUKASTTQm5LSG5SMm16UFU)'>Colorado Population and Economic Update (2016) <i class='fas fa-file-pdf' style='color:red;'></i></a></li>
+		<li><a class='accordion-link' href='https://drive.google.com/uc?export=download&id=0B2oqdPZKJqK7RDloZG45V2JmNmc)'>What Paradox? Educational Attainment by Place of Birth  <i class='fas fa-file-pdf' style='color:red;'></i></a></li>
+		<li><a class='accordion-link' href='https://drive.google.com/uc?export=download&id=0B2oqdPZKJqK7UWNjU1ZuVnVEUmc)'>Colorado Mineral and Energy Update (2014)  <i class='fas fa-file-pdf' style='color:red;'></i></a></li>
+		<li><a class='accordion-link' href='https://drive.google.com/uc?export=download&id=0B2oqdPZKJqK7dU9uVzdzaE84c0k)'>\"Social Generations\" (2014)  <i class='fas fa-file-pdf' style='color:red;'></i></a></li>
+		<li><a class='accordion-link' href=' https://drive.google.com/uc?export=download&id=0B2oqdPZKJqK7NnhnQnVhWHdJV1E'>Aging in Colorado (2012)  <i class='fas fa-file-pdf' style='color:red;'></i></a></li>
+		<li><a class='accordion-link' href='https://drive.google.com/uc?export=download&id=0B2oqdPZKJqK7NE1XNDVrN2tBelE)'>Cost of Living Differentials in Colorado (2007) <i class='fas fa-file-pdf' style='color:red;'></i></a></li>
+	</ul>
+</main>
+</div> <!-- app -->
+
+ <div class="grid-item panel2_4_2">
+		<div w3-include-html="./bodycontent1.html"></div>
+</div>
+	<div class="grid-item panel2_4_4">
+		<div w3-include-html="./bodycontent2.html"></div>
+</div>
+<div class="grid-item panel2_4_6">
+	<div w3-include-html="./bodycontent3.html"></div>
+</div>
+</div>  <!-- End of Grid -->
+
+
+<script>
+
+//Setting HTML include and Accordion
+includeHTML(); 
+
+</script>
+
+</body>
+</html> 

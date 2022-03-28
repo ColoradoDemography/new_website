@@ -1,0 +1,133 @@
+<!-- Crosstabs Secondary Page A Bickford 5/2021 -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>SDO Crosstabs Page</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
+<!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
+<!-- SDO CSS -->
+<link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
+<!-- adding d3.js  for data manipulation-->
+ <script src="https://d3js.org/d3.v6.min.js"></script>
+<!-- SDO suport functions, genSYA, insertHTML, -->
+<script src="../js/funct.js"></script>
+<!-- GoogleAnalytics Script -->
+<script defer src="../js/googleAnalytics.js"></script>
+</head>
+<body>
+<div class="alert__bar--covid-19" style="text-color:black;font-size:12px;">
+    <h2 style="background-color:#8fc6e8;text-align:center;">
+      Visit <a href="https://covid19.colorado.gov/for-coloradans/vaccine/where-can-i-get-vaccinated">"Where can I get vaccinated"</a> or call 1-877-COVAXCO (1-877-268-2926) for vaccine information.
+    </h2>
+</div>    
+<div>
+<a href="https://cdola.colorado.gov/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt="Department of Local Affairs Homepage"></a>
+</div>
+	<div w3-include-html="./navheader.html"></div>
+<!-- First Grid, linked images -->
+<div class="grid-container2">
+  <div class="grid-item panel2_1_1">
+	<div w3-include-html="./sdotitle.html"></div>
+  </div>
+  <div class="grid-item panel2_2_1" id="leftHand">
+	<div w3-include-html="./left_hand_index.html"></div>
+  </div> <!-- Grid  panel2_2_1 -->
+
+
+<div class="grid-item app-panel_2_span">
+<p>
+<b>Crosstabs - A Closer Look at the Economics & Demographics of Colorado</b><br>
+</p>
+ <details>
+	<summary>Changes in Colorado's Educational Attainment 2010 to 2019 6/4/2021</summary>
+<main>
+		<div w3-include-html="../crosstabs/Education_20211004.html"></div>
+</main>
+</details>
+<details>
+	<summary>Highlights from the 2017 Census of Agriculture 1/29/2020</summary>
+<main>
+		<div w3-include-html="../crosstabs/agricultiure_2017_20200129.html"></div>
+</main>
+</details>
+<details>
+	<summary>Characteristics of Colorado Migrants 10/19/2018</summary>
+<main>
+		<div w3-include-html="../crosstabs/Migration_20181019.html"></div>
+</main>
+</details>
+<details>
+	<summary>Colorado Non-Renewable Resources Update 6/29/2018</summary>
+<main>
+		<div w3-include-html="../crosstabs/non-renewable_resource_20180629.html"></div>
+</main>
+</details>
+<details>
+	<summary>Generations (re)Defined 3/15/2018</summary>
+<main>
+		<div w3-include-html="../crosstabs/generations_20180315.html"></div>
+</main>
+</details>
+<details>
+	<summary>Aging and the Economy 11/20/2017</summary>
+<main>
+		<div w3-include-html="../crosstabs/agingecon_20171120.html"></div>
+</main>
+</details>
+<details>
+	<summary>Colorado Fertility Part Two: Expectations of Change 7/21/2017</summary>
+<main>
+		<div w3-include-html="../crosstabs/fertility_2_20170721.html"></div>
+</main>
+</details>
+<details>
+	<summary>Colorado Fertility Part One: Recent Trends 5/17/2017</summary>
+<main>
+		<div w3-include-html="../crosstabs/fertility_1_20170517.html"></div>
+</main>
+</details>
+<details>
+	<summary>Earnings: Millennials vs. Older Generations 3/14/2017</summary>
+<main>
+		<div w3-include-html="../crosstabs/millearn_20170314.html"></div>
+</main>
+</details>
+<details>
+	<summary>Aging in Colorado Part 2: What Does it Mean for Our State? 10/25/2016</summary>
+<main>
+		<div w3-include-html="../crosstabs/aging_20161025.html"></div>
+</main>
+</details>
+<details>
+	<summary>Aging in Colorado Part 1: Why is Colorado Aging So Quickly? 9/20/2016</summary>
+<main>
+		<div w3-include-html="../crosstabs/aging_20160921.html"></div>
+</main>
+</details>
+</div> <!-- app -->
+
+ <div class="grid-item panel2_4_2">
+		<div w3-include-html="./bodycontent1.html"></div>
+</div>
+	<div class="grid-item panel2_4_4">
+		<div w3-include-html="./bodycontent2.html"></div>
+</div>
+<div class="grid-item panel2_4_6">
+	<div w3-include-html="./bodycontent3.html"></div>
+</div>
+</div>  <!-- End of Grid -->
+
+
+<script>
+
+//Setting HTML include and Accordion
+includeHTML(); 
+
+</script>
+
+</body>
+</html> 
