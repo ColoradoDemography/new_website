@@ -25,8 +25,19 @@ hr {
     border-top: 1px solid #cbcbcb;
     margin: 1em 0;
 }
+/* Paragraph Style */
+.textp {
+	color : black;
+	font-family: "Trebuchet MS, Museo Slab; helvetica, lucida sans, tahoma, verdana", sans-serif;
+	font-size: 11pt;
+}
 
-
+.texth {
+	color : black;
+	font-family: "Trebuchet MS, Museo Slab; helvetica, lucida sans, tahoma, verdana", sans-serif;
+	font-size: 12pt;
+	font-weight : bold;
+}
 /* Table Styles */
 table {
 	table-layout : auto;
