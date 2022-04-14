@@ -25,19 +25,64 @@ hr {
     border-top: 1px solid #cbcbcb;
     margin: 1em 0;
 }
-/* Paragraph Style */
-.textp {
-	color : black;
-	font-family: "Trebuchet MS, Museo Slab; helvetica, lucida sans, tahoma, verdana", sans-serif;
-	font-size: 11pt;
+/* Styles for crosstabs  blog entries*/
+.crosstab_grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows : 2fr;
+  	column-gap : 2rem;
 }
 
-.texth {
+.crosstab_content_row {
+   grid-column : 1/ span 2;
+   margin-left: 2em;
+   margin-right: 2em;
+   }
+.crosstab_content_head1 {
+    grid-column-start  : 1;
+	grid-column-end : 1;
+	column-gap : 2rem;
+ }
+ .crosstab_content_head2 {
+    grid-column-start  : 2;
+	grid-column-end : 2;
+	margin-right: 4em;
+ }
+ 
+ p.crosstext {
+	color : black;
+	font-family: "Trebuchet MS, Museo Slab; helvetica, lucida sans, tahoma, verdana", sans-serif;
+	font-size: 12pt;
+	text-align: justify;
+}
+
+li.crosstext {
+	color : black;
+	font-family: "Trebuchet MS, Museo Slab; helvetica, lucida sans, tahoma, verdana", sans-serif;
+	font-size: 12pt;
+	text-align: justify;
+}
+
+p.crosstitle {
+	color : black;
+	font-family: "Trebuchet MS, Museo Slab; helvetica, lucida sans, tahoma, verdana", sans-serif;
+	font-size: 12pt;
+	font-weight : bold;
+	text-align: center;
+	}
+.crossimg {
+	display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
+.crosshead {
 	color : black;
 	font-family: "Trebuchet MS, Museo Slab; helvetica, lucida sans, tahoma, verdana", sans-serif;
 	font-size: 12pt;
 	font-weight : bold;
 }
+
 /* Table Styles */
 table {
 	table-layout : auto;
@@ -324,11 +369,12 @@ a :hover {
    }
 
 ul.accordion-ul {
+    display: block; 
 	margin-left: 10px;
 	padding : 5px;
 	font-size : 10pt;
-	list-style-type : disc;
-	display: list-item;
+    list-style-type : disc; 
+
 }
 .accordion-link {
 	font-size : 11pt;
@@ -979,6 +1025,30 @@ details main {
    grid-column: 6;
    grid-row: 2;   
   }  
+    .sect-panel_3_1 {  
+   grid-column: 1;
+   grid-row: 3;   
+  }  
+  .sect-panel_3_2 {  
+   grid-column: 2;
+   grid-row: 3;   
+  }  
+  .sect-panel_3_3 {  
+   grid-column: 3;
+   grid-row: 3;   
+  }  
+  .sect-panel_3_4 {  
+   grid-column: 4;
+   grid-row: 3;   
+  }  
+  .sect-panel_3_5 {  
+   grid-column: 5;
+   grid-row: 3;   
+  }  
+  .sect-panel_3_6 {  
+   grid-column: 6;
+   grid-row: 3;   
+  } 
   
  .sect-spread_1 { 
    grid-column: 1/ span 3;
