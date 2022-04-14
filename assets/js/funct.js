@@ -1918,7 +1918,6 @@ function educData(indata,fips) {
 	 outdata.push(temp);	
     }; //end of a loop
 
-
   //flatten 
 var outdata_flat = [];
 for(i = 0; i < outdata.length; i++){
@@ -2289,54 +2288,56 @@ for(i = 0;i < inData[0].length; i++){
 	 
 	 if((inData[0][i].slice(-1) === "E") || (inData[0][i].slice(-1) === "M")) {
 	    if(inData[0][i] != 'NAME') {
-		  name_arr.push(inData[0][i])
+		  name_arr.push({"pos" : i, "varname" : inData[0][i]})
 		};
      };	
 } 
 
 //adding name and geos to name arr
 if(countyPos != 0) {
-	name_arr.unshift("GEO2");
+	name_arr.unshift({"pos" : countyPos, "varname" : "GEO2"});
 }
 if(placePos != 0) {
-	name_arr.unshift("GEO2");
+	name_arr.unshift({"pos" : placePos, "varname" : "GEO2"});
 }
 if(statePos != 0) {
 	if(countyPos == 0) {
-		name_arr.unshift("GEO2");	
+		name_arr.unshift({"pos" : countyPos, "varname" : "GEO2"});	
 	}	
-	name_arr.unshift("GEO1");		  
+	name_arr.unshift({"pos" : statePos, "varname" : "GEO1"});		  
 }
 
-name_arr.unshift("NAME");
+name_arr.unshift({"pos" : namePos, "varname" : "NAME"});
 
 var num_data = [];
 for(i = 1; i < inData.length;i++){
-	  var tmp_data = inData[i].filter(Number);
-	  var tmp_data2 =  tmp_data.map(function (x) { 
-					return +x; 
-	  });
-      var plVal = inData[i][namePos];
-	  if(countyPos != 0) { var geo2Val = parseInt(inData[i][countyPos]);}
-	  if(placePos != 0) { var geo2Val = parseInt(inData[i][placePos]);}
-	  if(statePos != 0) { var geo1Val = parseInt(inData[i][statePos]);
-	  	if(countyPos == 0) { geo2Val = 0;	}	
+	  var tmp_data = inData[i];
+	  var tmp_data2 = []
+	  for(j = 0; j < tmp_data.length; j++){
+		  if(Number(tmp_data[j])){
+			  tmp_data2.push(parseInt(tmp_data[j]) < 0 ? 0 : parseInt(tmp_data[j]));
+		  } else {
+			  tmp_data2.push(tmp_data[j]);
+		  }
 	  }
+  num_data.push(tmp_data2);
+}
 
-      tmp_data2.unshift(geo2Val);
-      tmp_data2.unshift(geo1Val);
-	  tmp_data2.unshift(plVal); 
-	  num_data.push(tmp_data2);
-}	
+var fin_data = []
+for(i = 0; i < num_data.length; i++){
+	var tmp_data = num_data[i];
+	var tmp_name = [];
+	for(j = 0; j < name_arr.length;j++){
 
-//Create associative array...
-var fin_data =[]
-for(i = 0 ; i < num_data.length; i++){
-	   var tmp_data = [];
-	   for(j = 0; j < num_data[i].length; j++) {
-		   tmp_data[name_arr[j]] = num_data[i][j];
-	   }
-	   fin_data.push(tmp_data);
+		 var var_str = name_arr[j].varname;
+		 var var_pos = name_arr[j].pos;
+		 if(var_str == "GEO2" && var_pos == 0){
+			 tmp_name[var_str] = 0;
+		 } else {
+		 tmp_name[var_str] = tmp_data[var_pos];
+		 }
+	}
+	fin_data.push(tmp_name);
 }
 
 return(fin_data);
@@ -3472,7 +3473,7 @@ if(fips == "000") {
 
        var educstr_cur = genACSUrl("homepage",curyr, "B15003", 1, 25, "county",fips);
 	   var educstr_prev = genACSUrl("homepage",prevyr, "B15003", 1, 25, "county",fips);
-	   
+
        var incstr_cur = genACSUrl("homepage",curyr, "B19013", 1, 1, "county",fips);
 	   var incstr_prev = genACSUrl("homepage",prevyr, "B19013", 1, 1, "county",fips);
 	   
@@ -3563,7 +3564,8 @@ Promise.all(prom).then(function(data){
 
     educ_prev = educData(acsPrep(data[2]),fips);
 	educ_cur = educData(acsPrep(data[3]),fips);
-  
+
+ 
 	//Calculate rank 
 	if(fips == '000') {  //Removing DC and PR
 	  educ_rank = educ_cur.sort(function(a, b){ return d3.ascending(b['baplus_est_pct'], a['baplus_est_pct']); })
@@ -4178,10 +4180,12 @@ var forec_layout = {
  
 Plotly.newPlot(FORECAST, forec_tr, forec_layout,config);
 //Data formatting
+
 var forecast_shift  = [];
 forecast_data.forEach(item => {
-    forecast_shift.push({'fips' : item.fips, 'name' : item.ctyName, 'year' :  item.year, 'totalpopulation' : fmt_comma(item.totalpopulation)});
+    forecast_shift.push({'fips' : fips, 'name' : ctyName, 'year' :  item.year, 'totalpopulation' : fmt_comma(item.totalpopulation)});
 });
+
 
 //Forecasts
 var forecast_names = {
@@ -4564,7 +4568,7 @@ var popchng_layout = {
 	                   p0 : fmt_comma(d.p0),
 					   p1 : fmt_comma(d.p1),
 					   popchng : d.popchng < 0 ? ("-" + fmt_comma(Math.abs(d.popchng))) : fmt_comma(d.popchng),
-	                   pctchng: d.pctchng <0 ? ("-" + fmt_pct1(Math.abs(d.pctchng))) : fmt_pct1(d.pctchng)
+	                   pctchng: d.pctchng < 0 ? ("-" + fmt_pct1(Math.abs(d.pctchng))) : fmt_pct1(d.pctchng)
 	 })
  });
  
@@ -4726,7 +4730,7 @@ if(app == 'dashboard') {
     netmig_shift.push({ fips : fips,
 	                    loc : ctyName,
 	                    age : d.age,
-						NetMig0010 : fmt_comma(d.NetMig0010)
+						NetMig0010 : d.NetMig0010 < 0 ?  ("-" + fmt_comma(Math.abs(d.NetMig0010))) : fmt_comma(d.NetMig0010)
 	})
 	}) 
 } else {
@@ -4734,9 +4738,9 @@ if(app == 'dashboard') {
     netmig_shift.push({ fips : fips,
 	                    loc : ctyName,
 	                    age : d.age,
-						NetMig9500 : fmt_comma(d.NetMig9500),
-						NetMig0010 : fmt_comma(d.NetMig0010),
-						NetMig1020 : fmt_comma(d.NetMig1020)
+						NetMig9500 : d.NetMig9500 < 0 ?  ("-" + fmt_comma(Math.abs(d.NetMig9500))) : fmt_comma(d.NetMig9500),
+						NetMig0010 : d.NetMig0010 < 0 ?  ("-" + fmt_comma(Math.abs(d.NetMig0010))) : fmt_comma(d.NetMig0010),
+						NetMig1020 : d.NetMig1020 < 0 ?  ("-" + fmt_comma(Math.abs(d.NetMig1020))) : fmt_comma(d.NetMig1020)
 	})
 	})
 	}
@@ -4925,11 +4929,11 @@ coc_flat.forEach( d => {
 		   fips : fips,
 		   name : ctyName,
 		   year : d.year,
-		   totalpopulation : fmt_comma(d.totalpopulation),
-		   births : fmt_comma(d.births),
-		   deaths : fmt_comma(d.deaths),
-           naturalincrease : fmt_comma(d.naturalincrease),
-		   netmigration : fmt_comma(d.netmigration)
+		   totalpopulation : d.totapopulation < 0 ?  ("-" + fmt_comma(Math.abs(d.totalpopulation))) : fmt_comma(d.totalpopulation),
+		   births : d.births < 0 ?  ("-" + fmt_comma(Math.abs(d.births))) : fmt_comma(d.births),
+		   deaths : d.deaths < 0 ?  ("-" + fmt_comma(Math.abs(d.deaths))) : fmt_comma(d.deaths),
+           naturalincrease : d.naturalincrease < 0 ?  ("-" + fmt_comma(Math.abs(d.naturalincrease))) : fmt_comma(d.naturalincrease),
+		   netmigration : d.netmigration < 0 ?  ("-" + fmt_comma(Math.abs(d.netmigration))) : fmt_comma(d.netmigration)
 	})
 });
 	

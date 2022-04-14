@@ -2382,6 +2382,12 @@ for(i = 1; i < names.length; i++){
 	  descript = descript + ", " + names[i];
 };
 
+const regList = ['Region', 'Regional Comparison'];
+const ctyList = ['County', 'County Comparison'];
+const muniList = ['Municipality', 'Municipal Comparison'];
+const placeList = ['Census Designated Place', 'Census Designated Place Comparison'];
+
+
 //Defining the output p[anels
 var PROFILE_1 = document.getElementById('profile-content1');
 var PROFILE_2 = document.getElementById('profile-content2');
@@ -2391,12 +2397,13 @@ var PROFILE_4 = document.getElementById('profile-content4');
 	 
  //Create an array that holds the contenrnts 
 
-//Selecting Maximum Year
+//Selecting Maximum Year and acsyr
 var yrstr = "https://gis.dola.colorado.gov/lookups/componentYRS";
 d3.json(yrstr).then(function(yeardata){
     var maxest = yeardata.filter(function(d){return d.datatype == 'Estimate'});
 	var yrsList = maxest.map(function(d){return d.year;});
     var curyear = d3.max(yrsList);
+	var acsyr = 2020;  ///CHANGE THIS WHEN 2020 ACS is available
 
 //Triggering the first button  Expand these for each button...
 var firstbtn = valSec[0];
@@ -2439,8 +2446,22 @@ if(firstbtn == 'sel3') {
    PROFILE_2.innerHTML = "";
    PROFILE_3.innerHTML = "";
    PROFILE_4.innerHTML = "";
-   genSel3display(lvl, fipsArr, names, curyear, PROFILE_1, PROFILE_2, PROFILE_3, PROFILE_4);
+   if(muniList.includes(lvl)) {
+         genSel3display(lvl, fipsArr, names, acsyr, PROFILE_1, PROFILE_2, PROFILE_3, PROFILE_4);
+   } else {
+	     genSel3display(lvl, fipsArr, names, curyear, PROFILE_1, PROFILE_2, PROFILE_3, PROFILE_4);
+   }
 }
+
+//Income, Educ, Race Panel button
+if(firstbtn == 'sel4') { 
+   PROFILE_1.innerHTML = "";
+   PROFILE_2.innerHTML = "";
+   PROFILE_3.innerHTML = "";
+   PROFILE_4.innerHTML = "";
+   genSel4display(lvl, fipsArr, names, acsyr, PROFILE_1, PROFILE_2, PROFILE_3, PROFILE_4);
+}
+
 //Setting Event Listeners  For a click on a section button...
 document.getElementById("sel1btn").addEventListener("click", function() {
   PROFILE_1.innerHTML = "";
@@ -2473,8 +2494,22 @@ document.getElementById("sel3btn").addEventListener("click", function() {
    PROFILE_2.innerHTML = "";
    PROFILE_3.innerHTML = "";
    PROFILE_4.innerHTML = "";
-   genSel3display(lvl, fipsArr, names, curyear, PROFILE_1, PROFILE_2, PROFILE_3, PROFILE_4);
-}); //end of sel2btn listener
+   if(muniList.includes(lvl)) {
+         genSel3display(lvl, fipsArr, names, acsyr, PROFILE_1, PROFILE_2, PROFILE_3, PROFILE_4);
+   } else {
+	     genSel3display(lvl, fipsArr, names, curyear, PROFILE_1, PROFILE_2, PROFILE_3, PROFILE_4);
+   }
+}); //end of sel3btn listener
+
+//Income, Educ, Race Panel button
+document.getElementById("sel4btn").addEventListener("click", function() {
+   PROFILE_1.innerHTML = "";
+   PROFILE_2.innerHTML = "";
+   PROFILE_3.innerHTML = "";
+   PROFILE_4.innerHTML = "";
+   genSel4display(lvl, fipsArr, names, acsyr, PROFILE_1, PROFILE_2, PROFILE_3, PROFILE_4);
+}); //end of sel4btn listener
+
 }); //End of Promise 
 }; //end of genProfile
 	
@@ -2503,7 +2538,7 @@ function genSel1map(level, fipsArr,nameArr,outputProfile){
 
 var prom = [d3.json(ctyPath),d3.csv(placecentroid)]
 
-Promise.all(prom).then(function(data){
+Promise.all(prom).then(data =>{
 
 	let projection = d3.geoMercator();
     projection.fitSize([width, height], data[0]);
@@ -2761,7 +2796,7 @@ if(muniList.includes(level)){
 				 d3.json(natCTY),d3.json(natCDP)];
   }
 
-  Promise.all(prom).then(function(data){
+  Promise.all(prom).then(data =>{
   
 	  
 	  if(regList.includes(level)){
@@ -3323,7 +3358,7 @@ if(muniList.includes(geotype)){
 };
 
 
-Promise.all(prom).then(function(data){
+Promise.all(prom).then(data =>{
 // Processing State Table
 var columnsToSum = ['births', 'deaths', 'totalpopulation'];
 
@@ -3577,296 +3612,6 @@ var coc_data = coc_cty_data; //This is single year data
 }; //end genSel2display
 
 
-//acsPct creates age percentage data from ACS inputs for Age Bar Charts
-function acsPct(inData,fips, yrvalue, type) {
-	
-	var numData = [];
-	for(i = 0; i < inData[1].length; i++){
-		numData.push(parseInt(inData[1][i]));
-	}
-	
-	var tot_totalpopulation_e = numData[0];
-	var tot_totalpopulation_m = numData[2];
-	var tot_malepopulation_e  = numData[4];
-	var tot_malepopulation_m = numData[6] 
-	var tot_femalepopulation_e = numData[100];
-	var tot_femalepopulation_m = numData[102];
-	  var fips_val = parseInt(fips);
-	
-	if (type == "county") {
-		var out_name = countyName(fips_val);
-	} else {
-	    var out_name = muniName(fips_val);
-	};
-//Output Bar chart data 
-	var outData = [];
-
-//dataArr has the addresses of column names, male, female
-for(i = 0; i <= 7; i++){
-    if(i == 0){ 
-	       var age_cat = '0 to 4';
-			var malepopulation_e = numData[8];
-			var malepopulation_m  = numData[10] 
-			var femalepopulation_e  = numData[104];
-			var femalepopulation_m  = numData[106];
-   };
-	if(i == 1){
-	    var age_cat = '5 to 17';
-		var malepopulation_e =  numData[12] + numData[16] + numData[20];
-		var malepopulation_m =  Math.sqrt(Math.pow(numData[14],2) + Math.pow(numData[18],2) + Math.pow(numData[22],2));
-		var femalepopulation_e =  numData[108] + numData[112] + numData[116];
-		var femalepopulation_m =  Math.sqrt(Math.pow(numData[110],2) + Math.pow(numData[114],2) + Math.pow(numData[118],2));
-    };
-    if(i == 2){
-	    var age_cat = '18 to 24';
-		var malepopulation_e =  numData[24] + numData[28] + numData[32] + numData[36];
-		var malepopulation_m = Math.sqrt(Math.pow(numData[26],2) + Math.pow(numData[30],2) + Math.pow(numData[34],2) + Math.pow(numData[38],2));
-		var femalepopulation_e =  numData[120] + numData[124] + numData[128] + numData[132];
-		var femalepopulation_m =  Math.sqrt(Math.pow(numData[122],2) + Math.pow(numData[126],2) + Math.pow(numData[130],2) + Math.pow(numData[134],2));
-
-		};
-    if(i == 3){
-	    var age_cat = '25 to 54';
-		var malepopulation_e =  numData[40] + numData[44] + numData[48] + numData[52] + numData[56] + numData[60];
-		var malepopulation_m =  Math.sqrt(Math.pow(numData[42],2) + Math.pow(numData[46],2) + Math.pow(numData[50],2) + Math.pow(numData[54],2) + Math.pow(numData[58],2) + Math.pow(numData[62],2));
-		var femalepopulation_e =  numData[136] + numData[140] + numData[144] + numData[148] + numData[152] + numData[156];
-		var femalepopulation_m =  Math.sqrt(Math.pow(numData[138],2) + Math.pow(numData[142],2) + Math.pow(numData[146],2) + Math.pow(numData[150],2) + Math.pow(numData[154],2) + Math.pow(numData[158],2));
-		};
-    if(i == 4){
-	    var age_cat = '55 to 64';
-		var malepopulation_e =   numData[64] + numData[68] + numData[72];
-		var malepopulation_m =   Math.sqrt(Math.pow(numData[66],2) + Math.pow(numData[70],2) + Math.pow(numData[74],2));
-		var femalepopulation_e =   numData[160] + numData[164] + numData[168];
-		var femalepopulation_m =   Math.sqrt(Math.pow(numData[162],2) + Math.pow(numData[166],2) + Math.pow(numData[170],2));
-		};
-    if(i == 5){
-	    var age_cat = '65 to 74';
-		var malepopulation_e = numData[76] + numData[80] + numData[84];
-		var malepopulation_m = Math.sqrt(Math.pow(numData[78],2) + Math.pow(numData[82],2) + Math.pow(numData[86],2));
-		var femalepopulation_e = numData[172] + numData[176] + numData[180];
-		var femalepopulation_m = Math.sqrt(Math.pow(numData[174],2) + Math.pow(numData[178],2) + Math.pow(numData[182],2));
-		};
-	 if(i == 6){
-	    var age_cat = '75 to 84';
-		var malepopulation_e = numData[88] + numData[92];
-		var malepopulation_m =  Math.sqrt(Math.pow(numData[90],2) + Math.pow(numData[94],2));
-		var femalepopulation_e =  numData[184] + numData[188];
-		var femalepopulation_m =  Math.sqrt(Math.pow(numData[186],2) + Math.pow(numData[190],2));
-		};
-	 if(i == 7){
-	     var age_cat = '85 +';
-		var malepopulation_e =  numData[96];
-		var malepopulation_m =  numData[98];
-		var femalepopulation_e =  numData[192];
-		var femalepopulation_m = numData[194];
-		};	
-
-	 var totalpopulation_e = malepopulation_e + femalepopulation_e;
-	 var totalpopulation_m = Math.sqrt(Math.pow(malepopulation_m,2) + Math.pow(femalepopulation_m,2));
-	 var pct_malepopulation_e =  malepopulation_e/tot_malepopulation_e;
-	 var pct_malepopulation_m =  malepopulation_m/tot_malepopulation_e;
-	 var pct_femalepopulation_e = femalepopulation_e/tot_femalepopulation_e;
-	 var pct_femalepopulation_m = femalepopulation_m/tot_femalepopulation_e;
-     var pct_totalpopulation_e = totalpopulation_e/tot_totalpopulation_e;
-     var pct_totalpopulation_m = totalpopulation_m/tot_totalpopulation_e;
-	 
-	 outData.push({'fips' : fips_val, 'name' : out_name, 'year' : yrvalue, 'age_cat_no' : i, 'age_cat' : age_cat, 
-	         'malepopulation_e' : malepopulation_e, 'malepopulation_m' : malepopulation_m, 
-			 'tot_malepopulation_e' : tot_malepopulation_e, 'tot_malepopulation_m' : tot_malepopulation_m,
-			 'pct_malepopulation_e' : pct_malepopulation_e, 'pct_malepopulation_m' : pct_malepopulation_m,
-			 'femalepopulation_e' : femalepopulation_e, 'femalepopulation_m' : femalepopulation_m, 
-			 'tot_femalepopulation_e' : tot_femalepopulation_e, 'tot_femalepopulation_m' : tot_femalepopulation_m,
-			  'pct_femalepopulation_e' : pct_femalepopulation_e,  'pct_femalepopulation_m' : pct_femalepopulation_m,
-			 'totalpopulation_e' : totalpopulation_e, 'totalpopulation_m' : totalpopulation_m,
-	         'tot_totalpopulation_e' : tot_totalpopulation_e, 'tot_totalpopulation_m' : tot_totalpopulation_m,
-	          'pct_totalpopulation_e' : pct_totalpopulation_e, 'pct_totalpopulation_m' : pct_totalpopulation_m});
-	}; //i
-	return(outData);
-} //acsPct
-
-//acsPyr creates age percentage data from ACS inputs for Age Pyramid Charts
-function acsPyr(inData,fips, yrvalue, type) {
-	var numData = [];
-	for(i = 0; i < inData[1].length; i++){
-		numData.push(parseInt(inData[1][i]));
-	}
-	
-	var tot_totalpopulation_e = numData[0];
-	var tot_totalpopulation_m = numData[2];
-	var tot_malepopulation_e  = numData[4];
-	var tot_malepopulation_m = numData[6] 
-	var tot_femalepopulation_e = numData[100];
-	var tot_femalepopulation_m = numData[102];
-	  var fips_val = parseInt(fips);
-	
-	if (type == "county") {
-		var out_name = countyName(fips_val);
-	} else {
-	    var out_name = muniName(fips_val);
-	};
-//Output Bar chart data 
-	var outData = [];
-    var fips_val = parseInt(fips);
-	if (type == "county") {
-		var out_name = countyName(fips_val);
-	} else {
-	    var out_name = muniName(fips_val);
-	};
-//Output Pyramid data
-var outData = [];
-for(i = 0; i <= 17;  i++){
-    if(i == 0){ 
-	       var age_cat = '0 to 4';
-		   var malepopulation_e = numData[8];
-		   var malepopulation_m = numData[10];
-		   var femalepopulation_e = numData[104]
-		   var femalepopulation_m = numData[106];
-		   };
-	if(i == 1){
-	       var age_cat = '5 to 9';
-		   var malepopulation_e = numData[12];
-		   var malepopulation_m = numData[14];
-		   var femalepopulation_e = numData[108];
-		   var femalepopulation_m = numData[110];
-    };
-	if(i == 2){
-	       var age_cat = '10 to 14';
-		   var malepopulation_e = numData[16];
-		   var malepopulation_m = numData[18];
-		   var femalepopulation_e = numData[112];
-		   var femalepopulation_m = numData[114];
-    };
-	if(i == 3){
-	       var age_cat = '15 to 19';
-		   var malepopulation_e = numData[20] + numData[24] ;
-		   var malepopulation_m = Math.sqrt(Math.pow(numData[22],2) + Math.pow(numData[26],2));
-		   var femalepopulation_e = numData[116] + numData[120];
-		   var femalepopulation_m = Math.sqrt(Math.pow(numData[118],2) + Math.pow(numData[122],2));
-    };
-	if(i == 4){
-	       var age_cat = '20 to 24';
-		   var malepopulation_e = numData[28] + numData[32] + numData[36];
-		   var malepopulation_m = Math.sqrt(Math.pow(numData[30],2) + Math.pow(numData[34],2) + Math.pow(numData[38],2));
-		   var femalepopulation_e = numData[124] + numData[128] + numData[132];
-		   var femalepopulation_m = Math.sqrt(Math.pow(numData[126],2) + Math.pow(numData[130],2) + Math.pow(numData[134],2));
-    };
-	if(i == 5){
-	       var age_cat = '25 to 29';
-		   var malepopulation_e = numData[40];
-		   var malepopulation_m = numData[42];
-		   var femalepopulation_e = numData[136];
-		   var femalepopulation_m = numData[138];
-    };
-	if(i == 6){
-	       var age_cat = '30 to 34';
-		   var malepopulation_e = numData[44];
-		   var malepopulation_m = numData[46];
-		   var femalepopulation_e = numData[140];
-		   var femailepopulation_m = numData[142];
-    };
-	if(i == 7){
-	       var age_cat = '35 to 39';
-		   var malepopulation_e = numData[48] ;
-		   var malepopulation_m = numData[50];
-	       var femalepopulation_e = numData[144];
-	       var femalepopulation_m = numData[146];
-    };
-	if(i == 8){
-	       var age_cat = '40 to 44';
-		   var malepopulation_e = numData[52];
-		   var malepopulation_m = numData[54];
-		   var femalepopulation_e = numData[148];
-		   var femalepopulation_m = numData[150];
-    };
-	if(i == 9){
-	       var age_cat = '45 to 49';
-		   var malepopulation_e = numData[56];
-		   var malepopulation_m = numData[58];
-		   var femalepopulation_e = numData[152];
-		   var femalepopulation_m = numData[154]
-    };
-	if(i == 10){
-	       var age_cat = '50 to 54';
-		   var malepopulation_e = numData[60];
-		   var malepopulation_m = numData[62];
-		   var femalepopulation_e = numData[156];
-		   var femalepopulation_m = numData[158]
-    };
-	if(i == 11){
-	       var age_cat = '55 to 59';
-		   var malepopulation_e = numData[64];
-		   var malepopulation_m = numData[66];
-		   var femalepopulation_e = numData[160];
-		   var femalepopultrion_m = numData[164];
-    };
-	if(i == 12){
-	       var age_cat = '60 to 64';
-		   var malepopulation_e = numData[68] + numData[72];
-		   var malepopulation_m = Math.sqrt(Math.pow(numData[70],2) + Math.pow(numData[74],2))
-		   var femalepopulation_e = numData[164] + numData[168];
-		   var femalepopulation_m = Math.sqrt(Math.pow(numData[166],2) + Math.pow(numData[170],2))
-    };
-	if(i == 13){
-	       var age_cat = '65 to 69';
-		   var malepopulation_e = numData[76] + numData[80];
-		   var malepopulation_m = Math.sqrt(Math.pow(numData[78],2) + Math.pow(numData[82],2))
-		   var femalepopulation_e = numData[172] + numData[176];
-		   var femalepopulation_m = Math.sqrt(Math.pow(numData[174],2) + Math.pow(numData[178],2))
-
-    };
-	if(i == 14){
-	       var age_cat = '70 to 74';
-		   var malepopulation_e = numData[84];
-		   var malepopulation_m = numData[86];
-		   var femalepopulation_e = numData[180];
-		   var femalepopulation_m = numData[182];
-    };
-	if(i == 15){
-	       var age_cat = '75 to 79';
-		   var malepopulation_e = numData[88];
-		   var malepopulation_m = numData[90]
-		   var femalepopulation_e = numData[184];
-		   var femalepopulation_m = numData[186];
-    };
-	if(i == 16){
-	       var age_cat = '80 to 84';
-		   var malepopulation_e = numData[92];
-		   var malepopulation_m = numData[94]
-		   var femalepopulation_e = numData[188];
-		   var femalepopulation_m = numData[190]
-    };
-	if(i == 17){
-	       var age_cat = '85 +';
-		   var malepopulation_e = numData[96];
-		   var malepopulation_m = numData[98];
-		   var femalepopulation_e = numData[192];
-		   var femalepopulation_m = numData[194]
-    };
-
-	 var totalpopulation_e = malepopulation_e + femalepopulation_e;
-	 var totalpopulation_m = Math.sqrt(Math.pow(malepopulation_m,2) + Math.pow(femalepopulation_m,2));
-	 var pct_malepopulation_e =  malepopulation_e/tot_malepopulation_e;
-	 var pct_malepopulation_m =  malepopulation_m/tot_malepopulation_e;
-	 var pct_femalepopulation_e = femalepopulation_e/tot_femalepopulation_e;
-	 var pct_femalepopulation_m = femalepopulation_m/tot_femalepopulation_e;
-     var pct_totalpopulation_e = totalpopulation_e/tot_totalpopulation_e;
-     var pct_totalpopulation_m = totalpopulation_m/tot_totalpopulation_e;
-	 
-	 outData.push({'fips' : fips_val, 'name' : out_name, 'year' : yrvalue, 'age_cat_no' : i, 'age_cat' : age_cat, 
-	         'malepopulation_e' : malepopulation_e, 'malepopulation_m' : malepopulation_m, 
-			 'tot_malepopulation_e' : tot_malepopulation_e, 'tot_malepopulation_m' : tot_malepopulation_m,
-			 'pct_malepopulation_e' : pct_malepopulation_e, 'pct_malepopulation_m' : pct_malepopulation_m,
-			 'femalepopulation_e' : femalepopulation_e, 'femalepopulation_m' : femalepopulation_m, 
-			 'tot_femalepopulation_e' : tot_femalepopulation_e, 'tot_femalepopulation_m' : tot_femalepopulation_m,
-			  'pct_femalepopulation_e' : pct_femalepopulation_e,  'pct_femalepopulation_m' : pct_femalepopulation_m,
-			 'totalpopulation_e' : totalpopulation_e, 'totalpopulation_m' : totalpopulation_m,
-	         'tot_totalpopulation_e' : tot_totalpopulation_e, 'tot_totalpopulation_m' : tot_totalpopulation_m,
-	          'pct_totalpopulation_e' : pct_totalpopulation_e, 'pct_totalpopulation_m' : pct_totalpopulation_m});
-	}; //i
-	return(outData);
-} //acsPyr
-
-
 //genSel3 Display  Produces age panel charts
 //Age estimates and forecasts facet chart
 //Age Pyramid
@@ -3892,9 +3637,8 @@ function genSel3display(geotype, fipsArr, names, curyear, PRO_1, PRO_2, PRO_3, P
   PRO_3.innerHTML = "";
   PRO_4.innerHTML = "";
 
-//This code Generates data for refions and counties...
+//This code Generates data for regions and counties...
 if(regList.includes(geotype)){
-	
 		var fips_tmp = regionCOL(parseInt(fipsArr));
 	    var fips_list =  fips_tmp[0].fips.map(function (x) { 
 					return parseInt(x, 10); 
@@ -3916,20 +3660,19 @@ var prom = [d3.json(forcurlCO), d3.json(forcurlCty)];
 
 //Estimages and Forecasts --For muniipalities, take  from the ACS No forecast
 if(muniList.includes(geotype)){
-	var acsyr = 2019;  ///CHANGE THIS WHEN 2020 ACS is available
 	var ctynum = muni_county(fipsArr);
-	var forcurlCty = "https://api.census.gov/data/"+ acsyr + "/acs/acs5?get=group(B01001)&for=county:" + ctynum +"&in=state:08&key=08fe07c2a7bf781b7771d7cccb264fe7ff8965ce";
- 	var forcurlMuni = "https://api.census.gov/data/"+ acsyr + "/acs/acs5?get=group(B01001)&for=place:" + fipsArr +"&in=state:08&key=08fe07c2a7bf781b7771d7cccb264fe7ff8965ce";
+	var forcurlCty = "https://api.census.gov/data/"+ curyear + "/acs/acs5?get=group(B01001)&for=county:" + ctynum +"&in=state:08&key=08fe07c2a7bf781b7771d7cccb264fe7ff8965ce";
+ 	var forcurlMuni = "https://api.census.gov/data/"+ curyear + "/acs/acs5?get=group(B01001)&for=place:" + fipsArr +"&in=state:08&key=08fe07c2a7bf781b7771d7cccb264fe7ff8965ce";
     var prom = [d3.json(forcurlCty), d3.json(forcurlMuni)];
 }
 
-Promise.all(prom).then(function(data){
+Promise.all(prom).then(data =>{
 //Selecting year range
 if(muniList.includes(geotype)){
-     var cty_age_pct = acsPct(data[0],ctynum, acsyr, 'county');
-	 var cty_age_pyr = acsPyr(data[0],ctynum,acsyr,'county');
-	 var muni_age_pct = acsPct(data[1],fipsArr[0], acsyr, 'muni');
-	 var muni_age_pyr = acsPyr(data[1],fipsArr[0], acsyr,'muni');
+     var cty_age_pct = acsAgePct(data[0],ctynum, curyear, 'county');
+	 var cty_age_pyr = acsAgePyr(data[0],ctynum,curyear,'county');
+	 var muni_age_pct = acsAgePct(data[1],fipsArr[0], curyear, 'muni');
+	 var muni_age_pyr = acsAgePyr(data[1],fipsArr[0], curyear,'muni');
      var fin_age_pct = cty_age_pct.concat(muni_age_pct);
 	 var fin_age_pyr = cty_age_pyr.concat(muni_age_pyr);
 } else { //County and Region data files
@@ -4219,3 +3962,181 @@ var ctyNameList = [...new Set(fin_age_pct.map(d => d.name))];
 genAgeSetup(geotype,fin_age_pct,fin_age_pyr,PRO_1.id, PRO_2.id, PRO_3.id, PRO_4.id, fipsList, ctyNameList,acsyr);
 }); //End of Promise
 }; // End of selGen3display
+
+
+
+//genSel4 Display  Produces Income, Educ and Race panel charts
+//Age estimates and forecasts facet chart
+//Age Pyramid
+
+function genSel4display(geotype, fipsArr, names, curyear, PRO_1, PRO_2, PRO_3, PRO_4) {
+	const fmt_date = d3.timeFormat("%B %d, %Y");
+	const fmt_dec = d3.format(".3");
+	const fmt_pct = d3.format(".1%");
+	const fmt_comma = d3.format(",");
+    const fmt_dollar = d3.format("$,.0f");
+    const fmt_yr = d3.format("00");
+
+	const regList = ['Region', 'Regional Comparison'];
+	const ctyList = ['County', 'County Comparison'];
+    const muniList = ['Municipality', 'Municipal Comparison'];
+	const placeList = ['Census Designated Place', 'Census Designated Place Comparison'];
+    const range = (min, max) => Array.from({ length: max - min + 1 }, (_, i) => min + i);
+
+//Clear out Divs
+
+  PRO_1.innerHTML = "";
+  PRO_2.innerHTML = "";
+  PRO_3.innerHTML = "";
+  PRO_4.innerHTML = "";
+  /*
+  What hh_tab contains: 
+						Estimate 	MOE
+	Total Households	B19051_001E	B19051_001M
+	Total Households With earnings	B19051_002E	B19051_002M
+	Total Households With wage or salary income	B19052_002E	B19052_002M
+	Total Households With self-employment income	B19053_002E	B19053_002M
+	Total Households With interest, dividends, or net rental income	B19054_002E	B19054_002M
+	Total Households With Social Security income	B19055_002E	B19055_002M
+	Total Households With Supplemental Security Income (SSI)	B19056_002E	B19056_002M
+	Total Households With public assistance income	B19057_002E	B19057_002M
+	Total Households With cash public assistance or Food Stamps/SNAP	B19058_002E	B19058_002M
+	Total Households With retirement income	B19059_002E	B19059_002M
+	Total Households With other types of income	B19060_002E	B19060_002M
+	Total Income	B19061_001E	B19061_001M
+	Total Wage and Salary Income	B19062_001E	B19062_001M
+	Total Self Employment Income	B19063_001E	B19063_001M
+	Total Interest Income	B19064_001E	B19064_001M
+	Total  Social Security Income	B19065_001E	B19065_001M
+	Total SSI Income	B19066_001E	B19066_001M
+	Total Public Assistance Income	B19067_001E	B19067_001M
+	Total Retirement Income	B19069_001E	B19069_001M
+	Total Other Income	B19070_001E	B19070_001M
+*/
+  
+  var hh_tab = ["B19051_001E",	"B19051_001M",	"B19051_002E",	"B19051_002M",	"B19052_002E",	"B19052_002M",
+                 "B19053_002E",	"B19053_002M",	"B19054_002E",	"B19054_002M",	"B19055_002E",	"B19055_002M",	
+				 "B19056_002E",	"B19056_002M",	"B19057_002E",	"B19057_002M",	"B19058_002E",	"B19058_002M",	
+				 "B19059_002E",	"B19059_002M",	"B19060_002E",	"B19060_002M",
+				 "B19061_001E",	"B19061_001M",	"B19062_001E",	"B19062_001M",	"B19063_001E",	"B19063_001M",	
+				 "B19064_001E",	"B19064_001M",	"B19065_001E",	"B19065_001M",	"B19066_001E",	"B19066_001M",	
+				 "B19067_001E",	"B19067_001M",	"B19069_001E",	"B19069_001M",	"B19070_001E",	"B19070_001M"]
+		
+
+  // Generateing list of fips codes by geotype
+
+	if(regList.includes(geotype)){
+		var fips_tmp = regionCOL(parseInt(fipsArr));
+	    var fips_str =  fips_tmp[0].fips.map(function (x) { 
+					return x; 
+			});
+        var fips_list = fips_str.toString();
+		
+		var inc_cty_url = genACSUrl("profile",curyear,'B19001',1,17,geotype,fips_list);
+		var hhinc_cty_url = genACSUrl("profile",curyear,hh_tab,1,1,geotype,fips_list);
+		var educ_cty_url = genACSUrl("profile",curyear,'B15003',1,25,geotype,fips_list);
+		var race_cty_url = genACSUrl("profile",curyear,'B03002',1,12,geotype,fips_list);
+		var inc_st_url = genACSUrl("profile",curyear,'B19001',1,17,'state',fips_list);
+		var hhinc_st_url = genACSUrl("profile",curyear,hh_tab,1,1,'state',fips_list);
+		var educ_st_url = genACSUrl("profile",curyear,'B15003',1,25,'state',fips_list);
+		var race_st_url = genACSUrl("profile",curyear,'B03002',1,12,'state',fips_list);
+	    var prom = [d3.json(inc_cty_url),d3.json(hhinc_cty_url), d3.json(educ_cty_url), d3.json(race_cty_url),
+		            d3.json(inc_st_url),d3.json(hhinc_st_url), d3.json(educ_st_url), d3.json(race_st_url)]
+		
+	};
+	
+	if(ctyList.includes(geotype)){
+		var inc_cty_url = genACSUrl("profile",curyear,'B19001',1,17,geotype,fipsArr);
+		var hhinc_cty_url = genACSUrl("profile",curyear,hh_tab,1,1,geotype,fipsArr);
+		var educ_cty_url = genACSUrl("profile",curyear,'B15003',1,25,geotype,fipsArr);
+		var race_cty_url = genACSUrl("profile",curyear,'B03002',1,12,geotype,fipsArr);
+		var inc_st_url = genACSUrl("profile",curyear,'B19001',1,17,'state',fipsArr);
+		var hhinc_st_url = genACSUrl("profile",curyear,hh_tab,1,1,'state',fipsArr);
+		var educ_st_url = genACSUrl("profile",curyear,'B15003',1,25,'state',fipsArr);
+		var race_st_url = genACSUrl("profile",curyear,'B03002',1,12,'state',fipsArr);
+	    var prom = [d3.json(inc_cty_url),d3.json(hhinc_cty_url), d3.json(educ_cty_url), d3.json(race_cty_url),
+		            d3.json(inc_st_url),d3.json(hhinc_st_url), d3.json(educ_st_url), d3.json(race_st_url)]
+	}
+	
+	if(muniList.includes(geotype)){	
+	var ctynum = muni_county(fipsArr);
+		var inc_muni_url = genACSUrl("profile",curyear,'B19001',1,17,geotype,fipsArr);
+		var hhinc_muni_url = genACSUrl("profile",curyear,hh_tab,1,1,geotype,fipsArr);
+		var educ_muni_url = genACSUrl("profile",curyear,'B15003',1,25,geotype,fipsArr);
+		var race_muni_url = genACSUrl("profile",curyear,'B03002',1,12,geotype,fipsArr);
+		var inc_cty_url = genACSUrl("profile",curyear,'B19001',1,17,'county',ctynum);
+		var hhinc_cty_url = genACSUrl("profile",curyear,hh_tab,1,1,'county',ctynum);
+		var educ_cty_url = genACSUrl("profile",curyear,'B15003',1,25,'county',ctynum);
+		var race_cty_url = genACSUrl("profile",curyear,'B03002',1,12,'county',ctynum);
+	    var prom = [d3.json(inc_muni_url),d3.json(hhinc_muni_url), d3.json(educ_muni_url), d3.json(race_muni_url),
+		            d3.json(inc_cty_url),d3.json(hhinc_cty_url), d3.json(educ_cty_url), d3.json(race_cty_url)];
+
+	}
+
+Promise.all(prom).then(data =>{
+	//Creating associative arrays from raw data  acsPrep creates the associative array, genACS... creates the combined data
+
+   if(muniList.includes(geotype)){
+	var inc_muni_data = genACSIncome(acsPrep(data[0]),'muni');
+	var hhinc_muni_data = genACSHHIncome(acsPrep(data[1]),'muni');
+    var educ_muni_data = genACSEducation(acsPrep(data[2]),'muni');
+	var race_muni_data = genACSRace(acsPrep(data[3]),'muni');
+	var inc_cty_data = genACSIncome(acsPrep(data[4]),'cty');
+	var hhinc_cty_data = genACSHHIncome(acsPrep(data[5]),'cty');
+    var educ_cty_data = genACSEducation(acsPrep(data[6]),'cty');
+	var race_cty_data = genACSRace(acsPrep(data[7]),'cty');
+   } else {
+	var inc_cty_data = genACSIncome(acsPrep(data[0]),'cty');
+	var hhinc_cty_data = genACSHHIncome(acsPrep(data[1]),'cty');
+    var educ_cty_data = genACSEducation(acsPrep(data[2]),'cty');
+	var race_cty_data = genACSRace(acsPrep(data[3]),'cty');
+	var inc_st_data = genACSIncome(acsPrep(data[4]),'st');
+	var hhinc_st_data = genACSHHIncome(acsPrep(data[5]),'st');
+    var educ_st_data = genACSEducation(acsPrep(data[6]),'st');
+	var race_st_data = genACSRace(acsPrep(data[7]),'st');
+   }	
+  
+ 
+
+//Regional data -- combine and rollup records
+if(regList.includes(geotype)){
+//Creating Columns to Sum Array
+var inc_cty_keys = Object.keys(inc_cty_data[0])
+var hhinc_cty_keys = Object.keys(hhinc_cty_data[0]);
+var educ_cty_keys = Object.keys(educ_cty_data[0]);
+var race_cty_keys = Object.keys(race_cty_data[0]);
+inc_cty_keys.splice(0,2);
+hhinc_cty_keys.splice(0,2);
+educ_cty_keys.splice(0,2);
+race_cty_keys.splice(0,2);
+
+var inc_reg_sum =  d3.rollup(inc_cty_data, v => Object.fromEntries(inc_cty_keys.map(col => [col, d3.sum(v, d => +d[col])])));
+var hhinc_reg_sum =  d3.rollup(hhinc_cty_data, v => Object.fromEntries(hhinc_cty_keys.map(col => [col, d3.sum(v, d => +d[col])])));
+var educ_reg_sum =  d3.rollup(educ_cty_data, v => Object.fromEntries(educ_cty_keys.map(col => [col, d3.sum(v, d => +d[col])])));
+var race_reg_sum =  d3.rollup(race_cty_data, v => Object.fromEntries(race_cty_keys.map(col => [col, d3.sum(v, d => +d[col])])));
+
+var inc_reg_2 = acsMOE(inc_reg_sum,geotype,fipsArr);
+var inc_cty_2 = acsMOE(inc_cty_data,'county',fips_list);
+var inc_st_2 = acsMOE(inc_st_data,'state','8');
+var inc_reg_data = acsConcat(inc_st_2,inc_reg_2,inc_cty_2);
+
+var hhinc_reg_2 = acsMOE(hhinc_reg_sum,geotype,fipsArr);
+var hhinc_cty_2 = acsMOE(hhinc_cty_data,'county',fips_list);
+var hhinc_st_2 = acsMOE(hhinc_st_data,'state','8');
+var hhinc_reg_data = acsConcat(hhinc_st_2,hhinc_reg_2,hhinc_cty_2);
+
+var educ_reg_2 = acsMOE(educ_reg_sum,geotype,fipsArr);
+var educ_cty_2 = acsMOE(educ_cty_data,'county',fips_list);
+var educ_st_2 = acsMOE(educ_st_data,'state','8');
+var educ_reg_data = acsConcat(educ_st_2,educ_reg_2,educ_cty_2);
+
+var race_reg_2 = acsMOE(race_reg_sum,geotype,fipsArr);
+var race_cty_2 = acsMOE(race_cty_data,'county',fips_list);
+var race_st_2 = acsMOE(race_st_data,'state','8');
+var race_reg_data = acsConcat(race_st_2,race_reg_2,race_cty_2);
+
+
+} //Region
+//Other geos and calculte percentages
+}); //end of Promise
+}; //end of genSel4Display
