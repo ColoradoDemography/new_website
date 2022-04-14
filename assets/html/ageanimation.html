@@ -1,0 +1,73 @@
+<!-- Age Animation Wrapper A Bickford 3/2022 -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>SDO Age Animation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
+<!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
+<!-- SDO CSS -->
+<link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
+<!-- adding d3.js  for data manipulation-->
+ <script src="https://d3js.org/d3.v6.min.js"></script>
+<!-- Adding Plotly.js for  charting -->
+ <script src="https://cdn.plot.ly/plotly-2.2.0.min.js" charset="utf-8"></script>
+<!-- SDO suport functions, genSYA, insertHTML, -->
+<script src="../js/funct.js"></script>
+<!-- GoogleAnalytics Script -->
+<script defer src="../js/googleAnalytics.js"></script>
+</head>
+<body>
+<div>
+<a href="https://cdola.colorado.gov/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt="Department of Local Affairs Homepage"></a>
+</div>
+<div w3-include-html="./navheader.html"></div>
+
+<!-- First Grid, linked images -->
+<div class="grid-container2">
+  <div class="grid-item panel2_1_1">
+	<div w3-include-html="./sdotitle.html"></div>
+  </div>
+   <div class="grid-item app-panel_2_1" id="leftHand">
+	<div w3-include-html="./left_hand_index.html"></div>
+  </div> <!-- Grid  panel2_2_1 -->
+  <div class="grid-item app-panel_2_2">
+  <b>Age Animation</b>
+   <br><br>INSTRUCTIONS:
+   <p>
+   The following page provides county-level estimates of single-year of age and generation between 1990 and 2050.
+   </p>
+ 
+   <b><i>This data visualization can only be viewed on a tablet or desktop.</i></b>
+  </div>
+  <div class="grid-item app-ageani">
+      <div class="dropdown AClass">
+		  <button class="dropbtn"  id="line"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+		  <div class="dropdown-content">
+		    <ul class='dd-list'>
+			<li><a href="#" id='ageani_csv'>Download Data (CSV)</a></li>
+			<li><a href="#" id='ageani_png'>Download Image (PNG)</a></li>
+			<li><a href='https://coloradodemography.github.io/population/data/race-estimate/#county-race-by-age-estimates' id='line_src'>County Race and Ethnicity by Age Lookup</a></li>
+			</ul>
+		  </div>
+	  </div>
+	 <div id="line_output" class='row-container'->
+	    <iframe src="https://gis.dola.colorado.gov/Age-Animation-Bars/" width="100%" height="50%" name="targetframe" allowTransparency="true" scrolling="yes" frameborder="0" >
+    </iframe>
+	 </div>
+  </div>
+  <div class="grid-item app-panel_4_2">
+  <p><p>
+  </div>
+</div>  <!-- End of Grid -->
+
+
+<script>
+//Setting HTML include 
+includeHTML(); 
+</script>
+
+</body>
+</html> 
