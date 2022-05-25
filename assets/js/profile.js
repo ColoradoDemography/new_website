@@ -1125,7 +1125,7 @@ var pltData = pltSort.filter(d => fipsList.includes(d.fips));
       xref : 'paper', 
       x : 0, 
       yref : 'paper', 
-      y : -0.20, 
+      y : -0.35, 
       align : 'left', 
       showarrow : false}]
   };
@@ -1242,7 +1242,7 @@ var pltData = pltSort.filter(d => fipsList.includes(d.fips));
       xref : 'paper', 
       x : 0, 
       yref : 'paper', 
-      y : -0.20, 
+      y : -0.35, 
       align : 'left', 
       showarrow : false}]
   };
@@ -1439,7 +1439,7 @@ var coc_layout = {
       xref : 'paper', 
       x : 0, 
       yref : 'paper', 
-      y : -0.20, 
+      y : -0.35, 
       align : 'left', 
       showarrow : false}]
   };
@@ -1599,7 +1599,7 @@ if(PlaceNames.length == 1){
       xref : 'paper', 
       x : 0, 
       yref : 'paper', 
-      y : -0.20, 
+      y : -0.35, 
       align : 'left', 
       showarrow : false}]
   };
@@ -1707,7 +1707,7 @@ if(PlaceNames.length == 1){
       xref : 'paper', 
       x : 0, 
       yref : 'paper', 
-      y : -0.20, 
+      y : -0.35, 
       align : 'left', 
       showarrow : false}]
   };
@@ -1938,7 +1938,7 @@ for(j = 0; j < tick_val.length; j++){
      xref : 'paper',  
      x : 0.5, 
      yref : 'paper', 
-     y : -0.20, 
+     y : -0.35, 
      align : 'center', 
      font : { size : 14},
      showarrow : false},
@@ -2098,7 +2098,7 @@ for(j = 0; j < tick_val.length; j++){
    xref : 'paper',  
      x : 0.5, 
      yref : 'paper', 
-     y : -0.20, 
+     y : -0.35, 
      align : 'center', 
      font : { size : 14},
      showarrow : false},
@@ -2110,7 +2110,7 @@ for(j = 0; j < tick_val.length; j++){
    xref : 'paper', 
      x : 0, 
      yref : 'paper', 
-     y : -0.20, 
+     y : -0.37, 
      align : 'left', 
      showarrow : false}]
  };
@@ -4264,7 +4264,7 @@ var ftrStr = 'Data Sources: U.S. Census Bureau (1990-2010) and Colorado State De
       xref : 'paper', 
       x : 0, 
       yref : 'paper', 
-      y : -0.20, 
+      y : -0.35, 
       align : 'left', 
       showarrow : false}]
   };
@@ -5867,7 +5867,7 @@ var ftrStr = 'U.S. Census Bureau ('+ acsYear + '). ' + (acsYear - 4) + '-' + acs
       xref : 'paper', 
       x : 0, 
       yref : 'paper', 
-      y : -0.20, 
+      y : -0.35, 
       align : 'left', 
       showarrow : false}]
   };
@@ -6148,7 +6148,7 @@ var ftrStr = 'U.S. Census Bureau ('+ acsYear + '). ' + (acsYear - 4) + '-' + acs
       xref : 'paper', 
       x : 0, 
       yref : 'paper', 
-      y : -0.20, 
+      y : -0.35, 
       align : 'left', 
       showarrow : false}]
   };
