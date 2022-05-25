@@ -1086,7 +1086,7 @@ details main {
    grid-row: 2 / span 3;
      padding: 0px;
   }
-/*Special container for pyramids*/
+*Special container for pyramids*/
 
 .pyramid-container{
   display: grid;
@@ -1151,6 +1151,10 @@ details main {
      padding: 0px;
   }
 
+/* Multip plot Style*/
+.multi_plot{
+     padding: 0px;
+  }
 
 } /* Layout for Desktops*/
 
