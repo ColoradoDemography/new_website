@@ -1664,7 +1664,12 @@ function transpose(data) {
 
 //exporttoCsv  downloads the a selected file
 function exportToCsv(cname, type, rows, yr) {
-
+		if(Array.isArray(cname)){
+			var outNames = "";
+			cname.forEach(d => {outNames = outNames + " " + d; })
+			cname = outNames;
+		}
+	  
         var csvFile = d3.csvFormat(rows);
 
 		if(type == 'test'){
@@ -1754,6 +1759,9 @@ function exportToCsv(cname, type, rows, yr) {
 		if(type == 'raceeth'){
 			var fileName = "ACS Race and Ethnicity " + cname + ".csv"
 		}
+		if(type == 'hhforecast'){
+			var fileName = "Household Forecast by Age " + cname + ".csv"
+		}
         var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
         if (navigator.msSaveBlob) { // IE 10+
             navigator.msSaveBlob(blob, fileName);
@@ -1772,7 +1780,8 @@ function exportToCsv(cname, type, rows, yr) {
         }
     };
 
-function plotDownload(plotdiv,filename){
+function plotDownload(plotdiv,filename,type){
+	  if(type == 'agepyr'){
 		Plotly.toImage(plotdiv, { format: 'png', width: 600, height: 400 }).then(function (dataURL) {
 			var a = document.createElement('a');
 			a.href = dataURL;
@@ -1781,10 +1790,21 @@ function plotDownload(plotdiv,filename){
 			a.click();
 			document.body.removeChild(a);
 		});
+	  } else {
+		 Plotly.toImage(plotdiv, { format: 'png', width: 1000, height: 500 }).then(function (dataURL) {
+        var a = document.createElement('a');
+        a.href = dataURL;
+        a.download = filename;
+        document.body.appendChild(a);
+         a.click();
+        document.body.removeChild(a);
+    });
+	  }
 }
 
 //exportToPng  Exports plotly trace and layout to PNG file
 function exportToPng(cname, type, graphDiv, yr){
+	
 	  	if(type == 'estimate') {
 			var fileName = "Population Estimates " + cname;
 		};
@@ -1867,34 +1887,35 @@ function exportToPng(cname, type, graphDiv, yr){
 		if(type == 'educatt'){
 			var fileName = "ACS Educational Attainment " + cname 
 		}
+		if(type == 'hhforecast'){
+			var fileName = "Houshehold Forecast by Age " + cname 
+		}
 	
-	if(type == "agepyr") {
 		if(Array.isArray(graphDiv)){
 			for(i = 0; i < graphDiv.length; i++){
-               plotDownload(graphDiv[i].plot,graphDiv[i].fName);
+               plotDownload(graphDiv[i].plot,graphDiv[i].fName,type);
 			};  //i
 		} else {
-			var fn = fileName + cname + ".png";
+		var fn = fileName + cname + ".png";
+		if(type == 'agepyr'){
 		Plotly.toImage(graphDiv, { format: 'png', width: 900, height: 500 }).then(function (dataURL) {
-        var a = document.createElement('a');
-        a.href = dataURL;
-        a.download = fn;
-        document.body.appendChild(a);
-         a.click();
-        document.body.removeChild(a);
-    });
-		};
-	} else {
-	  var fn =  fileName + ".png";
-	  if(type == 'popchng') {
+			var a = document.createElement('a');
+			a.href = dataURL;
+			a.download = fn;
+			document.body.appendChild(a);
+			 a.click();
+			document.body.removeChild(a);
+        });
+		} else {
+	      if(type == 'popchng') {
 		    Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 500 }).then(function (dataURL) {
-        var a = document.createElement('a');
-        a.href = dataURL;
-        a.download = fn;
-        document.body.appendChild(a);
-         a.click();
-        document.body.removeChild(a);
-    });
+				var a = document.createElement('a');
+				a.href = dataURL;
+				a.download = fn;
+				document.body.appendChild(a);
+				 a.click();
+				document.body.removeChild(a);
+			});
 	  } else {
 	   Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 500 }).then(function (dataURL) {
         var a = document.createElement('a');
@@ -1906,7 +1927,8 @@ function exportToPng(cname, type, graphDiv, yr){
     });
 	}
 	}
-};
+		}
+};  //exportToPng
 
 
 //educData reads in the ACS Education data file and output the summary file information
@@ -2222,7 +2244,6 @@ function returnRank(indata,fips){
 
 //genACSUrl  Generates ACS call from the Census API
 function genACSUrl(pgtype,acsyear, table, startidx, endidx, geotype,geolist){
-
 	if(geotype == "Region"){
 		var geoName = 'county';
 	} else {
@@ -2777,9 +2798,6 @@ return(outData);
 }; //end of genACSIncome
 
 function genACSHHIncome(inData,type){
-	//Households  -- This has the total number of households receivng a type of income and the aggregate value of that income. Calculate the average
-
-
 
 var outData = [];
 inData.forEach(
@@ -3038,6 +3056,7 @@ inData.forEach(
 
 //acsMOE Takes square root of MOE values from summary data sets
 function acsMOE(inData){
+	
 	  var outData = inData;
 	if(Array.isArray(outData)){
 	   for(i = 0; i < outData.length; i++){
@@ -4298,7 +4317,7 @@ var est_layout = {
 		  },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  			font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper',  
@@ -4403,7 +4422,7 @@ var forec_layout = {
 		  },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper', 
@@ -4568,7 +4587,7 @@ var age_layout = {
 		  },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper', 
@@ -4778,7 +4797,7 @@ var popchng_layout = {
 		  font : { color : 'black' },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper', 
@@ -4950,7 +4969,7 @@ var NetMig_layout = {
 		  },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper', 
@@ -5151,7 +5170,7 @@ var coc_layout = {
 		  },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper', 
@@ -5643,7 +5662,7 @@ var line_layout = {
 		  },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper', 
@@ -5686,7 +5705,7 @@ var white_layout = {
 		  },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper', 
@@ -5729,7 +5748,7 @@ var hisp_layout = {
 		  },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper',
@@ -5772,7 +5791,7 @@ var black_layout = {
 		  },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper', 
@@ -5815,7 +5834,7 @@ var asian_layout = {
 		  },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper', 
@@ -5858,7 +5877,7 @@ var amind_layout = {
 		  },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper',
@@ -6100,7 +6119,7 @@ var NetMig_layout = {
 		  },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper',
@@ -6141,7 +6160,7 @@ var NetMig_layout = {
 		  },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper',
@@ -6339,7 +6358,7 @@ var tot_layout = {
 		  },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper',
@@ -6381,7 +6400,7 @@ var rate_layout = {
 		  },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper',
@@ -6584,7 +6603,7 @@ var birth_layout = {
 		  },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper', 
@@ -6625,7 +6644,7 @@ var death_layout = {
 		  },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper', 
@@ -6666,7 +6685,7 @@ var mig_layout = {
 		  },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper', 
@@ -6960,7 +6979,7 @@ for(i = 0; i < hh_arr.length; i++){
 		  },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper',
@@ -6980,7 +6999,7 @@ ch_layout.push(layout);
 		y_title = "Households";
 		y_ticks = ',';
     } else {
-		tit_str = tit_str + " Percentage of Housing Units";
+		tit_str = tit_str + " Percentage of Households";
 		y_title = "Percentage";
 		y_ticks = ',.0%';
 	};
@@ -7016,7 +7035,7 @@ ch_layout.push(layout);
 		  },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper',
@@ -7379,7 +7398,7 @@ var config = {responsive: true,
 		  },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper',
@@ -7421,7 +7440,7 @@ var layout1 = {
 		  },
 			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper', 
@@ -7464,7 +7483,7 @@ var layout2 = {
 	  },
 		annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
  				font: {
-				size: 6,
+				size : 7,
 				color: 'black'
 			   },
 			   xref : 'paper',
