@@ -1782,7 +1782,7 @@ function exportToCsv(cname, type, rows, yr) {
 
 function plotDownload(plotdiv,filename,type){
 	  if(type == 'agepyr'){
-		Plotly.toImage(plotdiv, { format: 'png', width: 600, height: 400 }).then(function (dataURL) {
+		Plotly.toImage(plotdiv, { format: 'png', width: 900, height: 600 }).then(function (dataURL) {
 			var a = document.createElement('a');
 			a.href = dataURL;
 			a.download = filename;
@@ -1791,7 +1791,7 @@ function plotDownload(plotdiv,filename,type){
 			document.body.removeChild(a);
 		});
 	  } else {
-		 Plotly.toImage(plotdiv, { format: 'png', width: 1000, height: 500 }).then(function (dataURL) {
+		 Plotly.toImage(plotdiv, { format: 'png', width: 1000, height: 600 }).then(function (dataURL) {
         var a = document.createElement('a');
         a.href = dataURL;
         a.download = filename;
@@ -1908,7 +1908,7 @@ function exportToPng(cname, type, graphDiv, yr){
         });
 		} else {
 	      if(type == 'popchng') {
-		    Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 500 }).then(function (dataURL) {
+		    Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 600 }).then(function (dataURL) {
 				var a = document.createElement('a');
 				a.href = dataURL;
 				a.download = fn;
@@ -1917,7 +1917,7 @@ function exportToPng(cname, type, graphDiv, yr){
 				document.body.removeChild(a);
 			});
 	  } else {
-	   Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 500 }).then(function (dataURL) {
+	   Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 600 }).then(function (dataURL) {
         var a = document.createElement('a');
         a.href = dataURL;
         a.download = fn;

@@ -1125,7 +1125,7 @@ var pltData = pltSort.filter(d => fipsList.includes(d.fips));
       xref : 'paper', 
       x : 0, 
       yref : 'paper', 
-      y : -0.35, 
+      y : -0.20, 
       align : 'left', 
       showarrow : false}]
   };
@@ -1242,7 +1242,7 @@ var pltData = pltSort.filter(d => fipsList.includes(d.fips));
       xref : 'paper', 
       x : 0, 
       yref : 'paper', 
-      y : -0.35, 
+      y : -0.20, 
       align : 'left', 
       showarrow : false}]
   };
@@ -1439,7 +1439,7 @@ var coc_layout = {
       xref : 'paper', 
       x : 0, 
       yref : 'paper', 
-      y : -0.35, 
+      y : -0.20, 
       align : 'left', 
       showarrow : false}]
   };
@@ -1599,7 +1599,7 @@ if(PlaceNames.length == 1){
       xref : 'paper', 
       x : 0, 
       yref : 'paper', 
-      y : -0.35, 
+      y : -0.20, 
       align : 'left', 
       showarrow : false}]
   };
@@ -1707,7 +1707,7 @@ if(PlaceNames.length == 1){
       xref : 'paper', 
       x : 0, 
       yref : 'paper', 
-      y : -0.35, 
+      y : -0.20, 
       align : 'left', 
       showarrow : false}]
   };
@@ -2110,7 +2110,7 @@ for(j = 0; j < tick_val.length; j++){
    xref : 'paper', 
      x : 0, 
      yref : 'paper', 
-     y : -0.35, 
+     y : -0.20, 
      align : 'left', 
      showarrow : false}]
  };
@@ -4264,7 +4264,7 @@ var ftrStr = 'Data Sources: U.S. Census Bureau (1990-2010) and Colorado State De
       xref : 'paper', 
       x : 0, 
       yref : 'paper', 
-      y : -0.35, 
+      y : -0.20, 
       align : 'left', 
       showarrow : false}]
   };
@@ -5867,7 +5867,7 @@ var ftrStr = 'U.S. Census Bureau ('+ acsYear + '). ' + (acsYear - 4) + '-' + acs
       xref : 'paper', 
       x : 0, 
       yref : 'paper', 
-      y : -0.35, 
+      y : -0.20, 
       align : 'left', 
       showarrow : false}]
   };
@@ -6148,7 +6148,7 @@ var ftrStr = 'U.S. Census Bureau ('+ acsYear + '). ' + (acsYear - 4) + '-' + acs
       xref : 'paper', 
       x : 0, 
       yref : 'paper', 
-      y : -0.35, 
+      y : -0.20, 
       align : 'left', 
       showarrow : false}]
   };
