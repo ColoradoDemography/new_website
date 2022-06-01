@@ -37,6 +37,23 @@ function showButtons() {
 	};
 }; //end of showButtons
 
+//annot  Chart annotation function
+function annot(annTxt) {
+	const fmt_date = d3.timeFormat("%B %d, %Y");
+	var  outAnnot = {text :  annTxt +'  Print Date: ' +  fmt_date(new Date) , 
+                font: {
+    size : 9,
+    color: 'black'
+      },
+      xref : 'paper', 
+      x : 0, 
+      yref : 'paper', 
+      y : -0.35, 
+      align : 'left', 
+      showarrow : false};
+	  
+return(outAnnot);
+}
 
 
 //muni_county provides county designation for municiplaities (based oased on largest population for multi-county munis
@@ -1782,7 +1799,7 @@ function exportToCsv(cname, type, rows, yr) {
 
 function plotDownload(plotdiv,filename,type){
 	  if(type == 'agepyr'){
-		Plotly.toImage(plotdiv, { format: 'png', width: 900, height: 600 }).then(function (dataURL) {
+		Plotly.toImage(plotdiv, { format: 'png', width: 900, height: 400 }).then(function (dataURL) {
 			var a = document.createElement('a');
 			a.href = dataURL;
 			a.download = filename;
@@ -1791,7 +1808,7 @@ function plotDownload(plotdiv,filename,type){
 			document.body.removeChild(a);
 		});
 	  } else {
-		 Plotly.toImage(plotdiv, { format: 'png', width: 1000, height: 600 }).then(function (dataURL) {
+		 Plotly.toImage(plotdiv, { format: 'png', width: 1000, height: 400 }).then(function (dataURL) {
         var a = document.createElement('a');
         a.href = dataURL;
         a.download = filename;
@@ -1804,7 +1821,7 @@ function plotDownload(plotdiv,filename,type){
 
 //exportToPng  Exports plotly trace and layout to PNG file
 function exportToPng(cname, type, graphDiv, yr){
-	
+
 	  	if(type == 'estimate') {
 			var fileName = "Population Estimates " + cname;
 		};
@@ -1896,7 +1913,7 @@ function exportToPng(cname, type, graphDiv, yr){
                plotDownload(graphDiv[i].plot,graphDiv[i].fName,type);
 			};  //i
 		} else {
-		var fn = fileName + cname + ".png";
+		var fn = fileName + ".png";
 		if(type == 'agepyr'){
 		Plotly.toImage(graphDiv, { format: 'png', width: 900, height: 500 }).then(function (dataURL) {
 			var a = document.createElement('a');
@@ -1908,7 +1925,7 @@ function exportToPng(cname, type, graphDiv, yr){
         });
 		} else {
 	      if(type == 'popchng') {
-		    Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 600 }).then(function (dataURL) {
+		    Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 400 }).then(function (dataURL) {
 				var a = document.createElement('a');
 				a.href = dataURL;
 				a.download = fn;
@@ -1917,7 +1934,7 @@ function exportToPng(cname, type, graphDiv, yr){
 				document.body.removeChild(a);
 			});
 	  } else {
-	   Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 600 }).then(function (dataURL) {
+	   Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 400 }).then(function (dataURL) {
         var a = document.createElement('a');
         a.href = dataURL;
         a.download = fn;
@@ -4315,17 +4332,7 @@ var est_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 			font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper',  
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
 		
 Plotly.newPlot(ESTIMATE, est_data, est_layout,config);
@@ -4420,17 +4427,7 @@ var forec_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper', 
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
  
 Plotly.newPlot(FORECAST, forec_tr, forec_layout,config);
@@ -4585,17 +4582,7 @@ var age_layout = {
 			linecolor: 'black',
 			linewidth: 2
 		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper', 
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		}; 
 		
 Plotly.newPlot(AGEPLOT, age_data, age_layout,config);
@@ -4795,17 +4782,7 @@ var popchng_layout = {
 			linewidth: 2
 		  },
 		  font : { color : 'black' },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper', 
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
  Plotly.newPlot(POPCHNG, popchng_tr, popchng_layout,config);
 
@@ -4967,17 +4944,7 @@ var NetMig_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper', 
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
 
 Plotly.newPlot(NETMIG, NetMig_data, NetMig_layout,config);
@@ -5168,17 +5135,7 @@ var coc_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper', 
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
  
 Plotly.newPlot(COC, coc_data, coc_layout,config);	
@@ -5660,17 +5617,7 @@ var line_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper', 
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
  
 Plotly.newPlot(LINE, line_data, line_layout,config);
@@ -5703,17 +5650,7 @@ var white_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper', 
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
  
 Plotly.newPlot(WHITE, white_trace, white_layout,config);
@@ -5746,17 +5683,7 @@ var hisp_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper',
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
  
 Plotly.newPlot(HISPANIC, hisp_trace, hisp_layout,config);
@@ -5789,17 +5716,7 @@ var black_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper', 
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
  
 Plotly.newPlot(BLACK, black_trace, black_layout,config);
@@ -5832,17 +5749,7 @@ var asian_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper', 
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
  
 Plotly.newPlot(ASIAN, asian_trace, asian_layout,config);
@@ -5875,17 +5782,7 @@ var amind_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper',
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
  
 Plotly.newPlot(AMIND, amind_trace, amind_layout,config);
@@ -6117,17 +6014,7 @@ var NetMig_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper',
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
  
  var Rate_layout = {
@@ -6158,17 +6045,7 @@ var NetMig_layout = {
 			linewidth: 2,
 			 tickformat:  '.2f'
 		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper',
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
 		
 var config = {responsive: true,
@@ -6356,17 +6233,7 @@ var tot_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper',
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
 
 
@@ -6398,17 +6265,7 @@ var rate_layout = {
 			linewidth: 2,
 			 tickformat:  '.2f'
 		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper',
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
 		//Chart Call
 
@@ -6601,17 +6458,7 @@ var birth_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper', 
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
 		
 var death_layout = {
@@ -6642,17 +6489,7 @@ var death_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper', 
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
 		
 var mig_layout = {
@@ -6683,17 +6520,7 @@ var mig_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper', 
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
 		
 
@@ -6977,17 +6804,7 @@ for(i = 0; i < hh_arr.length; i++){
 			linewidth: 2,
 			tickformat: y_ticks
 		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper',
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
 ch_layout.push(layout);
 };
@@ -7033,17 +6850,7 @@ ch_layout.push(layout);
 			linewidth: 2,
 			tickformat: y_ticks
 		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper',
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
 ch_layout.push(layout);
 };
@@ -7396,17 +7203,7 @@ var config = {responsive: true,
 			linewidth: 2,
 			tickformat: ','
 		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper',
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};	
 		
 var layout1 = {
@@ -7438,17 +7235,7 @@ var layout1 = {
 			linewidth: 2,
 			tickformat: ','
 		  },
-			annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper', 
-			   x : 0, 
-			   yref : 'paper', 
-			   y :  -0.20,
-			   align : 'left', 
-			   showarrow : false}]
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};	
 		
 var layout2 = {
@@ -7481,17 +7268,7 @@ var layout2 = {
 		linewidth: 2,
 		tickformat: ','
 	  },
-		annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
- 				font: {
-				size : 7,
-				color: 'black'
-			   },
-			   xref : 'paper',
-		   x : 0, 
-		   yref : 'paper', 
-		   y :  -0.20,
-		   align : 'left', 
-		   showarrow : false}]
+		annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 	};
 
 		

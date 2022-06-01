@@ -1117,26 +1117,18 @@ var pltData = pltSort.filter(d => fipsList.includes(d.fips));
    linewidth: 2,
     tickformat: ','
     },
-   annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
-                font: {
-    size : 7,
-    color: 'black'
-      },
-      xref : 'paper', 
-      x : 0, 
-      yref : 'paper', 
-      y : -0.35, 
-      align : 'left', 
-      showarrow : false}]
+   annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
   };
   
 Plotly.newPlot(estDiv, est_data, est_layout,config);
 //Download Events
+debugger;
+console.log(ctyNames);
 
 var profileDat2 = document.getElementById('profileDat2');
 var profileImg2 = document.getElementById('profileImg2');
-profileDat2.onclick = function() {exportToCsv(ctyNames[0], 'estimate', pltData,0)};
-profileImg2.onclick = function() {exportToPng(ctyNames[0], 'estimate', estDiv,0)};
+profileDat2.onclick = function() {exportToCsv(ctyNames, 'estimate', pltData,0)};
+profileImg2.onclick = function() {exportToPng(ctyNames, 'estimate', estDiv,0)};
  
 }; //genRegEst   
 
@@ -1234,17 +1226,7 @@ var pltData = pltSort.filter(d => fipsList.includes(d.fips));
    linewidth: 2,
     tickformat: ','
     },
-   annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
-               font: {
-    size : 7,
-    color: 'black'
-      },
-      xref : 'paper', 
-      x : 0, 
-      yref : 'paper', 
-      y : -0.35, 
-      align : 'left', 
-      showarrow : false}]
+   annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
   };
   
 Plotly.newPlot(forecDiv, forec_data, forec_layout,config);
@@ -1252,8 +1234,8 @@ Plotly.newPlot(forecDiv, forec_data, forec_layout,config);
 
 var profileDat3 = document.getElementById('profileDat3');
 var profileImg3 = document.getElementById('profileImg3');
-profileDat3.onclick = function() {exportToCsv(ctyNames[0], 'forecast', pltData,0)};
-profileImg3.onclick = function() {exportToPng(ctyNames[0], 'forecast', forecDiv,0)};
+profileDat3.onclick = function() {exportToCsv(ctyNames, 'forecast', pltData,0)};
+profileImg3.onclick = function() {exportToPng(ctyNames, 'forecast', forecDiv,0)};
   
 }; //genRegFore   
 
@@ -1431,17 +1413,7 @@ var coc_layout = {
    linewidth: 2,
     tickformat: ','
     },
-   annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
-     font: {
-    size : 7,
-    color: 'black'
-      },
-      xref : 'paper', 
-      x : 0, 
-      yref : 'paper', 
-      y : -0.35, 
-      align : 'left', 
-      showarrow : false}]
+   annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
   };
   
 Plotly.newPlot(cocDiv, coc_trace, coc_layout,config);
@@ -1591,17 +1563,7 @@ if(PlaceNames.length == 1){
    linewidth: 2,
     tickformat:  '.1%'
     },
-   annotations : [{text : citation, 
-     font: {
-    size : 7,
-    color: 'black'
-      },
-      xref : 'paper', 
-      x : 0, 
-      yref : 'paper', 
-      y : -0.35, 
-      align : 'left', 
-      showarrow : false}]
+   annotations : [ annot(citation)]
   };
  Plotly.newPlot(ageDiv, age_data, age_layout,config);
 
@@ -1699,17 +1661,7 @@ if(PlaceNames.length == 1){
    linewidth: 2,
     tickformat:  '.1%'
     },
-   annotations : [{text :  'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date) , 
-     font: {
-    size : 7,
-    color: 'black'
-      },
-      xref : 'paper', 
-      x : 0, 
-      yref : 'paper', 
-      y : -0.35, 
-      align : 'left', 
-      showarrow : false}]
+   annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
   };
  Plotly.newPlot(ageDiv, age_data, age_layout,config);
 
@@ -1938,7 +1890,7 @@ for(j = 0; j < tick_val.length; j++){
      xref : 'paper',  
      x : 0.5, 
      yref : 'paper', 
-     y : -0.35, 
+     y : -0.30, 
      align : 'center', 
      font : { size : 14},
      showarrow : false},
@@ -2098,7 +2050,7 @@ for(j = 0; j < tick_val.length; j++){
    xref : 'paper',  
      x : 0.5, 
      yref : 'paper', 
-     y : -0.35, 
+     y : -0.30, 
      align : 'center', 
      font : { size : 14},
      showarrow : false},
@@ -4228,7 +4180,7 @@ var ftrStr = 'Data Sources: U.S. Census Bureau (1990-2010) and Colorado State De
   title: "Household Forecast by Year: " + PlaceNames[0],
     autosize: false,
     width: 1000,
-    height: 400, 
+    height : 400,
     xaxis: {
    title : 'Year',
    font: {
@@ -4258,13 +4210,13 @@ var ftrStr = 'Data Sources: U.S. Census Bureau (1990-2010) and Colorado State De
     },
   annotations : [{text :  ftrStr , 
                 font: {
-    size: 7,
+    size : 9,
     color: 'black'
       },
       xref : 'paper', 
       x : 0, 
       yref : 'paper', 
-      y : -0.35, 
+      y : -0.37,
       align : 'left', 
       showarrow : false}]
   };
@@ -4307,10 +4259,190 @@ function genHHForecastChart(inData,outDiv, geotype) {
        });
 } //genHHForecastChart
  
+ 
+//genSubjTab Generates substantive tablewith topics in the rows and geographies in the columns
+function genSubjTab(inData,row_topics) {
+const fmt_pct = d3.format(".2%")
+const fmt_comma = d3.format(",");
+
+
+	var row_tab = ["<th></th>","<th></th>"];
+	for(i = 0 ; i < row_topics.length; i++){
+		 row_tab.push("<td><a href='" + row_topics[i].URL_link + "' target='_blank'>" + row_topics[i].title + "</a></td>");
+	}
+	
+	
+ //Creating the output objects
+ var arr_len = (inData.length * 2);  
+ 
+  var out_count = [];
+  var out_pct = []
+  for(i = 0 ; i < row_tab.length;i++){
+	  out_count[i] = new Array(arr_len);
+	  out_pct[i] = new Array(arr_len);
+  }
+
+  //Filling in the row labels
+   for(i = 0; i < row_tab.length;i++){
+	  out_count[i][0] = row_tab[i];
+	  out_pct[i][0] = row_tab[i]
+  } //i
+  
+ //Populate the output tables
+ var inData_keys = Object.keys(inData[0]);
+ 
+ 	var col_pos = 1
+	  for(i = 0; i < inData.length;i++){  
+	        var col_pos2 = col_pos + 1;
+			 out_count[0][col_pos] = "<th align='center' colspan='2'>" + inData[i][inData_keys[1]] + "</th>";
+			 out_count[1][col_pos] = "<th align='center'>Estimate</th>";
+			 out_count[1][col_pos + 1] = "<th align='center'>Margin of Error</th>";
+			 out_pct[0][col_pos] = "<th align='center' colspan='2'>" + inData[i][inData_keys[1]] + "</th>";
+			 out_pct[1][col_pos] = "<th align='center'>Estimate</th>";;
+			 out_pct[1][col_pos2] = "<th align='center'>Margin of Error</th>";
+			 var tot_est = inData[i][inData_keys[2]];
+			 var tot_moe = inData[i][inData_keys[3]];
+			 for(j = 0; j < inData_keys.length; j++){
+				if(j % 2 == 0&& j > 0) {
+					var val_est = inData[i][inData_keys[j]];
+					var val_moe = inData[i][inData_keys[j+1]]
+					var pct_est = val_est/tot_est;
+					var pct_moe = acsPctMOE(tot_est, tot_moe,pct_est,val_moe);
+					var row_pos = ((j/2) - 1) + 2;
+					out_count[row_pos][col_pos] = "<td>" + fmt_comma(val_est) + "</td>";
+					out_count[row_pos][col_pos2] = "<td>" + fmt_comma(Math.round(val_moe)) + "</td>";
+					if(j == 2) {
+					   out_pct[row_pos][col_pos] = "<td>" + fmt_comma(val_est) + "</td>";
+					   out_pct[row_pos][col_pos2] = "<td>" + fmt_comma(Math.round(val_moe)) + "</td>";
+					} else {
+					  out_pct[row_pos][col_pos] = "<td>" + fmt_pct(pct_est) + "</td>";
+					  out_pct[row_pos][col_pos2] = "<td>" + fmt_pct(pct_moe) + "</td";
+					}
+				} //j % 2
+		 } //j
+	 col_pos = col_pos + 2;
+	  } //i
+	  
+
+	  
+
+return(out_count,out_pct);
+
+} //genSubjTab
+
 //genOccupancyTab Generates Occupancy Table
-function genOccupancyTab(inData,outDiv,geotype) {
-	exportToCsv("occupancy","test",inData,0);
-	debugger;
+function genOccupancyTab(inData,outDiv,level,curYr,fipsArr) {
+ 					
+	var row_labels = [
+     {'title' : 'Total Housing Units', 'URL_link' : genCEDSCIUrl(level,'B25002',curYr,fipsArr)},
+   {'title' : 'Occupied Housing Units, NH', 'URL_link' : genCEDSCIUrl(level,'B25002',curYr,fipsArr)},
+   {'title' : 'Vacant Housing Units', 'URL_link' : genCEDSCIUrl(level,'B25002',curYr,fipsArr)},
+   {'title' : 'Vacant Housing Units for Sale or Rent', 'URL_link' : genCEDSCIUrl(level,'B25004',curYr,fipsArr)},
+   {'title' : 'Vacant Housing Units Sold or Rented but not Occupied', 'URL_link' : genCEDSCIUrl(level,'B25004',curYr,fipsArr)},
+   {'title' : 'easonal, Recreational, or Occasional Vacancy', 'URL_link' : genCEDSCIUrl(level,'B25004',curYr,fipsArr)},
+   {'title' : 'Vacant - current residence elsewhere', 'URL_link' : genCEDSCIUrl(level,'B25005',curYr,fipsArr)},
+   {'title' : 'Housing for Migrant Workers', 'URL_link' : genCEDSCIUrl(level,'B25005',curYr,fipsArr)},
+   {'title' : 'Other Vacancy', 'URL_link' : genCEDSCIUrl(level,'B25004',curYr,fipsArr)}
+	];
+	
+
+var tab_obj = genSubjTab(inData, row_labels)
+var count_obj = tab_obj[0];
+
+var count_tab = "<thead><tr>"
+for(i = 0; count_obj.length; i++){
+	if(i == 0){
+		for(j =0; j < count_obj[i].length;j++) {
+			count_tab = count_tab + count_obj[i][j];
+		}
+	 count_tab = count_tab + "</tr><tr>";
+	}
+	if(i == 1){
+		for(j =0; j < count_obj[i].length;j++) {
+			count_tab = count_tab + count_obj[i][j];
+		}
+	 count_tab = count_tab + "</tr></thead>";
+	}
+	if(i > 1)
+		count_tab = count_tab + "<tr>"
+	   	for(j =0; j < count_obj[i].length;j++) {
+			count_tab = count_tab + count_obj[i][j];
+		}
+	 count_tab = count_tab + "</tr>";
+}
+
+//Creating data table
+/*
+var tabDiv = document.getElementById(outDiv);
+var occCat = ["Percentage", "Count"]
+//Add Dropdown to div
+//Page heading
+  var pgHead = document.createElement("H3");
+     var pgText = document.createTextNode("Housing Occupancy and Vacancy")
+   pgHead.appendChild(pgText);
+
+   //dropdown
+   var occSel = document.createElement('select');
+   occSel.id = 'occSel';
+   occSel.setAttribute('value','name');
+   for(j = 0; j < occCat.length; j++){
+      var opt = document.createElement('option');
+      opt.innerHTML = ctyName[j];
+      opt.value = j;
+      occSel.appendChild(opt);
+   } //j
+   
+ //Writing to div
+ var tabDiv = document.getElementById(outDiv);
+    outDiv.appendChild(pgHead);
+    outDiv.appendChild(occSel);
+	
+//Selecting value
+$("#occSel option[value='0']").prop("selected", true);
+//Produce inital html tables
+//replace 
+//Generate Table
+$(tabDiv).append("<table id='occtab' class='DTTable' width='90%'></table>");
+$("#occtab").append(tabpop_fin); //this has to be a html table
+
+$('#occtab').DataTable({
+	"pageLength": 5,
+  "scrollY" : true,
+     "scrollX" : true,
+  "columnDefs" : [
+  {   
+   'targets' : '_all', 'className': 'dt-body-right',
+  }
+  ],
+  dom: 'Bfrtip',
+       buttons: [
+  {  
+                text :'Word',
+    action: function ( e, dt, node, config ) {
+                    genplexTab(tab_data,labels,tblfoot,fileName,'word',"raceeth")
+                }
+        },
+        {  
+    text : 'Excel',
+      action: function ( e, dt, node, config ) {
+                    genplexTab(tab_data,labels,tblfoot,fileName,'xlsx',"raceeth")
+    }
+        },
+        {  
+    text : 'CSV',
+      action: function ( e, dt, node, config ) {
+                    genplexTab(tab_data,labels,tblfoot,fileName,'csv',"raceeth")
+    }
+  },
+        {
+          text :'PDF',
+    action: function ( e, dt, node, config ) {
+                    genplexTab(tab_data,labels,ftrMsg,fileName,'pdf',"raceeth")
+           }
+  }
+     ],  //buttons
+ } );
+ */
 } // genOccupancyTab
 
 //genSel1map The first tab, map
@@ -5825,13 +5957,13 @@ if(i == 0){
  } //i
  
 
-var ftrStr = 'U.S. Census Bureau ('+ acsYear + '). ' + (acsYear - 4) + '-' + acsYear + ' American Community Survey Table: ' + acsTab +'<br>Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date)
+var ftrStr = 'U.S. Census Bureau ('+ acsYear + '). ' + (acsYear - 4) + '-' + acsYear + ' American Community Survey Table: ' + acsTab +' Print Date: ' +  fmt_date(new Date)
 
  var income_layout = {
   title: "Household Income, " + acsYear,
     autosize: false,
     width: 1000,
-    height: 400, 
+    height : 400,
     xaxis: {
    title : 'Household Income',
    font: {
@@ -5861,13 +5993,13 @@ var ftrStr = 'U.S. Census Bureau ('+ acsYear + '). ' + (acsYear - 4) + '-' + acs
     },
   annotations : [{text :  ftrStr , 
                 font: {
-    size : 7,
+    size : 9,
     color: 'black'
       },
       xref : 'paper', 
       x : 0, 
       yref : 'paper', 
-      y : -0.35, 
+      y : -0.37,
       align : 'left', 
       showarrow : false}]
   };
@@ -6106,13 +6238,13 @@ if(i == 0){
  } //i
  
  
-var ftrStr = 'U.S. Census Bureau ('+ acsYear + '). ' + (acsYear - 4) + '-' + acsYear + ' American Community Survey Table: ' + acsTab +'<br>Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date)
+var ftrStr = 'U.S. Census Bureau ('+ acsYear + '). ' + (acsYear - 4) + '-' + acsYear + ' American Community Survey Table: ' + acsTab +' Print Date: ' +  fmt_date(new Date)
 
  var educ_layout = {
   title: "Educational Attainment, Persons Age 25+, " + acsYear,
     autosize: false,
     width: 1000,
-    height: 400, 
+    height : 400,
     xaxis: {
    title : 'Educational Attainment',
    font: {
@@ -6142,13 +6274,13 @@ var ftrStr = 'U.S. Census Bureau ('+ acsYear + '). ' + (acsYear - 4) + '-' + acs
     },
   annotations : [{text :  ftrStr , 
                 font: {
-    size : 7,
+    size : 9,
     color: 'black'
       },
       xref : 'paper', 
       x : 0, 
       yref : 'paper', 
-      y : -0.35, 
+      y : -0.37,
       align : 'left', 
       showarrow : false}]
   };
@@ -7041,10 +7173,11 @@ if(muniList.includes(geotype)){
 } // muni
 
 //Outputs
-genHHForecastChart(hhforecast_fin,PRO_1.id,geotype);
+//genHHForecastChart(hhforecast_fin,PRO_1.id,geotype);
+genOccupancyTab(occ_tab_fin,PRO_2.id,geotype,curyear,fipsArr);
 
 /*
-genOccupancyTab(occ_tab_fin,PRO_2.id,geotype);
+
 genHousingTypeTab();
 genHHIncomeTab();
 */
