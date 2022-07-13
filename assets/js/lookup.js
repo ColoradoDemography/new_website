@@ -47,6 +47,8 @@ sel.innerHTML = "";
 
 //genRaceTab creares the race data call and produces table
 function genRaceTab(loc,year_arr, race_arr,eth_arr,age_arr,sex_list,group) {
+	const fmt_comma = d3.format(",");
+
 	//build urlstr
 	var fips_arr = [];
 	for(i = 0; i < loc.length; i++){ fips_arr.push(parseInt(loc[i]))}
@@ -56,7 +58,7 @@ function genRaceTab(loc,year_arr, race_arr,eth_arr,age_arr,sex_list,group) {
 	var eth_list = eth_arr.join(",")
 	var age_list = age_arr.join(",")
 	
-	if(sex_list == "S") {
+	if(sex_list == "B") {
 		var urlstr = "https://gis.dola.colorado.gov/lookups/sya-race-estimates?age="+ age_list + "&county="+ fips_list +"&year="+ year_list +"&race=" + race_list+ "&ethnicity="+eth_list+"&group="+group;
 	} else {
 		var urlstr = "https://gis.dola.colorado.gov/lookups/sya-race-estimates?age="+ age_list + "&county="+ fips_list +"&year="+ year_list +"&race=" + race_list+ "&ethnicity="+eth_list+"&sex="+sex_list+"&group="+group;
@@ -64,28 +66,45 @@ function genRaceTab(loc,year_arr, race_arr,eth_arr,age_arr,sex_list,group) {
 
 d3.json(urlstr).then(function(data){
 
+    // Flesh out records -- for options ne 0
+	var fullkeys = ['county_fips', 'year','age','sex','race', 'ethnicity','count']
+
+	for(i = 0; i < data.length; i++){
+		for(j = 0; j < fullkeys.length; j ++) {
+		if(!(fullkeys[j] in data[i])){
+				data[i][fullkeys[j]] = "_";
+			}
+		}
+	}
+	
+
+	
 	// Generate Table
 	var out_tab = "<thead><tr><th>County Name</th><th>County FIPS</th><th>Year</th><th>Age</th><th>Sex</th><th>Race</th><th>Ethnicity</th><th>Count</th></tr></thead>";
 	out_tab = out_tab + "<tbody>"
 	for(i = 0; i < data.length; i++){
-		var tmp_str = "<tr>"
-		tmp_str = tmp_str + "<td>"+ countyName(data[i].county_fips) + "</td>"
-		tmp_str = tmp_str + "<td>" + data[i].county_fips + "</td>"
-		tmp_str = tmp_str + "<td>" + data[i].year + "</td>"
-		tmp_str = tmp_str + "<td>" + data[i].age + "</td>"
-		if(sex_list == "S") {
-			tmp_str = tmp_str + "<td> </td>"
+		var ctyName = data[i].county_fips  == "_" ? " " : countyName(data[i].county_fips)
+		var el1 = "<td>" + ctyName + "</td>"
+		var el2 = "<td>" + data[i].county_fips + "</td>"
+		var el3 = "<td>" + data[i].year + "</td>"
+		var el4 = "<td>" + data[i].age + "</td>"
+		if(sex_list == "B") {
+			var el5 = "<td> </td>"
 		} else {
 		   if(data[i].sex == "M"){
-			tmp_str = tmp_str + "<td>Male</td>";
+			var el5 = "<td>Male</td>";
 		   }
 		   if(data[i].sex == "F"){
-			tmp_str = tmp_str + "<td>Female</td>";
+			var el5 =  "<td>Female</td>";
 		   }
 		}
-		tmp_str = tmp_str + "<td>" + data[i].race + "</td>"
-		tmp_str = tmp_str + "<td>" + data[i].ethnicity + "</td>"
-		tmp_str = tmp_str + "<td>" + parseInt(data[i].count) + "</td></tr>"
+		var el6 =  "<td>" + data[i].race + "</td>"
+		var el7 = "<td>" + data[i].ethnicity + "</td>"
+		var el8 = "<td>" + fmt_comma(parseInt(data[i].count)) + "</td>"
+
+		var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + el5 + el6 + el7 + el8 + "</tr>";
+		var tmp_str = tmp_row.replaceAll("_","")
+
 	   out_tab = out_tab + tmp_str;
 	}
 	out_tab = out_tab + "</tbody>"
