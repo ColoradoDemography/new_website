@@ -1526,6 +1526,9 @@ if(level == 'region' || level == 'regioncomp') {
 	}
 	
     } else {
+	if(callpg == 'lookup') {
+		locarr.shift()
+	}
 	 var sel = document.getElementById(ddid);
 		for(var i = 0; i < locarr.length; i++) {
 			var el = document.createElement("option");
@@ -1536,7 +1539,7 @@ if(level == 'region' || level == 'regioncomp') {
 	}
 }; //end of popDropdown	
 
-//popCtyDrop  Populates the regiona deopdown and facilitates drill down...
+//popCtyDrop  Populates the region dropdown and facilitates drill down...
 function popCtyDrop(regnum,ddid){
 
 	reg_num = parseInt(regnum);
@@ -1779,6 +1782,18 @@ function exportToCsv(cname, type, rows, yr) {
 		if(type == 'hhforecast'){
 			var fileName = "Household Forecast by Age " + cname + ".csv"
 		}
+		
+		if(type == "Summary Statistics Table"){
+			var fileName = cname + ".csv"
+		}
+		if(type == "Population Growth Table"){
+			var fileName = cname + ".csv"
+		}
+		if(type == "Housing Occupancy and Vacancy"){
+			var fileName = cname + ".csv"
+		}
+
+		
         var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
         if (navigator.msSaveBlob) { // IE 10+
             navigator.msSaveBlob(blob, fileName);
@@ -1821,7 +1836,9 @@ function plotDownload(plotdiv,filename,type){
 
 //exportToPng  Exports plotly trace and layout to PNG file
 function exportToPng(cname, type, graphDiv, yr){
-
+	  	if(type == 'map') {
+			var fileName = cname + " Base Map";
+		};
 	  	if(type == 'estimate') {
 			var fileName = "Population Estimates " + cname;
 		};
@@ -1914,7 +1931,14 @@ function exportToPng(cname, type, graphDiv, yr){
 			};  //i
 		} else {
 		var fn = fileName + ".png";
-		if(type == 'agepyr'){
+		switch(type) {
+		case 'map': {
+			var count_node = d3.select("svg").node();
+	        count_node.setAttribute("viewBox", "0 0 925 500");
+	        saveSvgAsPng(count_node, fn);
+		} 
+		break;
+		case 'agepyr' : {
 		Plotly.toImage(graphDiv, { format: 'png', width: 900, height: 500 }).then(function (dataURL) {
 			var a = document.createElement('a');
 			a.href = dataURL;
@@ -1923,8 +1947,9 @@ function exportToPng(cname, type, graphDiv, yr){
 			 a.click();
 			document.body.removeChild(a);
         });
-		} else {
-	      if(type == 'popchng') {
+		} 
+		break;
+	    case 'popchng' : {
 		    Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 400 }).then(function (dataURL) {
 				var a = document.createElement('a');
 				a.href = dataURL;
@@ -1933,7 +1958,9 @@ function exportToPng(cname, type, graphDiv, yr){
 				 a.click();
 				document.body.removeChild(a);
 			});
-	  } else {
+		} 
+		break;
+	  default : {
 	   Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 400 }).then(function (dataURL) {
         var a = document.createElement('a');
         a.href = dataURL;
@@ -1942,7 +1969,8 @@ function exportToPng(cname, type, graphDiv, yr){
          a.click();
         document.body.removeChild(a);
     });
-	}
+	  }
+	break;
 	}
 		}
 };  //exportToPng
@@ -2256,6 +2284,7 @@ function returnRank(indata,fips){
 //genACSHHIncome ACS data summary functions  HH Income
 //genACSEducation ACS data summary functions  Educational Attainment
 //genACSRace ACS data summary functions  Race and Ethnicity
+//genACSPov ACS data summary function Poverty
 //acsMOE Takes square root of MOE values from summary data sets
 //genACSpct generic function to calculate percentages
 
@@ -2328,7 +2357,6 @@ function genCEDSCIUrl(level,tableid, yrvalue, fipsArr) {
 	var urlHead = 'https://data.census.gov/cedsci/table?q=' + tableid;
 	var urlTail = '&tid=ACSDT5Y' + yrvalue + '.' + tableid;
 	var urlGeo = "&g=";
-	
 	    if(level == "Region") {
 		if(fipsArr[0] == "08") {
 			urlGeo = urlGeo + '0400000US' + fipsArr[0] + '_';
@@ -2339,13 +2367,13 @@ function genCEDSCIUrl(level,tableid, yrvalue, fipsArr) {
 		};
 		urlGeo = urlGeo + "0500000US"
 		for(i = startVal; i < fipsArr.length; i++) {
-			urlGeo = urlGeo + fipsArr[i] + ",";
+			urlGeo = urlGeo + "08" + fipsArr[i] + ",";
 		}
 	 urlGeo = urlGeo.slice(0, -1)
 	}
 	if(level == "County") {
 		urlGeo = urlGeo + '0400000US' + fipsArr[0] + '_';
-		urlGeo = urlGeo + "0500000US" + fipsArr[1];
+		urlGeo = urlGeo + "0500000US" + "08" + fipsArr[1];
 	};
 	if(level == "Municipality") {
 		var ctycode = "08" + fipsArr[0].substring(4)
@@ -2354,7 +2382,6 @@ function genCEDSCIUrl(level,tableid, yrvalue, fipsArr) {
 	}
 	
 var fullUrl = urlHead + urlGeo + urlTail;
-
 
 return(fullUrl)
 } //genCEDSCIUrl
