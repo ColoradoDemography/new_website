@@ -223,7 +223,7 @@
 		
 		
 		if(selectedeth.length == 0 && selectedrace.length == 0){
-		    outputmsg = outputmsg + "  Please select one or more race and ethnicity groups.";
+		    outputmsg = outputmsg + "  >Please select one or more race and ethnicity groups.";
 			complete = false;
 		}
 		if(selectedeth.length != 0 && selectedrace.length == 0){
@@ -236,7 +236,7 @@
 		var agedd = document.getElementById('age-dropdown');
 		var selectedage = getSelectValues(agedd);
 		if(selectedage.length == 0){
-		    outputmsg = outputmsg + "  Please select one or more age group.";
+		    outputmsg = outputmsg + "  >Please select one or more age group.";
 			complete = false;
 		}
 
