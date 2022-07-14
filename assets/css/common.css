@@ -456,6 +456,12 @@ details main {
   border: 2px solid black; 
 }
 
+.incbtn {
+  color: #efefef;
+  /*width: 40px; 
+  height: 40px; */
+  border: 2px solid black; 
+}
 .dropdown {
   display: inline-block;
 }
@@ -1476,3 +1482,19 @@ div.tooltip {
     grid-column: 6;
     grid-row: 7;   
    }
+   
+   
+/* Classes for lookups */
+/* Add a background color on hover */
+.lookup_cell {
+	border: none; 
+	width: 25%;
+	vertical-align: top;
+	text-align: left;
+}
+.lookup_p {
+	font-family: "Trebuchet MS, Museo Slab; helvetica, lucida sans, tahoma, verdana", sans-serif;
+    line-height: 1;
+	color : black;
+	font-size: 10pt;
+}
