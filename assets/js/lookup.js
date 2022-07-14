@@ -48,7 +48,7 @@ sel.innerHTML = "";
 //genRaceTab creares the race data call and produces table
 function genRaceTab(loc,year_arr, race_arr,eth_arr,age_arr,sex_list,group) {
 	const fmt_comma = d3.format(",");
-
+debugger;
 	//build urlstr
 	var fips_arr = [];
 	for(i = 0; i < loc.length; i++){ fips_arr.push(parseInt(loc[i]))}
@@ -58,13 +58,16 @@ function genRaceTab(loc,year_arr, race_arr,eth_arr,age_arr,sex_list,group) {
 	var eth_list = eth_arr.join(",")
 	var age_list = age_arr.join(",")
 	
-	if(sex_list == "B") {
+	if(sex_list == "S") {
 		var urlstr = "https://gis.dola.colorado.gov/lookups/sya-race-estimates?age="+ age_list + "&county="+ fips_list +"&year="+ year_list +"&race=" + race_list+ "&ethnicity="+eth_list+"&group="+group;
 	} else {
 		var urlstr = "https://gis.dola.colorado.gov/lookups/sya-race-estimates?age="+ age_list + "&county="+ fips_list +"&year="+ year_list +"&race=" + race_list+ "&ethnicity="+eth_list+"&sex="+sex_list+"&group="+group;
 	}
+console.log(urlstr);
 
 d3.json(urlstr).then(function(data){
+
+console.log(data);
 
     // Flesh out records -- for options ne 0
 	var fullkeys = ['county_fips', 'year','age','sex','race', 'ethnicity','count']
@@ -88,7 +91,7 @@ d3.json(urlstr).then(function(data){
 		var el2 = "<td>" + data[i].county_fips + "</td>"
 		var el3 = "<td>" + data[i].year + "</td>"
 		var el4 = "<td>" + data[i].age + "</td>"
-		if(sex_list == "B") {
+		if(sex_list == "S") {
 			var el5 = "<td> </td>"
 		} else {
 		   if(data[i].sex == "M"){
