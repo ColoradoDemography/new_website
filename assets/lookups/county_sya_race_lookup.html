@@ -110,9 +110,9 @@
 		<option value="3">American Indian and Alaska Native alone</option>
 			<option value="2">Asian alone</option>
 			<option value="4">Black or African American alone</option>
-			<option value="2">Native Hawaiian or Other Pacific Islander alone</option>
+			<option value="6">Native Hawaiian or Other Pacific Islander alone</option>
 			<option value="1">White alone</option>
-			<option value="3">Two or More Races</option>
+			<option value="6">Two or More Races</option>
 	 </select>
     </td>
 	<td class="lookup_cell">
@@ -127,13 +127,13 @@
 	<table style="border-collapse: collapse; border: none;">
 	<tr>
 	<td class="lookup_cell">
-	   <p class="entry_text" id='age-lbl'>Select one or more ages:</li>
+	   <p class="entry_text" id='age-lbl'>Select one or more ages:</p>
 	</td>
 	<td class="lookup_cell">
-	   <p class="entry_text" id='sex-lbl'>Display results by sex:</li>
+	   <p class="entry_text" id='sex-lbl'>Display results by sex:</p>
 	</td>
 	<td class="lookup_cell">
-	   <p class="entry_text" id='group-lbl'>Select 0 or more variables to summarize by:</li>
+	   <p class="entry_text" id='group-lbl'>Select 0 or more variables to summarize by (leave blank for a detailed summary):</p
 	</td>
 	<td class="lookup_cell">
 	</td>
@@ -203,7 +203,7 @@
 		var selectedfips = getSelectValues(fipsdd);
 
 		if(selectedfips.length == 0){
-		    outputmsg = outputmsg +  "<li>Please select one or more counties</li>";
+		    outputmsg = outputmsg +  "  Please select one or more counties.";
 			complete = false;
 		}
 		
@@ -211,26 +211,32 @@
 		var selectedyr = getSelectValues(yrdd);
 
 		if(selectedyr.length == 0){
-		    outputmsg = outputmsg +  "<li>Please select one or more years</li>";
+		    outputmsg = outputmsg +  "  >Please select one or more years.";
 			complete = false;
 		}
 
 		var racedd = document.getElementById('race-dropdown');
 		var selectedrace = getSelectValues(racedd)
-		if(selectedrace.length == 0){
-		    outputmsg = outputmsg +  "<li>Please select one or more race group</li>";
-			complete = false;
-		}
+		
 		var ethdd = document.getElementById('ethnicity-dropdown');
 		var selectedeth = getSelectValues(ethdd);
-		if(selectedeth.length == 0){
-		    outputmsg = outputmsg + "<li>Please select one or more echnicity group</li>";
+		
+		
+		if(selectedeth.length == 0 && selectedrace.length == 0){
+		    outputmsg = outputmsg + "  Please select one or more race and ethnicity groups.";
 			complete = false;
 		}
+		if(selectedeth.length != 0 && selectedrace.length == 0){
+		   var selectedrace = ['1','2','3','4']; //CHANGE WITH NEW DATA
+		}
+		if(selectedeth.length == 0 && selectedrace.length != 0){
+		   selectedeth = ['1','2']; //CHANGE WITH NEW DATA
+		}
+		
 		var agedd = document.getElementById('age-dropdown');
 		var selectedage = getSelectValues(agedd);
 		if(selectedage.length == 0){
-		    outputmsg = outputmsg + "<li>Please select one or more age group</li>";
+		    outputmsg = outputmsg + "  Please select one or more age group.";
 			complete = false;
 		}
 
@@ -247,10 +253,11 @@
 		} else {
 		   selectedgroup = "opt" + selectedgroup;
 		}
+		debugger;
 		if(complete){
 		     genRaceTab(selectedfips,selectedyr, selectedrace,selectedeth,selectedage,selectedsex,selectedgroup);
 			 } else {
-			 document.getElementById("tbl_output").innerHTML = "<ul>" + outputmsg + "</ul>"
+			 window.alert(outputmsg);
 			 }
 	 };  //chkInputs
 	 
