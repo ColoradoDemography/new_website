@@ -530,6 +530,7 @@ return cty;
 //RegionNum takes the names of selected regions and returns a list of region numbers
 function RegionNum(nam) {
 var regionNum = 0;
+if(nam == 'Colorado') {regionNum = 0};
 if(nam == 'Central Mountains') {regionNum = 1};
 if(nam == 'Eastern Plains') {regionNum = 2};
 if(nam == 'Front Range') {regionNum = 3};
@@ -575,6 +576,7 @@ return(regionNum);
 
 //RegionName takes the region number and returns the name
 function regionName(reg) {
+if(reg == 0) {name =  'Colorado'};
 if(reg == 1) {name =  'Central Mountains'};
 if(reg == 2) {name =  'Eastern Plains'};
 if(reg == 3) {name =  'Front Range'};
@@ -1201,6 +1203,7 @@ var county = [  {'location':'Colorado', 'fips': '000'}, {'location':'Adams Count
 
 
 //regions
+
 var region =  [
 				{'optgroup' : 'Geographic Region','location' : 'Central Mountains', 'regnum' : '01'},	
 				{'optgroup' : 'Geographic Region','location' : 'Eastern Plains', 'regnum' : '02'},
@@ -1242,6 +1245,7 @@ var region =  [
 				{'optgroup' : 'Denver Regions','location' : 'Denver-Boulder Metro Area', 'regnum' : '38'},
 				{'optgroup' : 'Denver Regions','location' : 'Denver-Boulder-Greely CMSA', 'regnum' : '39'},
 ];
+
 //Municipalities and places
 
 var municipality = [{'location' :  'Aguilar' , 'fips' : '00760'}, {'location' :  'Akron' , 'fips' : '00925'},
@@ -1486,7 +1490,14 @@ var profile = [{'location' :  'Select Profile' , 'fips' : ''},{'location' :  'Re
 	*/
 	]	
 
-if(level == 'region') { var locarr = region};
+if(level == 'region') { 
+	var locarr = region;
+    if(callpg == 'lookup'){
+		var staterec = {'optgroup' : 'State Total','location' : 'Colorado', 'regnum' : '000'};
+		locarr.unshift(staterec);
+	}
+  }
+
 if(callpg == 'profile') { //removes "Colorado" from the county array when called by the profile
 	if(level == 'county') {
 		var tmpcty = county;
@@ -1508,7 +1519,6 @@ var sel = document.getElementById(ddid);
 sel.innerHTML = "";
 
 if(level == 'region' || level == 'regioncomp') {
-
 	var groups = [... new Set(locarr.map(tag => tag.optgroup))];
 
 	for(i = 0; i < groups.length; i++){
@@ -1564,7 +1574,7 @@ var sel = document.getElementById(ddid);
 } //end of popCtyDrop
 
 
-//regioncty  returns te fips codes and color codes for a input region number
+//regionCOL  returns te fips codes and color codes for a input region number
 //Color Pallettes
 //Geographic Regions  DOLA Reds
 //Management Regions DOLA Purples
@@ -1573,6 +1583,11 @@ var sel = document.getElementById(ddid);
 //Denver DOLA Rignh Mountain Teal
 function regionCOL(regnum) {
 	var fips = []; 
+if(regnum == 0) {fips.push({'fips' : ['001', '003', '005', '007', '009', '011', '013', '014', '015', '017', '019', '021', '023', '025', '027', 
+									'029', '031', '033', '035', '037', '039', '041', '043', '045', '047', '049', '051', '053', '055', '057', 
+									'059', '061', '063', '065', '067', '069', '071', '073', '075', '077', '079', '081', '083', '085', '087', 
+									'089', '091', '093', '095', '097', '099', '101', '103', '105', '107', '109', '111', '113', '115', '117', 
+									'119', '121', '123', '125'], 'color' : ''})};
 if(regnum == 1) {fips.push({'fips' : ['015', '019', '027', '043', '047', '055', '065', '071', '093'], 'color' : '#EE6677'})};
 if(regnum == 2) {fips.push({'fips' : ['009', '011', '017', '025', '039', '061', '063', '073', '075', '087', '089', '095', '099', '115', '121', '125'],  'color' : '#228833'})};
 if(regnum == 3) {fips.push({'fips' : ['001', '005', '013', '014', '031', '035', '041', '059', '069', '101','119','123'],  'color' : '#4477AA'})};
