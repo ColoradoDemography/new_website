@@ -1,9 +1,9 @@
-<!-- County Race Ethnicity LookupPage A Bickford 6/2021 -->
+<!-- Region Race Ethnicity LookupPage A Bickford 6/2021 -->
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>Race and Ethnicity by Age Estimates - County</title>
+<title>Race and Ethnicity by Age Estimates - Region</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" http-equiv="content-type" content="text/html; charset=utf-8">
 <!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
 <!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
@@ -57,13 +57,13 @@
 	<div w3-include-html="../html/left_hand_index.html"></div>
   </div> <!-- Grid  panel2_2_1 -->
   <div class="grid-item app-panel_2_2">
-  <b>Race and Ethnicity by Age Estimates - County</b>
+  <b>Race and Ethnicity by Age Estimates - Region</b>
   <p>
-  <a href="../lookups/region_sya_race_lookup.html" target='_blank'>Need Regional and State Data?</a>
+  <a href="../lookups/county_sya_race_lookup.html" target='_blank'>Need County Data?</a>
   </p>
    <br>INSTRUCTIONS:
    <p class="lookup_p">
-   This application creates custom tables for SDO county-level estimates by race, ethnicity, age and sex.
+   This application creates custom tables for SDO Regional estimates by race, ethnicity, age and sex.
    </p>
    <p class="lookup_p">
     Estimated data is based on 2020 Census population estimates.  These estimates provide data broken down by: 
@@ -86,7 +86,7 @@
    <table style="border-collapse:collapse; border:none;">
    <tr>
 	<td class="lookup_cell">
-		<p class="entry_text" id="county-lbl">Select one or more Counties:</p> 
+		<p class="entry_text" id="region-lbl">Select one or more Regions:</p> 
 	</td>
 	<td class="lookup_cell">
 		<p class="entry_text" id="year-lbl">Select Year:</p>
@@ -100,7 +100,7 @@
 	</tr>
 	<tr>
 	<td class="lookup_cell"> 
-	 <select class="county-dropdown" id="county-dropdown" multiple></select>
+	 <select class="Region-dropdown" id="region-dropdown" multiple></select>
 	 </td>
 	<td class="lookup_cell">
     <select class="year-dropdown" id="year-dropdown" style='width:100px;' size="4" multiple></select>
@@ -155,19 +155,19 @@
 	<td class="lookup_cell">
     <select class="group-dropdown" id="group-dropdown" size="4">
         <option value='1'>Year</option>
-        <option value='2'>County</option>
+        <option value='2'>Region</option>
         <option value='3'>Age</option>
         <option value='4'>Race</option>
-        <option value='5'>Year, County</option>
+        <option value='5'>Year, Region</option>
         <option value='6'>Year, Age</option>
         <option value='7'>Year, Race</option>
-        <option value='8'>County, Age</option>
-        <option value='9'>County, Race</option>
+        <option value='8'>Region, Age</option>
+        <option value='9'>Region, Race</option>
         <option value='10'>Age, Race</option>
-        <option value='11'>Year, County, Age</option>
-        <option value='12'>Year, County, Race</option>
+        <option value='11'>Year, Region, Age</option>
+        <option value='12'>Year, Region, Race</option>
         <option value='13'> Year, Age, Race</option>
-        <option value='14'>County, Age, Race</option>
+        <option value='14'>Region, Age, Race</option>
 		</select>
     </td>
 	<td class="lookup_cell">
@@ -186,7 +186,7 @@
 
  includeHTML();
 
- popDropdown('county','county-dropdown','lookup');
+ popDropdown('region','region-dropdown','lookup');
  popRaceYrdd("year-dropdown",2010,2020);  //Change this range to match data
  popAgeYrdd("age-dropdown",0,85);  //Change this range to match data
 
@@ -199,11 +199,16 @@
  var complete = true;
  var outputmsg = "";
  document.getElementById('tbl_output').innerHTML = "";
-	    var fipsdd = document.getElementById('county-dropdown');
-		var selectedfips = getSelectValues(fipsdd);
 
+	    var fipsdd = document.getElementById('region-dropdown');
+		var selectedreg = getSelectValues(fipsdd);
+		selectedfips = [];
+		selectedreg.forEach(d => {
+			var tmpcty = regionCOL(+d);
+		    selectedfips.push(tmpcty[0].fips)
+		})
 		if(selectedfips.length == 0){
-		    outputmsg = outputmsg +  "  >Please select one or more counties.";
+		    outputmsg = outputmsg +  "  >Please select one or more regions.";
 			complete = false;
 		}
 		
@@ -253,9 +258,9 @@
 		} else {
 		   selectedgroup = "opt" + selectedgroup;
 		}
-		debugger;
+
 		if(complete){
-		     genRaceTabCty(selectedfips,selectedyr, selectedrace,selectedeth,selectedage,selectedsex,selectedgroup);
+		     genRaceTabReg(selectedreg, selectedfips,selectedyr, selectedrace,selectedeth,selectedage,selectedsex,selectedgroup);
 			 } else {
 			 window.alert(outputmsg);
 			 }
