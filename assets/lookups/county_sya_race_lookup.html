@@ -106,12 +106,12 @@
     <select class="year-dropdown" id="year-dropdown" style='width:100px;' size="6" multiple></select>
     </td>
 	<td class="lookup_cell">
-    <select class="race-dropdown" id="race-dropdown" size="6" multiple>
-		<option value="3">American Indian and Alaska Native alone</option>
-			<option value="2">Asian alone</option>
-			<option value="4">Black or African American alone</option>
-			<option value="6">Native Hawaiian or Other Pacific Islander alone</option>
-			<option value="1">White alone</option>
+     <select class="race-dropdown" id="race-dropdown" size="6" multiple>
+		<option value="1">White alone</option>
+			<option value="2">Black or African American alone</option>
+			<option value="3">American Indian and Alaska Native alone</option>
+			<option value="4">Asian alone</option>
+			<option value="5">Native Hawaiian or Other Pacific Islander alone</option>
 			<option value="6">Two or More Races</option>
 	 </select>
     </td>
@@ -187,7 +187,7 @@
  includeHTML();
 
  popDropdown('county','county-dropdown','lookup');
- popRaceYrdd("year-dropdown",2010,2020);  //Change this range to match data
+ popRaceYrdd("year-dropdown",2020,2021);  //Change this range to match data
  popAgeYrdd("age-dropdown",0,85);  //Change this range to match data
 
 //Button Event
@@ -253,7 +253,7 @@
 		} else {
 		   selectedgroup = "opt" + selectedgroup;
 		}
-		debugger;
+
 		if(complete){
 		     genRaceTabCty(selectedfips,selectedyr, selectedrace,selectedeth,selectedage,selectedsex,selectedgroup);
 			 } else {
