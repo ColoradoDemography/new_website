@@ -1754,8 +1754,14 @@ function exportToCsv(cname, type, rows, yr) {
 		if(type == 'asian'){
 			var fileName = "Single Year of Age by Race Asian NH " + cname +  " " + yr + ".csv";
 		};
+		if(type == 'nhpi'){
+			var fileName = "Single Year of Age by Race Native Hawaiian Pacific Islander NH " + cname +  " " + yr + ".csv";
+		};
 		if(type == 'amind'){
 			var fileName = "Single Year of Age by Race American Indian NH " + cname +  " " + yr + ".csv";
+		};
+		if(type == 'amind'){
+			var fileName = "Single Year of Age by Race Two or More Races NH " + cname +  " " + yr + ".csv";
 		};
 		if(type == 'netmign'){
 			var fileName =  "Net Migration by Age " + cname + ".csv"
@@ -1770,7 +1776,7 @@ function exportToCsv(cname, type, rows, yr) {
 			var fileName =  "Net Migration by Year.csv"
 		};
 		if(type == 'nethist') {
-			var fileName = "Long Term Trend Birth Death Migration " + cname + ".csv"
+			var fileName = "Long Term Trend Births Deaths Migration " + cname + ".csv"
 		};
 		if(type == 'hhchart') {
 			var fileName = "Household Projections Age Group x Household Type " + cname + ".csv"
@@ -1897,8 +1903,14 @@ function exportToPng(cname, type, graphDiv, yr){
 		if(type == 'asian'){
 			var fileName = "Single Year of Age by Race Asian NH " + cname +  " " + yr;
 		};
+		if(type == 'nhpi'){
+			var fileName = "Single Year of Age by Race Native Hawaiian Pacific Islander NH " + cname +  " " + yr;
+		};
 		if(type == 'amind'){
 			var fileName = "Single Year of Age by Race American Indian NH " + cname +  " " + yr;
+		};
+		if(type == 'multi'){
+			var fileName = "Single Year of Age by Race Two or More Races NH " + cname +  " " + yr;
 		};
 		if(type == 'netmign'){
 			var fileName =  "Net Migration by Age " + cname
@@ -5413,9 +5425,9 @@ for(i = 1; i<= 100; i++){
   };
   
  
-//estimates urls
-urlstr_hispest = "https://gis.dola.colorado.gov/lookups/sya-race-estimates?age="+ age_list + "&county="+ fips_list +"&year="+ yrvalue +"&race=1,2,3,4&ethnicity=1&sex=b";
-urlstr_nonhispest = "https://gis.dola.colorado.gov/lookups/sya-race-estimates?age="+ age_list + "&county="+ fips_list +"&year="+ yrvalue +"&race=1,2,3,4&ethnicity=2&sex=b";
+//estimates urls  
+urlstr_hispest = "https://gis.dola.colorado.gov/lookups/county_sya_race_estimates_current?age="+ age_list + "&county="+ fips_list +"&year="+ yrvalue +"&race=1,2,3,4,5,6&ethnicity=1&sex=b";
+urlstr_nonhispest = "https://gis.dola.colorado.gov/lookups/county_sya_race_estimates_current?age="+ age_list + "&county="+ fips_list +"&year="+ yrvalue +"&race=1,2,3,4,5,6&ethnicity=2&sex=b";
 
 //Promise Structure
 var prom = [d3.json(urlstr_hispest),d3.json(urlstr_nonhispest)];
@@ -5480,24 +5492,32 @@ if(geotype == 'region') {
 };
 
 
+debugger;
+console.log(race_flat);
+
 //Plotting 
 var config = {responsive: true,
               displayModeBar: false};
-//Clearing out divs
+//Clearing out divs 
 var LINE = document.getElementById("line_output");
 var WHITE = document.getElementById("white_output");
 var HISPANIC = document.getElementById("hisp_output");
 var BLACK = document.getElementById("black_output");
 var ASIAN = document.getElementById("asian_output");
 var AMIND = document.getElementById("amind_output");
+var NHPI = document.getElementById("nhpi_output");
+var MULTI = document.getElementById("multi_output");
+
 LINE.innerHTML = "";
 WHITE.innerHTML = "";
 HISPANIC.innerHTML = "";
 BLACK.innerHTML = "";
 ASIAN.innerHTML = "";
 AMIND.innerHTML = "";
+NHPI.innerHTML = "";
+MULTI.innerHTML = "";
 
-//line chart
+//line chart add traces for line chart
 
 var age_line_arr_w = [];
 var pop_line_arr_w = [];
@@ -5509,9 +5529,13 @@ var age_line_arr_as = [];
 var pop_line_arr_as = [];
 var age_line_arr_ai = [];
 var pop_line_arr_ai = [];
+var age_line_arr_nh = [];
+var pop_line_arr_nh = [];
+var age_line_arr_mu = [];
+var pop_line_arr_mu = [];
 
 for(i = 0; i < race_flat.length; i++){
-	if(race_flat[i].race_eth == "White NH" && race_flat[i].age < 85){
+	if(race_flat[i].race_eth == "White alone NH" && race_flat[i].age < 85){
 		age_line_arr_w.push(race_flat[i].age);
 		pop_line_arr_w.push(race_flat[i].population);
 	};
@@ -5519,17 +5543,25 @@ for(i = 0; i < race_flat.length; i++){
 		age_line_arr_h.push(race_flat[i].age);
 		pop_line_arr_h.push(race_flat[i].population);
 	};
-	if(race_flat[i].race_eth == "Black NH" && race_flat[i].age < 85){
+	if(race_flat[i].race_eth == "Black or African American alone NH" && race_flat[i].age < 85){
 		age_line_arr_b.push(race_flat[i].age);
 		pop_line_arr_b.push(race_flat[i].population);
 	};
-	if(race_flat[i].race_eth == "Asian/Pacific Islander NH" && race_flat[i].age < 85){
+	if(race_flat[i].race_eth == "Asian alone NH" && race_flat[i].age < 85){
 		age_line_arr_as.push(race_flat[i].age);
 		pop_line_arr_as.push(race_flat[i].population);
 	};
-	if(race_flat[i].race_eth == "American Indian NH" && race_flat[i].age < 85){
+	if(race_flat[i].race_eth == "Native Hawaiian or Other Pacific Islander alone NH" && race_flat[i].age < 85){
+		age_line_arr_nh.push(race_flat[i].age);
+		pop_line_arr_nh.push(race_flat[i].population);
+	};
+	if(race_flat[i].race_eth == "American Indian and Alaska Native alone NH" && race_flat[i].age < 85){
 		age_line_arr_ai.push(race_flat[i].age);
 		pop_line_arr_ai.push(race_flat[i].population);
+	};
+	if(race_flat[i].race_eth == "Two or more  NH" && race_flat[i].age < 85){
+		age_line_arr_mu.push(race_flat[i].age);
+		pop_line_arr_mu.push(race_flat[i].population);
 	};
 };
 
@@ -5558,7 +5590,7 @@ var hisp_line = {
 var black_line = { 
                x: age_line_arr_b,
                y : pop_line_arr_b,
-			   name : 'Black, NH',
+			   name : 'Black or African American, NH',
 			   mode : 'lines', 
 			   line : {
 					color: 'green',
@@ -5569,7 +5601,7 @@ var black_line = {
 var asian_line = { 
                x: age_line_arr_as,
                y : pop_line_arr_as,
-			   name : 'Asian/Pacific Islander, NH',
+			   name : 'Asian, NH',
 			   mode : 'lines', 
 			   line : {
 					color: 'red',
@@ -5577,18 +5609,38 @@ var asian_line = {
 				}
 			};
 			
+var nhpi_line = { 
+               x: age_line_arr_nh,
+               y : pop_line_arr_nh,
+			   name : 'Native Hawaiian or Other Pacific Islander, NH',
+			   mode : 'lines', 
+			   line : {
+					color: 'brown',
+					width : 3
+				}
+			};
 var amind_line = { 
                x: age_line_arr_ai,
                y : pop_line_arr_ai,
-			   name : 'American Indian, NH',
+			   name : 'American Indian and Alaska Native, NH',
 			   mode : 'lines', 
     		   line : {
 					color: 'purple',
 					width : 3
 				}
 			};
-			
-//Traces for Barcharts
+
+var multi_line = { 
+               x: age_line_arr_mu,
+               y : pop_line_arr_mu,
+			   name : 'Two or More Races, NH',
+			   mode : 'lines', 
+    		   line : {
+					color: 'grey',
+					width : 3
+				}
+			};
+//Traces for Barcharts 
 var white_bar = { 
                x: age_line_arr_w,
                y : pop_line_arr_w,
@@ -5616,7 +5668,14 @@ var asian_bar = {
 			   type : 'bar',
 			   marker : { color : 'red' }
 			};
-			
+
+var nhpi_bar = { 
+               x: age_line_arr_nh,
+               y : pop_line_arr_nh,
+			   type : 'bar',
+			   marker : { color : 'brown' }
+			};
+
 var amind_bar = { 
                x: age_line_arr_ai,
                y : pop_line_arr_ai,
@@ -5624,12 +5683,21 @@ var amind_bar = {
 			   marker : { color : 'purple' }
 			};
 			
-var line_data = [white_line, hisp_line, black_line, asian_line, amind_line];
+var multi_bar = { 
+               x: age_line_arr_mu,
+               y : pop_line_arr_mu,
+			   type : 'bar',
+			   marker : { color : 'grey' }
+			};
+//aDD FOR NEW RACES
+var line_data = [white_line, hisp_line, black_line, asian_line, nhpi_line, amind_line, multi_line];
 var white_trace = [white_bar];
 var hisp_trace = [hisp_bar];
 var black_trace = [black_bar];
 var asian_trace = [asian_bar];
+var nhpi_trace = [nhpi_bar];
 var amind_trace = [amind_bar];
+var multi_trace = [multi_bar];
 
 var line_layout = {
 		title: "Single Year of Age by Race/Ethnicity: " + ctyName + ", " + yrvalue,
@@ -5731,7 +5799,7 @@ var hisp_layout = {
 Plotly.newPlot(HISPANIC, hisp_trace, hisp_layout,config);
 
 var black_layout = {
-		title: "Single Year of Age by Race/Ethnicity: " + ctyName + ", " + yrvalue + " Black, NH",
+		title: "Single Year of Age by Race/Ethnicity: " + ctyName + ", " + yrvalue + " Black or African American, NH",
 		  autosize: false,
 		  width: 1000,
 		  height: 400, 
@@ -5764,7 +5832,7 @@ var black_layout = {
 Plotly.newPlot(BLACK, black_trace, black_layout,config);
 
 var asian_layout = {
-		title: "Single Year of Age by Race/Ethnicity: " + ctyName + ", " + yrvalue + " Asian/Pacific Islander, NH",
+		title: "Single Year of Age by Race/Ethnicity: " + ctyName + ", " + yrvalue + " Asian, NH",
 		  autosize: false,
 		  width: 1000,
 		  height: 400, 
@@ -5796,8 +5864,41 @@ var asian_layout = {
  
 Plotly.newPlot(ASIAN, asian_trace, asian_layout,config);
 
+var nhpi_layout = {
+		title: "Single Year of Age by Race/Ethnicity: " + ctyName + ", " + yrvalue + " Native Hawaiian or Other Pacific Islander, NH",
+		  autosize: false,
+		  width: 1000,
+		  height: 400, 
+		  xaxis: {
+			title : 'Age',
+			showgrid: true,
+			zeroline: true,
+			showline: true,
+			mirror: 'ticks',
+			gridcolor: '#bdbdbd',
+			gridwidth: 2,
+			linecolor: 'black',
+			linewidth: 2
+		  },
+		  yaxis: {
+			  title : 'Total Population',
+			  automargin : true,
+			showgrid: true,
+			showline: true,
+			mirror: 'ticks',
+			gridcolor: '#bdbdbd',
+			gridwidth: 2,
+			linecolor: 'black',
+			linewidth: 2,
+			 tickformat: ','
+		  },
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
+		};
+ 
+Plotly.newPlot(NHPI, nhpi_trace, nhpi_layout,config);
+
 var amind_layout = {
-		title: "Single Year of Age by Race/Ethnicity: " + ctyName + ", " + yrvalue + " American Indian, NH",
+		title: "Single Year of Age by Race/Ethnicity: " + ctyName + ", " + yrvalue + " American Indian and Alaska Native, NH",
 		  autosize: false,
 		  width: 1000,
 		  height: 400, 
@@ -5829,7 +5930,40 @@ var amind_layout = {
  
 Plotly.newPlot(AMIND, amind_trace, amind_layout,config);
 
-//Download trigger events
+var multi_layout = {
+		title: "Single Year of Age by Race/Ethnicity: " + ctyName + ", " + yrvalue + " Two or More Races, NH",
+		  autosize: false,
+		  width: 1000,
+		  height: 400, 
+		  xaxis: {
+			title : 'Age',
+			showgrid: true,
+			zeroline: true,
+			showline: true,
+			mirror: 'ticks',
+			gridcolor: '#bdbdbd',
+			gridwidth: 2,
+			linecolor: 'black',
+			linewidth: 2
+		  },
+		  yaxis: {
+			  title : 'Total Population',
+			  automargin : true,
+			showgrid: true,
+			showline: true,
+			mirror: 'ticks',
+			gridcolor: '#bdbdbd',
+			gridwidth: 2,
+			linecolor: 'black',
+			linewidth: 2,
+			 tickformat: ','
+		  },
+			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
+		};
+ 
+Plotly.newPlot(MULTI, multi_trace, multi_layout,config);
+
+//Download trigger events  ADD NEW RACES HERE...
 // Make race_flat wide
 var race_wide = restructureRace(race_flat);
 
@@ -5884,14 +6018,34 @@ asian_png.onclick = function() {
 	   exportToPng(ctyName, 'asian', ASIAN,yrvalue);
      };
 	 
+//nhpi Chart
+var nhpi_csv = document.getElementById('nhpi_csv');
+var nhpi_png = document.getElementById('nhpi_png');
+nhpi_csv.onclick = function() {
+	  exportToCsv(ctyName, 'nhpi', race_flat.filter(function(d) {return d.race_eth == "Native Hawaiian or Other Pacific Islander NH";}), yrvalue);
+     }; 
+nhpi_png.onclick = function() {
+	   exportToPng(ctyName, 'nhpi', NHPI,yrvalue);
+     };
+	 
 //Amind Chart
 var amind_csv = document.getElementById('amind_csv');
 var amind_png = document.getElementById('amind_png');
 amind_csv.onclick = function() {
-	  exportToCsv(ctyName, 'amind', race_flat.filter(function(d) {return d.race_eth == "American Indiam NH";}), yrvalue);
+	  exportToCsv(ctyName, 'amind', race_flat.filter(function(d) {return d.race_eth == "American Indian NH";}), yrvalue);
      }; 
 amind_png.onclick = function() {
 	   exportToPng(ctyName, 'amind', AMIND,yrvalue);
+     };
+	 
+//multi Chart
+var multi_csv = document.getElementById('multi_csv');
+var multi_png = document.getElementById('multi_png');
+multi_csv.onclick = function() {
+	  exportToCsv(ctyName, 'multi', race_flat.filter(function(d) {return d.race_eth == "Two or More Races NH";}), yrvalue);
+     }; 
+multi_png.onclick = function() {
+	   exportToPng(ctyName, 'multi', MULTI,yrvalue);
      };
 }); //End of Promise
 }; //end of genRaceVis
