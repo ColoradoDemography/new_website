@@ -1,9 +1,9 @@
-<!-- Region Race Ethnicity LookupPage A Bickford 6/2021 -->
+<!-- Region Race Hispanic Origin LookupPage A Bickford 6/2021 -->
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>Race and Ethnicity by Age Estimates - State and Region</title>
+<title>Race and Hispanic Origin by Age Estimates - State and Region</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" http-equiv="content-type" content="text/html; charset=utf-8">
 <!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
 <!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
@@ -57,13 +57,13 @@
 	<div w3-include-html="../html/left_hand_index.html"></div>
   </div> <!-- Grid  panel2_2_1 -->
   <div class="grid-item app-panel_2_2">
-  <b>Race and Ethnicity by Age Estimates - State and Regions</b>
+  <b>Race and Hispanic Origin by Age Estimates - State and Regions</b>
   <p>
   <a href="../lookups/county_sya_race_lookup.html" target='_blank'>Need County Data?</a>
   </p>
    <br>INSTRUCTIONS:
    <p class="lookup_p">
-   This application creates custom tables for SDO Regional estimates by race, ethnicity, age and sex.
+   This application creates custom tables for SDO Regional estimates by race, Hispanic Origin, age and sex.
    </p>
    <p class="lookup_p">
     Estimated data is based on 2020 Census population estimates.  These estimates provide data broken down by: 
@@ -80,11 +80,11 @@
    2020 Census responses differed from the questions and processing of the 2010 Census responses and should be considered a break in the series.
   </p>
      <p class="lookup_p">
-   A data lookup application forrace, ethnicity, age and sex for 2010-2020 is available
+   A data lookup application forrace, Hispanic Origin, age and sex for 2010-2020 is available
    <a href='https://coloradodemography.github.io/population/data/race-estimate-regions/' target='_blank'>here.</a>
   </p>
   <p class="lookup_p">
-   A spreadsheet with detailed information by race, ethnicity, age and sex for 2010-2020 is available on the 
+   A spreadsheet with detailed information by race, Hispanic Origin, age and sex for 2010-2020 is available on the 
    <a href='https://demography.dola.colorado.gov/assets/html/population.html' target='_blank'>SDO Population Spreadsheets</a> page.
   </p>
    <table style="border-collapse:collapse; border:none;">
@@ -99,7 +99,7 @@
 		<p class="entry_text" id="race-lbl">Select one or more race caregories:</p>
 	</td>
 	<td class="lookup_cell">
-		<p class="entry_text" id="ethnicity-lbl">Select one or more ethnicity categories:</p>
+		<p class="entry_text" id="ethnicity-lbl">Select one or more Hispanic Origin categories:</p>
 	</td>
 	</tr>
 	<tr>
@@ -121,8 +121,8 @@
     </td>
 	<td class="lookup_cell">
     <select class="ethnicity-dropdown" id="ethnicity-dropdown" size="2" multiple>
-		<option value="1">Hispanic</option>
-		<option value ="2">Non-Hispanic</option>
+		<option value="1">Hispanic Origin</option>
+		<option value ="2">Not of Hispanic Origin</option>
 	</select>
     </td>
 	</tr>
@@ -163,17 +163,17 @@
         <option value='2'>Year</option>
         <option value='3'>Age</option>
         <option value='4'>Race</option>
-        <option value='5'>Ethnicity</option>
-		<option value='6'>Race, Ethnicity</option>
+        <option value='5'>Hispanic Origin</option>
+		<option value='6'>Race, Hispanic Origin</option>
         <option value='7'>Region, Year, Race</option>
-        <option value='8'>Region, Year, Ethnicity</option>
-        <option value='9'>Region, Year, Race, Ethnicity</option>
+        <option value='8'>Region, Year, Hispanic Origin</option>
+        <option value='9'>Region, Year, Race, Hispanic Origin</option>
         <option value='10'>Region, Age, Race</option>
-        <option value='11'>Region, Age, Ethnicity</option>
-        <option value='12'>Region, Age, Race, Ethnicity</option>
+        <option value='11'>Region, Age, Hispanic Origin</option>
+        <option value='12'>Region, Age, Race, Hispanic Origin</option>
         <option value='13'>Region, Year, Age, Race</option>
-        <option value='14'>Region, Year, Age, Ethnicity</option>
-		<option value='0'>Region, Year, Age, Rece, Ethnicity</option>
+        <option value='14'>Region, Year, Age, Hispanic Origin</option>
+		<option value='0'>Region, Year, Age, Rece, Hispanic Origin</option>
 	</select>
     </td>
 	<td class="lookup_cell">
