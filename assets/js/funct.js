@@ -3467,27 +3467,29 @@ for(i = 1; i<= 100; i++){
 
  } 
 //estimates urls
-urlstr_hispest = "https://gis.dola.colorado.gov/lookups/sya-race-estimates?age="+ age_list + "&county="+ fips_list +"&year="+ yrvalue +"&race=1,2,3,4&ethnicity=1&sex=b&group=opt7";
-urlstr_nonhispest = "https://gis.dola.colorado.gov/lookups/sya-race-estimates?age="+ age_list + "&county="+ fips_list +"&year="+ yrvalue +"&race=1,2,3,4&ethnicity=2&sex=b&group=opt7";
+urlstr_hispest = "https://gis.dola.colorado.gov/lookups/county_sya_race_estimates_current?age="+ age_list + "&county="+ fips_list +"&year="+ yrvalue +"&race=1,2,3,4,5,6&ethnicity=1&group=opt7";
+urlstr_nonhispest = "https://gis.dola.colorado.gov/lookups/county_sya_race_estimates_current?age="+ age_list + "&county="+ fips_list +"&year="+ yrvalue +"&race=1,2,3,4,5,6&ethnicity=2&group=opt7";;
 
 //forecast urls
-urlstr_for = "https://gis.dola.colorado.gov/lookups/sya-race-forecast?age=0,18,65&county=" + fips_list + "&year=" + year10 + "&race=1,2,3,4,5&group=opt7";
+//urlstr_for = "https://gis.dola.colorado.gov/lookups/sya-race-forecast?age=0,18,65&county=" + fips_list + "&year=" + year10 + "&race=1,2,3,4,5&group=opt7";
 
-var hisp_est = [];
-var nonhisp_est = [];
-var raceeth_for = [];
+
 //Promise Structure
-var prom = [d3.json(urlstr_hispest),d3.json(urlstr_nonhispest),d3.json(urlstr_for)];
+//var prom = [d3.json(urlstr_hispest),d3.json(urlstr_nonhispest),d3.json(urlstr_for)];
+var prom = [d3.json(urlstr_hispest),d3.json(urlstr_nonhispest)];
+
 
 Promise.all(prom).then(function(data){
+	var hisp_est = [];
+	var nonhisp_est = []
 //push out vars and count to number
 data[0].forEach(function(obj) {
 hisp_est.push({'year' : obj.year, 'sex' : obj.sex, 'population' : parseInt(obj.count)});
 });
     data[1].forEach(function(obj) {
-	 if(obj.race ==  "Asian/Pacific Islander") {obj.race ="Asian/ Pacific Islander";}
      nonhisp_est.push({'year' : obj.year, 'sex' : obj.sex, 'race' : obj.race, 'population' : parseInt(obj.count)});
 });
+/*
     data[2].forEach(function(obj) {
      raceeth_for.push({'year' : obj.year, 'race_eth' : obj.race, 'population' : parseInt(obj.count)});
 });
@@ -3500,7 +3502,7 @@ for(i = 0; i < raceeth_for.length; i++){
 	if(raceeth_for[i].race_eth == "American Indian non Hispanic"){ raceeth_for[i].race_eth = "American Indian NH"};
      if(raceeth_for[i].race_eth == "Asian non Hispanic"){ raceeth_for[i].race_eth = "Asian/ Pacific Islander NH"};
 };
-   
+*/   
 //Rolling up the hispanic and non-hispanic datasets
 var hisp_total = d3.rollup(hisp_est, v => d3.sum(v, d => d.population), d => d.year);
 var nonhisp_total = d3.rollup(nonhisp_est, v => d3.sum(v, d => d.population), d => d.year, d=> d.race);
@@ -3518,30 +3520,42 @@ for (let[key2, value2] of value) {
 }
 
 var raceeth_est = hisp_flat.concat(nonhisp_flat);
-var raceeth_fin = [];
+var raceeth_fin = raceeth_est;
 
+/*
 raceeth_est.concat(raceeth_for).forEach(function(obj) {
     raceeth_fin.push({'year' : obj.year, 'race_eth' : obj.race_eth, 'population' : obj.population});
     });
-
+*/
 
 // Create table array for output
 var tbl_arr = []
 var race_eth_sum = d3.sum(raceeth_est, d => d.population);
-var raceth = ["Hispanic", "White NH", "Black NH", "Asian/ Pacific Islander NH", "American Indian NH"];
+var raceth = ['Hispanic', 'White alone NH', 'Black or African American alone NH',
+			'Asian alone NH', 'Native Hawaiian or Other Pacific Islander alone NH', 
+			'American Indian and Alaska Native alone NH', 'Two or more  NH'];
 
 for(i = 0; i < raceth.length; i++) {
 	var filt = raceeth_fin.filter(function(d) {return d.race_eth == raceth[i]});
-	tbl_arr.push({'race_eth' : raceth[i], 'percent' : fmt_pct(filt[0].population/race_eth_sum), 'curval' : fmt_comma(filt[0].population), 'forval' : fmt_comma(filt[1].population)});
+	//tbl_arr.push({'race_eth' : raceth[i], 'percent' : fmt_pct(filt[0].population/race_eth_sum), 'curval' : fmt_comma(filt[0].population), 'forval' : fmt_comma(filt[1].population)});
+	tbl_arr.push({'race_eth' : raceth[i], 'percent' : fmt_pct(filt[0].population/race_eth_sum), 'curval' : fmt_comma(filt[0].population)});
   };
 
-
 //Generate Table
+/*
 var tblcolumns1 = [
     {'text' :'Race/ Ethnicity: '+ yrvalue, 'colspan' : 2},
-	{'text' : "<a href='https://gis.dola.colorado.gov/population/data/race-estimate/#county-race-by-age-estimates' target=_blank>Race/Ethnicity Lookup</a>", 'colspan' : 2}
+	{'text' : "<a href='https://demography.dola.colorado.gov/assets/lookups/county_sya_race_lookup.html' target=_blank>Race/Ethnicity Lookup</a>", 'colspan' : 2}
 	 ];
-var tblcolumns2 = ['Race/ Ethnicity','Percentage, ' + yrvalue,'Number,  '+ yrvalue,year10 + ' Forecast'];
+*/
+
+var tblcolumns1 = [
+    {'text' :'Race/ Ethnicity: '+ yrvalue, 'colspan' : 2},
+	{'text' : "<a href='https://demography.dola.colorado.gov/assets/lookups/county_sya_race_lookup.html' target=_blank>Race/Ethnicity Lookup</a>"}
+	 ];
+	 
+//var tblcolumns2 = ['Race/ Ethnicity','Percentage, ' + yrvalue,'Number,  '+ yrvalue,year10 + ' Forecast'];
+var tblcolumns2 = ['Race/ Ethnicity',  'Percentage, ' + yrvalue, 'Number,  '+ yrvalue];
 // Output table 
 d3.select('#RaceTab').html("");
 var syatab = d3.select('#RaceTab')
@@ -3558,7 +3572,7 @@ thead.append('tr')
    .html(function(d) {return d.text;})
    .attr("colspan", function(d) {return d.colspan;})
    .style("border", "1px black solid")
-   .style("width","50%")
+   .style("width", d => {d.text == 'Race/ Ethnicity: '+ yrvalue ? "60%" : "40%"})
  	
 thead.append('tr')
    .selectAll('th')
@@ -3566,7 +3580,7 @@ thead.append('tr')
    .append('th')
    .text(function(d) {return d;})
    .style("border", "1px black solid")
-   .style("width","25%")
+   .style("width", d => {d.col1 === "Race/ Ethnicity" ? "60%" : "20%"})
    .style("text-align", "center")
    .style("font-weight", "bold");
 //Rows   
@@ -3575,7 +3589,6 @@ var rows = tbody
     .selectAll('tr')
     .data(tbl_arr).enter()
     .append('tr')
-	.attr("width", "25%")
 	.attr("border-spacing","0")
 	.style("color","black");
 
@@ -3583,24 +3596,28 @@ var rows = tbody
 rows.append('td')
       .style("text-align", "left")
 	  .style('font-size','10pt')
+	  .style('width' , '60%')
 	  .attr("border-spacing","0")
 	  .html(function(m) { return m.race_eth; });
 rows.append('td')
       .style("text-align", "right")
 	  .style('font-size','10pt')
+	  .style('width' , '20%')
 	  .attr("border-spacing","0")
       .html(function(m) { return m.percent; });
 rows.append('td')
        .style("text-align", "right") 
 	   .style('font-size','10pt')
+	    .style('width' , '20%')
 	   .attr("border-spacing","0")
        .html(function(m) { return m.curval; });
+/*
 rows.append('td')
       .style("text-align", "right")
 	  .style('font-size','10pt')
 	  .attr("border-spacing","0")
       .html(function(m) { return m.forval; });
-
+*/
 
 }); //end of Promise
 
@@ -4322,20 +4339,21 @@ rows.append('td')
 }; // End of genHousing
 
 //Component Functions for Demograpic Dashboard 
-function estPlot(inData, app, level, plotdiv, yrvalue, fips, ctyName){
+function estPlot(inData, app, level, plotdiv, bkmark, yrvalue, fips, ctyName){
     const fmt_date = d3.timeFormat("%B %d, %Y");
 
 var config = {responsive: true,
               displayModeBar: false};
 //Clearing out divs
-var ESTIMATE = document.getElementById(plotdiv);
-ESTIMATE.innerHTML = "";
 
 if(app == "profile") {
-	  pgSetup(level, plotdiv,"County Population Estimates",false,fips, ctyName);
+	  pgSetup(level,"chart",plotdiv,bkmark,true,false,fips, ctyName, 0)
 	  var ESTIMATE = document.getElementById('PlotDiv2');
+} else {
+	var ESTIMATE = document.getElementById(plotdiv);
 }
 
+ESTIMATE.innerHTML = "";
 //Prepping Plot
 
 var year_est_arr =[];
@@ -4390,6 +4408,7 @@ var est_layout = {
 		};
 		
 Plotly.newPlot(ESTIMATE, est_data, est_layout,config);
+
 if(app == 'profile'){
 var profileDat2 = document.getElementById('profileDat2');
 var profileImg2 = document.getElementById('profileImg2');
@@ -4404,17 +4423,20 @@ est_png.onclick = function() {exportToPng(ctyName, 'estimate', ESTIMATE,0)};
 }; //end of estPlot
 
 //Forecast Plot    
-function forecastPlot(inData, app, plotdiv,yrvalue,fips,ctyName) {
-
+function forecastPlot(inData, app, level, plotdiv, bkmark, yrvalue,fips,ctyName) {
     const fmt_date = d3.timeFormat("%B %d, %Y");
 	const fmt_pct = d3.format(".0%");
 	const fmt_pct1 = d3.format(".1%");
 	const fmt_comma = d3.format(",");
 	var config = {responsive: true,
               displayModeBar: false};
-//Clearing out divs
-
-var FORECAST = document.getElementById(plotdiv);
+			  
+if(app == "profile") {
+	  pgSetup(level,"chart",plotdiv,bkmark,true,false,fips, ctyName, 0)
+	  var FORECAST = document.getElementById('PlotDiv3');
+} else {
+	var FORECAST = document.getElementById(plotdiv);
+}
 FORECAST.innerHTML = "";
 
 //Population Projections  This data is a single Geo by age...
@@ -5045,7 +5067,8 @@ mig_png.onclick = function() {exportToPng(ctyName, 'netmig', NETMIG,0)};
 }; //netmigPlot
 
 //Coc Plot
-function cocPlot(inData,app, plotdiv,yrvalue,fips,ctyName) {
+
+function cocPlot(inData,app, level, plotdiv, bkmark,yrvalue,fips,ctyName) {
 	const fmt_date = d3.timeFormat("%B %d, %Y");
 	const fmt_pct = d3.format(".0%");
 	const fmt_pct1 = d3.format(".1%");
@@ -5060,19 +5083,16 @@ for(i = 1; i < coc_flat.length; i++){
     coc_flat[i].popchng = coc_flat[i].totalpopulation - coc_flat[i-1].totalpopulation;
     };
 
-	
-//Plotting 
-var config = {responsive: true,
-              displayModeBar: false};
-//Clearing out divs
-var COC = document.getElementById(plotdiv);
+
+if(app == "profile") {
+	  pgSetup(level,"chart",plotdiv,bkmark,true,false,fips, ctyName, 0)
+	  var COC = document.getElementById('PlotDiv4');
+} else {
+	var COC = document.getElementById(plotdiv);
+}
 
 COC.innerHTML = "";
 
-if(app == 'profile') {
-		  pgSetup('County', plotdiv,"County Components of Change",false,fips, ctyName);
-		  var COC = document.getElementById('PlotDiv4');
-}
 //Components of Change
 var year_coc_arr =[];
 var pop_coc_arr = [];
@@ -5379,9 +5399,9 @@ var netmig_data = [];
 }; 
 
 //Plotting 
-	estPlot(est_data, "dashboard", "County",  "est_output", yrvalue, fips, ctyName);
-	forecastPlot(forecast_data, "dashboard", "forec_output", yrvalue, fips, ctyName);
-	cocPlot(est_data, "dashboard","coc_output", yrvalue, fips, ctyName);
+	estPlot(est_data, "dashboard", "County",  "est_output", "", yrvalue, fips, ctyName);
+	forecastPlot(forecast_data, "dashboard", "County", "forec_output", "", yrvalue, fips, ctyName);
+	cocPlot(est_data, "dashboard","County", "coc_output", "", yrvalue, fips, ctyName);
 	netmigPlot(netmig_data, "dashboard","mig_output", fips, ctyName);
     agePlot(forecast_data,"dashboard", "ageest_output", yrvalue, fips, ctyName);
     popchngPlot(forecast_data,"dashboard", unit, "popchng_output", yrvalue, fips, ctyName);
@@ -5491,9 +5511,6 @@ if(geotype == 'region') {
 				.sort(function(a, b){ return d3.ascending(a['fips'], b['fips']); });
 };
 
-
-debugger;
-console.log(race_flat);
 
 //Plotting 
 var config = {responsive: true,
