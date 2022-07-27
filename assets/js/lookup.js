@@ -83,44 +83,45 @@ d3.json(urlstr).then(function(data){
 	  var filtData = data.filter(b => (b.county_fips == i));
 	  var cty_tmp = [];
 
+debugger;
     //Rollups based on group value
 	switch(group) {
 		case "opt0":
 		filtData.forEach(j =>{
-				cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : j.year, 'age' : j.age, 'sex' : j.sex, 'race' : j.race, 'ethnicity' : j.ethnicity, 'count' : +j.count});
+				cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : j.year, 'age' : j.age, 'sex' : j.sex, 'race' : j.race, 'ethnicity' : j.ethnicity, 'count' : Math.round(+j.count)});
 		});
 		break;
 		case "opt1":
 			var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count));
 			//Flatten Arrays for output
-			 cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : "", 'count' : cty_sum});
+			 cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : "", 'count' : Math.round(cty_sum)});
 		break;
 		case "opt2":
 			var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year);
 			//Flatten Arrays for output
 			for (let [key, value] of cty_sum) {  
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : "", 'count' : value});
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : "", 'count' : Math.round(value)});
 				}
 		break;
 		case "opt3":
 		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.age);
 			//Flatten Arrays for output
 			for (let [key, value] of cty_sum) {  
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : key, 'sex' : "", 'race' : "", 'ethnicity' : "", 'count' : value});
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : key, 'sex' : "", 'race' : "", 'ethnicity' : "", 'count' : Math.round(value)});
 				}
 		break;
 		case "opt4":
 		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.race);
 			//Flatten Arrays for output
 			for (let [key, value] of cty_sum) {  
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : "", 'sex' : "", 'race' : key, 'ethnicity' : "", 'count' : value});
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : "", 'sex' : "", 'race' : key, 'ethnicity' : "", 'count' : Math.round(value)});
 				}
 		break;
 		case "opt5":
 		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.ethnicity);
 			//Flatten Arrays for output
 			for (let [key, value] of cty_sum) {  
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : key, 'count' : value});
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : key, 'count' : Math.round(value)});
 				}
 		break;
 		case "opt6":
@@ -128,7 +129,7 @@ d3.json(urlstr).then(function(data){
 			//Flatten Arrays for output
 			for (let [key, value] of cty_sum) {  
 			    for(let [key2,value2] of value){
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : "", 'sex' : "", 'race' : key, 'ethnicity' : key2, 'count' : value2});
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : "", 'sex' : "", 'race' : key, 'ethnicity' : key2, 'count' : Math.round(value2)});
 			}}
 		break;
 		case "opt7":
@@ -136,7 +137,7 @@ d3.json(urlstr).then(function(data){
 			//Flatten Arrays for output
 			for (let [key, value] of cty_sum) {  //Year
 			   for( let[key2, value2] of value){
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : "", 'sex' : "", 'race' : key2, 'ethnicity' : "", 'count' : value2});
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : "", 'sex' : "", 'race' : key2, 'ethnicity' : "", 'count' : Math.round(value2)});
 			}}
 		break;
 		case "opt8":
@@ -144,7 +145,7 @@ d3.json(urlstr).then(function(data){
 			//Flatten Arrays for output
 			for (let [key, value] of cty_sum) {  //Year
 			   for( let[key2, value2] of value){
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : key2, 'count' : value2});
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : key2, 'count' : Math.round(value2)});
 			}}
 		break;
 		case "opt9":
@@ -154,7 +155,7 @@ d3.json(urlstr).then(function(data){
 			for (let [key, value] of cty_sum) {  //Year
 			   for( let[key2, value2] of value){
 				   for( let [key3, value3] of value2){
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : "", 'sex' : "", 'race' : key2, 'ethnicity' : key3, 'count' : value3});
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : "", 'sex' : "", 'race' : key2, 'ethnicity' : key3, 'count' : Math.round(value3)});
 			}}}
 		break;
 		case "opt10":
@@ -162,7 +163,7 @@ d3.json(urlstr).then(function(data){
 			//Flatten Arrays for output
 			for (let [key, value] of cty_sum) {  //Year
 			   for( let[key2, value2] of value){
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : key, 'sex' : "", 'race' : key2, 'ethnicity' : "", 'count' : value2});
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : key, 'sex' : "", 'race' : key2, 'ethnicity' : "", 'count' : Math.round(value2)});
 			}}
 		break;
 		case "opt11":
@@ -170,7 +171,7 @@ d3.json(urlstr).then(function(data){
 			//Flatten Arrays for output
 			for (let [key, value] of cty_sum) {  //Year
 			   for( let[key2, value2] of value){
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : key, 'sex' : "", 'race' : "", 'ethnicity' : key2, 'count' : value2});
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : key, 'sex' : "", 'race' : "", 'ethnicity' : key2, 'count' : Math.round(value2)});
 			}}
 		break;
 		case "opt12":
@@ -179,7 +180,7 @@ d3.json(urlstr).then(function(data){
 			for (let [key, value] of cty_sum) {  //Year
 			   for( let[key2, value2] of value){
 				   for( let [key3, value3] of value2){
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : key, 'sex' : "", 'race' : key2, 'ethnicity' : key3, 'count' : value3});
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : key, 'sex' : "", 'race' : key2, 'ethnicity' : key3, 'count' : Math.round(value3)});
 			}}}
 		break;
 		case "opt13":
@@ -188,7 +189,7 @@ d3.json(urlstr).then(function(data){
 			for (let [key, value] of cty_sum) {  //Year
 			   for( let[key2, value2] of value){
 				   for( let [key3, value3] of value2){
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : key2, 'sex' : "", 'race' : key3, 'ethnicity' : "", 'count' : value3});
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : key2, 'sex' : "", 'race' : key3, 'ethnicity' : "", 'count' : Math.round(value3)});
 			}}}
 		break;
 		case "opt14":
@@ -197,7 +198,7 @@ d3.json(urlstr).then(function(data){
 			for (let [key, value] of cty_sum) {  //Year
 			   for( let[key2, value2] of value){
 				   for( let [key3, value3] of value2){
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : key2, 'sex' : "", 'race' : "", 'ethnicity' : key3, 'count' : value3});
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : key2, 'sex' : "", 'race' : "", 'ethnicity' : key3, 'count' : Math.round(value3)});
 			}}}
 		break;
 } //Switch
@@ -311,7 +312,7 @@ var reg_data = [];
 				  for(let [key3,value3] of value2) { //sex
 					 for(let [key4, value4] of value3) { //race
 					   for (let [key5, value5] of value4){  //ethncitiy
-					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : key, 'age' : key2, 'sex' : key3, 'race' : key4, 'ethnicity' : key5, 'count' : value5});
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : key, 'age' : key2, 'sex' : key3, 'race' : key4, 'ethnicity' : key5, 'count' : Math.round(value5)});
 				}}}}}
 		break;
 		case "opt1":
@@ -323,28 +324,28 @@ var reg_data = [];
 			var reg_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year);
 			//Flatten Arrays for output
 			for (let [key, value] of reg_sum) {  
-					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : key, 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : "", 'count' : value});
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : key, 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : "", 'count' : Math.round(value)});
 				}
 		break;
 		case "opt3":
 		var reg_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.age);
 			//Flatten Arrays for output
 			for (let [key, value] of reg_sum) {  
-					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : "", 'age' : key, 'sex' : "", 'race' : "", 'ethnicity' : "", 'count' : value});
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : "", 'age' : key, 'sex' : "", 'race' : "", 'ethnicity' : "", 'count' : Math.round(value)});
 				}
 		break;
 		case "opt4":
 		var reg_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.race);
 			//Flatten Arrays for output
 			for (let [key, value] of reg_sum) {  
-					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : "", 'age' : "", 'sex' : "", 'race' : key, 'ethnicity' : "", 'count' : value});
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : "", 'age' : "", 'sex' : "", 'race' : key, 'ethnicity' : "", 'count' : Math.round(value)});
 				}
 		break;
 		case "opt5":
 		var reg_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.ethnicity);
 			//Flatten Arrays for output
 			for (let [key, value] of reg_sum) {  
-					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : "", 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : key, 'count' : value});
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : "", 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : key, 'count' : Math.round(value)});
 				}
 		break;
 		case "opt6":
@@ -352,7 +353,7 @@ var reg_data = [];
 			//Flatten Arrays for output
 			for (let [key, value] of reg_sum) {  
 			    for(let [key2,value2] of value){
-					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : "", 'age' : "", 'sex' : "", 'race' : key, 'ethnicity' : key2, 'count' : value2});
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : "", 'age' : "", 'sex' : "", 'race' : key, 'ethnicity' : key2, 'count' : Math.round(value2)});
 			}}
 		break;
 		case "opt7":
@@ -360,7 +361,7 @@ var reg_data = [];
 			//Flatten Arrays for output
 			for (let [key, value] of reg_sum) {  //Year
 			   for( let[key2, value2] of value){
-					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : key, 'age' : "", 'sex' : "", 'race' : key2, 'ethnicity' : "", 'count' : value2});
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : key, 'age' : "", 'sex' : "", 'race' : key2, 'ethnicity' : "", 'count' : Math.round(value2)});
 			}}
 		break;
 		case "opt8":
@@ -368,7 +369,7 @@ var reg_data = [];
 			//Flatten Arrays for output
 			for (let [key, value] of reg_sum) {  //Year
 			   for( let[key2, value2] of value){
-					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : key, 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : key2, 'count' : value2});
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : key, 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : key2, 'count' : Math.round(value2)});
 			}}
 		break;
 		case "opt9":
@@ -378,7 +379,7 @@ var reg_data = [];
 			for (let [key, value] of reg_sum) {  //Year
 			   for( let[key2, value2] of value){
 				   for( let [key3, value3] of value2){
-					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : key, 'age' : "", 'sex' : "", 'race' : key2, 'ethnicity' : key3, 'count' : value3});
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : key, 'age' : "", 'sex' : "", 'race' : key2, 'ethnicity' : key3, 'count' : Math.round(value3)});
 			}}}
 		break;
 		case "opt10":
@@ -386,7 +387,7 @@ var reg_data = [];
 			//Flatten Arrays for output
 			for (let [key, value] of reg_sum) {  //Year
 			   for( let[key2, value2] of value){
-					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : "", 'age' : key, 'sex' : "", 'race' : key2, 'ethnicity' : "", 'count' : value2});
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : "", 'age' : key, 'sex' : "", 'race' : key2, 'ethnicity' : "", 'count' : Math.round(value2)});
 			}}
 		break;
 		case "opt11":
@@ -394,7 +395,7 @@ var reg_data = [];
 			//Flatten Arrays for output
 			for (let [key, value] of reg_sum) {  //Year
 			   for( let[key2, value2] of value){
-					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : "", 'age' : key, 'sex' : "", 'race' : "", 'ethnicity' : key2, 'count' : value2});
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : "", 'age' : key, 'sex' : "", 'race' : "", 'ethnicity' : key2, 'count' : Math.round(value2)});
 			}}
 		break;
 		case "opt12":
@@ -403,7 +404,7 @@ var reg_data = [];
 			for (let [key, value] of reg_sum) {  //Year
 			   for( let[key2, value2] of value){
 				   for( let [key3, value3] of value2){
-					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : "", 'age' : key, 'sex' : "", 'race' : key2, 'ethnicity' : key3, 'count' : value3});
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : "", 'age' : key, 'sex' : "", 'race' : key2, 'ethnicity' : key3, 'count' : Math.round(value3)});
 			}}}
 		break;
 		case "opt13":
@@ -412,7 +413,7 @@ var reg_data = [];
 			for (let [key, value] of reg_sum) {  //Year
 			   for( let[key2, value2] of value){
 				   for( let [key3, value3] of value2){
-					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : key, 'age' : key2, 'sex' : "", 'race' : key3, 'ethnicity' : "", 'count' : value3});
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : key, 'age' : key2, 'sex' : "", 'race' : key3, 'ethnicity' : "", 'count' : Math.round(value3)});
 			}}}
 		break;
 		case "opt14":
@@ -421,7 +422,7 @@ var reg_data = [];
 			for (let [key, value] of reg_sum) {  //Year
 			   for( let[key2, value2] of value){
 				   for( let [key3, value3] of value2){
-					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : key, 'age' : key2, 'sex' : "", 'race' : "", 'ethnicity' : key3, 'count' : value3});
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : key, 'age' : key2, 'sex' : "", 'race' : "", 'ethnicity' : key3, 'count' : Math.round(value3)});
 			}}}
 		break;
 } //Switch

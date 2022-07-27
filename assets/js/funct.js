@@ -3484,10 +3484,10 @@ Promise.all(prom).then(function(data){
 	var nonhisp_est = []
 //push out vars and count to number
 data[0].forEach(function(obj) {
-hisp_est.push({'year' : obj.year, 'sex' : obj.sex, 'population' : parseInt(obj.count)});
+hisp_est.push({'year' : obj.year, 'sex' : obj.sex, 'population' : Math.round(+obj.count)});
 });
     data[1].forEach(function(obj) {
-     nonhisp_est.push({'year' : obj.year, 'sex' : obj.sex, 'race' : obj.race, 'population' : parseInt(obj.count)});
+     nonhisp_est.push({'year' : obj.year, 'sex' : obj.sex, 'race' : obj.race, 'population' : Math.round(+obj.count)});
 });
 /*
     data[2].forEach(function(obj) {
@@ -3510,12 +3510,12 @@ var nonhisp_total = d3.rollup(nonhisp_est, v => d3.sum(v, d => d.population), d 
 //Flattening the datasets
     var hisp_flat = [];
 for (let [key, value] of hisp_total) {
-  hisp_flat.push({'year' : key, 'race_eth' : 'Hispanic',  'population' : value});
+  hisp_flat.push({'year' : key, 'race_eth' : 'Hispanic',  'population' : Math.round(value)});
     }
 var nonhisp_flat = [];
 for (let [key1, value] of nonhisp_total) {
 for (let[key2, value2] of value) {
-   nonhisp_flat.push({'year' : key1, 'race_eth' : key2 + ' NH', 'population' : value2});
+   nonhisp_flat.push({'year' : key1, 'race_eth' : key2 + ' NH', 'population' : Math.round(value2)});
 }
 }
 
