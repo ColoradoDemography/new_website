@@ -1,4 +1,4 @@
-<!-- Community Profile Secondary Page A Bickford 7/2021 -->
+<!-- Community Profile Secondary Page A Bickford 5/2022 -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -8,14 +8,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" http-equiv="content-type" content="text/html; charset=utf-8">
 <!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
 <!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
+<
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" crossorigin="anonymous">
+
 <!-- SDO CSS -->
 <link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
 <!-- adding d3.js  for data manipulation-->
- <script src="https://d3js.org/d3.v6.min.js"></script>
-
+ <script src="https://d3js.org/d3.v7.min.js"></script>
+<script type="text/javascript" src="https://demography.dola.colorado.gov/assets/js/saveSvgAsPng.js"></script>
 <!-- Adding Plotly.js for  charting -->
-<script src="https://cdn.plot.ly/plotly-2.2.0.min.js" charset="utf-8"></script>
+<script src="https://cdn.plot.ly/plotly-2.12.1.min.js" charset="utf-8"></script>
 <!-- Adding jquery and datatables for table production -->
 <script
   src="https://code.jquery.com/jquery-3.6.0.min.js"
@@ -24,21 +26,19 @@
 </script>
  
 <!-- Datatables -->
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jq-3.6.0/jszip-2.5.0/dt-1.11.3/b-2.0.1/b-colvis-2.0.1/b-html5-2.0.1/b-print-2.0.1/datatables.min.css"/>
-<script type="text/javascript" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script> 
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/v/dt/jq-3.6.0/jszip-2.5.0/dt-1.11.3/b-2.0.1/b-colvis-2.0.1/b-html5-2.0.1/b-print-2.0.1/datatables.min.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.5/js/dataTables.buttons.min.js" ></script>
-<script type="text/javascript" src ="https://cdn.datatables.net/buttons/1.6.5/js/buttons.flash.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jq-3.6.0/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-html5-2.2.3/sc-2.0.6/sp-2.0.1/sl-1.4.0/datatables.min.css"/>
+ 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.5/pdfmake.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/vfs_fonts.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/v/dt/jq-3.6.0/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-html5-2.2.3/sc-2.0.6/sp-2.0.1/sl-1.4.0/datatables.min.js"></script> 
 
 
 	
 <!-- SDO functions -->
-<script src="../js/funct.js"></script>
-<script src="../js/profile.js"></script>
+<script type="text/javascript" src="../js/funct.js"></script>
+<script type="text/javascript" src="../js/profile.js"></script>
 <!-- GoogleAnalytics Script -->
-<script defer src="../js/googleAnalytics.js"></script>
+<script defer src="https://demography.dola.colorado.gov/assets/js/googleAnalytics.js"></script>
 
 </head>
 <body>
@@ -48,13 +48,10 @@
 <div w3-include-html="./navheader.html"></div>
 <!-- First Grid, linked images -->
 <div id="profile-container" class="profile-container">
-  <div class="grid-item panel2_1_1">
-	<div w3-include-html="./sdotitle.html"></div>
-  </div>
   <div class="grid-item panel_2_1" id="leftHand">
 	<div id="profileDiv">
 		<ul class="breadcrumb">
-		  <li><a href="https://coloradodemography.github.io/new_website/">Home</a></li>
+		  <li><a href="https://demography.dola.colorado.gov/">Home</a></li>
 		</ul>
 		<p>
 			<label class="prolabel" for="profile-dropdown">Select Profile Type:</label>
@@ -64,79 +61,15 @@
 			<label class="prolabel" for="location-dropdown" id="location-label"></label>
 			<select id="location-dropdown"></select>
 		</p>
-		<table>
-		<tr>
-		<td>
-			<input class="proInput" type="checkbox" id="sel1" name="sel1" value="sel1">
-		</td>
-		<td>
-			<label class="prolabel" for="sel1" >Basic Statistics</label>
-		</td>
-		</tr>
-		<tr>
-		<td>
-			<input class="proInput" type="checkbox" id="sel2" name="sel2" value="sel2">
-		</td>
-		<td>
-			<label class="prolabel" for="sel2" >Population Trends</label>
-		</td>
-		</tr>
-		<td>
-			<input class="proInput" type="checkbox" id="sel3" name="sel3" value="sel3">
-		</td>
-		<td>
-			<label class="prolabel" for="sel3" >Population Characteristics: Age</label>
-		</td>
-		</tr>
-		<tr>
-		<td>
-			<input class="proInput" type="checkbox" id="sel4" name="sel4" value="sel4">
-		</td>
-		<td>
-			<label class="prolabel" for="sel4" >Population Characteristics:<br>Income, Education and Race</label>
-		</td>
-		</tr>
-		<tr>
-		<td>
-			<input class="proInput" type="checkbox" id="sel5" name="sel5" value="sel5">
-		</td>
-		<td>
-			<label class="prolabel" for="sel5" >Housing and Households</label>
-		</td>
-		</tr>
-		<tr>
-		<td>
-			<input class="proInput" type="checkbox" id="sel6" name="sel6" value="sel6">
-		</td>
-		<td>
-			<label class="prolabel" for="sel6" >Commuting and Job Growth</label>
-		</td>
-		</tr>
-		<tr>
-		<td>
-			<input class="proInput" type="checkbox" id="sel7" name="sel7" value="sel7">
-		</td>
-		<td>
-			<label class="prolabel" for="sel7" >Employment by Industry</label>
-		</td>
-		</tr>
-		<tr>
-		<td>
-			<input class="proInput" type="checkbox" id="sel8" name="sel8" value="sel8">
-		</td>
-		<td>
-		    <label class="prolabel" for="sel8" >Employment Forecast and Wage Information</label>
-		<td>
-		</tr>
-		</table>
-		<p>
-		<button class='databutton' id='genprofile'>Generate Profile</button>
-	</div> <!-- Profile Div -->
-	<div>
+	<p>
+	<div id="option-table"></div>
+	</p>
+	<p>
+	<button class='databutton' id='genProfile'>Generate Profile</button>
+	</p>
+	<p>
 	<button class='databutton' ><a href="https://docs.google.com/forms/d/e/1FAIpQLSfaKgXqFYKNvnGFSWmiKymanBMeVKMRQtAs7exEdF6ZyDlD0w/viewform?usp=sf_link" target='_blank' style='font-size:10pt;'>Questions? Contact SDO</a></button>
-
-	</div>
-	<div>
+	</p>
 	  <hr>
 		<p style='font-size:10pt;'>
 		&#169; 2022 State of Colorado
@@ -145,9 +78,9 @@
 		<a href='https://data.colorado.gov/Government/Transparency-Online-Project-TOPS-State-Government-/rifs-n6ib' target='_blank'>Transparency Online</a> |
 		<a href='https://www.colorado.gov/accessibility-standards' target='_blank'>Accessibility</a>
 		</p>
-	</div>
-</div> <!-- Grid  panel_2_1 -->
-  <div id="profile_2" class="grid-item profile_2">
+</div> <!-- Profile Div -->
+</div> <!-- Grid panel_2_1 -->
+<div id="profile_2" class="grid-item profile_2">
 	<div id="pro-list" class="button-group">
 		<button id='sel1btn' class='selbtn' style='display: none;'>Basic Statistics</button>
 		<button id='sel2btn' class='selbtn' style='display: none;'>Population Trends</button>
@@ -159,92 +92,61 @@
 		<button id='sel8btn' class='selbtn' style='display: none;'>Employment Forecast and Wage Information</button>
 	</div>
 	<p></p>
+
+
 	<div class="grid-item app-panel_3_2" id='chartdiv_a'>
-			<div id='profile-content1'></div>
+	        <div id='profile-content1'></div>
 	</div>
     <div class="grid-item app-panel_4_2" id='chartdiv_b'>
-		<div id='profile-content2'></div>
-	  </div>
+			<div id='profile-content2'></div>
+	</div>
    <div class="grid-item app-panel_5_2" id='chartdiv_c'>
-		<div id='profile-content3'></div>
+			<div id='profile-content3'></div>
 	</div>
    <div class="grid-item app-panel_6_2" id='chartdiv_d'>
-		<div id='profile-content4'></div>
+			<div id='profile-content4'></div>
 	</div>
-  </div> <!-- Grid  panel2_2 -->
-</div>  <!-- End of Grid -->
+</div> <!-- Grid  profile_2 -->
+</div>  <!-- end of profile-container -->
 
 
 <script>
 
 //Setting HTML include and Accordion
-
-
+ 
 includeHTML();
 
 //Initial set up
 document.getElementById("location-dropdown").style.display = "none";
-document.getElementById('sel1').checked = true;
-document.getElementById('sel2').checked = true;
-document.getElementById('sel3').checked = true;
-document.getElementById('sel4').checked = true;
-document.getElementById('sel5').checked = true;
-document.getElementById('sel6').checked = true;
-document.getElementById('sel7').checked = true;
-document.getElementById('sel8').checked = true;
+document.getElementById("genProfile").style.display = "none";
+
 
 popDropdown('profile','profile-dropdown','profile');
 
 d3.select("#profile-dropdown").on("change", function(d,i) {
-document.getElementById("location-label").innerHTML = "";
+	   document.getElementById("location-label").innerHTML = "";
        document.getElementById('location-dropdown').style.display = "block";
 	   document.getElementById('location-dropdown').innerHTML = null;
 	   document.getElementById("location-label").innerHTML = null;
+	   document.getElementById("option-table").innerHTML = "";
 
 	   var selectedtype = d3.select('#profile-dropdown option:checked').text();
 	   var selectedfips = d3.select("#profile-dropdown").property('value');
-	   // changing dropdown to multiple
-	   if(selectedtype.includes("Comparison")) {
-	      
-	      if(selectedfips == "region"){
-	              document.getElementById("location-label").innerHTML = "Select Regions:";
-				  };
-		  if(selectedfips == "county"){
-	              document.getElementById("location-label").innerHTML = "Select Counties:";
-				  };
-		  if(selectedfips == "municipality"){
-	              document.getElementById("location-label").innerHTML = "Select Municipalities:";
-				  };
-		  if(selectedfips == "place"){
-	              document.getElementById("location-label").innerHTML = "Select Places:";
-				  };
-	      document.getElementById("location-dropdown").multiple = true;
-		  } else {
-	      	      if(selectedfips == "region"){
-	              document.getElementById("location-label").innerHTML = "Select Region:";
-				  };
-		  if(selectedfips == "county"){
-	              document.getElementById("location-label").innerHTML = "Select County:";
-				  };
-		  if(selectedfips == "municipality"){
-	              document.getElementById("location-label").innerHTML = "Select Municipality:";
-				  };
-		  if(selectedfips == "place"){
-	              document.getElementById("location-label").innerHTML = "Select Place:";
-				  };
-		  document.getElementById("location-dropdown").multiple = false;
-       }
+	   
 
        popDropdown(selectedfips,'location-dropdown','profile'); 
+	   genUI(selectedtype, 'option-table');
+	   document.getElementById("genProfile").style.display = "block";
  });
 
-document.getElementById('genprofile').onclick = function changeContent() {
+document.getElementById('genProfile').onclick = function changeContent() {
 
      var selectedlevel = d3.select('#profile-dropdown option:checked').text();
      var selected = document.querySelectorAll('#location-dropdown option:checked');
      var selectedloc = Array.from(selected).map(el => el.value);
 	 var selectedname = Array.from(selected).map(el => el.text);
 //Clear out Divs
+
 	      document.getElementById("profile-content1").innerHTML = "";
 		  document.getElementById("profile-content2").innerHTML = "";
           document.getElementById("profile-content3").innerHTML = "";
