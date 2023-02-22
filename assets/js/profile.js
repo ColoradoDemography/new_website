@@ -45,9 +45,20 @@ return(outData);
 function selValsMulti(inData, selArr, nRows,nPanel,dir) {
  const fmt_pct = d3.format(".1%");
  const fmt_comma = d3.format(",");
-    const fmt_dollar = d3.format("$,.0f");
+ const fmt_dollar = d3.format("$,.0f");
+
+
+
+var dkeys = Object.keys(inData[0]);
+for(i = 0 ; i < inData.length; i++){
+	for(j = 0; j < dkeys.length; j++){
+		var chkval = inData[i][dkeys[j]];
+		inData[i][dkeys[j]] = Number.isNaN(chkval) ? " " : chkval;
+	}
+}
 
 var inMap = { ...inData }
+
 var outData = [];
 //Create 2d aray for outData
  // creating two dimensional array
@@ -56,6 +67,7 @@ var outData = [];
             outData[i] = [];
         }
     }
+
 
 for(i = 0; i < inData.length; i++){
   var tmp2 = Object.keys(inMap[i]).
@@ -99,7 +111,6 @@ for(j = 0;j < outData.length;j++){
 } //SelVarsMulti
 
 //Join function from http://learnjsdata.com/combine_data.html
-
 function join(lookupTable, mainTable, lookupKey, mainKey, select) {
     var l = lookupTable.length,
         m = mainTable.length,
@@ -227,6 +238,51 @@ function restructureACS(inData,vars) {
 return(outData);
 } //restructire ACS
 
+//genUI creates the profile table and button
+function genUI(level, sidepanel){
+	const tblArr = ["Basic Statistics", "Population Trends", "Population Characteristics: Age", "Population Characteristics: Income, Education and Race",
+			"Housing and Households", "Commuting and Job Growth", "Employment by Industry", "Employment Forecast and Wage Information"]
+
+	var nrows = (level == "Region") ? 5 : 8;
+	
+	var tbl = document.createElement("table");
+      tbl.style.width = "90%";
+      tbl.style.border = "0px solid black";
+   
+  var tblbody = document.createElement("tbody");
+  for(i = 0; i < nrows; i++){
+      var tblrow = document.createElement("tr");
+	  var tblcell1 = document.createElement("td")
+	  //Check box
+	  var selval = "sel" + (i + 1);
+	  var ckbx = document.createElement("input");
+          ckbx.setAttribute("type", "checkbox");
+		  ckbx.className = 'proInpur';
+		  ckbx.id = selval;
+		  ckbx.name = selval;
+		  ckbx.value = selval;
+		  ckbx.setAttribute("checked", "true")
+		  tblcell1.appendChild(ckbx)
+		  
+	  var tblcell2 = document.createElement("td");
+	  var cklbl = document.createElement('label');
+		  cklbl.className = 'prolabel'
+		  cklbl.setAttribute('for',selval);
+		  cklbl.innerHTML = tblArr[i]
+	  tblcell2.appendChild(cklbl)
+	  
+	  tblrow.appendChild(tblcell1)
+	  tblrow.appendChild(tblcell2)
+	  tblbody.appendChild(tblrow)
+  }
+  tbl.appendChild(tblbody)
+  
+  //Assemble final table
+  var outDiv = document.getElementById(sidepanel);
+  outDiv.appendChild(tbl)
+ 
+}
+
 //getHeaders exttracts multi line headers from data table
 function getHeaders( dt ){
 
@@ -285,17 +341,96 @@ function getHeaders( dt ){
    return matrix;
 };
 
+//procHHForecast Processes Household Forecast data
+function procHHForecast(inData){
+	var outData = [];
+	var grFips = [...new Set(inData.map(d => d.fips))]
+	var age_arr = ["Total", "18 to 24", "25 to 44", "45 to 64", "65 and Older"]
+	grFips.forEach(fp =>{
+		for(i = 0; i < 5; i++){ //age_group_id
+			var tmpFore = inData.filter(d => d.fips == fp).filter(d2 => d2.age_group_id == i)
+			for(j = 0; j < tmpFore.length; j++){
+				outData.push({
+					'fips' : tmpFore[j].fips,
+				   'name' : tmpFore[j].name,
+				   'year' : tmpFore[j].year,
+				   'age_group_id' : age_arr[tmpFore[j].age_group_id],
+				   'household_type_id' : 0,
+				   'total_households' : tmpFore[j].total_households,
+				   'grlabel' : j == 0 ? "" :tmpFore[j-1].year + "-" + tmpFore[j].year,
+				   'growth'  : j == 0 ? 0 : tmpFore[j].total_households - tmpFore[j-1].total_households,
+				   'cagr' : j == 0 ? '-' : (Math.pow((tmpFore[j].total_households/tmpFore[j-1].total_households),(1/(tmpFore[j].year - tmpFore[j-1].year)))-1)
+				})
+		} //j
+	} //i
+});
+return(outData)
+} // procHHForecast
+
+//aggPPH Calculates PPH for Regions
+function aggPPH(pphdata, hhdata,regid) {
+	var tmpdata = join(pphdata,hhdata,"GEO2","GEO2",function(dat,col){
+		return{
+			GEO2 : col.GEO2,
+			pershh_est : col.B25010_001E * dat.B25032_001E,
+			pershh_moe : Math.pow((col.B25010_001M * dat.B25032_001E),2),
+			persoo_est : col.B25010_002E * dat.B25032_002E,
+			persoo_moe : Math.pow((col.B25010_002M * dat.B25032_002E),2),
+			persrt_est : col.B25010_003E * dat.B25032_013E,
+			persrt_moe : Math.pow((col.B25010_003M * dat.B25032_013E),2),
+			tothh_est : dat.B25032_001E,
+			tothh_moe : Math.pow(dat.B25032_001M,2),
+			totoo_est : dat.B25032_002E,
+			totoo_moe : Math.pow(dat.B25032_002M,2),
+			totrt_est : dat.B25032_013E,
+			totrt_moe : Math.pow(dat.B25032_013M,2)
+		};
+	});
+
+
+	var columnsToSum = ["pershh_est", "pershh_moe", "persoo_est", "persoo_moe", "persrt_est", "persrt_moe", 
+						"tothh_est", "tothh_moe", "totoo_est", "totoo_moe", "totrt_est", "totrt_moe"]
+	var sumdata = d3.rollup(tmpdata, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])))
+
+    sumdata.NAME = regid.NAME;
+	sumdata.GEO1 = 8;
+	sumdata.GEO2 = regid.FIPS;
+	sumdata.B25010_001E = sumdata.pershh_est/sumdata.tothh_est;
+	sumdata.B25010_001M = Math.sqrt(sumdata.pershh_moe/sumdata.tothh_est);
+	sumdata.B25010_002E = sumdata.persoo_est/sumdata.totoo_est;
+	sumdata.B25010_002M = Math.sqrt(sumdata.persoo_moe/sumdata.totoo_est);
+	sumdata.B25010_003E = sumdata.persrt_est/sumdata.totrt_est;
+	sumdata.B25010_003M = Math.sqrt(sumdata.persrt_moe/sumdata.totrt_est);
+	delete sumdata.pershh_est;
+	delete sumdata.pershh_moe;
+	delete sumdata.tothh_est;
+	delete sumdata.tothh_moe;
+	delete sumdata.persoo_est;
+	delete sumdata.persoo_moe;
+	delete sumdata.totoo_est;
+	delete sumdata.totoo_moe;
+	delete sumdata.persrt_est;
+	delete sumdata.persrt_moe;
+	delete sumdata.totrt_est;
+	delete sumdata.totrt_moe;
+	var outdata = [];
+	outdata.push(sumdata)
+return(outdata);
+}
 // growth_tab Calculate 5-year growth rate table 
-function growth_tab(level, inData,bkmark, fileName, outDiv){
+function growth_tab(level, inData,bkMark, fileName, outDiv_id){
  const fmt_pct = d3.format(".1%")
  const fmt_comma = d3.format(",");
  const fmt_date = d3.timeFormat("%B %d, %Y");
  const regList = ['Region', 'Regional Comparison'];
- const tabtitle = bkmark.title;
+ const tabtitle = bkMark.title;
 
 
-outDiv.innerHTML = "";
 var geomap = [...new Set(inData.map(d => d.fips))];
+var geonames = [...new Set(inData.map(d => d.name))];
+var yrvalues = [...new Set(inData.map(d => d.year))];
+var maxyear = Math.max(...yrvalues);
+
 var outDataPop = [];
 var outDataGr = [];
 
@@ -352,6 +487,7 @@ for(x = 0; x < places.length;x++){
  tab_data_Gr = tab_data_Gr.concat(outarrGr);
 
 } //x
+
 //Add keys to tab_data_Pop and tab_data_Gr
 
 var yrskeys = years;
@@ -360,29 +496,29 @@ yrskeys.unshift('location');
 var tab_data_Popk = [];
 var tab_data_Grk = [];
 for(i = 0; i < tab_data_Pop.length; i++){
-	tab_data_Popk.push({
-	[yrskeys[0].toString()] : tab_data_Pop[i][0],
-	[yrskeys[1].toString()] : tab_data_Pop[i][1],
-	[yrskeys[2].toString()] : tab_data_Pop[i][2],
-	[yrskeys[3].toString()] : tab_data_Pop[i][3],
-	[yrskeys[4].toString()] : tab_data_Pop[i][4],
-	[yrskeys[5].toString()] : tab_data_Pop[i][5],
-	[yrskeys[6].toString()] : tab_data_Pop[i][6],
-	[yrskeys[7].toString()] : tab_data_Pop[i][7]
-	});
-	
-	tab_data_Grk.push({
-	[yrskeys[0].toString()] : tab_data_Gr[i][0],
-	[yrskeys[1].toString()] : tab_data_Gr[i][1],
-	[yrskeys[2].toString()] : tab_data_Gr[i][2],
-	[yrskeys[3].toString()] : tab_data_Gr[i][3],
-	[yrskeys[4].toString()] : tab_data_Gr[i][4],
-	[yrskeys[5].toString()] : tab_data_Gr[i][5],
-	[yrskeys[6].toString()] : tab_data_Gr[i][6],
-	[yrskeys[7].toString()] : tab_data_Gr[i][7]	
-	})
-}
-
+		tab_data_Popk.push({
+			[yrskeys[0].toString()] : tab_data_Pop[i][0],
+			[yrskeys[1].toString()] : tab_data_Pop[i][1],
+			[yrskeys[2].toString()] : tab_data_Pop[i][2],
+			[yrskeys[3].toString()] : tab_data_Pop[i][3],
+			[yrskeys[4].toString()] : tab_data_Pop[i][4],
+			[yrskeys[5].toString()] : tab_data_Pop[i][5],
+			[yrskeys[6].toString()] : tab_data_Pop[i][6],
+			[yrskeys[7].toString()] : tab_data_Pop[i][7],
+			[yrskeys[8].toString()] : tab_data_Pop[i][8]
+			});
+		tab_data_Grk.push({
+			[yrskeys[0].toString()] : tab_data_Gr[i][0],
+			[yrskeys[1].toString()] : tab_data_Gr[i][1],
+			[yrskeys[2].toString()] : tab_data_Gr[i][2],
+			[yrskeys[3].toString()] : tab_data_Gr[i][3],
+			[yrskeys[4].toString()] : tab_data_Gr[i][4],
+			[yrskeys[5].toString()] : tab_data_Gr[i][5],
+			[yrskeys[6].toString()] : tab_data_Gr[i][6],
+			[yrskeys[7].toString()] : tab_data_Gr[i][7],
+			[yrskeys[8].toString()] : tab_data_Gr[i][8],
+			});
+	}
 
 if(level == "Region"){
 	var src_link = 'https://coloradodemography.github.io/population/data/regional-data-lookup/';
@@ -402,36 +538,41 @@ var row_labels_pop = row_labels;
 var row_labels_gr = row_labels;
 
 
-var tab_pop = genSubjTab(level, tab_data_Popk, 2,row_labels_pop,false);
-var tab_gr = genSubjTab(level,tab_data_Grk, 2, row_labels,false);
+var tab_pop = genSubjTab(level, tab_data_Popk, bkMark.id,row_labels_pop,false);
+var tab_gr = genSubjTab(level,tab_data_Grk, bkMark.id, row_labels,false);
 
 //footer
 //Creating Footer
 var ftrMsg = "Source: Colorado State Demography Office Print Date : " + fmt_date(new Date);
-var ftrString = "<tfoot><tr><td colspan = '3'>"+ ftrMsg + "</td></tr></tfoot>";
+if(level == "Municipality"){
+	var ftrString = "<tfoot><tr><td colspan = '4'>"+ ftrMsg + "</td></tr></tfoot>";
+} else {
+	var ftrString = "<tfoot><tr><td colspan = '3'>"+ ftrMsg + "</td></tr></tfoot>";
+}
 var tblfoot = [ "Source: Colorado State Demography Office Print Date : " + fmt_date(new Date)];
 
 //Producing  datatables...
 
-pgSetup(level, "table", outDiv.id, bkmark, false, true, '','', '')
+pgSetupPro(level, "table", outDiv_id, bkMark, false, true, geomap,geonames, maxyear)
 
 var tabVal = 0;
 
 	//selecting initial dropdown values
 
-   var dd1 = document.getElementById("tabSelect1");
+if(level == "Region"){
+	var dd1 = document.getElementById("statSelect1");
    dd1.value = "0";
    var btndown = document.getElementById("increment11");
    var btnup = document.getElementById("increment21");
 
-DTtab("tabDiv1",tab_gr,tabVal,row_labels,ftrString,tblfoot,"popgrowth",fileName,tabtitle) 
+DTtab("TabDiv1",tab_gr,tabVal,row_labels,ftrString,tblfoot,"popgrowth",fileName,tabtitle) 
 
    
   dd1.addEventListener('change', function() {
 	   if(dd1.value == "0") {
-		   DTtab("tabDiv1",tab_gr,tabVal,row_labels,ftrString,tblfoot,"popgrowth",fileName,tabtitle);
+		   DTtab("TabDiv1",tab_gr,tabVal,row_labels,ftrString,tblfoot,"popgrowth",fileName,tabtitle);
 	   } else {
-		   DTtab("tabDiv1",tab_pop,tabVal,row_labels,ftrString,tblfoot,"popgrowth",fileName,tabtitle);
+		   DTtab("TabDiv1",tab_pop,tabVal,row_labels,ftrString,tblfoot,"popgrowth",fileName,tabtitle);
 	   }
    });
 
@@ -441,9 +582,9 @@ DTtab("tabDiv1",tab_gr,tabVal,row_labels,ftrString,tblfoot,"popgrowth",fileName,
 		tabVal = 5
 	 }
 	 if(dd1.value == "0") {
-		   DTtab("tabDiv1",tab_gr,tabVal,row_labels,ftrString,tblfoot,"popgrowth",fileName,tabtitle);
+		   DTtab("TabDiv1",tab_gr,tabVal,row_labels,ftrString,tblfoot,"popgrowth",fileName,tabtitle);
 	   } else {
-		   DTtab("tabDiv1",tab_pop,tabVal,row_labels,ftrString,tblfoot,"popgrowth",fileName,tabtitle);
+		   DTtab("TabDiv1",tab_pop,tabVal,row_labels,ftrString,tblfoot,"popgrowth",fileName,tabtitle);
 	  }
    });
   btnup.addEventListener('click', function() {
@@ -452,12 +593,24 @@ DTtab("tabDiv1",tab_gr,tabVal,row_labels,ftrString,tblfoot,"popgrowth",fileName,
 		tabVal = 0
 	 }
 	 if(dd1.value == "0") {
-		   DTtab("tabDiv1",tab_gr,tabVal,row_labels,ftrString,tblfoot,"popgrowth",fileName,tabtitle);
+		   DTtab("TabDiv1",tab_gr,tabVal,row_labels,ftrString,tblfoot,"popgrowth",fileName,tabtitle);
 	   } else {
-		   DTtab("tabDiv1",tab_pop,tabVal,row_labels,ftrString,tblfoot,"popgrowth",fileName,tabtitle);
+		   DTtab("TabDiv1",tab_pop,tabVal,row_labels,ftrString,tblfoot,"popgrowth",fileName,tabtitle);
 	  }
     });
+}  else {
+	var dd1 = document.getElementById("statSelect1");
+   dd1.value = "0";
+	DTtab("TabDiv1",tab_gr,tabVal,row_labels,ftrString,tblfoot,"popgrowth",fileName,tabtitle) 
 
+  dd1.addEventListener('change', function() {
+	   if(dd1.value == "0") {
+		   DTtab("TabDiv1",tab_gr,tabVal,row_labels,ftrString,tblfoot,"popgrowth",fileName,tabtitle);
+	   } else {
+		   DTtab("TabDiv1",tab_pop,tabVal,row_labels,ftrString,tblfoot,"popgrowth",fileName,tabtitle);
+	   }
+   });
+}
  }; //growth_tab
  
  
@@ -555,19 +708,19 @@ return (bindatafin);
 //genSubjTab Generates substantive table with topics in the rows and geographies in the columns. a n rows *5 column array of tables
 function genSubjTab(level,inData,section, row_topics,pctTab) {
 // section refers to the output section.  For section > 2, need to go through steps and format table.
-// for cestion <= 2, the table is alreary formatted and the tables have a different column layout
+// for section <= 2, the table is alreary formatted and the tables have a different column layout
 const fmt_comma = d3.format(",");
 const fmt_pct = d3.format(".1%");
 
 //Fix for section 2
-if(section == 2) {
+if(section == 'popgr') {
 	if(row_topics[0].title == 'location'){
 	  row_topics.shift()
 	}
 }
 
 var nRows = row_topics.length + 2;
-//The idea is to create a 3D array:  array[panel][row_topic][6 column table string (2 cols for index and rew_topic and 2 * 2 geography))]
+//The idea is to create a 3D array:  array[panel][row_topic][6 column table string (2 cols for index and row_topic and 2 * 2 geography))]
 	var row_tab = [];
 	for(i = 0 ; i < nRows; i++){
 		if( i < 2){
@@ -576,18 +729,18 @@ var nRows = row_topics.length + 2;
 		 row_tab.push("<td><a href='" + row_topics[i-2].URL_link + "' target='_blank'>" + row_topics[i-2].title + "</a></td>");
 		}
 	}
+
 	
-
-
  //Creating the output objects
  var ntopics = row_tab.length ;
- 
+
 if(level == "Municipality") {
    var npanels = 1;
  } else {
    var npanels = Math.round((inData.length)/2); //This is the number of panels
  }
  
+
   var out_count = new Array(npanels);
   if(pctTab){
   var out_pct = new Array(npanels);
@@ -598,30 +751,36 @@ if(level == "Municipality") {
 	  out_pct[i] = new Array(ntopics);
 	}
 	  for(j = 0 ; j < ntopics;j++){
-		  if(section == 2) {
+		  if(section == 'popgr') {
 			  if(level == "Municipality"){
-				 out_count[i][j] = new Array(4);
+				 out_count[i][j] = new Array(7);
 			  } else {
 			  out_count[i][j] = new Array(3);
 			  }
 		  } else {
-			out_count[i][j] = new Array(5);
+			if(level == "Municipality"){
+				 out_count[i][j] = new Array(7);
+			  } else {
+				out_count[i][j] = new Array(5);
+			}
 		  }
 			if(pctTab){
 			 if(section == 2) {
 				 if(level == "Municipality"){
-					 out_pct[i][j] = new Array(4);
+					 out_pct[i][j] = new Array(7);
 				 } else {
 					out_pct[i][j] = new Array(3);
 				 }
 			} else {
 				out_pct[i][j] = new Array(5);
 			}
-				  out_pct[i][j] = new Array(5);
-			}
+			if(level == "Municipality"){
+				 out_count[i][j] = new Array(7);
+			  } else {
+				out_count[i][j] = new Array(5);
+			}			}
 	  }
   }
-
 
   //Filling in the row labels
   for(i = 0; i < npanels; i++){
@@ -633,23 +792,20 @@ if(pctTab){
    } //j
   } //i
  
-  
-
   //Generate List of Keys
   var tmp_data_keys = Object.keys(inData[0]);
   var tgtrow = 0
 
  //Generate Tables by section 
-  if(section == 1) { //this is for the summary table
-
-   for(a = 0; a < npanels;a++) {// panels
+if(section == 'summtab') { //this is for the summary table
+for(a = 0; a < npanels;a++) {// panels
   var tmp_data = [];
 
   if(tgtrow == (inData.length - 1)){
 	  tmp_data.push(inData[tgtrow]);
   } else {
 	  if(level == "Municipality"){
-		  tmp_data.push(inData[tgtrow], inData[tgtrow+1], inData[tgtrow+2]);
+		tmp_data = inData;
 	  } else {
 		tmp_data.push(inData[tgtrow], inData[tgtrow+1]);
 	  }
@@ -684,9 +840,9 @@ if(pctTab){
 	 col_pos = col_pos + 2;
 	  } //i
   } //a
-  } //section == 1
-  
- if(section == 2) { //this is for the population growth rate tables --want to have a number and a rate panel similar to section > 2
+   } //section == 1
+
+ if(section == 'popgr') { //this is for the population growth rate tables --want to have a number and a rate panel similar to section > 2
 for(a = 0; a < npanels;a++) {// panels
   var tmp_data = [];
 
@@ -695,8 +851,8 @@ for(a = 0; a < npanels;a++) {// panels
   } else {
 	  	  if(level == "Municipality"){
 		  tmp_data.push(inData[tgtrow], inData[tgtrow+1], inData[tgtrow+2]);
-	  } else {
-		tmp_data.push(inData[tgtrow], inData[tgtrow+1]);
+			} else {
+			tmp_data.push(inData[tgtrow], inData[tgtrow+1]);
 	  }
   };
   tgtrow = tgtrow + 2
@@ -716,19 +872,23 @@ for(a = 0; a < npanels;a++) {// panels
 	 col_pos = col_pos + 1;
 	  } //i
   } //a
- debugger;
- console.log(out_count);
- 
+  
   } //section  == 2
- if(section > 2){ //the main table array for sections beyond 2
+ 
+ //the  table array for housing tables
+ 
+ if(section == 'house02'){
   for(a = 0; a < npanels;a++) {// panels
   var tmp_data = [];
-
-  if(tgtrow == (inData.length - 1)){
-	  tmp_data.push(inData[tgtrow]);
-  } else {
-	  tmp_data.push(inData[tgtrow], inData[tgtrow+1]);
-  };
+	if(level == "Municipality"){
+		tmp_data = inData;
+	} else {
+	  if(tgtrow == (inData.length - 1)){
+		  tmp_data.push(inData[tgtrow]);
+	  } else {
+		  tmp_data.push(inData[tgtrow], inData[tgtrow+1]);
+	  };
+	}
   tgtrow = tgtrow + 2
  //Populate the output tables
 
@@ -771,8 +931,173 @@ for(a = 0; a < npanels;a++) {// panels
 	  } //i
   } //a
   
- } //section > 2
+ } //Housing Occupancy Table 
+ 
+ if(section == 'house03'){  //Housing Type Table -- never get to this
+ //create table shell
+ var houseType = ["All Housing Units", "Owner-Occupied Housing Units", "Rental Housing Units"]
+ var geoNames =  [...new Set(inData.map(d => d.NAME))];
+ //row_topics
+ var n_cols = (geoNames.length * 4) + 1;
+ var n_rows = (row_topics.length * houseType.length); 
+ 
+
+ var out_count = new Array[npanels];
+ var out_pct = new Array[npanels];
+
+ for(a = 0; a < npanels;a++) { //Panels
+     out_count[a] = new Array[n_rows, n_cols];
+	 out_pct[a] = new Array[n_rows, n_cols];
+ }
+ //for(b = 0; b < houseType.length; b++){ //rows
+
+  for(a = 0; a < npanels;a++) {// panels
+  var tmp_data = [];
+	if(level == "Municipality"){
+		tmp_data = inData;
+	} else {
+	  if(tgtrow == (inData.length - 1)){
+		  tmp_data.push(inData[tgtrow]);
+	  } else {
+		  tmp_data.push(inData[tgtrow], inData[tgtrow+1]);
+	  };
+	}
+  tgtrow = tgtrow + 2
+ //Populate the output tables
+console.log(tmp_data)
+debugger;
+ 	var col_pos = 1
+	  for(i = 0; i < tmp_data.length;i++){  
+	        var col_pos2 = col_pos + 1;
+			 out_count[a][0][col_pos] = "<th align='center' colspan='2'>" + tmp_data[i][tmp_data_keys[1]] + "</th>";
+			 out_count[a][1][col_pos] = "<th align='center'>Estimate</th>";
+			 out_count[a][1][col_pos2] = "<th align='center'>Margin of Error</th>";
+			 if(pctTab){
+			 out_pct[a][0][col_pos] = "<th align='center' colspan='2'>" + tmp_data[i][tmp_data_keys[1]] + "</th>";
+			 out_pct[a][1][col_pos] = "<th align='center'>Estimate</th>";
+			 out_pct[a][1][col_pos2] = "<th align='center'>Margin of Error</th>";
+			 } //pctTab
+			 
+			 console.log(out_count)
+			 console.log(out_pct)
+			 debugger;
+			 
+			 var tot_est = tmp_data[i][tmp_data_keys[2]];
+			 var tot_moe = tmp_data[i][tmp_data_keys[3]];
+			 for(j = 0; j < tmp_data_keys.length; j++){
+				if(j % 2 == 0 && j > 0) {
+					var row_pos = ((j/2) - 1) + 2;
+					var val_est = tmp_data[i][tmp_data_keys[j]];
+					var val_moe = tmp_data[i][tmp_data_keys[j+1]]
+				if(pctTab){
+					var pct_est = val_est/tot_est;
+					var pct_moe = acsPctMOE(tot_est, tot_moe,pct_est,val_moe);
+				}
+					out_count[a][row_pos][col_pos] = "<td align='right'>" + fmt_comma(val_est) + "</td>";
+					out_count[a][row_pos][col_pos2] = "<td align='right'>" + fmt_comma(Math.round(val_moe)) + "</td>";
+				if(pctTab){
+					if(j == 2) {
+					   out_pct[a][row_pos][col_pos] = "<td align='right'>" + fmt_comma(val_est) + "</td>";
+					   out_pct[a][row_pos][col_pos2] = "<td align='right'>" + fmt_comma(Math.round(val_moe)) + "</td>";
+					} else {
+					  out_pct[a][row_pos][col_pos] = "<td align='right'>" + fmt_pct(pct_est) + "</td>";
+					  out_pct[a][row_pos][col_pos2] = "<td align='right'>" + fmt_pct(pct_moe) + "</td>";
+					}
+				} //pctTab
+				} //j % 2
+		 } //j
+	 col_pos = col_pos + 2;
+	  } //i
+  } //a
   
+ } //Housing Type Table 
+ 
+  //Income Source Table
+if(section == 'inc02'){
+for(pnl = 0; pnl < npanels;pnl++) {// panels
+  var tmp_data = [];
+
+  if(tgtrow == (inData.length - 1)){
+	  tmp_data.push(inData[tgtrow]);
+  } else {
+	  if(level == "Municipality") {
+		  tmp_data = inData;
+	  } else {
+		tmp_data.push(inData[tgtrow], inData[tgtrow+1]);
+	  }
+  };
+  tgtrow = tgtrow + 2
+ //Populate the output tables
+var colpos = 1
+
+for(h = 0; h < tmp_data.length; h++){ //Number of rows in tmp_data
+	  for(j = 0; j < row_tab.length; j++){  //Loop through rows 
+			  if(j == 0){
+			  out_count[pnl][j][colpos] = "<th colspan='4' align='center'>" + tmp_data[h][1] +"</th>";
+			  }
+			  if(j == 1){
+			  out_count[pnl][j][0] = "<th></th>";
+			  out_count[pnl][j][colpos] = "<th>Households</th>";
+			  out_count[pnl][j][colpos+1] = "<th>Margin of Error</th>";
+			  out_count[pnl][j][colpos+2] = "<th>Average Income</th>";
+			  out_count[pnl][j][colpos+3] = "<th>Margin of Error</th>";
+			  }
+	          if(j > 1){
+				var offset = 0;
+			   for(k = row_topics[j-2].stpos; k <= row_topics[j-2].endpos; k++){ //loop through columns
+				   out_count[pnl][j][colpos + offset] = "<td align='right'>" + tmp_data[h][k] + "</td>"
+				   offset = offset + 1
+				 }  //k
+			  } //j > 1
+   } //j loop
+   colpos = colpos + 4
+} //h
+}  //pnl
+} //section
+
+//Race Ethnicity Table
+ if(section == 'raceeth'){
+
+for(pnl = 0; pnl < npanels;pnl++) {// panels
+  var tmp_data = [];
+  if(level == "Municipality"){
+		  tmp_data = inData;
+  } else {
+  if(tgtrow == (inData.length - 1)){
+	  tmp_data.push(inData[tgtrow]);
+  } else {
+	     tmp_data.push(inData[tgtrow], inData[tgtrow+1]);
+  }
+  };
+  
+  tgtrow = tgtrow + 2
+ //Populate the output tables
+var colpos = 1
+
+for(h = 0; h < tmp_data.length; h++){ //Number of rows in tmp_data
+	  for(j = 0; j < row_tab.length; j++){  //Loop through rows 
+			  if(j == 0){
+			  out_count[pnl][j][colpos] = "<th colspan='4' align='center'>" + tmp_data[h][1] +"</th>";
+			  }
+			  if(j == 1){
+			  out_count[pnl][j][colpos] = "<th>Number</th>";
+			  out_count[pnl][j][colpos+1] = "<th>Margin of Error</th>";
+			  out_count[pnl][j][colpos+2] = "<th>Percentage</th>";
+			  out_count[pnl][j][colpos+3] = "<th>Margin of Error</th>";
+			  }
+			   if(j > 1){
+				   var offset = 0
+				   for(k = row_topics[j-2].stpos; k <= row_topics[j-2].endpos; k++){ //loop through columns
+					   out_count[pnl][j][colpos + offset] = "<td align='right'>" + tmp_data[h][k] + "</td>"
+					   offset = offset + 1
+				   }  //k
+			} //j > 1
+	   } //j loop
+	colpos = colpos + 4;
+} //h
+}  //pnl
+} //section
+
   //convert to html array, one row per panel
   //for each panel, 0 and 1 are the header, 2 to n is the table body
   var count_html = [];
@@ -812,34 +1137,551 @@ if(pctTab) {
 }
 } //genSubjTab
 
-//DTtab produces generic DT tables 
-function DTtab(tabdiv,tab_data,panelN,row_labels,footer,footArr,tabName, fileName, tabTitle){
+//genUnitArray created empty array with reow and column header information for housing unit table
 
-var pgLength = row_labels.length + 2;
+function genUnitArray(level,row_topics,NameList){
+	  var unit_arr = new Array(30)
+
+if(level == "Municipality") {
+  var row_span = 12
+  for(i = 0; i < 30; i++){
+	  unit_arr[i] = new Array(13)
+  }
+} else {
+    var row_span = 8
+  for(i = 0; i < 30; i++){
+	  unit_arr[i] = new Array(9)
+  }
+}
+  //Filling rows
+  for(i = 0; i < 30; i++){
+	  if(i < 3){
+		  unit_arr[0][i] = "<th align='center'> </th>";
+	  } else if(i == 3){
+		unit_arr[i][0] = "<td colspan='"+row_span +"'>All Housing Units</td>"
+		for(k = 1; k < row_span + 1;k++){
+			unit_arr[i][k] = "<td style='display: none;'>";
+		}
+	  var row_offset = 4;
+	  } else if(i == 12){
+		unit_arr[i][0] = "<td colspan='"+row_span +"'>Owner-Occupied Housing Units</td>"
+		for(k = 1; k < row_span + 1;k++){
+			unit_arr[i][k] = "<td style='display: none;'>";
+		}
+		var row_offset = 13;
+	  } else if(i == 21) {
+		unit_arr[i][0] = "<td colspan='"+row_span +"'>Rental Housing Units</td>"
+		for(k = 1; k < row_span + 1;k++){
+			unit_arr[i][k] = "<td style='display: none;'>";
+		}
+	  var row_offset = 22;
+	  } else {
+		 for(k = 0; k < row_topics.length;k++){
+			 unit_arr[k+row_offset][0] = "<a href='"+row_topics[k].URL_link+"' target='_blank'>"+row_topics[k].title+"</a>";
+		 }
+	  }
+  } //i
+  
+  //Building Header
+	unit_arr[0][1] = "<th align='center' colspan='4'>" + NameList[0] + "</th>";
+	unit_arr[0][5] = "<th align='center' colspan='4'>" + NameList[1] + "</th>";
+	if(level == "Municipality"){
+	unit_arr[0][9] = "<th align='center' colspan='4'>" + NameList[2]+ "</th>";
+	}
+	var term = "Counts"
+	for(j = 1; j < row_span + 1; j++){
+		if(j % 2 != 0) {
+           	unit_arr[1][j] = "<th align='center' colspan='2'>"+ term + "</th>";
+			unit_arr[2][j] = "<th align='center'>Estimate</th>"
+			if(term  == "Counts"){
+				var term = "Percent"
+			} else {
+			    var term = "Counts"
+			}
+		} else {
+			unit_arr[2][j] = "<th align='center'>Margin of Error</th>"
+		}
+	}
+	
+return(unit_arr)
+} //genUnitArray
+
+//genTenTab Generates Housing Unit Tables
+function genTenTab(level,inData,row_topics,pctTab) {
+const fmt_dec = d3.format(".2f");
+const fmt_comma = d3.format(",");
+const fmt_pct = d3.format(".1%");
+
+ var geoNames =  [...new Set(inData.map(d => d.NAME))];
+ 
+
+ 
+if(level == "Municipality"){
+  var unit_data = genUnitArray(level, row_topics, geoNames)
+ } else {
+   var geoNames =  [...new Set(inData.map(d => d.NAME))];
+   var npanels = Math.round((geoNames.length)/2); //This is the number of panels
+   var unit_data = new Array(npanels);
+   for(i = 0; i < npanels; i++){
+	 var nameArr = []
+	 if(i % 2 == 0){
+			 nameArr.push(geoNames[i], geoNames[i+1]);
+		  } else {
+			if(i == npanels) {
+                nameArr.push(geoNames[i]);
+			  }
+		  }
+		 unit_data[i]  = genUnitArray(level, row_topics, nameArr)
+  } //i
+ }
+ 
+  var pop_data = unit_data;
+
+console.log(unit_data);
+debugger;
+  
+ //Column Addresses
+   var unitRows = [
+			{vars :["ALLHU_E", "OOHU_E", "RTHU_E"], rows :[4, 13, 22]},
+			{vars :["ALLSFU_E", "OOSFU_E", "RTSFU_E"], rows :[5, 14, 23]},
+			{vars :["ALL24_E", "OO24_E",   "RT24_E"], rows :[6, 15, 24]},
+			{vars :["ALL550_E", "OO550_E", "RT550_E"], rows :[7, 16, 25]},
+			{vars :["ALLMOB_E", "OOMOB_E", "RTMOB_E"], rows :[8, 17, 26]},
+			{vars :["ALLOTH_E", "OOOTH_E", "RTOTH_E"], rows :[9, 18, 27]},
+			{vars :["ALLMEDYR_E", "OOMEDYR_E", "RTMEDYR_E"], rows :[10, 19, 28]},
+			{vars :["ALL_PPH_E", "OO_PPH_E", "RT_PPH_E"],rows :[11, 20, 29]}
+				]
+
+/*
+
+for(b = 0; b < unitRows.length; b++){
+	    var filtvar_u = selData.filter(d => unitRows[b].vars.includes(d.VAR));
+	
+	    var tgt_row1 = unitRows[b].row[0]
+		var tgt_row2 = unitRows[b].row[1]
+		var tgt_row3 = unitRows[b].row[2]
+		
+		if(b < 6) {
+		    unit_data[tgt_row1][0] = row_tab[b + 3];
+			unit_data[tgt_row2][0] = row_tab[b + 3];
+			unit_data[tgt_row3][0] = row_tab[b + 3];
+			
+			pop_data[tgt_row1][0] = row_tab[b + 3];
+			pop_data[tgt_row2][0] = row_tab[b + 3];
+			pop_data[tgt_row3][0] = row_tab[b + 3];
+        }
+
+		if(b == 6){
+			unit_data[tgt_row1][0] = row_tab[b + 3];
+			unit_data[tgt_row2][0] = row_tab[b + 3];
+			unit_data[tgt_row3][0] = row_tab[b + 3];
+			
+
+			pop_data[tgt_row1][0] = row_tab[b + 4];
+			pop_data[tgt_row2][0] = row_tab[b + 4];
+			pop_data[tgt_row3][0] = row_tab[b + 4];
+ 		}
+
+for(c = 0; c < filtvar_u.length; c++){
+	switch (c) {
+			case 0 :
+			if(['ALLMEDYR_E', 'OOMEDYR_E', 'RTMEDYR_E'].includes(filtvar_u[c].VAR)){
+				unit_data[tgt_row1][1] = "<td align='right'>" + filtvar_u[c].UNIT_EST + "</td>";
+				unit_data[tgt_row1][2] = "<td align='right'>" + Math.round(filtvar_u[c].UNIT_MOE) + "</td>";
+				unit_data[tgt_row1][3] = "<td align='right'> </td>";
+				unit_data[tgt_row1][4] = "<td align='right'> </td>";
+			} else {
+				if(['ALL_PPH_E', 'OO_PPH_E', 'RT_PPH_E'].includes(filtvar_u[c].VAR)){
+				pop_data[tgt_row1][1] = "<td align='right'>" + fmt_dec(filtvar_u[c].POP_EST) + "</td>";
+				pop_data[tgt_row1][2] = "<td align='right'>" + fmt_dec(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
+				pop_data[tgt_row1][3] = "<td align='right'> </td>";
+				pop_data[tgt_row1][4] = "<td align='right'> </td>";
+				} else {
+				unit_data[tgt_row1][1] = "<td align='right'>" + fmt_comma(filtvar_u[c].UNIT_EST) + "</td>";
+				unit_data[tgt_row1][2] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].UNIT_MOE)) + "</td>";
+				unit_data[tgt_row1][3] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_EST) + "</td>";
+				unit_data[tgt_row1][4] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_MOE) + "</td>";
+				
+				pop_data[tgt_row1][1] = "<td align='right'>" + fmt_comma(filtvar_u[c].POP_EST) + "</td>";
+				pop_data[tgt_row1][2] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
+				pop_data[tgt_row1][3] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_EST) + "</td>";
+				pop_data[tgt_row1][4] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_MOE) + "</td>";
+			}
+			}
+			break;
+			case 1 :
+			if(['ALLMEDYR_E', 'OOMEDYR_E', 'RTMEDYR_E'].includes(filtvar_u[c].VAR)){
+				unit_data[tgt_row2][1] = "<td align='right'>" + filtvar_u[c].UNIT_EST + "</td>";
+				unit_data[tgt_row2][2] = "<td align='right'>" + Math.round(filtvar_u[c].UNIT_MOE) + "</td>";
+				unit_data[tgt_row2][3] = "<td align='right'> </td>";
+				unit_data[tgt_row2][4] = "<td align='right'> </td>";
+			} else {
+				if(['ALL_PPH_E', 'OO_PPH_E', 'RT_PPH_E'].includes(filtvar_u[c].VAR)){
+				pop_data[tgt_row2][1] = "<td align='right'>" + fmt_dec(filtvar_u[c].POP_EST) + "</td>";
+				pop_data[tgt_row2][2] = "<td align='right'>" + fmt_dec(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
+				pop_data[tgt_row2][3] = "<td align='right'> </td>";
+				pop_data[tgt_row2][4] = "<td align='right'> </td>";
+			} else {
+				unit_data[tgt_row2][1] = "<td align='right'>" + fmt_comma(filtvar_u[c].UNIT_EST) + "</td>";
+				unit_data[tgt_row2][2] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].UNIT_MOE)) + "</td>";
+				unit_data[tgt_row2][3] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_EST) + "</td>";
+				unit_data[tgt_row2][4] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_MOE) + "</td>";
+				
+				pop_data[tgt_row2][1] = "<td align='right'>" + fmt_comma(filtvar_u[c].POP_EST) + "</td>";
+				pop_data[tgt_row2][2] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
+				pop_data[tgt_row2][3] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_EST) + "</td>";
+				pop_data[tgt_row2][4] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_MOE) + "</td>";
+			}
+			}
+			break;
+			case 2 :
+			if(['ALLMEDYR_E', 'OOMEDYR_E', 'RTMEDYR_E'].includes(filtvar_u[c].VAR)){
+				unit_data[tgt_row3][1] = "<td align='right'>" + filtvar_u[c].UNIT_EST + "</td>";
+				unit_data[tgt_row3][2] = "<td align='right'>" + Math.round(filtvar_u[c].UNIT_MOE) + "</td>";
+				unit_data[tgt_row3][3] = "<td align='right'> </td>";
+				unit_data[tgt_row3][4] = "<td align='right'> </td>";
+			} else {
+				if(['ALL_PPH_E', 'OO_PPH_E', 'RT_PPH_E'].includes(filtvar_u[c].VAR)){
+				pop_data[tgt_row3][1] = "<td align='right'>" + fmt_dec(filtvar_u[c].POP_EST) + "</td>";
+				pop_data[tgt_row3][2] = "<td align='right'>" + fmt_dec(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
+				pop_data[tgt_row3][3] = "<td align='right'> </td>";
+				pop_data[tgt_row3][4] = "<td align='right'> </td>";
+			} else {
+				unit_data[tgt_row3][1] = "<td align='right'>" + fmt_comma(filtvar_u[c].UNIT_EST) + "</td>";
+				unit_data[tgt_row3][2] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].UNIT_MOE)) + "</td>";
+				unit_data[tgt_row3][3] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_EST) + "</td>";
+				unit_data[tgt_row3][4] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_MOE) + "</td>";
+
+				pop_data[tgt_row3][1] = "<td align='right'>" + fmt_comma(filtvar_u[c].POP_EST) + "</td>";
+				pop_data[tgt_row3][2] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
+				pop_data[tgt_row3][3] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_EST) + "</td>";
+				pop_data[tgt_row3][4] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_MOE) + "</td>";
+			}
+			}
+			break;
+			case 3 :
+			if(['ALLMEDYR_E', 'OOMEDYR_E', 'RTMEDYR_E'].includes(filtvar_u[c].VAR)){
+				unit_data[tgt_row1][5] = "<td align='right'>" + filtvar_u[c].UNIT_EST + "</td>";
+				unit_data[tgt_row1][6] = "<td align='right'>" + Math.round(filtvar_u[c].UNIT_MOE) + "</td>";
+				unit_data[tgt_row1][7] = "<td align='right'> </td>";
+				unit_data[tgt_row1][8] = "<td align='right'> </td>";
+			} else {
+				if(['ALL_PPH_E', 'OO_PPH_E', 'RT_PPH_E'].includes(filtvar_u[c].VAR)){
+				pop_data[tgt_row1][5] = "<td align='right'>" + fmt_dec(filtvar_u[c].POP_EST) + "</td>";
+				pop_data[tgt_row1][6] = "<td align='right'>" + fmt_dec(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
+				pop_data[tgt_row1][7] = "<td align='right'> </td>";
+				pop_data[tgt_row1][8] = "<td align='right'> </td>";
+			} else {
+				unit_data[tgt_row1][5] = "<td align='right'>" + fmt_comma(filtvar_u[c].UNIT_EST) + "</td>";
+				unit_data[tgt_row1][6] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].UNIT_MOE)) + "</td>";
+				unit_data[tgt_row1][7] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_EST) + "</td>";
+				unit_data[tgt_row1][8] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_MOE) + "</td>";
+			
+				pop_data[tgt_row1][5] = "<td align='right'>" + fmt_comma(filtvar_u[c].POP_EST) + "</td>";
+				pop_data[tgt_row1][6] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
+				pop_data[tgt_row1][7] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_EST) + "</td>";
+				pop_data[tgt_row1][8] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_MOE) + "</td>";
+			}
+			}
+			break;
+			case 4 :
+			if(['ALLMEDYR_E', 'OOMEDYR_E', 'RTMEDYR_E'].includes(filtvar_u[c].VAR)){
+				unit_data[tgt_row2][5] = "<td align='right'>" + filtvar_u[c].UNIT_EST + "</td>";
+				unit_data[tgt_row2][6] = "<td align='right'>" + Math.round(filtvar_u[c].UNIT_MOE) + "</td>";
+				unit_data[tgt_row2][7] = "<td align='right'> </td>";
+				unit_data[tgt_row2][8] = "<td align='right'> </td>";
+			} else {
+				if(['ALL_PPH_E', 'OO_PPH_E', 'RT_PPH_E'].includes(filtvar_u[c].VAR)){
+				pop_data[tgt_row2][5] = "<td align='right'>" + fmt_dec(filtvar_u[c].POP_EST) + "</td>";
+				pop_data[tgt_row2][6] = "<td align='right'>" + fmt_dec(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
+				pop_data[tgt_row2][7] = "<td align='right'> </td>";
+				pop_data[tgt_row2][8] = "<td align='right'> </td>";
+			} else {
+				unit_data[tgt_row2][5] = "<td align='right'>" + fmt_comma(filtvar_u[c].UNIT_EST) + "</td>";
+				unit_data[tgt_row2][6] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].UNIT_MOE)) + "</td>";
+				unit_data[tgt_row2][7] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_EST) + "</td>";
+				unit_data[tgt_row2][8] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_MOE) + "</td>";
+
+				pop_data[tgt_row2][5] = "<td align='right'>" + fmt_comma(filtvar_u[c].POP_EST) + "</td>";
+				pop_data[tgt_row2][6] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
+				pop_data[tgt_row2][7] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_EST) + "</td>";
+				pop_data[tgt_row2][8] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_MOE) + "</td>";
+			}
+			}
+			break;
+			case 5 :  
+			if(['ALLMEDYR_E', 'OOMEDYR_E', 'RTMEDYR_E'].includes(filtvar_u[c].VAR)){
+				unit_data[tgt_row3][5] = "<td align='right'>" + filtvar_u[c].UNIT_EST + "</td>";
+				unit_data[tgt_row3][6] = "<td align='right'>" + Math.round(filtvar_u[c].UNIT_MOE) + "</td>";
+				unit_data[tgt_row3][7] = "<td align='right'> </td>";
+				unit_data[tgt_row3][8] = "<td align='right'> </td>";
+			} else {
+		 	if(['ALL_PPH_E', 'OO_PPH_E', 'RT_PPH_E'].includes(filtvar_u[c].VAR)){
+				pop_data[tgt_row3][5] = "<td align='right'>" + fmt_dec(filtvar_u[c].POP_EST) + "</td>";
+				pop_data[tgt_row3][6] = "<td align='right'>" + fmt_dec(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
+				pop_data[tgt_row3][7] = "<td align='right'> </td>";
+				pop_data[tgt_row3][8] = "<td align='right'> </td>";
+			} else {
+				unit_data[tgt_row3][5] = "<td align='right'>" + fmt_comma(filtvar_u[c].UNIT_EST) + "</td>";
+				unit_data[tgt_row3][6] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].UNIT_MOE)) + "</td>";
+				unit_data[tgt_row3][7] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_EST) + "</td>";
+				unit_data[tgt_row3][8] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_MOE) + "</td>";
+
+				pop_data[tgt_row3][5] = "<td align='right'>" + fmt_comma(filtvar_u[c].POP_EST) + "</td>";
+				pop_data[tgt_row3][6] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
+				pop_data[tgt_row3][7] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_EST) + "</td>";
+				pop_data[tgt_row3][8] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_MOE) + "</td>";
+			}
+			}
+			break;
+	}
+		} //c
+
+} //b
+   unit_out.push(unit_data);
+   pop_out.push(pop_data);   
+*/
+
+
+  //convert to html array, one row per panel
+  //for each panel, 0 and 1 are the header, 2 to n is the table body
+  var unit_html = [];
+  var pop_html = [];
+
+   for(a = 0; a < npanels; a++){ //panels
+	   var strhtml_count = "<thead>"
+	   for(b = 0; b < unit_out[a].length; b++) {  //geo
+		   strhtml_count = strhtml_count + "<tr>"
+		   for(c = 0; c < unit_out[a][b].length; c++){ //item
+			     strhtml_count = strhtml_count + unit_out[a][b][c]
+		   } //c
+		  strhtml_count = strhtml_count + "</tr>";
+		if(b ==2) {strhtml_count = strhtml_count + "</thead>"	}
+	   } //b
+	   
+	 unit_html.push(strhtml_count.replaceAll('undefined',''));
+   } //a
+ 
+   
+ for(a = 0; a < npanels; a++){ //panels
+	   var strhtml_pop = "<thead>"
+	   for(b = 0; b < pop_out[a].length; b++) {  //geo
+		   strhtml_pop = strhtml_pop + "<tr>"
+		   for(c = 0; c < pop_out[a][b].length; c++){ //item
+			     strhtml_pop = strhtml_pop + pop_out[a][b][c]
+		   } //c
+		  strhtml_pop = strhtml_pop + "</tr>";
+		if(b == 2) {strhtml_pop = strhtml_pop + "</thead>"	}
+	   } //b
+	   
+	 pop_html.push(strhtml_pop.replaceAll('undefined',''));
+   } //a
+
+
+return([unit_html, pop_html]);
+} //genTenTab
+
+//HHIncTab Generates Household Income table
+function HHIncTab(level,MedData, PctData,section, row_topics,pctTab) {
+	const fmt_pct = d3.format(".2%")
+    const fmt_comma = d3.format(",");
+    const fmt_dollar = d3.format("$,");
+//Setup panels
+var nRows = row_topics.length + 2;
+//The idea is to create a 3D array:  array[panel][row_topic][6 column table string (2 cols for index and row_topic and 2 * 2 geography))]
+	var row_tab = [];
+	for(i = 0 ; i < nRows; i++){
+		if( i < 2){
+			row_tab.push("<th></th>");
+		} else {
+		 row_tab.push("<td><a href='" + row_topics[i-2].URL_link + "' target='_blank'>" + row_topics[i-2].title + "</a></td>");
+		}
+	}
+	
+ //Creating the output objects
+ var ntopics = row_tab.length ;
+ var nCols = 13;
+
+if(level == "Municipality") {
+   var npanels = 1;
+ } else {
+   var Nfips = [...new Set(PctData.map(d => d.FIPS))];
+   var npanels = Math.round((Nfips.length)/2); //This is the number of panels
+   
+   var selfips = [];  //This is the contents of each panel
+   for(i = 0; i < Nfips.length; i++){
+	 var fipsrec = []
+	 if(i % 2 == 0){
+			 fipsrec.push(Nfips[i], Nfips[i+1]);
+			 selfips.push(fipsrec)
+		  } else {
+			  if(i == Nfips.length) {
+			fipsrec.push(Nfips[i])
+			selfips.push(fipsrec)
+			  }
+		  }
+    } //i
+ }
+ 
+ //Building Raw tables
+var count_tab = new Array(npanels);
+var pct_tab = new Array(npanels);
+
+for(a = 0; a < npanels;a++) {// panels  Need to make a 3d array, panels , 10 rows, 5 or 7 cols
+   count_tab[a] = new Array(row_tab.length);
+   pct_tab[a] = new Array(row_tab.length);
+  for(x  = 0; x < row_tab.length; x++){
+	  if(level == "Municipality") {
+		count_tab[a][x] = new Array(7)
+		pct_tab[a][x] = new Array(7)
+	  } else {
+	  count_tab[a][x] = new Array(5)
+	  pct_tab[a][x] = new Array(5)
+	  }
+  } //x
+} //a  
+
+//Populate Tables
+for(a = 0; a < npanels;a++) {
+  	var selmedian = MedData.filter(d => selfips[a].includes(d.FIPS))
+	var selpct = PctData.filter(d => selfips[a].includes(d.FIPS));
+
+
+	for(i = 0; i < row_tab.length; i++){
+		count_tab[a][i][0] = row_tab[i];
+		pct_tab[a][i][0] = row_tab[i];
+	} //i
+	
+	var tgtcol = 1;
+	for(b = 0; b < selmedian.length; b++){
+	 if(typeof selmedian[b].NAME !== undefined){
+		count_tab[a][0][tgtcol] = "<th align='center' colspan='2'>" + selmedian[b].NAME + "</th>";
+		count_tab[a][1][tgtcol] = "<th align='center'>Estimate</th>"
+		count_tab[a][1][tgtcol+1] = "<th align='center'>Margin of Error</th>"
+        count_tab[a][2][tgtcol] = "<td align='right'>"+ fmt_dollar(selmedian[b].OO_EST) + "</td>"
+        count_tab[a][2][tgtcol+1] = "<td align='right'>"+ fmt_dollar(selmedian[b].OO_MOE.toFixed(2)) + "</td>"
+		count_tab[a][3][tgtcol] = "<td align='right'>"+ fmt_comma(selpct[b].TOTAL_OO_E) + "</td>"
+		count_tab[a][3][tgtcol+1] = "<td align='right'>" + fmt_comma(selpct[b].TOTAL_OO_M.toFixed(2)) + "</td>"
+		count_tab[a][4][tgtcol] = "<td align='right'>"+ fmt_comma(selpct[b].PCTGE30_OO_E) + "</td>"
+		count_tab[a][4][tgtcol+1] = "<td align='right'>" + fmt_comma(selpct[b].PCTGE30_OO_M.toFixed(2)) + "</td>"
+		count_tab[a][5][tgtcol] = "<td align='right'>"+ fmt_comma(selpct[b].PCT3039_OO_E) + "</td>"
+		count_tab[a][5][tgtcol+1] = "<td align='right'>" + fmt_comma(selpct[b].PCT3039_OO_M.toFixed(2)) + "</td>"
+		count_tab[a][6][tgtcol] = "<td align='right'>"+ fmt_comma(selpct[b].PCT4049_OO_E) + "</td>"
+		count_tab[a][6][tgtcol+1] = "<td align='right'>" + fmt_comma(selpct[b].PCT4049_OO_M.toFixed(2)) + "</td>"
+		count_tab[a][7][tgtcol] = "<td align='right'>"+ fmt_comma(selpct[b].PCTGE50_OO_E) + "</td>"
+		count_tab[a][7][tgtcol+1] = "<td align='right'>" + fmt_comma(selpct[b].PCTGE50_OO_M.toFixed(2)) + "</td>"
+        count_tab[a][8][tgtcol] = "<td align='right'>"+ fmt_dollar(selmedian[b].RT_EST) + "</td>"
+        count_tab[a][8][tgtcol+1] = "<td align='right'>"+ fmt_dollar(selmedian[b].RT_MOE.toFixed(2)) + "</td>"
+		count_tab[a][9][tgtcol] = "<td align='right'>"+ fmt_comma(selpct[b].TOTAL_RT_E) + "</td>"
+		count_tab[a][9][tgtcol+1] = "<td align='right'>" + fmt_comma(selpct[b].TOTAL_RT_M.toFixed(2)) + "</td>"
+		count_tab[a][10][tgtcol] = "<td align='right'>"+ fmt_comma(selpct[b].PCTGE30_RT_E) + "</td>"
+		count_tab[a][10][tgtcol+1] = "<td align='right'>" + fmt_comma(selpct[b].PCTGE30_RT_M.toFixed(2)) + "</td>"
+		count_tab[a][11][tgtcol] = "<td align='right'>"+ fmt_comma(selpct[b].PCT3039_RT_E) + "</td>"
+		count_tab[a][11][tgtcol+1] = "<td align='right'>" + fmt_comma(selpct[b].PCT3039_RT_M.toFixed(2)) + "</td>"
+		count_tab[a][12][tgtcol] = "<td align='right'>"+ fmt_comma(selpct[b].PCT4049_RT_E) + "</td>"
+		count_tab[a][12][tgtcol+1] = "<td align='right'>" + fmt_comma(selpct[b].PCT4049_RT_M.toFixed(2)) + "</td>"
+		count_tab[a][13][tgtcol] = "<td align='right'>"+ fmt_comma(selpct[b].PCTGE50_RT_E) + "</td>"
+		count_tab[a][13][tgtcol+1] = "<td align='right'>" + fmt_comma(selpct[b].PCTGE50_RT_M.toFixed(2)) + "</td>"
+		
+		pct_tab[a][0][tgtcol] = "<th align='center' colspan='2'>" + selmedian[b].NAME + "</th>";
+		pct_tab[a][1][tgtcol] = "<th align='center'>Estimate</th>"
+		pct_tab[a][1][tgtcol+1] = "<th align='center'>Margin of Error</th>"
+        pct_tab[a][2][tgtcol] = "<td align='right'>"+ fmt_dollar(selmedian[b].OO_EST) + "</td>"
+        pct_tab[a][2][tgtcol+1] = "<td align='right'>"+ fmt_dollar(selmedian[b].OO_MOE.toFixed(2)) + "</td>"
+		pct_tab[a][3][tgtcol] = "<td align='right'>"+ fmt_comma(selpct[b].TOTAL_OO_E) + "</td>"
+		pct_tab[a][3][tgtcol+1] = "<td align='right'>" + fmt_comma(selpct[b].TOTAL_OO_M.toFixed(2)) + "</td>"
+		pct_tab[a][4][tgtcol] = "<td align='right'>"+ fmt_pct(selpct[b].PCTGE30_OO_E/selpct[b].TOTAL_OO_E) + "</td>"
+		pct_tab[a][4][tgtcol+1] = "<td align='right'>" + fmt_pct(acsPctMOE(selpct[b].TOTAL_OO_E,selpct[b].TOTAL_OO_M,(selpct[b].PCTGE30_OO_E/selpct[b].TOTAL_OO_E), selpct[b].PCTGE30_OO_M)) + "</td>"
+		pct_tab[a][5][tgtcol] = "<td align='right'>"+ fmt_pct(selpct[b].PCT3039_OO_E/selpct[b].TOTAL_OO_E) + "</td>"
+		pct_tab[a][5][tgtcol+1] = "<td align='right'>" + fmt_pct(acsPctMOE(selpct[b].TOTAL_OO_E,selpct[b].TOTAL_OO_M,(selpct[b].PCT3039_OO_E/selpct[b].TOTAL_OO_E), selpct[b].PCT3039_OO_M)) + "</td>"
+		pct_tab[a][6][tgtcol] = "<td align='right'>"+ fmt_pct(selpct[b].PCT4049_OO_E/selpct[b].TOTAL_OO_E) + "</td>"
+		pct_tab[a][6][tgtcol+1] = "<td align='right'>" + fmt_pct(acsPctMOE(selpct[b].TOTAL_OO_E,selpct[b].TOTAL_OO_M,(selpct[b].PCT4049_OO_E/selpct[b].TOTAL_OO_E), selpct[b].PCT4049_OO_M)) + "</td>"
+		pct_tab[a][7][tgtcol] = "<td align='right'>"+ fmt_pct(selpct[b].PCTGE50_OO_E/selpct[b].TOTAL_OO_E) + "</td>"
+		pct_tab[a][7][tgtcol+1] = "<td align='right'>" + fmt_pct(acsPctMOE(selpct[b].TOTAL_OO_E,selpct[b].TOTAL_OO_M,(selpct[b].PCTGE50_OO_E/selpct[b].TOTAL_OO_E), selpct[b].PCTGE50_OO_M)) + "</td>"
+        pct_tab[a][8][tgtcol] = "<td align='right'>"+ fmt_dollar(selmedian[b].RT_EST) + "</td>"
+        pct_tab[a][8][tgtcol+1] = "<td align='right'>"+ fmt_dollar(selmedian[b].RT_MOE.toFixed(2)) + "</td>"
+		pct_tab[a][9][tgtcol] = "<td align='right'>"+ fmt_comma(selpct[b].TOTAL_RT_E) + "</td>"
+		pct_tab[a][9][tgtcol+1] = "<td align='right'>" + fmt_comma(selpct[b].TOTAL_RT_M.toFixed(2)) + "</td>"
+		pct_tab[a][10][tgtcol] = "<td align='right'>"+ fmt_pct(selpct[b].PCTGE30_RT_E/selpct[b].TOTAL_RT_E) + "</td>"
+		pct_tab[a][10][tgtcol+1] = "<td align='right'>" + fmt_pct(acsPctMOE(selpct[b].TOTAL_RT_E,selpct[b].TOTAL_RT_M,(selpct[b].PCTGE30_RT_E/selpct[b].TOTAL_RT_E), selpct[b].PCTGE30_RT_M)) + "</td>"
+		pct_tab[a][11][tgtcol] = "<td align='right'>"+ fmt_pct(selpct[b].PCT3039_RT_E/selpct[b].TOTAL_RT_E) + "</td>"
+		pct_tab[a][11][tgtcol+1] = "<td align='right'>" + fmt_pct(acsPctMOE(selpct[b].TOTAL_RT_E,selpct[b].TOTAL_RT_M,(selpct[b].PCT3039_RT_E/selpct[b].TOTAL_RT_E), selpct[b].PCT3039_RT_M)) + "</td>"
+		pct_tab[a][12][tgtcol] = "<td align='right'>"+ fmt_pct(selpct[b].PCT4049_RT_E/selpct[b].TOTAL_RT_E) + "</td>"
+		pct_tab[a][12][tgtcol+1] = "<td align='right'>" + fmt_pct(acsPctMOE(selpct[b].TOTAL_RT_E,selpct[b].TOTAL_RT_M,(selpct[b].PCT4049_RT_E/selpct[b].TOTAL_RT_E), selpct[b].PCT4049_RT_M)) + "</td>"
+		pct_tab[a][13][tgtcol] = "<td align='right'>"+ fmt_pct(selpct[b].PCTGE50_RT_E/selpct[b].TOTAL_RT_E) + "</td>"
+		pct_tab[a][13][tgtcol+1] = "<td align='right'>" + fmt_pct(acsPctMOE(selpct[b].TOTAL_RT_E,selpct[b].TOTAL_RT_M,(selpct[b].PCTGE50_RT_E/selpct[b].TOTAL_RT_E), selpct[b].PCTGE50_RT_M)) + "</td>"
+        tgtcol = 3
+	 } //undefined
+	} //b
+} //a
+
+  //convert to html array, one row per panel
+  //for each panel, 0 and 1 are the header, 2 to n is the table body
+  var count_html = [];
+  var pct_html = [];
+
+   for(a = 0; a < npanels; a++){ //panels
+	   var strhtml_count = "<thead>"
+	   for(b = 0; b < count_tab[a].length; b++) {  //geo
+		   strhtml_count = strhtml_count + "<tr>"
+		   for(c = 0; c < count_tab[a][b].length; c++){ //item
+			     strhtml_count = strhtml_count + count_tab[a][b][c]
+		   } //c
+		  strhtml_count = strhtml_count + "</tr>";
+		if(b ==1) {strhtml_count = strhtml_count + "</thead>"	}
+	   } //b
+	   
+	 count_html.push(strhtml_count.replaceAll('undefined','')); 
+   } //a
+ 
+ for(a = 0; a < npanels; a++){ //panels
+	   var strhtml_pop = "<thead>"
+	   for(b = 0; b < pct_tab[a].length; b++) {  //geo
+		   strhtml_pop = strhtml_pop + "<tr>"
+		   for(c = 0; c < pct_tab[a][b].length; c++){ //item
+			     strhtml_pop = strhtml_pop + pct_tab[a][b][c]
+		   } //c
+		  strhtml_pop = strhtml_pop + "</tr>";
+		if(b == 1) {strhtml_pop = strhtml_pop + "</thead>"	}
+	   } //b
+	   
+	 pct_html.push(strhtml_pop.replaceAll('undefined',''));
+   } //a
+   
+   
+return([count_html, pct_html]);
+} // HHIncTab
+
+//DTtab produces generic DT tables 
+function DTtab(TabDiv,tab_data,panelN,row_labels,footer,footArr,tabName, fileName, tabTitle){
+
+if(tabName == "houstype") {
+	var pgLength = 29;
+} else {
+	var pgLength = row_labels.length + 2;
+}
 
 var labels = [];
 row_labels.forEach(x =>{
 	 labels.push(x.title)
 });
 
-
 var tab_data2 = tab_data[panelN] + footer;
 
-var tabDivOut = document.getElementById(tabdiv);
+var TabDivOut = document.getElementById(TabDiv);
 //Clear div
-tabDivOut.innerHTML = "";
+TabDivOut.innerHTML = "";
 
 var tabObj = "#" + tabName;
-$(tabDivOut).append("<table id="+ tabName + " class='DTTable' width='90%'></table>");
+$(TabDivOut).append("<table id= '"+ tabName + "' class='DTTable' width='90%'></table>");
 $(tabObj).append(tab_data2); //this has to be a html table
-
 
 $(tabObj).DataTable({
        "pageLength" : pgLength,
 	   "ordering": false,
 		"fixedHeader":   true,
  dom: 'Bfrtip',
-       "buttons": [
+       buttons: [
 		{ text :'Word',    action: function ( e, dt, node, config ) { genplexTab(tab_data,labels,footArr,fileName,'word',tabTitle)} },
         { text : 'Excel',  action: function ( e, dt, node, config ) { genplexTab(tab_data,labels,footArr,fileName,'xlsx',tabTitle)} },
         { text : 'CSV',    action: function ( e, dt, node, config ) { genplexTab(tab_data,labels,footArr,fileName,'csv',tabTitle)} },
@@ -858,7 +1700,6 @@ function stripHTML(inData){
 	 var x2 = x.split("|")
 	 tArrt.push(x2);
 	});
-
 
 //remove empty fields
 var tArr = [];
@@ -900,12 +1741,20 @@ for(i = 0 ; i < row_labels.length; i++){
 }
 
 //Header rows
+//Checking the structure of tblArray
+
+var jlen = 2
+if(tblArray.length == 1) {
+	if(tblArray[0][2] != "Estimate" && tblArray[0][3] == "Estimate"){  //check for muni
+	 var jlen = 3;
+	}
+}
 
 var hdrArray = [];
 var hdrstr1 = "|";
 var hdrstr2 = "|";
 for(i = 0; i < tblArray.length;i++){
-	for(j = 0 ; j < 2; j++) {
+	for(j = 0 ; j < jlen; j++) {
 		if(tblArray[i][j] != 'Estimate'){
 		hdrstr1 = hdrstr1 + tblArray[i][j] + "||";
 		hdrstr2 = hdrstr2 + "Estimate|Margin of Error|"
@@ -913,178 +1762,149 @@ for(i = 0; i < tblArray.length;i++){
 	}
 }
 
-
 hdrstr1 = hdrstr1.substr(0,(hdrstr1.length - 1));
 hdrstr2 = hdrstr2.substr(0,(hdrstr2.length - 1));
+
 hdrArray.push(hdrstr1.split("|"));
 hdrArray.push(hdrstr2.split("|"));
 
-
   var finData = [];
-  for(x = 0; x < tblArray.length; x++){
-	 var tmpData = []
-  if(tblArray[x][1] != "Estimate"){
-	  for(k = 0; k < tblArray[x].length; k++){
-		  var rowassn = checkHash(tblArray[x][k], rowHash);
-		  if(rowassn != 0){
-			  //K values
-			  var a = k + 1;
-			  var b = k + 2;
-			  var c = k + 3;
-			  var d = k + 4;
-			  tmpData.push({ label : tblArray[x][k],
-			                ["e1" + x] : tblArray[x][a],
-							["m1" + x] :  tblArray[x][b],
-							["e2" + x] :  tblArray[x][c],
-							["m2" + x] : tblArray[x][d]
-			  });
-		  } //rowassn
-		  } //k
-	  } else {
-		  for(k = 0; k < tblArray[x].length; k++){
-		  var rowassn = checkHash(tblArray[x][k], rowHash);
-		  if(rowassn != 0){
-			   //K values
-			  var a = k + 1;
-			  var b = k + 2;
-			  tmpData.push({ label : tblArray[x][k],
-			                 ["e1" + x]: tblArray[x][a],
-							 ["m1" + x] : tblArray[x][b],
-							 ["e2" + x] : "",
-							 ["m2" + x] : ""
-			  });
-		  } //rowassn 
-	  } //k
-	  }  //estimate
-	  if(finData.length == 0) {
-		  finData = tmpData;
-	  } else {
-		  finData = mergeArrayObjects(finData,tmpData);
-	  }
-  } //i
+
+//Check for number of places between the first and second row id
+var rowid1 = rowHash[0].label
+var rowid2 = rowHash[1].label
+var rowpos1 = 0;
+var rowpos2 = 0;
+
+//This outputs the array that created the table
 
 
-var outData = [];
-
-for(i = 0; i < finData.length; i++){
-	outData.push(Object.values(finData[i]));
-};
-
-var tableData = hdrArray.concat(outData);
-
-if(type == "CSV"){
-      return(tableData);
-} else {
-
-	var tabkeys = Object.keys(finData[0]);
-	var arrlen = hdrArray.length;
-	var finHdr = [];
-
-	
-    for(i = 0; i < hdrArray.length; i++){
-		 var tmphdr = {};
-		  for(j = 0; j < tabkeys.length;j++){
-			  tmphdr[tabkeys[j]] = hdrArray[i][j];
-		  }
-		  finHdr = finHdr.concat(tmphdr)
+//Builds the final output data set, to be created in the pdf table.
+for(z = 0; z < tblArray.length; z++){
+var rowpos = 0;
+var tmpData = [];
+for(a = 0; a < tblArray[z].length; a++){
+	if(tblArray[z][a] == rowid1) {  rowpos1 = a}
+	if(rowpos1 != 0){
+		if(tblArray[z][a] == rowid2) {  
+		   rowpos2 = a;
+		   break;
+		   }
 	}
-
-	var finTab = finHdr.concat(finData);
-
-	//convert finTab to table structure
-	var npanels = (tabkeys.length - 1)/4
-	var finouttab = [];
-	for(x = 0 ; x < npanels; x++){
-		startpos = (x * 4 ) + 1;
-		lab0 = tabkeys[0];
-		lab1 = tabkeys[startpos];
-		lab2 = tabkeys[startpos+1];
-		lab3 = tabkeys[startpos+2];
-		lab4 = tabkeys[startpos+3];
-		var tmppnl = []
-		for(z = 0 ; z < finTab.length; z++) {
-			
-			tmppnl.push({
-			[lab0] : typeof finTab[z][lab0] === 'undefined' ? ' ' : finTab[z][lab0],
-			[lab1] : typeof finTab[z][lab1] === 'undefined' ? ' ' : finTab[z][lab1],
-			[lab2] : typeof finTab[z][lab2] === 'undefined' ? ' ' : finTab[z][lab2],
-			[lab3] : typeof finTab[z][lab3] === 'undefined' ? ' ' : finTab[z][lab3],
-			[lab4] : typeof finTab[z][lab4] === 'undefined' ? ' ' : finTab[z][lab4]
-			})
-		} //z
-		finouttab.push(tmppnl);
-    } //x
-			 
-	return(finouttab);
 }
+
+var nvals = rowpos2 - rowpos1;
+
+for(a = 0; a < rowHash.length; a++){
+	var chkval = rowHash[a].label
+	//Getting position of label
+	for(b = 0; b < tblArray[z].length; b++){
+	  if(tblArray[z][b] == chkval) {
+		 rowpos = b;
+	  } else {
+		 rowpos = 0;
+	  }
+	  if(rowpos != 0){
+		  var selarr = []
+		  for(c = 0; c < nvals; c++){
+			  selarr.push(tblArray[z][rowpos + c]);
+		  } //c
+		  tmpData.push(selarr);
+	  } //rowpos
+	  } //b
+} //a
+
+finData.push(tmpData)
+} //z
+
+    var tableData = [];
+	for(i = 0; i < finData.length; i++){
+		if(i == 0) {
+		 for(j = 0; j < finData[i].length; j++){
+	       tableData.push(finData[i][j]);
+		 } //j
+	} else {
+		for(j = 0; j < finData[i].length; j++){
+			var shortrec = finData[i][j];
+			shortrec.shift()
+	        tableData[j] = tableData[j].concat(shortrec);
+		 } //j
+    }
+   }
+   
+
+var outData = hdrArray.concat(tableData);
+return(outData);
+
 } //HTMLtoArray
 
-//setBookmark  function to set book mark statement at top of page
-function setBookmark(divout,links) {
-	//links is an array of link ids
-	//divout is the output div
-	
-} // setBookmark
+//dlContent  Generates the contents of the deopdown list
+function dlContent(outtype, idxval, mark){
 
-//pgSetup  adds download buttons and dropdowns to Plot and Table  divs
-function pgSetup(level, type, gridPanel, bkMark, multi, pctTable, ctyFips,ctyName, yrvalue) {
+	var dlDiv = document.createElement("div");
+	var dlUl= document.createElement('ul');
+	dlDiv.setAttribute("class","dropdown-content")
+	dlUl.setAttribute("class", "dd-list")
+if(outtype == "chart") {
+	for(i = 0; i <= 2;i++){
+		var dlLi = document.createElement('li'); 
+		if(i == 0){
+		  var linktxt = document.createTextNode("Download Data (CSV)");
+		  var linkid = "profileDat" + idxval;
+		  var linkref = "#";
+		 }
+		if(i == 1){
+		  var linktxt = document.createTextNode("Download Image (PNG)");
+		  var linkid = "profileImg" + idxval;
+		  var linkref = "#";
+		}
+		if(i == 2){
+		  var linktxt = document.createTextNode(mark.srctxt);
+		  var linkid = "profileSRC" + idxval;
+		  var linkref = mark.srclink;
+		}
+		
+		var dlLink = document.createElement('a');
+		dlLink.href = linkref
+		dlLink.id = linkid;
+		dlLink.appendChild(linktxt);
+		
+		dlLi.appendChild(dlLink); 
+		dlUl.appendChild(dlLi); 
+	}
+} // chart
+if(outtype == "table"){
+	var dlLi = document.createElement('li'); 
+	var linktxt = document.createTextNode(mark.srctxt);
+	var linkid = "profileSRC" + idxval;
+	var linkref = mark.srclink;
+	var dlLink = document.createElement('a');
+	dlLink.href = linkref
+	dlLink.id = linkid;
+	dlLink.appendChild(linktxt);
+}
+    dlLi.appendChild(dlLink); 
+    dlUl.appendChild(dlLi); 
+    dlDiv.appendChild(dlUl);
+return(dlDiv);
+}
+
+//pgSetupPro  adds download buttons and dropdowns to Plot and Table  divs
+function pgSetupPro(level, type, gridPanel, bkMark, multi, pctTable, ctyFips,ctyName, yrvalue) {
+//create header 
+//type == "map" Page Header, table with download button for image
+//type == "table" Page Header, table stats table with download button for sources,  dropdown for statistics and increment buttons
+//type="chart" Page Header, table with download button, geography selection button for regions, statistics selection dropdown, plot generation button for regions
+
   var idxval = gridPanel.charAt(gridPanel.length - 1);
-
-var src_txt = document.createTextNode('');
-
-  //Page heading
-  var pgHead = document.createElement("H3");
-     var pgText = document.createTextNode(bkMark.title)
-   pgHead.setAttribute('id', bkMark.id)
-   pgHead.appendChild(pgText);
-
-
-  //Create objects
-if(type == "chart"){
-	if(bkMark.id == 'map'){
- // Download Button
-   var dlbtn = document.createElement('button');
-    dlbtn.id = 'profiledl' + idxval;
-    dlbtn.className = 'dropbtn';
-    dlbtn.innerHTML = '<i class="fas fas fa-download fa-2x" style="color: black;">';
-
-    var img_li = document.createElement('li');
-    var img_link = document.createElement('a');
-     img_link.href = '#';
-     img_link.id = 'profileImg' + idxval;
-    var img_Text = document.createTextNode("Download Image (PNG)");
-     img_link.appendChild(img_Text);
-     img_li.appendChild(img_link);
-	 
-	    //Download List
-    var dllist = document.createElement('ul');
-        dllist.className = 'dd-list';
-        dllist.appendChild(img_li)
-     
-	 
-} else {  //Every other chart
-
-  var dlbtn = document.createElement('button');
-    dlbtn.id = 'profiledl' + idxval;
-    dlbtn.className = 'dropbtn';
-    dlbtn.innerHTML = '<i class="fas fas fa-download fa-2x" style="color: black;">';
-
+  
+  const row1List = ["age01", "popest", "inc01", "educ", "raceeth", "house01"];
 //Creating strFips
-if(level == "Region") {
- var sFips = ctyFips.map(i => i.toString().padStart(3,'0'));
- var strFips = sFips.map(i => "08" + i) 
-if(strFips[0] === "08008"){
-   strFips[0] = "08";
-}
-if(strFips[1] == "08-101"){
- strFips.splice(1,1)
-}
-}
 
 if(level == "County"){
  var sFips = ctyFips.map(i => i.toString().padStart(3,'0'));
  var strFips = sFips.map(i => "08" + i) 
-if(strFips[0] === "08008"){
+if(strFips[0] === "08008" || strFips[0] === "08000"){
    strFips[0] = "08";
 }
 }
@@ -1092,291 +1912,101 @@ if(strFips[0] === "08008"){
 if(level == 'Municipality') {
   var sFips = ctyFips.map(i => i.toString().padStart(5,'0'));
  var strFips = sFips.map(i => "08" + i) 
-if(strFips[0] === "0800008"){
+if(strFips[0] === "0800008" || strFips[0] === "08000"){
    strFips[0] = "08";
 }
+
 }  
 
-   //Regional dropdown
-   var reglist = document.createElement('select');
-   reglist.id = 'RegSelect'+ idxval;
-   if(multi) {
-   reglist.setAttribute('multiple',true);
-   }
-   reglist.setAttribute('fips','name');
-   for(j = 0; j < ctyFips.length; j++){
-      var opt = document.createElement('option');
-      opt.innerHTML = ctyName[j];
-      opt.value = ctyFips[j];
-      reglist.appendChild(opt);
-   } //i
-     // Regional Button
-     var regbtn = document.createElement('button');
-     regbtn.id = 'RegBtn' + idxval;
-     regbtn.className = 'databutton';
-     regbtn.innerHTML = 'Generate Plot';
-   //Regional text
-     var regtxt = document.createElement('p');
-         regtxt.id = 'regtext' + idxval;
-      regtxt.className = 'entry_text';
-      if(multi){
-    regtxt.innerHTML = '<b>Select One or More Geographies</b><br>';
-      } else {
-       regtxt.innerHTML = '<b>Select Geography</b><br>';
-      }
-      
+var src_txt = document.createTextNode('');
 
-     //Data ds
+//Defining table and table row
+var tbl = document.createElement("table");
+      tbl.style.width = "90%";
+      tbl.style.border = "0px solid black";
+var tblrow = document.createElement("tr");
 
-    var data_li = document.createElement('li');
-    var data_link = document.createElement('a');
-     data_link.href = '#';
-     data_link.id = 'profileDat' + idxval;
-     var data_Text = document.createTextNode("Download Data (CSV)");
-     data_link.appendChild(data_Text);
-     data_li.appendChild(data_link);
-
-   //Image ds
-    var img_li = document.createElement('li');
-    var img_link = document.createElement('a');
-     img_link.href = '#';
-     img_link.id = 'profileImg' + idxval;
-    var img_Text = document.createTextNode("Download Image (PNG)");
-     img_link.appendChild(img_Text);
-     img_li.appendChild(img_link);
-		
-	//Data Type drop down
-	if(bkMark.title == "Household Forecast"){
-		var hhtxt = document.createElement('p');
-         hhtxt.id = 'hhtext' + idxval;
-         hhtxt.className = 'entry_text';
-		 hhtxt.innerHTML = '<b>Select Statistic</b><br>';
-		 
-		var seriesType = ['Number of Households', 'Household Change','Household Change Rate'];
-		var hhlist = document.createElement('select');
-		hhlist.id = 'HHSelect'+ idxval;
-       hhlist.setAttribute('stat','name');
-	   for(j = 0; j < seriesType.length; j++){
-		  var opt = document.createElement('option');
-		  opt.innerHTML = seriesType[j];
-		  opt.value = j;
-		  hhlist.appendChild(opt);
-	   } //i
+//Building Generic Download button
+   var dlbtn = document.createElement('button');
+    dlbtn.id = 'profileDL' + idxval;
+    dlbtn.className = 'dropbtn';
+    dlbtn.innerHTML = '<i class="fas fas fa-download fa-2x" style="color: black;">';
 	
-	} //Household Forecast
-	
-   //Source ds
-    var src_li = document.createElement('li');
-    var src_link = document.createElement('a');
-        
-     if(level == "Region") {
-      if(bkMark.title === "Regional Population Estimates"){
-      var src_txt = document.createTextNode('Regional Population Estimates');
-      src_link.href = 'https://coloradodemography.github.io/population/data/regional-data-lookup/';
-      }
-      if(bkMark.title === "Regional Population Forecasts"){
-      var src_txt = document.createTextNode('Regional Population Forecasts');
-      src_link.href = 'https://coloradodemography.github.io/population/data/sya-regions/';
-                     }
-      if(bkMark.title === "Regional Components of Change"){
-      var src_txt = document.createTextNode('Regional Components of Change');
-      src_link.href = 'https://coloradodemography.github.io/births-deaths-migration/data/components-change-regions/';
-                     }
-      if(bkMark.title === "Regional Age Estimates"){
-      var src_txt = document.createTextNode('State and Regional Single Year of Age Lookup');
-      src_link.href = 'https://coloradodemography.github.io/population/data/sya-regions/';
-                     }
-      if(bkMark.title === "Regional Age Forecasts"){
-      var src_txt = document.createTextNode('State and Regional Single Year of Age Lookup');
-      src_link.href = 'https://coloradodemography.github.io/population/data/sya-regions/';
-                     }
-      if(bkMark.title === "Regional Age Pyramid"){
-      var src_txt = document.createTextNode('State and Regional Single Year of Age Lookupa');
-      src_link.href = 'https://coloradodemography.github.io/population/data/sya-regions/';
-                     }
-      if(bkMark.title === "Household Income Distribution"){
-      var src_txt = document.createTextNode('ACS Household Income Estimates');
-      src_link.href = genCEDSCIUrl(level,"B19001",yrvalue, strFips);
-                     }
-      if(bkMark.title === "Educational Attainment, Age 25+"){
-      var src_txt = document.createTextNode('ACS Educational Attainment Estimates');
-      src_link.href = genCEDSCIUrl(level,"B15003",yrvalue, strFips);
-                     }
-	  if(bkMark.title === "Household Forecast"){
-      var src_txt = document.createTextNode('Household Forecast');
-      src_link.href = "https://coloradodemography.github.io/housing-and-households/data/household-projections/";
-                     }
-     }; //Region 
-     
-    if(level == "County") {  
-      if(bkMark.title === "County Population Estimates"){
-      var src_txt = document.createTextNode('County Population Estimates');
-      src_link.href = 'https://coloradodemography.github.io/population/data/county-data-lookup/';
-      }
-      if(bkMark.title === "County Population Forecasts"){
-      var src_txt = document.createTextNode('County Population Forecasts');
-      src_link.href = 'https://coloradodemography.github.io/population/data/sya-county/#county-population-by-single-year-of-age';
-                     }
-      if(bkMark.title === "County Components of Change"){
-      var src_txt = document.createTextNode('County Components of Change');
-      src_link.href = 'https://coloradodemography.github.io/births-deaths-migration/data/components-change/#components-of-change';
-                     };
-      if(bkMark.title === "County Age Estimates"){
-      var src_txt = document.createTextNode('County Single Year of Age Lookup');
-      src_link.href = 'https://coloradodemography.github.io/population/data/sya-county/#county-population-by-single-year-of-age';
-                     }
-      if(bkMark.title === "County Age Forecasts"){
-      var src_txt = document.createTextNode('County Single Year of Age Lookup');
-      src_link.href = 'https://coloradodemography.github.io/population/data/sya-county/#county-population-by-single-year-of-age';
-                     }
-      if(bkMark.title === "County Age Pyramid"){
-      var src_txt = document.createTextNode('County Single Year of Age Lookup');
-      src_link.href = 'https://coloradodemography.github.io/population/data/sya-county/#county-population-by-single-year-of-age';
-                     }
-      if(bkMark.title === "Household Income Distribution"){
-      var src_txt = document.createTextNode('ACS Household Income Estimates');
-      src_link.href = genCEDSCIUrl(level,"B19001",yrvalue, strFips);
-                     }
-      if(bkMark.title === "Educational Attainment, Age 25+"){
-      var src_txt = document.createTextNode('ACS Educational Attainment Estimates');
-      src_link.href = genCEDSCIUrl(level,"B15003",yrvalue, strFips);
-                     }
-	  if(bkMark.title === "Household Forecast"){
-      var src_txt = document.createTextNode('Household Forecast');
-      src_link.href = "https://coloradodemography.github.io/housing-and-households/data/household-projections/";
-                     }
-     };  //County
-     
-     if(level == "Municipality"){
-     
-       if(bkMark.title === "Municipal Age Estimates"){
-      var src_txt = document.createTextNode('ACS Age Eatimates');
-      src_link.href = genCEDSCIUrl(level,"B01001",yrvalue, strFips);
-                     };
-       if(bkMark.title === "Municipal Age Pyramid"){
-      var src_txt = document.createTextNode('ACS Age Estimates');
-      src_link.href = genCEDSCIUrl(level,"B01001",yrvalue, strFips);
-      };
-     if(bkMark.title === "Household Income Distribution"){
-      var src_txt = document.createTextNode('ACS Household Income Estimates');
-      src_link.href = genCEDSCIUrl(level,"B19001",yrvalue, strFips);
-                     }
-      if(bkMark.title === "Educational Attainment, Age 25+"){
-      var src_txt = document.createTextNode('ACS Educational Attainment Estimates');
-      src_link.href = genCEDSCIUrl(level,"B15003",yrvalue, strFips);
-                     }
-     }; //Municipalitiy
-     
-     src_link.appendChild(src_txt);
-     src_link.id = 'profileSrc' + idxval;
-     src_link.setAttribute('target', '_blank');
-     src_li.appendChild(src_link);
 
-    //Download List
-    var dllist = document.createElement('ul');
-        dllist.className = 'dd-list';
-     
-           dllist.appendChild(data_li);
-     dllist.appendChild(img_li)
-     dllist.appendChild(src_li);
 
- 
-     
-}  //Everything else
-//Creating table wrapper  
-
-    var dlcontent = document.createElement('div');
-         dlcontent.className = 'dropdown-content';
-      dlcontent.appendChild(dllist);
-   //dropdown list wrapper
-       var dlwrap = document.createElement('div');
-     dlwrap.className = "dropdown AClass";
-     dlwrap.appendChild(dlbtn);
-     dlwrap.appendChild(dlcontent);
-	 
-  var tbl = document.createElement("table");
-      tbl.style.width = "60%";
-   tbl.style.border = "0px solid black";
-   
-  var tblbody = document.createElement("tbody");
-  var tblrow = document.createElement("tr");
-   
-  var tabcell1 = document.createElement("td");
-   tabcell1.style.border = "0px solid black";
-   tabcell1.style.verticalAlign = "top";
-   tabcell1.style.align = 'left';
-   tabcell1.style.width = "20%"
-   tabcell1.appendChild(dlwrap);
-  
-if(bkMark.id != 'map'){
+//Building Table elements
 if(level == "Region"){
-  var tabcell2 = document.createElement("td");
-   tabcell2.style.border = "0px solid black";
-   tabcell2.style.verticalAlign = "top";
-   tabcell2.style.align = 'left';
-   tabcell2.style.width = "25%"
-   tabcell2.appendChild(regtxt);
-   tabcell2.appendChild(reglist);
-     
-  var tabcell3 = document.createElement("td");
-   tabcell3.style.border = "0px solid black";
-   tabcell3.style.verticalAlign = "top";
-   tabcell3.style.align = 'left';
-   tabcell3.style.width = "25%"
-   tabcell3.appendChild(regbtn);
-}
-  if(bkMark.title == "Household Forecast"){
-	var tabcell4 = document.createElement("td");
-	tabcell4.style.border = "0px solid black";
-	tabcell4.style.verticalAlign = "top";
-	tabcell4.style.align = 'left';
-	tabcell4.style.width = "25%"
-	tabcell4.appendChild(hhtxt);
-	tabcell4.appendChild(hhlist); 
-  }
-  } //map  
-   tblrow.appendChild(tabcell1);
-  if(bkMark.id != "map"){
-   if(!['Regional Age Forecasts', 'Regional Age Pyramid'].includes(bkMark.title)){
-   tblrow.appendChild(tabcell2);
-   tblrow.appendChild(tabcell3);
-   if(bkMark.title == "Household Forecast"){ 
-     tblrow.appendChild(tabcell4);
-   }
-  }
-  } //map
-  tblbody.appendChild(tblrow);
-  tbl.appendChild(tblbody);
+//Geography Selection Dropdown
+	 var geotxt = document.createElement('p');
+     geotxt.id = 'geotext' + idxval;
+     geotxt.className = 'entry_text';
+	 geotxt.innerHTML = '<b>Select one or more geographies</b><br>';
 
-   //Plotdiv   
-   var plotdiv = document.createElement('div');
-       plotdiv.id = 'PlotDiv' + idxval
- 
-} //type == chart
-if(type == "table"){
- if(pctTable){
+if(!Array.isArray(ctyFips)){ 
+	var ctyList = regionCOL(parseInt(ctyFips));
+	var listType = [{'id' : "08", 'name' :'Colorado'},
+					{'id' : "-101" , 'name' : ctyName[0]}];
+	var sellist = ctyList[0].fips;
+	for(i = 0; i < sellist.length; i++){
+		listType.push({'id' : sellist[i], 'name' : countyName(parseInt(sellist[i]))});
+	}
+} else {
+	var listType = [];
+	for(i = 0; i < ctyFips.length; i++){
+		listType.push({'id' : ctyFips[i], 'name' : ctyName[i]});
+	}
+}
+
+	 var geolist = document.createElement('select');
+	   geolist.id = 'geoSelect'+ idxval;
+	   geolist.multiple = true;
+       geolist.setAttribute('geo','name');
+	   for(j = 0; j < listType.length; j++){
+		  var opt = document.createElement('option');
+		  opt.innerHTML = listType[j].name;
+		  opt.value = listType[j].id;
+		  geolist.appendChild(opt);
+	   }
+	   
+//Statistic Select dropdown
+if(pctTable){
 	//Type selection
-	var tabtxt = document.createElement('p');
-         tabtxt.id = 'tabtext' + idxval;
-         tabtxt.className = 'entry_text';
-		 tabtxt.innerHTML = '<b>Select Statistic</b><br>';
-		 if(bkMark.title == "Population Growth Table"){
+	var stattxt = document.createElement('p');
+         stattxt.id = 'stattext' + idxval;
+         stattxt.className = 'entry_text';
+		 stattxt.innerHTML = '<b>Select Statistic</b><br>';
+		 switch(bkMark.title) {  //this is the table type selectotor
+		 case "Population Growth Table" :   
 			var seriesType = ['Growth Rate', 'Numeric Growth'];
-		}  else {
-	 		var seriesType = ['Percentage', 'Number'];
+			break;
+		case "Household Forecast" :
+			var seriesType = ['Number of Households', 'Household Change','Household Change Rate'];
+			break;
+        case "Housing Type Table" :
+			var seriesType = ['Number of Housing Units', 'People in Housing Units'];
+		    break;
+		default :
+	 		var seriesType = ['Percentage', 'Number'];  
 		}
-		var tablist = document.createElement('select');
-		tablist.id = 'tabSelect'+ idxval;
-       tablist.setAttribute('stat','name');
+	   var statlist = document.createElement('select');
+	   statlist.id = 'statSelect'+ idxval;
+       statlist.setAttribute('stat','name');
 	   for(j = 0; j < seriesType.length; j++){
 		  var opt = document.createElement('option');
 		  opt.innerHTML = seriesType[j];
 		  opt.value = j;
-		  tablist.appendChild(opt);
+		  statlist.appendChild(opt);
 	   }
  }
-	//Scroll buttons
-if(level == "Region") {
+
+//Plot Button
+var plotbtn = document.createElement('button');
+    plotbtn.id = 'plotBtn' + idxval;
+	plotbtn.className = 'databutton';
+    plotbtn.innerHTML = 'Update Plot';
+	
+	
+//Increment buttons
 	var scrollbtn1 = document.createElement('button');
     scrollbtn1.id = 'increment1' + idxval;
     scrollbtn1.innerHTML = '<i class="fa-solid fa-square-caret-left fa-2x" style="color: black;">';
@@ -1384,44 +2014,497 @@ if(level == "Region") {
 	var scrollbtn2 = document.createElement('button')
 	scrollbtn2.id = 'increment2' + idxval;
     scrollbtn2.innerHTML = '<i class="fa-solid fa-square-caret-right fa-2x" style="color: black;">';
+	
+
+
+  //Page heading 
+  var pgHead = document.createElement("H3");
+     var pgText = document.createTextNode(bkMark.title)
+   pgHead.setAttribute('id', bkMark.id)
+   pgHead.appendChild(pgText);
+   
+//PlotDiv
+
+var plotDiv = document.createElement("div");
+if(type == "table"){
+    plotDiv.setAttribute('id', "TabDiv" + idxval);
+} else {
+	plotDiv.setAttribute('id', "PlotDiv" + idxval)
 }
-	//Output Table
-	 var tbl = document.createElement("table");
-      tbl.style.width = "40%";
-   tbl.style.border = "0px solid black";
-   
-  var tblbody = document.createElement("tbody");
-  var tblrow = document.createElement("tr");
-   
-  var tabcell1 = document.createElement("td");
-   tabcell1.style.border = "0px solid black";
-   tabcell1.style.verticalAlign = "top";
-   tabcell1.style.align = 'left';
-   tabcell1.style.width = "20%"
-   if(pctTable) {
-	tabcell1.appendChild(tabtxt);
-	tabcell1.appendChild(tablist);
-   }
-  if(level == "Region"){
-   tabcell1.appendChild(scrollbtn1);
-   tabcell1.appendChild(scrollbtn2);
+
+	   
+//Building Table
+  if(type == "map"){
+	  //Build Contents of Download Button  -- map is only download
+	   
+	   var tabcell1 = document.createElement("td");
+	   tabcell1.style.border = "0px solid black";
+	   tabcell1.style.verticalAlign = "top";
+	   tabcell1.style.align = 'left';
+	   tabcell1.style.width = "20%";
+	   tabcell1.appendChild(dlbtn)
+	   tblrow.appendChild(tabcell1);
+	   
+	   var tabcell2 = document.createElement("td");
+	   tabcell2.style.border = "0px solid black";
+	   tabcell2.style.verticalAlign = "top";
+	   tabcell2.style.align = 'left';
+	   tabcell2.style.width = "20%";
+	   tblrow.appendChild(tabcell2);
+	   
+	   var tabcell3 = document.createElement("td");
+	   tabcell3.style.border = "0px solid black";
+	   tabcell3.style.verticalAlign = "top";
+	   tabcell3.style.align = 'left';
+	   tabcell3.style.width = "20%";
+	   tblrow.appendChild(tabcell3);
+	  
+	   var tabcell4 = document.createElement("td");
+	   tabcell4.style.border = "0px solid black";
+	   tabcell4.style.verticalAlign = "top";
+	   tabcell4.style.align = 'left';
+	   tabcell4.style.width = "20%";
+	   tblrow.appendChild(tabcell4);
+  }  
+  if(type == "chart"){
+	  //Build Contents of download button nned image DL, data dl and source dl
+	  var outDL = dlContent(type, idxval, bkMark)
+	  var acDiv = document.createElement("div")
+	  acDiv.setAttribute("class", "dropdown AClass");
+	  acDiv.appendChild(dlbtn);
+	  acDiv.appendChild(outDL);
+	  
+	   var tabcell1 = document.createElement("td");
+	   tabcell1.style.border = "0px solid black";
+	   tabcell1.style.verticalAlign = "top";
+	   tabcell1.style.align = 'left';
+	   tabcell1.style.width = "20%";
+	   tabcell1.appendChild(acDiv);
+	   tblrow.appendChild(tabcell1);
+	  
+    if(pctTable){
+	   var tabcell2 = document.createElement("td");
+	   tabcell2.style.border = "0px solid black";
+	   tabcell2.style.verticalAlign = "top";
+	   tabcell2.style.align = 'left';
+	   tabcell2.style.width = "20%";
+	   tabcell2.appendChild(stattxt);
+	   tabcell2.appendChild(statlist);
+	   tblrow.appendChild(tabcell2);
+  } else {
+	  var tabcell2 = document.createElement("td");
+	   tabcell2.style.border = "0px solid black";
+	   tabcell2.style.verticalAlign = "top";
+	   tabcell2.style.align = 'left';
+	   tabcell2.style.width = "20%";
+	   tblrow.appendChild(tabcell2);
   }
-  tblrow.appendChild(tabcell1);
-  tblbody.appendChild(tblrow);
-  tbl.appendChild(tblbody);
-  
-   //Plotdiv   
-   var plotdiv = document.createElement('div');
-       plotdiv.id = 'tabDiv' + idxval;
-    
-} //table
+   var tabcell3 = document.createElement("td");
+	   tabcell3.style.border = "0px solid black";
+	   tabcell3.style.verticalAlign = "top";
+	   tabcell3.style.align = 'left';
+	   tabcell3.style.width = "20%";
+	   if(row1List.includes(bkMark.id)){
+	      tabcell3.appendChild(geolist);
+	   }
+	   tblrow.appendChild(tabcell3);
+	   
+  	   var tabcell4 = document.createElement("td");
+	   tabcell4.style.border = "0px solid black";
+	   tabcell4.style.verticalAlign = "top";
+	   tabcell4.style.align = 'left';
+	   tabcell4.style.width = "20%";
+	   if(row1List.includes(bkMark.id)){
+	      tabcell4.appendChild(plotbtn);
+	   }
+	   tblrow.appendChild(tabcell4);
+  } //chart
+  if(type == "table"){
+
+	   var tabcell1 = document.createElement("td");
+	   tabcell1.style.border = "0px solid black";
+	   tabcell1.style.verticalAlign = "top";
+	   tabcell1.style.align = 'left';
+	   tabcell1.style.width = "20%";
+	   tblrow.appendChild(tabcell1);
+	  
+   if(pctTable){
+	   var tabcell2 = document.createElement("td");
+	   tabcell2.style.border = "0px solid black";
+	   tabcell2.style.verticalAlign = "top";
+	   tabcell2.style.align = 'left';
+	   tabcell2.style.width = "20%";
+	   tabcell2.appendChild(stattxt);
+	   tabcell2.appendChild(statlist);
+	   tblrow.appendChild(tabcell2);
+  } else {
+	  var tabcell2 = document.createElement("td");
+	   tabcell2.style.border = "0px solid black";
+	   tabcell2.style.verticalAlign = "top";
+	   tabcell2.style.align = 'left';
+	   tabcell2.style.width = "20%";
+	   tblrow.appendChild(tabcell2);
+  }
+       var tabcell3 = document.createElement("td");
+	   tabcell3.style.border = "0px solid black";
+	   tabcell3.style.verticalAlign = "top";
+	   tabcell3.style.align = 'left';
+	   tabcell3.style.width = "20%";
+	   tabcell3.appendChild(scrollbtn1);
+	   tabcell3.appendChild(scrollbtn2);
+	   tblrow.appendChild(tabcell3);
+	   
+  	   var tabcell4 = document.createElement("td");
+	   tabcell4.style.border = "0px solid black";
+	   tabcell4.style.verticalAlign = "top";
+	   tabcell4.style.align = 'left';
+	   tabcell4.style.width = "20%";
+	   tblrow.appendChild(tabcell4);
+  } //table
+} //Region
+
+if(level == "County"){
+
+//Statistic Select dropdown
+if(pctTable){
+	//Type selection
+	var stattxt = document.createElement('p');
+         stattxt.id = 'stattext' + idxval;
+         stattxt.className = 'entry_text';
+		 stattxt.innerHTML = '<b>Select Statistic</b><br>';
+		 switch(bkMark.title) {  //this is the table type selectotor
+		 case "Population Growth Table" :   
+			var seriesType = ['Growth Rate', 'Numeric Growth'];
+			break;
+		case "Household Forecast" :
+			var seriesType = ['Number of Households', 'Household Change','Household Change Rate'];
+			break;
+        case "Housing Type Table" :
+			var seriesType = ['Number of Housing Units', 'People in Housing Units'];
+		    break;
+		default :
+	 		var seriesType = ['Percentage', 'Number'];  
+		}
+	   var statlist = document.createElement('select');
+	   statlist.id = 'statSelect'+ idxval;
+       statlist.setAttribute('stat','name');
+	   for(j = 0; j < seriesType.length; j++){
+		  var opt = document.createElement('option');
+		  opt.innerHTML = seriesType[j];
+		  opt.value = j;
+		  statlist.appendChild(opt);
+	   }
+ }
  
+   //Page heading 
+  var pgHead = document.createElement("H3");
+     var pgText = document.createTextNode(bkMark.title)
+   pgHead.setAttribute('id', bkMark.id)
+   pgHead.appendChild(pgText);
+   
+//PlotDiv
+
+var plotDiv = document.createElement("div");
+if(type == "table"){
+    plotDiv.setAttribute('id', "TabDiv" + idxval);
+} else {
+	plotDiv.setAttribute('id', "PlotDiv" + idxval)
+}
+	
+//Building Table
+  if(type == "map"){
+	  	  //Build Contents of Download Button  -- map is only download
+	  
+	   var tabcell1 = document.createElement("td");
+	   tabcell1.style.border = "0px solid black";
+	   tabcell1.style.verticalAlign = "top";
+	   tabcell1.style.align = 'left';
+	   tabcell1.style.width = "20%";
+	   tabcell1.appendChild(dlbtn)
+	   tblrow.appendChild(tabcell1);
+	   
+	   var tabcell2 = document.createElement("td");
+	   tabcell2.style.border = "0px solid black";
+	   tabcell2.style.verticalAlign = "top";
+	   tabcell2.style.align = 'left';
+	   tabcell2.style.width = "20%";
+	   tblrow.appendChild(tabcell2);
+	   
+	   var tabcell3 = document.createElement("td");
+	   tabcell3.style.border = "0px solid black";
+	   tabcell3.style.verticalAlign = "top";
+	   tabcell3.style.align = 'left';
+	   tabcell3.style.width = "20%";
+	   tblrow.appendChild(tabcell3);
+	  
+	   var tabcell4 = document.createElement("td");
+	   tabcell4.style.border = "0px solid black";
+	   tabcell4.style.verticalAlign = "top";
+	   tabcell4.style.align = 'left';
+	   tabcell4.style.width = "20%";
+	   tblrow.appendChild(tabcell4);
+  }  
+  if(type == "chart"){
+	  	  	  //Build Contents of Download Button  -- Chart is Img DL, data DL, and Source
+	  var outDL = dlContent(type, idxval, bkMark)
+	  var acDiv = document.createElement("div")
+	  acDiv.setAttribute("class", "dropdown AClass");
+	  acDiv.appendChild(dlbtn);
+	  acDiv.appendChild(outDL);
+	  
+	   var tabcell1 = document.createElement("td");
+	   tabcell1.style.border = "0px solid black";
+	   tabcell1.style.verticalAlign = "top";
+	   tabcell1.style.align = 'left';
+	   tabcell1.style.width = "20%";
+	   tabcell1.appendChild(acDiv);
+	   tblrow.appendChild(tabcell1);
+
+    if(pctTable){
+	   var tabcell2 = document.createElement("td");
+	   tabcell2.style.border = "0px solid black";
+	   tabcell2.style.verticalAlign = "top";
+	   tabcell2.style.align = 'left';
+	   tabcell2.style.width = "20%";
+	   tabcell2.appendChild(stattxt);
+	   tabcell2.appendChild(statlist);
+	   tblrow.appendChild(tabcell2);
+  } else {
+	  var tabcell2 = document.createElement("td");
+	   tabcell2.style.border = "0px solid black";
+	   tabcell2.style.verticalAlign = "top";
+	   tabcell2.style.align = 'left';
+	   tabcell2.style.width = "20%";
+	   tblrow.appendChild(tabcell2);
+  }
+  	   var tabcell4 = document.createElement("td");
+	   tabcell4.style.border = "0px solid black";
+	   tabcell4.style.verticalAlign = "top";
+	   tabcell4.style.align = 'left';
+	   tabcell4.style.width = "20%";
+	   tblrow.appendChild(tabcell4);
+  } //chart
+  if(type == "table"){
+	  	//No DL Button for tables
+	  
+	   var tabcell1 = document.createElement("td");
+	   tabcell1.style.border = "0px solid black";
+	   tabcell1.style.verticalAlign = "top";
+	   tabcell1.style.align = 'left';
+	   tabcell1.style.width = "20%";
+	   tblrow.appendChild(tabcell1);
+
+   if(pctTable){
+	   var tabcell2 = document.createElement("td");
+	   tabcell2.style.border = "0px solid black";
+	   tabcell2.style.verticalAlign = "top";
+	   tabcell2.style.align = 'left';
+	   tabcell2.style.width = "20%";
+	   tabcell2.appendChild(stattxt);
+	   tabcell2.appendChild(statlist);
+	   tblrow.appendChild(tabcell2);
+  } else {
+	  var tabcell2 = document.createElement("td");
+	   tabcell2.style.border = "0px solid black";
+	   tabcell2.style.verticalAlign = "top";
+	   tabcell2.style.align = 'left';
+	   tabcell2.style.width = "20%";
+	   tblrow.appendChild(tabcell2);
+  }
+       var tabcell3 = document.createElement("td");
+	   tabcell3.style.border = "0px solid black";
+	   tabcell3.style.verticalAlign = "top";
+	   tabcell3.style.align = 'left';
+	   tabcell3.style.width = "20%";
+	   tblrow.appendChild(tabcell3);
+	   
+  	   var tabcell4 = document.createElement("td");
+	   tabcell4.style.border = "0px solid black";
+	   tabcell4.style.verticalAlign = "top";
+	   tabcell4.style.align = 'left';
+	   tabcell4.style.width = "20%";
+	   tblrow.appendChild(tabcell4);
+  } //table
+} //County
+
+if(level == "Municipality"){
+//Statistic Select dropdown
+if(pctTable){
+	//Type selection
+	var stattxt = document.createElement('p');
+         stattxt.id = 'stattext' + idxval;
+         stattxt.className = 'entry_text';
+		 stattxt.innerHTML = '<b>Select Statistic</b><br>';
+		 switch(bkMark.title) {  //this is the table type selectotor
+		 case "Population Growth Table" :   
+			var seriesType = ['Growth Rate', 'Numeric Growth'];
+			break;
+		case "Household Forecast" :
+			var seriesType = ['Number of Households', 'Household Change','Household Change Rate'];
+			break;
+        case "Housing Type Table" :
+			var seriesType = ['Number of Housing Units', 'People in Housing Units'];
+		    break;
+		default :
+	 		var seriesType = ['Percentage', 'Number'];  
+		}
+	   var statlist = document.createElement('select');
+	   statlist.id = 'statSelect'+ idxval;
+       statlist.setAttribute('stat','name');
+	   for(j = 0; j < seriesType.length; j++){
+		  var opt = document.createElement('option');
+		  opt.innerHTML = seriesType[j];
+		  opt.value = j;
+		  statlist.appendChild(opt);
+	   }
+ }
+ 
+   //Page heading 
+  var pgHead = document.createElement("H3");
+     var pgText = document.createTextNode(bkMark.title)
+   pgHead.setAttribute('id', bkMark.id)
+   pgHead.appendChild(pgText);
+   
+//PlotDiv
+
+var plotDiv = document.createElement("div");
+if(type == "table"){
+    plotDiv.setAttribute('id', "TabDiv" + idxval);
+} else {
+	plotDiv.setAttribute('id', "PlotDiv" + idxval)
+}
+//Building Table
+  if(type == "map"){
+	  	  	  //Build Contents of Download Button  -- map is only download
+	  
+	   var tabcell1 = document.createElement("td");
+	   tabcell1.style.border = "0px solid black";
+	   tabcell1.style.verticalAlign = "top";
+	   tabcell1.style.align = 'left';
+	   tabcell1.style.width = "20%";
+	   tabcell1.appendChild(dlbtn)
+	   tblrow.appendChild(tabcell1);
+
+	   var tabcell2 = document.createElement("td");
+	   tabcell2.style.border = "0px solid black";
+	   tabcell2.style.verticalAlign = "top";
+	   tabcell2.style.align = 'left';
+	   tabcell2.style.width = "20%";
+	   tblrow.appendChild(tabcell2);
+	   
+	   var tabcell3 = document.createElement("td");
+	   tabcell3.style.border = "0px solid black";
+	   tabcell3.style.verticalAlign = "top";
+	   tabcell3.style.align = 'left';
+	   tabcell3.style.width = "20%";
+	   tblrow.appendChild(tabcell3);
+	  
+	   var tabcell4 = document.createElement("td");
+	   tabcell4.style.border = "0px solid black";
+	   tabcell4.style.verticalAlign = "top";
+	   tabcell4.style.align = 'left';
+	   tabcell4.style.width = "20%";
+	   tblrow.appendChild(tabcell4);
+  }  
+  if(type == "chart"){
+	  	  	  //Build Contents of Download Button  -- Chart is Img DL, data DL, and Source
+	  var outDL = dlContent(type, idxval, bkMark)
+	  var acDiv = document.createElement("div")
+	  acDiv.setAttribute("class", "dropdown AClass");
+	  acDiv.appendChild(dlbtn);
+	  acDiv.appendChild(outDL);
+	  
+	   var tabcell1 = document.createElement("td");
+	   tabcell1.style.border = "0px solid black";
+	   tabcell1.style.verticalAlign = "top";
+	   tabcell1.style.align = 'left';
+	   tabcell1.style.width = "20%";
+	   tabcell1.appendChild(acDiv);
+	   tblrow.appendChild(tabcell1);
+
+    if(pctTable){
+	   var tabcell2 = document.createElement("td");
+	   tabcell2.style.border = "0px solid black";
+	   tabcell2.style.verticalAlign = "top";
+	   tabcell2.style.align = 'left';
+	   tabcell2.style.width = "20%";
+	   tabcell2.appendChild(stattxt);
+	   tabcell2.appendChild(statlist);
+	   tblrow.appendChild(tabcell2);
+  } else {
+	  var tabcell2 = document.createElement("td");
+	   tabcell2.style.border = "0px solid black";
+	   tabcell2.style.verticalAlign = "top";
+	   tabcell2.style.align = 'left';
+	   tabcell2.style.width = "20%";
+	   tblrow.appendChild(tabcell2);
+  }
+       var tabcell3 = document.createElement("td");
+	   tabcell3.style.border = "0px solid black";
+	   tabcell3.style.verticalAlign = "top";
+	   tabcell3.style.align = 'left';
+	   tabcell3.style.width = "20%";
+	   tblrow.appendChild(tabcell3);
+	   
+  	   var tabcell4 = document.createElement("td");
+	   tabcell4.style.border = "0px solid black";
+	   tabcell4.style.verticalAlign = "top";
+	   tabcell4.style.align = 'left';
+	   tabcell4.style.width = "20%";
+	   tblrow.appendChild(tabcell4);
+  } //chart
+  if(type == "table"){
+	   //No DL Button for tables
+	  
+	   var tabcell1 = document.createElement("td");
+	   tabcell1.style.border = "0px solid black";
+	   tabcell1.style.verticalAlign = "top";
+	   tabcell1.style.align = 'left';
+	   tabcell1.style.width = "20%";
+	   tblrow.appendChild(tabcell1);
+
+	  
+   if(pctTable){
+	   var tabcell2 = document.createElement("td");
+	   tabcell2.style.border = "0px solid black";
+	   tabcell2.style.verticalAlign = "top";
+	   tabcell2.style.align = 'left';
+	   tabcell2.style.width = "20%";
+	   tabcell2.appendChild(stattxt);
+	   tabcell2.appendChild(statlist);
+	   tblrow.appendChild(tabcell2);
+  } else {
+	  var tabcell2 = document.createElement("td");
+	   tabcell2.style.border = "0px solid black";
+	   tabcell2.style.verticalAlign = "top";
+	   tabcell2.style.align = 'left';
+	   tabcell2.style.width = "20%";
+	   tblrow.appendChild(tabcell2);
+  }
+       var tabcell3 = document.createElement("td");
+	   tabcell3.style.border = "0px solid black";
+	   tabcell3.style.verticalAlign = "top";
+	   tabcell3.style.align = 'left';
+	   tabcell3.style.width = "20%";
+	   tblrow.appendChild(tabcell3);
+	   
+  	   var tabcell4 = document.createElement("td");
+	   tabcell4.style.border = "0px solid black";
+	   tabcell4.style.verticalAlign = "top";
+	   tabcell4.style.align = 'left';
+	   tabcell4.style.width = "20%";
+	   tblrow.appendChild(tabcell4);
+  } //table
+} //Municipality
+
+tbl.appendChild(tblrow);
+
 //writing to DOM
     var outDiv = document.getElementById(gridPanel);
     outDiv.appendChild(pgHead);
     outDiv.appendChild(tbl);
-    outDiv.appendChild(plotdiv);
-} //pgSetup
+    outDiv.appendChild(plotDiv);
+} //pgSetupPro
 
 
 // sumhouseholds summs census data SF1 files for househoild projections
@@ -1559,7 +2642,7 @@ function genRegEst(inData,DDsel,estDiv) {
     const fmt_date = d3.timeFormat("%B %d, %Y");
 var config = {responsive: true,
               displayModeBar: false};
-     
+
 //Generates the list of selected places
   var fipsList = [], opt;
   var len = DDsel.options.length;
@@ -1601,7 +2684,7 @@ var pltData = pltSort.filter(d => fipsList.includes(d.fips));
  var est_layout = {
   title: "Population Estimates " + year_est_arr[0] + " to " + year_est_arr[(year_est_arr.length - 1)] + ", " + ctyNames,
     autosize: false,
-    width: 1000,
+    width: 1200,
     height: 400, 
     xaxis: {
    title : 'Year',
@@ -1639,26 +2722,6 @@ profileDat2.onclick = function() {exportToCsv(ctyNames, 'estimate', pltData,0)};
 profileImg2.onclick = function() {exportToPng(ctyNames, 'estimate', estDiv,0)};
  
 }; //genRegEst   
-
-//gerRegEstSetup sets up the regional estimates plot
-function genRegEstSetup(level, inData, est_div, fipsList, ctyNameList) {
-
-  pgSetup(level,"chart", est_div,"Regional Population Estimates",'popest',true,false,fipsList, ctyNameList, 0)
-
-   //Initial Plot
-    var dd = document.getElementById("RegSelect2");
-   var btn = document.getElementById("RegBtn2");
-   dd.selectedIndex = 0;
-   var selvalue = [];
-   selvalue.push(+dd.value);
-
-   genRegEst(inData,dd, "PlotDiv2");
-
-   btn.addEventListener('click', function() {
-    genRegEst(inData,dd, "PlotDiv2")
-       });
-    
-};  //genRegEstSetup
 
 
 //genRegFore Generates forecast plot for regions...
@@ -1709,7 +2772,7 @@ var pltData = pltSort.filter(d => fipsList.includes(d.fips));
  var forec_layout = {
   title: "Population Forecast " + year_forec_arr[0] + " to " + year_forec_arr[(year_forec_arr.length - 1)] + ", " + ctyNames,
     autosize: false,
-    width: 1000,
+    width: 1200,
     height: 400, 
     xaxis: {
    title : 'Year',
@@ -1748,14 +2811,14 @@ profileImg3.onclick = function() {exportToPng(ctyNames, 'forecast', forecDiv,0)}
 }; //genRegFore   
 
 //genRegForeSetup sets up the regional forecast plot
-function genRegForeSetup(level, inData, fore_div, fipsList, ctyNameList) {
-
-  pgSetup(level,"chart",fore_div,"Regional Population Forecasts",'popfor', true,false,fipsList, ctyNameList, 0)
-
+function genRegForeSetup(level, inData, fore_div, bkMark, fipsList, ctyNameList) {
+	
+pgSetupPro(level,"chart", fore_div,bkMark,true, false,fipsList, ctyNameList, 0)
+ 
    //Initial Plot
-    var dd = document.getElementById("RegSelect3");
-   var btn = document.getElementById("RegBtn3");
-   dd.selectedIndex = 0;
+    var dd = document.getElementById("geoSelect3");
+   var btn = document.getElementById("plotBtn3");
+   dd.selectedIndex = 1;
    var selvalue = [];
    selvalue.push(+dd.value);
 
@@ -1894,7 +2957,7 @@ var yrvalue = year_coc_arr[year_coc_arr.length - 1];
 var coc_layout = {
   title: "Births, Deaths and Net Migration 1985 to " + yrvalue + ", " + ctyNames,
     autosize: false,
-    width: 1000,
+    width: 1200,
     height: 400,
     xaxis: {
    title : 'Year',
@@ -1934,26 +2997,29 @@ profileImg4.onclick = function() {exportToPng(ctyNames, 'coc', cocDiv,0)};
   
 }; //genRegcoc   
 
-//genRegcocSetup sets up the regional components of Change plot
-function genRegcocSetup(level, inData, coc_div, fipsList, ctyNameList) {
-
-  pgSetup(level,"chart",coc_div,"Regional Components of Change",'popcoc',false,false,fipsList, ctyNameList, 0)
-
+//genRegPopSetup sets up the regional population plots
+function genRegPopSetup(level, EstData, ForeData, CocData, divArr, bkMark, fipsList, ctyNameList) {
+  pgSetupPro(level,"chart", divArr[0],bkMark[1],true, false,fipsList, ctyNameList, 0)
+  pgSetupPro(level,"chart", divArr[1],bkMark[2],true, false,fipsList, ctyNameList, 0)
+  pgSetupPro(level,"chart", divArr[2],bkMark[3],true, false,fipsList, ctyNameList, 0)
    //Initial Plot
-    var dd = document.getElementById("RegSelect4");
-   var btn = document.getElementById("RegBtn4");
-   dd.selectedIndex = 0;
+    var dd = document.getElementById("geoSelect2");
+   var btn = document.getElementById("plotBtn2");  
+     dd.selectedIndex = 1;
    var selvalue = [];
-   selvalue.push(+dd.value);
+   selvalue.push(+dd.value)
 
-   genRegcoc(inData,dd, "PlotDiv4");
+   genRegEst(EstData,dd, "PlotDiv2");
+   genRegFore(ForeData,dd,"PlotDiv3")
+   genRegcoc(CocData,dd,"PlotDiv4");
 
    btn.addEventListener('click', function() {
-    genRegcoc(inData,dd, "PlotDiv4")
+   genRegEst(EstData,dd, "PlotDiv2");
+   genRegFore(ForeData,dd,"PlotDiv3")
+   genRegcoc(CocData,dd,"PlotDiv4");
        });
     
-};  //genRegcocSetup
-
+};  //genRegPopSetup
 
 ///genAgeEst Generates Age plot for regions...
 function genAgeEst(inData,level, DDsel,ageDiv,yrvalue) {
@@ -2045,7 +3111,7 @@ if(PlaceNames.length == 1){
 }  
  var age_layout = {
   title: PltTitle,
-    width: 1000,
+    width: 1200,
     height: 400, 
     barmode : 'group',
     xaxis: {
@@ -2142,7 +3208,7 @@ if(PlaceNames.length == 1){
  var age_layout = {
   title: PltTitle,
     autosize: false,
-    width: 1000,
+    width: 1200,
     height: 400, 
     barmode : 'group',
     xaxis: {
@@ -2398,7 +3464,7 @@ for(j = 0; j < tick_val.length; j++){
      xref : 'paper',  
      x : 0.5, 
      yref : 'paper', 
-     y : -0.30, 
+     y : -0.20, 
      align : 'center', 
      font : { size : 14},
      showarrow : false},
@@ -2558,7 +3624,7 @@ for(j = 0; j < tick_val.length; j++){
    xref : 'paper',  
      x : 0.5, 
      yref : 'paper', 
-     y : -0.30, 
+     y : -0.20, 
      align : 'center', 
      font : { size : 14},
      showarrow : false},
@@ -2570,7 +3636,7 @@ for(j = 0; j < tick_val.length; j++){
    xref : 'paper', 
      x : 0, 
      yref : 'paper', 
-     y : -0.37, 
+     y : -0.30, 
      align : 'left', 
      showarrow : false}]
  };
@@ -2591,31 +3657,28 @@ function genAgeSetup(level, inData, pyrData, age_div0, age_div1, age_div2, age_d
  document.getElementById(age_div2).innerHTML = "";
  document.getElementById(age_div3).innerHTML = "";
  
-var bkmarkArr = [{title : 'Population Estimates by Age', id : 'age01'},
-	{title: 'Population Forecasts by Age', id : 'age02'},
-	{title : 'Population Age Pyramids', id : 'age03'}
- ]
-
-var bkmarkArrMuni = [{title : 'Population Estimates by Age', id : 'age01'},
-	{title : 'Population Age Pyramids', id : 'age03'}
- ]
 
 if(level == "Region") { 
-insertBkmark(bkmarkArr)
+var bkMarkArr = [{title : 'Population Estimates by Age', id : 'age01', srctxt : "State and Regional Single Year of Age Lookup", srclink : "https://coloradodemography.github.io/population/data/sya-regions/"},
+	{title: 'Population Forecasts by Age', id : 'age02', srctxt : "State and Regional Single Year of Age Lookup", srclink : "https://coloradodemography.github.io/population/data/sya-regions/"},
+	{title : 'Population Age Pyramids', id : 'age03', srctxt : "State and Regional Single Year of Age Lookup", srclink : "https://coloradodemography.github.io/population/data/sya-regions/"}
+ ]
+
+insertBkmark(bkMarkArr)
   //Add a second chart div here
-  pgSetup(level,"chart",age_div1,bkmarkArr[0],true,false,fipsList, ctyNameList, 0);
+  pgSetupPro(level,"chart",age_div1,bkMarkArr[0],true,false,fipsList, ctyNameList, 0);
   var chartdiv_1 = document.createElement('div')
   chartdiv_1.id = 'AgeChart1'
   var chdiv_a = document.getElementById(age_div1)
   chdiv_a.appendChild(chartdiv_1)
   
-  pgSetup(level,"chart",age_div2,bkmarkArr[1],true,false,fipsList, ctyNameList, 0);
+  pgSetupPro(level,"chart",age_div2,bkMarkArr[1],true,false,fipsList, ctyNameList, 0);
   var chartdiv_2 = document.createElement('div')
   chartdiv_2.id = 'AgeChart2'
   var chdiv_b = document.getElementById(age_div2)
   chdiv_b.appendChild(chartdiv_2)
   
-  pgSetup(level,"chart",age_div3,bkmarkArr[2],true,false,fipsList, ctyNameList, 0);
+  pgSetupPro(level,"chart",age_div3,bkMarkArr[2],true,false,fipsList, ctyNameList, 0);
   var chartdiv_3 = document.createElement('div')
   chartdiv_3.id = 'AgeChart3'
   var chdiv_c = document.getElementById(age_div3)
@@ -2623,21 +3686,26 @@ insertBkmark(bkmarkArr)
 } 
 
 if(level == 'County'){  
-insertBkmark(bkmarkArr)
- pgSetup(level,"chart",age_div1,bkmarkArr[0],true,false, fipsList, ctyNameList,0 )
+var bkMarkArr = [{title : 'Population Estimates by Age', id : 'age01', srctxt : "County Single Year of Age Lookup",srclink : "https://coloradodemography.github.io/population/data/sya-county/#county-population-by-single-year-of-age"},
+	{title: 'Population Forecasts by Age', id : 'age02', srctxt : "County Single Year of Age Lookup",srclink : "https://coloradodemography.github.io/population/data/sya-county/#county-population-by-single-year-of-age"},
+	{title : 'Population Age Pyramids', id : 'age03', srctxt : "County Single Year of Age Lookup",srclink : "https://coloradodemography.github.io/population/data/sya-county/#county-population-by-single-year-of-age"}
+ ]
+
+insertBkmark(bkMarkArr)
+ pgSetupPro(level,"chart",age_div1,bkMarkArr[0],true,false, fipsList, ctyNameList,0 )
   //Add a second chart div here
   var chartdiv_1 = document.createElement('div')
   chartdiv_1.id = 'AgeChart1'
   var chdiv_a = document.getElementById(age_div1)
   chdiv_a.appendChild(chartdiv_1)
   
-  pgSetup(level,"chart",age_div2,bkmarkArr[1],true,false,fipsList, ctyNameList, 0);
+  pgSetupPro(level,"chart",age_div2,bkMarkArr[1],true,false,fipsList, ctyNameList, 0);
   var chartdiv_2 = document.createElement('div')
   chartdiv_2.id = 'AgeChart2'
   var chdiv_b = document.getElementById(age_div2)
   chdiv_b.appendChild(chartdiv_2)
   
-  pgSetup(level,"chart",age_div3,bkmarkArr[2],true,false,fipsList, ctyNameList, 0);
+  pgSetupPro(level,"chart",age_div3,bkMarkArr[2],true,false,fipsList, ctyNameList, 0);
   var chartdiv_3 = document.createElement('div')
   chartdiv_3.id = 'AgeChart3'
   var chdiv_c = document.getElementById(age_div3)
@@ -2645,15 +3713,19 @@ insertBkmark(bkmarkArr)
 }
 
 if(level == "Municipality"){
-	insertBkmark(bkmarkArrMuni)
-pgSetup(level,"chart",age_div1,bkmarkArrMuni[0],true,false,fipsList, ctyNameList, yrvalue)
+	var fullfips  = "08" + fipsList;
+	var bkMarkArr = [{title : 'Population Estimates by Age', id : 'age01', srctxt : "ACS Age Estimates", srclink : genCEDSCIUrl(level,"B01001",yrvalue, fullfips)},
+	{title : 'Population Age Pyramids', id : 'age03', srctxt : "ACS Age Eatimates", srclink : genCEDSCIUrl(level,"B01001",yrvalue, fullfips)}
+ ]
+	insertBkmark(bkMarkArr)
+pgSetupPro(level,"chart",age_div1,bkMarkArr[0],true,false,fipsList, ctyNameList, yrvalue)
   //Add a second chart div here
   var chartdiv_1 = document.createElement('div')
   chartdiv_1.id = 'AgeChart1'
   var chdiv_a = document.getElementById(age_div1)
   chdiv_a.appendChild(chartdiv_1)
   
-  pgSetup(level,"chart",age_div3,bkmarkArr[1],true,false,fipsList, ctyNameList,yrvalue);
+  pgSetupPro(level,"chart",age_div3,bkMarkArr[1],true,false,fipsList, ctyNameList,yrvalue);
   var chartdiv_3 = document.createElement('div')
   chartdiv_3.id = 'AgeChart3'
   var chdiv_c = document.getElementById(age_div3)
@@ -2663,11 +3735,11 @@ pgSetup(level,"chart",age_div1,bkmarkArrMuni[0],true,false,fipsList, ctyNameList
    
 
   if(level == "Region"){
-   var dd0 = document.getElementById("RegSelect2");
-   var btn0 = document.getElementById("RegBtn2");
+   var dd0 = document.getElementById("geoSelect2");
+   var btn0 = document.getElementById("plotBtn2");
    var selopts = "0,-101";
    $.each(selopts.split(","), function(i,e){
-          $("#RegSelect2 option[value='" + e + "']").prop("selected", true);
+          $("#geoSelect2 option[value='" + e + "']").prop("selected", true);
        }); 
     
    genAgeEst(inData,level,dd0, chartdiv_1.id,0);
@@ -3192,7 +4264,7 @@ function Export2Word(intab, filename = ''){
         type: 'application/msword'
     });
     
-    // Specify link url
+	    // Specify link url
     var url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(html);
     
     // Specify file name
@@ -3319,22 +4391,44 @@ $.fn.dataTable.ext.buttons.word = {
 
 //plextabWord processes datatable elements and produces a word doc
 function plextabWord(inData,hdrArr,ftrArr,fName,tabType) {
+//Special processing for Housing Type Table
+if(tabType == "Housing Type Table"){
+	for(i = 0; i < inData.length; i++){
+		headST = inData[i].indexOf("<thead>")
+		headEND = inData[i].indexOf("</thead>") + 8
+		headStr = inData[i].substring(headST,headEND)
+		colspanPOS = inData[i].indexOf("td colspan") + 12
+		colspanVal = inData[i].substr(colspanPOS,1);
+		
+		inData[i] = inData[i].replaceAll("<td style='display: none;'></td>","")
+		if(colspanVal == '5') {
+			inData[i] = inData[i].replace("<tr><td colspan='5'>Renter Occupied Housing Units</td>","</table><br style='page-break-before: always'><table border= '1' width= 100%>" + headStr + "<tr><td colspan='5'>Renter Occupied Housing Units</td>");
+        } else {
+			inData[i] = inData[i].replace("<tr><td colspan='9'>Renter Occupied Housing Units</td>","</table><br style='page-break-before: always'><table border= '1' width= 100%>" + headStr + "<tr><td colspan='9'>Renter Occupied Housing Units</td>");
+		}
+	}
+}
 
 
+//Assembling Final Table
  var tblStart = "<table border= '1' width= 100%>";
  var tblEnd = "</table>"
- 
- //Add Table footer
+ var pgbreak = '<br style="page-break-before: always">'
+
+var stackTab = "";
+
+for(i = 0; i < inData.length; i++){ 
+//Add Table footer
+colspanPOS = inData[i].indexOf("td colspan") + 12
+colspanVal = inData[i].substr(colspanPOS,1);
+
 var ftrString = "<tfoot><tr>";
-for(i = 0; i < ftrArr.length; i++){
-     ftrString = ftrString + "<tr><td colspan='5'>" + ftrArr[i] + "</td></tr>";
+
+for(j = 0; j < ftrArr.length; j++){
+		ftrString = ftrString + "<tr><td colspan='" + colspanVal + "'>" + ftrArr[j] + "</td></tr>";
  }; 
 ftrString = ftrString + "</tr></tfoot>";
 
-var stackTab = "";
-var pgbreak = '<br style="page-break-before: always">'
-
-for(i = 0; i < inData.length; i++){
 	if(i < inData.length - 1){
 		stackTab = stackTab + tblStart + inData[i] + ftrString + tblEnd + pgbreak;
 	} else {
@@ -3343,6 +4437,7 @@ for(i = 0; i < inData.length; i++){
  } 
  
  var stackTab2 = stackTab.replace(/−/g,"  -");
+
  Export2Word(stackTab2, fName);
 } //plextabWord
  
@@ -3379,6 +4474,17 @@ function genPDFTable(data, hdrRows) {
     return (outarr)
 }  //genPDFTable
 
+function chkEmpty(str) {
+	var nstr = 0;
+	for(i = 0; i < str.length; i++){
+		if (typeof str[i] === 'string' || str[i] instanceof String) {
+			nstr++
+		}
+	}
+	var notstr = str.length - nstr;
+    return (notstr);
+}
+
 //plextabPDF processes datatable elements and produces a PDF doc
 function plextabPDF(inData,hdrArr,ftrArr,fName,tabType) {
  //http://pdfmake.org/#/
@@ -3386,59 +4492,115 @@ function plextabPDF(inData,hdrArr,ftrArr,fName,tabType) {
 
 
  var pdfTab = HTMLtoArray(inData,hdrArr,"PDF")
-
-if(tabType = "Population Growth Table"){
-	for(a = 0; a < pdfTab.length; a++){
-		var est_b = "e2" + a;
-		var moe_a = "m1" + a 
-		var moe_b = "m2" + a;
-		for(i = 0; i < pdfTab[a].length; i++){
-			if(i <= 1){
-				pdfTab[a][i][[moe_a]] = "";
-				pdfTab[a][i][[moe_b]] = "";
-			} else {
-				pdfTab[a][i][[est_b]] = pdfTab[a][i][[moe_a]];
-				pdfTab[a][i][[moe_a]] = "";
-				pdfTab[a][i][[moe_b]] = "";
+  
+//Restructuring pdfTab into a 
+if(tabType == "Population Growth Table"){
+    var tableHdr = [];
+	for(a = 0; a < 2; a++){ 
+	var headrow = [];
+	for(b = 0; b < pdfTab[a].length; b++){
+		if(b <= 1) {
+			headrow.push(pdfTab[a][b]);
+		} else {
+			if(b %2 != 0) {
+			headrow.push(pdfTab[a][b]);
 			}
-		} //i
-	}  //a
+		}
+	}
+	tableHdr.push(headrow);
+	}
+var tmpTab = pdfTab.slice(2);
+var pdfTab = tableHdr.concat(tmpTab);
 }
 
- var bodykeys = [];
-  
-for(a = 0; a < inData.length;a++) {  //for each panel
-      var pnlKeys = Object.keys(pdfTab[a][0]);
-      bodykeys.push([pnlKeys]);
-} //a
+//8 Columns per page...
+var nPanel = Math.ceil(pdfTab[0].length/8); //page
+var nRows = pdfTab.length
 
+
+var bodyOut = new Array(nPanel);
+for(i = 0; i < nPanel; i++){
+	  bodyOut[i] = new Array(nRows)
+	  for(c = 0; c < nRows; c++){
+		  bodyOut[i][c] = new Array(9)
+	  }
+} 
+
+
+for(b = 0; b < nPanel; b++){
+	for(c = 0; c < nRows; c++) {
+		bodyOut[b][c][0] = pdfTab[c][0]
+	}
+}
+
+for(a = 0; a < nRows; a++){
+	var pnl = 0;
+	var outpos = 1;
+	for (b = 1; b < pdfTab[a].length; b++){
+		  	bodyOut[pnl][a][outpos] = pdfTab[a][b];
+			outpos++
+			  if(b % 8 == 0) {
+				  pnl++;
+				  outpos = 1;
+			  }
+	       }
+	  }
+
+
+var rowlen = bodyOut[0][0].length
+
+var outBody =[];
+for(x = 0; x < bodyOut.length; x++){
+	var outArr = []
+	for(z = 0; z < bodyOut[x].length; z++){
+	 var empties = chkEmpty(bodyOut[x][z]);
+	 if(empties != 0){
+	    var outRow = bodyOut[x][z].slice(0,(rowlen-empties))
+	 } else {
+		 outRow = bodyOut[x][z];
+	 }
+	 outArr.push(outRow);
+	}
+outBody.push(outArr)
+}
+
+var bodyOut = outBody;
 
 var bodyArr = []
-for(a = 0; a < pdfTab.length; a++){
+for(a = 0; a < bodyOut.length; a++){
 	var tmpbody = []
-	var rowcnt = 0;
-	 pdfTab[a].forEach(function(row) {
-
-        var dataRow = [];
-        rowcnt = rowcnt + 1;
-        bodykeys[a].forEach(function(column) {
-			column.forEach( col => {
-				if(rowcnt < 2) {
-					if(col != 'label'){
-						dataRow.push({text: row[col], style: 'headsty', colSpan:2});
+	 for(b = 0; b < bodyOut[a].length; b++) {
+		 var dataRow = [];
+		 for(c = 0; c < bodyOut[a][b].length; c++){
+			 switch(b) {
+				case 0: 
+					if(tabType == "Population Growth Table"){
+						dataRow.push({text: bodyOut[a][b][c], style: 'headsty'});
 					} else {
-						dataRow.push({text: row[col], style: 'headsty'});
+						if(bodyOut[a][b][c] != ""){
+							dataRow.push({text: bodyOut[a][b][c], style: 'headsty', colSpan:2});
+						} else {
+							dataRow.push({text: bodyOut[a][b][c], style: 'headsty'});
+						}
+					};
+				    break;
+				case 1 :
+					dataRow.push({text: bodyOut[a][b][c], style: 'headsty'})
+					break;
+				default :
+					if(c == 0) {
+						dataRow.push({text: bodyOut[a][b][c], style: 'lnleft'});
+					} else {
+						dataRow.push({text: bodyOut[a][b][c], style: 'lnright' });
 					}
-				} else {
-				    dataRow.push({text: row[col], style: col == 'label' ? 'lnleft' : 'lnright' });
-				}
-			})
-        })
-
-        tmpbody.push(dataRow);
-    });
+					break
+				}; //switch
+		 } //c
+	  tmpbody.push(dataRow);
+	 } //b
 	bodyArr.push(tmpbody);
-}
+} //a
+
 
  //Process footer
 
@@ -3474,11 +4636,9 @@ defaultStyle: {
  pdfMake.createPdf(dd).download(fName + ".pdf");
 } //plextabPDF
 
-
-//plextabCSV processes datatable elements and produces a CSV File -- used for both Excel and CSV files
-function plextabCSV(inData,hdrArr,ftrArr,fName,tabType) {
-if(tabType == "Population Growth Table"){
-	var tblArray = stripHTML(inData);
+//popGrowthCSV  Generates CSV File for Population Growth Table
+function popGrowthCSV(inData) {
+		var tblArray = stripHTML(inData);
 	//Creating the header
 	var newHdr = [""];
 	for(i = 0; i < tblArray.length; i++){
@@ -3536,14 +4696,11 @@ if(tabType == "Population Growth Table"){
    
 	
 	//Download code 
-	var fileName = fName + ".csv";
 
 	var csvContent = "data:text/csv;charset=utf-8," 
     + outtab.map(e => e.join(",")).join("\n");
 	
 	var csvContent2 = csvContent.replace(/−/g, ' -')
-
-	console.log(csvContent2)
 	
 	    if (navigator.msSaveBlob) { // IE 10+
             navigator.msSaveBlob(csvContent2, fileName);
@@ -3560,13 +4717,80 @@ if(tabType == "Population Growth Table"){
                 document.body.removeChild(link);
             }
 		}
-} else {
+} //popGrowthCSV		
+
+//housingTypeCSV  Processes the housing Type CSV Table
+function housingTypeCSV(inData,hdrArr) {
+		var tblArray = stripHTML(inData)
+		var outarr = [];
+		var plnames = [];
+		for(a = 0; a < tblArray.length; a++){
+			//extracting the place names
+			var dataStr = tblArray[a]
+			for(b = 0; b < 3; b++) {
+				if(dataStr[b] != ' ')
+				plnames.push(dataStr[b])
+			    plnames.push("")
+			}
+		}
+		//Column Names
+		var colnames = []
+ 		for(b = 0; b < plnames.length; b++){
+			colnames.push("Estimate")
+			colnames.push("Margin of Error");
+		}
+		
+	//processing data records
+
+var tabdata = []
+	for(a = 0; a < tblArray.length; a++){
+		var tmpdata = new Array(hdrArr.length-1);
+		for(b = 0; b <= hdrArr.length; b++){
+			tmpdata[b] = new Array(9);
+		}
+		var datstr = tblArray[a];
+		var ALLPOS = datstr.indexOf("All Housing Units");
+		var OOPOS = datstr.indexOf("Owner Occupied Housing Units");
+		var RENTPOS = datstr.indexOf("Renter Occupied Housing Units");
+
+		var allarr = []
+		rowpos = 0
+		colpos = 0
+		for(c = ALLPOS; c < OOPOS; c++){
+			
+			if(c == ALLPOS) {
+				tmpdata[rowpos][colpos] = datstr[c]
+				rowpos = rowpos + 1;
+				} else {
+//			if(c < ALLPOS + 9) {
+//		}
+
+	}
+	} //c
+	} //a
+}//housingTypeCSV
+
+//plextabCSV processes datatable elements and produces a CSV File -- used for both Excel and CSV files
+function plextabCSV(inData,hdrArr,ftrArr,fName,tabType) {
+var fileName = fName + ".csv";
+
+switch(tabType) {
+case "Population Growth Table":
+	popGrowthCSV(inData);
+break;
+case "Housing Type Table" :
+    housingTypeCSV(inData,hdrArr);
+break;
+default:
 	var outarr = HTMLtoArray(inData,hdrArr,"CSV")
-    exportToCsv(fName, tabType, outarr,0);
-}
+	exportToCsv(fName, tabType, outarr,0);
+} //end of switch
+
+    
+
 } //plextabCSV
 
-//genplexTab is a wrapper function that sends datatable elements out to file download functions plextabWord, plextabPDF, plextabXLSX and plextabPDF
+//genplexTab is a wrapper function that sends datatable elements out to file download functions plextabWord, plextabPDF, plextabCSV 
 function genplexTab(inData,hdrArr,ftrArr,fName,fmt,tabType) {
    switch(fmt) {
     case "word":
@@ -3613,7 +4837,7 @@ d3.json(yrstr).then(function(yeardata){
     var maxest = yeardata.filter(function(d){return d.datatype == 'Estimate'});
  var yrsList = maxest.map(function(d){return d.year;});
     var curyear = d3.max(yrsList);
- var acsyr = 2020;  ///CHANGE THIS WHEN 2020 ACS is available
+ var acsyr = 2020;  ///CHANGE THIS WHEN 2021 ACS is available
 //Create ouput array?
 
 //Triggering the first button  Expand these for each button...
@@ -3623,7 +4847,7 @@ if(firstbtn == 'sel1') {
    PROFILE_2.innerHTML = "";
    PROFILE_3.innerHTML = "";
    PROFILE_4.innerHTML = "";
-   genSel1display(lvl, fipsArr, names, curyear, PROFILE_1, PROFILE_2, PROFILE_3, PROFILE_4);
+   genSel1display(lvl, fipsArr, names, curyear, acsyr, PROFILE_1, PROFILE_2, PROFILE_3, PROFILE_4);
 };
 
  //Need to export final description, svg and datatable here
@@ -3674,7 +4898,7 @@ document.getElementById("sel1btn").addEventListener("click", function() {
    PROFILE_2.innerHTML = "";
    PROFILE_3.innerHTML = "";
    PROFILE_4.innerHTML = "";
-   genSel1display(lvl, fipsArr, names, curyear, PROFILE_1, PROFILE_2, PROFILE_3, PROFILE_4);
+   genSel1display(lvl, fipsArr, names, curyear, acsyr, PROFILE_1, PROFILE_2, PROFILE_3, PROFILE_4);
      }); //end of sel1btn listener
   
 document.getElementById("sel2btn").addEventListener("click", function() {
@@ -4010,7 +5234,7 @@ return(out_tab)
  } //gen_str_pop
  
  //genTenureTab  Generates the final Tenure tab data 
- function genTenureTab(unitTab,yrCty,yrSt,popTab,pphCty,pphSt){
+ function genTenureTab(unitTab,yrTab,popTab,pphTab){
  var varname = Object.keys(unitTab[0]);
  varname.splice(0,2);
 
@@ -4033,24 +5257,24 @@ return(out_tab)
 		var  OO_PPH_M =  "";
 		var  RT_PPH_E =  "";
 		var  RT_PPH_M =  "";
-	  if(unitdata.FIPS != -101){
 		  if(unitdata.FIPS == 8){
-			  ALL_MEDYR_E =  yrSt[0].B25037_001E;
-			  ALL_MEDYR_M =  yrSt[0].B25037_001M;
-			  OO_MEDYR_E =  yrSt[0].B25037_002E;
-			  OO_MEDYR_M =  yrSt[0].B25037_002M;
-			  RT_MEDYR_E =  yrSt[0].B25037_003E;
-			  RT_MEDYR_M =  yrSt[0].B25037_003M;
+			  ALL_MEDYR_E =  yrTab[0].B25037_001E;
+			  ALL_MEDYR_M =  yrTab[0].B25037_001M;
+			  OO_MEDYR_E =  yrTab[0].B25037_002E;
+			  OO_MEDYR_M =  yrTab[0].B25037_002M;
+			  RT_MEDYR_E =  yrTab[0].B25037_003E;
+			  RT_MEDYR_M =  yrTab[0].B25037_003M;
 			  
-			  ALL_PPH_E =  pphSt[0].B25010_001E;
-			  ALL_PPH_M =  pphSt[0].B25010_001M;
-			  OO_PPH_E =  pphSt[0].B25010_002E;
-			  OO_PPH_M =  pphSt[0].B25010_002M;
-			  RT_PPH_E =  pphSt[0].B25010_003E;
-			  RT_PPH_M =  pphSt[0].B25010_003M;
+			  ALL_PPH_E =  pphTab[0].B25010_001E;
+			  ALL_PPH_M =  pphTab[0].B25010_001M;
+			  OO_PPH_E =  pphTab[0].B25010_002E;
+			  OO_PPH_M =  pphTab[0].B25010_002M;
+			  RT_PPH_E =  pphTab[0].B25010_003E;
+			  RT_PPH_M =  pphTab[0].B25010_003M;
 		  } else {
-			  var medyrfilt = yrCty.filter(d => d.GEO2 == unitdata.FIPS);
-			  var pphfilt = pphCty.filter(d => d.GEO2 == unitdata.FIPS);
+			  var medyrfilt = yrTab.filter(d => d.GEO2 == unitdata.FIPS);
+			  var pphfilt = pphTab.filter(d => d.GEO2 == unitdata.FIPS);
+
 			  ALL_MEDYR_E =  medyrfilt[0].B25037_001E;
 			  ALL_MEDYR_M =  medyrfilt[0].B25037_001M;
 			  OO_MEDYR_E =  medyrfilt[0].B25037_002E;
@@ -4065,8 +5289,7 @@ return(out_tab)
 			  RT_PPH_E =  pphfilt[0].B25010_003E;
 			  RT_PPH_M =  pphfilt[0].B25010_003M;
 		  }
-	  }
-	  
+
 	  var ALL_UNIT_E = unitdata.ALLHU_E;
 	  var ALL_UNIT_M = unitdata.ALLHU_M;
 	  var ALL_POP_E = popdata.ALLHU_E;
@@ -4163,7 +5386,7 @@ return(out_tab)
              outData.push({
 				 'FIPS' : unitdata.FIPS,
 				 'NAME' : unitdata.NAME,
-				 "VAR" : "ALLPPH_E",
+				 "VAR" : "ALL_PPH_E",
 				 'UNIT_EST' : UNIT_EST,
 				 'UNIT_MOE' : UNIT_MOE,
 				 'UNIT_PCT_EST' : UNIT_PCT_EST,
@@ -4223,7 +5446,7 @@ return(out_tab)
              outData.push({
 				 'FIPS' : unitdata.FIPS,
 				 'NAME' : unitdata.NAME,
-				 "VAR" : "OOPPH_E",
+				 "VAR" : "OO_PPH_E",
 				 'UNIT_EST' : UNIT_EST,
 				 'UNIT_MOE' : UNIT_MOE,
 				 'UNIT_PCT_EST' : UNIT_PCT_EST,
@@ -4283,7 +5506,7 @@ return(out_tab)
              outData.push({
 				 'FIPS' : unitdata.FIPS,
 				 'NAME' : unitdata.NAME,
-				 "VAR" : "RTPPH_E",
+				 "VAR" : "RT_PPH_E",
 				 'UNIT_EST' : UNIT_EST,
 				 'UNIT_MOE' : UNIT_MOE,
 				 'UNIT_PCT_EST' : UNIT_PCT_EST,
@@ -4319,117 +5542,98 @@ return(out_tab)
  
  //genhousIncome Geneates Percentage Income spent on housing tab
  function genhousIncome(OO,RT,geotype) {
-
+	 
 	 var OO_dat = [];
-	 OO.forEach(d => {
+	 for(i = 0; i < OO.length;i++) {
 		 OO_dat.push({
-			"FIPS" : geotype == 'state' ? 8 : d.GEO2,
-			"NAME" : d.NAME,
-			"TOTAL_OO_E" : d.B25095_001E,
-			"TOTAL_OO_M" : d.B25095_001M, 
-			"PCT3539_OO_E" : d.B25095_007E + d.B25095_016E + d.B25095_025E + d.B25095_034E +d.B25095_043E + d.B25095_052E + d.B25095_061E + d.B25095_070E, 
-			"PCT3539_OO_M" : Math.pow(d.B25095_007M,2) + Math.pow(d.B25095_016M,2) + Math.pow(d.B25095_025M,2)+ Math.pow(d.B25095_034M,2)+ Math.pow(d.B25095_043M,2) 
-							+ Math.pow(d.B25095_052M,2) + Math.pow(d.B25095_061M,2) + Math.pow(d.B25095_070M,2), 
-			"PCT4045_OO_E" : d.B25095_008E + d.B25095_017E + d.B25095_026E + d.B25095_035E +d.B25095_044E + d.B25095_053E + d.B25095_062E + d.B25095_071E, 
-			"PCT4045_OO_M" : Math.pow(d.B25095_008M,2) + Math.pow(d.B25095_017M,2) + Math.pow(d.B25095_026M,2) + Math.pow(d.B25095_035M,2)+ Math.pow(d.B25095_044M,2)
-							+ Math.pow(d.B25095_053M,2) + Math.pow(d.B25095_062M,2) + Math.pow(d.B25095_071M,2), 
-			"PCTGE50_OO_E" : d.B25095_009E + d.B25095_018E + d.B25095_027E + d.B25095_036E +d.B25095_045E + d.B25095_054E + d.B25095_063E + d.B25095_072E, 
-			"PCTGE50_OO_M" : Math.pow(d.B25095_009M,2) + Math.pow(d.B25095_018M,2) + Math.pow(d.B25095_027M,2) + Math.pow(d.B25095_036M,2)+ Math.pow(d.B25095_045M,2)
-							+ Math.pow(d.B25095_054M,2) + Math.pow(d.B25095_063M,2) + Math.pow(d.B25095_072M,2), 
-			"PCTGE35_OO_E" : d.B25095_007E + d.B25095_016E + d.B25095_025E + d.B25095_034E +d.B25095_043E + d.B25095_052E + d.B25095_061E + d.B25095_070E +
-							 d.B25095_008E + d.B25095_017E + d.B25095_026E + d.B25095_035E +d.B25095_044E + d.B25095_053E + d.B25095_062E + d.B25095_071E +
-							 d.B25095_009E + d.B25095_018E + d.B25095_027E + d.B25095_036E +d.B25095_045E + d.B25095_054E + d.B25095_063E + d.B25095_072E,
-			"PCTGE35_OO_M" : Math.pow(d.B25095_007M,2) + Math.pow(d.B25095_016M,2) + Math.pow(d.B25095_025M,2)+ Math.pow(d.B25095_034M,2)+ Math.pow(d.B25095_043M,2) 
-							+ Math.pow(d.B25095_052M,2) + Math.pow(d.B25095_061M,2) + Math.pow(d.B25095_070M,2) +
-							Math.pow(d.B25095_008M,2) + Math.pow(d.B25095_017M,2) + Math.pow(d.B25095_026M,2) + Math.pow(d.B25095_035M,2)+ Math.pow(d.B25095_044M,2)
-							+ Math.pow(d.B25095_053M,2) + Math.pow(d.B25095_062M,2) + Math.pow(d.B25095_071M,2) + 
-							Math.pow(d.B25095_009M,2) + Math.pow(d.B25095_018M,2) + Math.pow(d.B25095_027M,2) + Math.pow(d.B25095_036M,2)+ Math.pow(d.B25095_045M,2)
-							+ Math.pow(d.B25095_054M,2) + Math.pow(d.B25095_063M,2) + Math.pow(d.B25095_072M,2)
+			"FIPS" : geotype == 'state' ? 8 : OO[i].GEO2,
+			"NAME" : OO[i].NAME,
+			"OO_TOTAL_E" :	OO[i].B25095_001E,
+			"OO_TOTAL_M" :	OO[i].B25095_001M,
+						"OO_GE30_E" :	OO[i].B25095_006E + OO[i].B25095_007E + OO[i].B25095_015E + OO[i].B25095_016E + OO[i].B25095_024E + OO[i].B25095_025E + OO[i].B25095_033E + OO[i].B25095_034E + OO[i].B25095_042E + OO[i].B25095_043E + OO[i].B25095_051E + OO[i].B25095_052E + OO[i].B25095_060E + OO[i].B25095_061E + OO[i].B25095_069E + OO[i].B25095_070E + 
+				OO[i].B25095_008E + OO[i].B25095_017E + OO[i].B25095_026E + OO[i].B25095_035E + OO[i].B25095_044E + OO[i].B25095_053E + OO[i].B25095_062E + OO[i].B25095_071E + 
+				OO[i].B25095_009E + OO[i].B25095_018E + OO[i].B25095_027E + OO[i].B25095_036E + OO[i].B25095_045E + OO[i].B25095_054E + OO[i].B25095_063E + OO[i].B25095_072E,
+			"OO_GE30_M" :	Math.pow(OO[i].B25095_006M,2) + Math.pow(OO[i].B25095_007M,2) + Math.pow(OO[i].B25095_015M,2) + Math.pow(OO[i].B25095_016M,2) + Math.pow(OO[i].B25095_024M,2) + Math.pow(OO[i].B25095_025M,2) + Math.pow(OO[i].B25095_033M,2) + Math.pow(OO[i].B25095_034M,2) + Math.pow(OO[i].B25095_042M,2) + Math.pow(OO[i].B25095_043M,2) + Math.pow(OO[i].B25095_051M,2) + Math.pow(OO[i].B25095_052M,2) + Math.pow(OO[i].B25095_060M,2) + Math.pow(OO[i].B25095_061M,2) + Math.pow(OO[i].B25095_069M,2) + Math.pow(OO[i].B25095_070M,2) + 
+				Math.pow(OO[i].B25095_008M,2) + Math.pow(OO[i].B25095_017M,2) + Math.pow(OO[i].B25095_026M,2) + Math.pow(OO[i].B25095_035M,2) + Math.pow(OO[i].B25095_044M,2) + Math.pow(OO[i].B25095_053M,2) + Math.pow(OO[i].B25095_062M,2) + Math.pow(OO[i].B25095_071M,2) + 
+				Math.pow(OO[i].B25095_009M,2) + Math.pow(OO[i].B25095_018M,2) + Math.pow(OO[i].B25095_027M,2) + Math.pow(OO[i].B25095_036M,2) + Math.pow(OO[i].B25095_045M,2) + Math.pow(OO[i].B25095_054M,2) + Math.pow(OO[i].B25095_063M,2) + Math.pow(OO[i].B25095_072M,2),
+			"OO_3039_E" :	OO[i].B25095_006E + OO[i].B25095_007E + OO[i].B25095_015E + OO[i].B25095_016E + OO[i].B25095_024E + OO[i].B25095_025E + OO[i].B25095_033E + OO[i].B25095_034E + OO[i].B25095_042E + OO[i].B25095_043E + OO[i].B25095_051E + OO[i].B25095_052E + OO[i].B25095_060E + OO[i].B25095_061E + OO[i].B25095_069E + OO[i].B25095_070E,
+			"OO_3039_M" : 	Math.pow(OO[i].B25095_006M,2) + Math.pow(OO[i].B25095_007M,2) + Math.pow(OO[i].B25095_015M,2) + Math.pow(OO[i].B25095_016M,2) + Math.pow(OO[i].B25095_024M,2) + Math.pow(OO[i].B25095_025M,2) + Math.pow(OO[i].B25095_033M,2) + Math.pow(OO[i].B25095_034M,2) + Math.pow(OO[i].B25095_042M,2) + Math.pow(OO[i].B25095_043M,2) + Math.pow(OO[i].B25095_051M,2) + Math.pow(OO[i].B25095_052M,2) + Math.pow(OO[i].B25095_060M,2) + Math.pow(OO[i].B25095_061M,2) + Math.pow(OO[i].B25095_069M,2) + Math.pow(OO[i].B25095_070M,2),
+			"OO_4049_E" :	OO[i].B25095_008E + OO[i].B25095_017E + OO[i].B25095_026E + OO[i].B25095_035E + OO[i].B25095_044E + OO[i].B25095_053E + OO[i].B25095_062E + OO[i].B25095_071E,
+			"OO_4049_M" :	Math.pow(OO[i].B25095_008M,2) + Math.pow(OO[i].B25095_017M,2) + Math.pow(OO[i].B25095_026M,2) + Math.pow(OO[i].B25095_035M,2) + Math.pow(OO[i].B25095_044M,2) + Math.pow(OO[i].B25095_053M,2) + Math.pow(OO[i].B25095_062M,2) + Math.pow(OO[i].B25095_071M,2),
+			"OO_GE50_E" :	OO[i].B25095_009E + OO[i].B25095_018E + OO[i].B25095_027E + OO[i].B25095_036E + OO[i].B25095_045E + OO[i].B25095_054E + OO[i].B25095_063E + OO[i].B25095_072E,
+			"OO_GE50_M" :	Math.pow(OO[i].B25095_009M,2) + Math.pow(OO[i].B25095_018M,2) + Math.pow(OO[i].B25095_027M,2) + Math.pow(OO[i].B25095_036M,2) + Math.pow(OO[i].B25095_045M,2) + Math.pow(OO[i].B25095_054M,2) + Math.pow(OO[i].B25095_063M,2) + Math.pow(OO[i].B25095_072M,2)
 		 });			
-	 });
+	 };
 	 
 	 var RT_dat = [];
-	 RT.forEach(d => {
+	 for(i = 0; i < RT.length;i++){
 		 RT_dat.push({
-			"FIPS" : geotype == 'state' ? 8 : d.GEO2,
-			"NAME" : d.NAME,
-			"TOTAL_RT_E" : d.B25074_001E,
-			"TOTAL_RT_M" : d.B25074_001M, 
-			"PCT3539_RT_E" : d.B25074_007E + d.B25074_016E + d.B25074_025E + d.B25074_034E +d.B25074_043E + d.B25074_052E + d.B25074_061E, 
-			"PCT3539_RT_M" : Math.pow(d.B25074_007M,2) + Math.pow(d.B25074_016M,2) + Math.pow(d.B25074_025M,2)+ Math.pow(d.B25074_034M,2)+ Math.pow(d.B25074_043M,2)
-							+ Math.pow(d.B25074_052M,2) + Math.pow(d.B25074_061M,2), 
-			"PCT4045_RT_E" : d.B25074_008E + d.B25074_017E + d.B25074_026E + d.B25074_035E +d.B25074_044E + d.B25074_053E + d.B25074_062E, 
-			"PCT4045_RT_M" : Math.pow(d.B25074_008M,2) + Math.pow(d.B25074_017M,2) + Math.pow(d.B25074_026M,2) + Math.pow(d.B25074_035M,2)+ Math.pow(d.B25074_044M,2)
-							+ Math.pow(d.B25074_053M,2) + Math.pow(d.B25074_062M,2), 
-			"PCTGE50_RT_E" : d.B25074_009E + d.B25074_018E + d.B25074_027E + d.B25074_036E +d.B25074_045E + d.B25074_054E + d.B25074_063E, 
-			"PCTGE50_RT_M" : Math.pow(d.B25074_009M,2) + Math.pow(d.B25074_018M,2) + Math.pow(d.B25074_027M,2) + Math.pow(d.B25074_036M,2)+ Math.pow(d.B25074_045M,2)
-							+ Math.pow(d.B25074_054M,2) + Math.pow(d.B25074_063M,2), 
-			"PCTGE35_RT_E" : d.B25074_007E + d.B25074_016E + d.B25074_025E + d.B25074_034E +d.B25074_043E + d.B25074_052E + d.B25074_061E +
-							 d.B25074_008E + d.B25074_017E + d.B25074_026E + d.B25074_035E +d.B25074_044E + d.B25074_053E + d.B25074_062E +
-							 d.B25074_009E + d.B25074_018E + d.B25074_027E + d.B25074_036E +d.B25074_045E + d.B25074_054E + d.B25074_063E,
-			"PCTGE35_RT_M" : Math.pow(d.B25074_007M,2) + Math.pow(d.B25074_016M,2) + Math.pow(d.B25074_025M,2)+ Math.pow(d.B25074_034M,2)+ Math.pow(d.B25074_043M,2) 
-							+ Math.pow(d.B25074_052M,2) + Math.pow(d.B25074_061M,2) +
-							Math.pow(d.B25074_008M,2) + Math.pow(d.B25074_017M,2) + Math.pow(d.B25074_026M,2) + Math.pow(d.B25074_035M,2)+ Math.pow(d.B25074_044M,2)
-							+ Math.pow(d.B25074_053M,2) + Math.pow(d.B25074_062M,2) +
-							Math.pow(d.B25074_009M,2) + Math.pow(d.B25074_018M,2) + Math.pow(d.B25074_027M,2) + Math.pow(d.B25074_036M,2)+ Math.pow(d.B25074_045M,2)
-							+ Math.pow(d.B25074_054M,2) + Math.pow(d.B25074_063M,2)
-
+			"FIPS" : geotype == 'state' ? 8 : RT[i].GEO2,
+			"NAME" : RT[i].NAME,
+			"RT_TOTAL_E" :	RT[i].B25074_001E,
+			"RT_TOTAL_M" :	RT[i].B25074_001M,
+			"RT_GE30_E" :	RT[i].B25074_006E + RT[i].B25074_007E + RT[i].B25074_015E + RT[i].B25074_016E + RT[i].B25074_024E + RT[i].B25074_025E + RT[i].B25074_033E + RT[i].B25074_034E + RT[i].B25074_042E + RT[i].B25074_043E + RT[i].B25074_051E + RT[i].B25074_052E + RT[i].B25074_060E + RT[i].B25074_061E + 
+				RT[i].B25074_008E + RT[i].B25074_017E + RT[i].B25074_026E + RT[i].B25074_035E + RT[i].B25074_044E + RT[i].B25074_053E + RT[i].B25074_062E + 
+				RT[i].B25074_009E + RT[i].B25074_018E + RT[i].B25074_027E + RT[i].B25074_036E + RT[i].B25074_045E + RT[i].B25074_054E + RT[i].B25074_063E ,
+			"RT_GE30_M" :	Math.pow(RT[i].B25074_006M,2) + Math.pow(RT[i].B25074_007M,2) + Math.pow(RT[i].B25074_015M,2) + Math.pow(RT[i].B25074_016M,2) + Math.pow(RT[i].B25074_024M,2) + Math.pow(RT[i].B25074_025M,2) + Math.pow(RT[i].B25074_033M,2) + Math.pow(RT[i].B25074_034M,2) + Math.pow(RT[i].B25074_042M,2) + Math.pow(RT[i].B25074_043M,2) + Math.pow(RT[i].B25074_051M,2) + Math.pow(RT[i].B25074_052M,2) + Math.pow(RT[i].B25074_060M,2) + Math.pow(RT[i].B25074_061M,2) + 
+				Math.pow(RT[i].B25074_008M,2) + Math.pow(RT[i].B25074_017M,2) + Math.pow(RT[i].B25074_026M,2) + Math.pow(RT[i].B25074_035M,2) + Math.pow(RT[i].B25074_044M,2) + Math.pow(RT[i].B25074_053M,2) + Math.pow(RT[i].B25074_062M,2) + 
+				Math.pow(RT[i].B25074_009M,2) + Math.pow(RT[i].B25074_018M,2) + Math.pow(RT[i].B25074_027M,2) + Math.pow(RT[i].B25074_036M,2) + Math.pow(RT[i].B25074_045M,2) + Math.pow(RT[i].B25074_054M,2) + Math.pow(RT[i].B25074_063M,2), 
+			"RT_3039_E" :	RT[i].B25074_006E + RT[i].B25074_007E + RT[i].B25074_015E + RT[i].B25074_016E + RT[i].B25074_024E + RT[i].B25074_025E + RT[i].B25074_033E + RT[i].B25074_034E + RT[i].B25074_042E + RT[i].B25074_043E + RT[i].B25074_051E + RT[i].B25074_052E + RT[i].B25074_060E + RT[i].B25074_061E,
+			"RT_3039_M" : 	Math.pow(RT[i].B25074_006M,2) + Math.pow(RT[i].B25074_007M,2) + Math.pow(RT[i].B25074_015M,2) + Math.pow(RT[i].B25074_016M,2) + Math.pow(RT[i].B25074_024M,2) + Math.pow(RT[i].B25074_025M,2) + Math.pow(RT[i].B25074_033M,2) + Math.pow(RT[i].B25074_034M,2) + Math.pow(RT[i].B25074_042M,2) + Math.pow(RT[i].B25074_043M,2) + Math.pow(RT[i].B25074_051M,2) + Math.pow(RT[i].B25074_052M,2) + Math.pow(RT[i].B25074_060M,2) + Math.pow(RT[i].B25074_061M,2) ,
+			"RT_4049_E" :	RT[i].B25074_008E + RT[i].B25074_017E + RT[i].B25074_026E + RT[i].B25074_035E + RT[i].B25074_044E + RT[i].B25074_053E + RT[i].B25074_062E,
+			"RT_4049_M" :	Math.pow(RT[i].B25074_008M,2) + Math.pow(RT[i].B25074_017M,2) + Math.pow(RT[i].B25074_026M,2) + Math.pow(RT[i].B25074_035M,2) + Math.pow(RT[i].B25074_044M,2) + Math.pow(RT[i].B25074_053M,2) + Math.pow(RT[i].B25074_062M,2) ,
+			"RT_GE50_E" :	RT[i].B25074_009E + RT[i].B25074_018E + RT[i].B25074_027E + RT[i].B25074_036E + RT[i].B25074_045E + RT[i].B25074_054E + RT[i].B25074_063E,
+			"RT_GE50_M" :	Math.pow(RT[i].B25074_009M,2) + Math.pow(RT[i].B25074_018M,2) + Math.pow(RT[i].B25074_027M,2) + Math.pow(RT[i].B25074_036M,2) + Math.pow(RT[i].B25074_045M,2) + Math.pow(RT[i].B25074_054M,2) + Math.pow(RT[i].B25074_063M,2)
 		 });	
-	 });
+	 };
 
 	var fin_data = [];
 	for(i = 0; i < OO_dat.length; i++){
 		fin_data.push({
 			'FIPS' : OO_dat[i].FIPS,
 			'NAME' : OO_dat[i].NAME,
-			'TOTAL_HH_E' :  OO_dat[i].TOTAL_OO_E  + RT_dat[i].TOTAL_RT_E,
-			'TOTAL_HH_M' :  OO_dat[i].TOTAL_OO_M  + RT_dat[i].TOTAL_RT_M,
-			'PCTGE35_HH_E' :  OO_dat[i].PCTGE35_OO_E  + RT_dat[i].PCTGE35_RT_E,
-			'PCTGE35_HH_M' :  OO_dat[i].PCTGE35_OO_M  + RT_dat[i].PCTGE35_RT_M,
-			'PCT3539_HH_E' :  OO_dat[i].PCT3539_OO_E  + RT_dat[i].PCT3539_RT_E,
-			'PCT3539_HH_M' :  OO_dat[i].PCT3539_OO_M  + RT_dat[i].PCT3539_RT_M,
-			'PCT4045_HH_E' :  OO_dat[i].PCT4045_OO_E  + RT_dat[i].PCT4045_RT_E,
-			'PCT4045_HH_M' :  OO_dat[i].PCT4045_OO_M  + RT_dat[i].PCT4045_RT_M,
-			'PCTGE50_HH_E' :  OO_dat[i].PCTGE50_OO_E  + RT_dat[i].PCTGE50_RT_E,
-			'PCTGE50_HH_M' :  OO_dat[i].PCTGE50_OO_M  + RT_dat[i].PCTGE50_RT_M,
-			'TOTAL_OO_E' :  OO_dat[i].TOTAL_OO_E,
-			'TOTAL_OO_M' :  OO_dat[i].TOTAL_OO_M,
-			'PCTGE35_OO_E' :  OO_dat[i].PCTGE35_OO_E,
-			'PCTGE35_OO_M' :  OO_dat[i].PCTGE35_OO_M,
-			'PCT3539_OO_E' :  OO_dat[i].PCT3539_OO_E,
-			'PCT3539_OO_M' :  OO_dat[i].PCT3539_OO_M,
-			'PCT4045_OO_E' :  OO_dat[i].PCT4045_OO_E,
-			'PCT4045_OO_M' :  OO_dat[i].PCT4045_OO_M,
-			'PCTGE50_OO_E' :  OO_dat[i].PCTGE50_OO_E,
-			'PCTGE50_OO_M' :  OO_dat[i].PCTGE50_OO_M,
-			'TOTAL_RT_E' :  RT_dat[i].TOTAL_RT_E,
-			'TOTAL_RT_M' :  RT_dat[i].TOTAL_RT_M,
-			'PCTGE35_RT_E' :  RT_dat[i].PCTGE35_RT_E,
-			'PCTGE35_RT_M' :  RT_dat[i].PCTGE35_RT_M,
-			'PCT3539_RT_E' :  RT_dat[i].PCT3539_RT_E,
-			'PCT3539_RT_M' :  RT_dat[i].PCT3539_RT_M,
-			'PCT4045_RT_E' :  RT_dat[i].PCT4045_RT_E,
-			'PCT4045_RT_M' :  RT_dat[i].PCT4045_RT_M,
-			'PCTGE50_RT_E' :  RT_dat[i].PCTGE50_RT_E,
-			'PCTGE50_RT_M' :  RT_dat[i].PCTGE50_RT_M,
+			'VAR' : 'IncomePct',
+			'TOTAL_OO_E' : OO_dat[i].OO_TOTAL_E,
+			'TOTAL_OO_M' : OO_dat[i].OO_TOTAL_M,
+			'PCTGE30_OO_E' : OO_dat[i].OO_GE30_E,
+			'PCTGE30_OO_M' : OO_dat[i].OO_GE30_M,
+			'PCT3039_OO_E' : OO_dat[i].OO_3039_E,
+			'PCT3039_OO_M' : OO_dat[i].OO_3039_M,
+			'PCT4049_OO_E' : OO_dat[i].OO_4049_E,
+			'PCT4049_OO_M' : OO_dat[i].OO_4049_M,
+			'PCTGE50_OO_E' : OO_dat[i].OO_GE50_E,
+			'PCTGE50_OO_M' : OO_dat[i].OO_GE50_M,
+			'TOTAL_RT_E' : RT_dat[i].RT_TOTAL_E,
+			'TOTAL_RT_M' : RT_dat[i].RT_TOTAL_M,
+			'PCTGE30_RT_E' : RT_dat[i].RT_GE30_E,
+			'PCTGE30_RT_M' : RT_dat[i].RT_GE30_M,
+			'PCT3039_RT_E' : RT_dat[i].RT_3039_E,
+			'PCT3039_RT_M' : RT_dat[i].RT_3039_M,
+			'PCT4049_RT_E' : RT_dat[i].RT_4049_E,
+			'PCT4049_RT_M' : RT_dat[i].RT_4049_M,
+			'PCTGE50_RT_E' : RT_dat[i].RT_GE50_E,
+			'PCTGE50_RT_M' : RT_dat[i].RT_GE50_M
 		});
 	}; //i
+
 return(fin_data);
  } //genhousIncome
  
  
  //genHHForecast generating Household Forecast Chart
-function genHHForecast(level, inData,DDsel,Statsel, outDiv) {
+function genHHForecast(level, inData,DDsel, outDiv) {
 const fmt_date = d3.timeFormat("%B %d, %Y");
 const fmt_pct = d3.format(".1%");
   
 var config = {responsive: true,
    displayModeBar: false};
 
+
 if(level == "Region") {
 //Generates the list of selected places
 var fipsList = [];
-var  opt,statopt, statVal;
+var  opt, statVal;
+
   var len = DDsel.options.length;
   for (var i = 0; i < len; i++) {
     opt = DDsel.options[i];
@@ -4440,16 +5644,6 @@ var  opt,statopt, statVal;
 }  else {
  var fipsList = [...new Set(inData.map(d => d.fips))];
 }
-//Setting stat value 
- var stlen = Statsel.options.length;
-  for (var i = 0; i < stlen; i++) {
-    statopt = Statsel.options[i];
-    if (statopt.selected) {
-      statVal = +statopt.value;
-    }
-  }
-
-
 var selData = inData.filter(d => fipsList.includes(d.fips));
 var selNames = [...new Set(selData.map(d => d.name))];
 
@@ -4464,7 +5658,6 @@ var selNames = [...new Set(selData.map(d => d.name))];
  //  plotdiv.className = 'multi-container';
   outdiv.appendChild(plotdiv);
   
-
  var plot_array = [];  
   for(i = 0; i < fipsList.length; i++) {
   var plot_grid = document.createElement('div');
@@ -4479,11 +5672,8 @@ var selNames = [...new Set(selData.map(d => d.name))];
 
   } //i
 
-
-
 var age_cats = [...new Set(inData.map(d => d.age_group_id))];
 age_cats.shift();
-
 
 var ctyNames;
 
@@ -4494,37 +5684,16 @@ var outPlot = plot_array[i].plot; //destination plot
   for(j = 0; j < age_cats.length;j++){
 	    var filtPlot = inData.filter(d => (d.fips == fipsList[i]) && (d.age_group_id == age_cats[j])); 
 		var PlaceNames = [...new Set(filtPlot.map(d => d.name))];
-		if(statVal == 0) {
-		var x_labs = [...new Set(inData.map(d => d.year))];
+
+		var x_labs = [...new Set(filtPlot.map(d => d.year))];
 	    var y_est = [...new Set(filtPlot.map(d => d.total_households))];
+		var chtitle = "Household Forecast by Year, Number of Households: " + PlaceNames[0];
 		var y_lab = "Number of Households"
 		hh_data.push({x : x_labs,
                 y : y_est,
 				name : age_cats[j],
                 type : 'bar'});
-		}
-		if(statVal == 1) {
-		var x_labs = [...new Set(inData.map(d => d.grlabel))];
-	    var y_est = [...new Set(filtPlot.map(d => d.growth))];
-		x_labs.shift();
-		y_est.shift();
-		var y_lab = "Household Change";
-		hh_data.push({x : x_labs,
-                y : y_est,
-				name : age_cats[j],
-                type : 'bar'});
-		}
-		if(statVal == 2) {
-		var x_labs = [...new Set(inData.map(d => d.grlabel))];
-	    var y_est = [...new Set(filtPlot.map(d => d.cagr))];
-		x_labs.shift();
-		y_est.shift();
-		var y_lab = "Household Change Rate (CAGR)";
-		hh_data.push({x : x_labs,
-                y : y_est,
-				name : age_cats[j],
-                mode : 'lines+markers'});
-		}	
+
   } //j
   
  
@@ -4532,9 +5701,9 @@ var ftrStr = 'Data Sources: U.S. Census Bureau (1990-2010) and Colorado State De
 
  var hh_layout = {
 	showlegend : true,
-  title: "Household Forecast by Year: " + PlaceNames[0],
+  title: chtitle,
     autosize: false,
-    width: 1000,
+    width: 1200,
     height : 400,
     xaxis: {
    title : 'Year',
@@ -4591,51 +5760,60 @@ profileImg1.onclick = function() {exportToPng(selNames, 'hhforecast', plot_array
  } //genHHForecast
  
  //genHHForecastChart  Wrapper for  Household Forecast Chart
-function genHHForecastChart(inData,outDiv, bkmark, geotype) {
+function genHHForecastChart(inData,outDiv, bkMark, geotype) {
+
 	var fipsList =  [... new Set(inData.map(tag => tag.fips))]; 
 	var ctyNameList =  [... new Set(inData.map(tag => tag.name))]; 	
 
-	pgSetup(geotype, "chart", outDiv, bkmark, true,false,fipsList, ctyNameList,0);
-	
+	pgSetupPro(geotype, "chart", outDiv, bkMark, true,false,fipsList, ctyNameList,0);
+
 	//selecting initial dropdown values
+if(geotype == "Region"){
    var selopts = "8,-101";
    $.each(selopts.split(","), function(i,e){
-          $("#RegSelect1 option[value='" + e + "']").prop("selected", true);
+          $("#geoSelect1 option[value='" + e + "']").prop("selected", true);
        }); 
   
-    $("#HHSelect1 option[value='0']").prop("selected", true);
+    $("#geoSelect1 option[value='0']").prop("selected", true);
  
-   var dd0 = document.getElementById("RegSelect1");
-   var dd1 = document.getElementById("HHSelect1")
-   var btn0 = document.getElementById("RegBtn1");
+   var dd0 = document.getElementById("geoSelect1");
+   var btn0 = document.getElementById("plotBtn1");
 
-  genHHForecast(geotype, inData,dd0, dd1,"PlotDiv1")
+  genHHForecast(geotype, inData,dd0,"PlotDiv1")
 
    btn0.addEventListener('click', function() {
-    genHHForecast(geotype, inData,dd0, dd1,"PlotDiv1")
+    genHHForecast(geotype, inData,dd0,"PlotDiv1")
        });
+} else {
+    genHHForecast(geotype, inData,"","PlotDiv1")
+}
 } //genHHForecastChart
  
 
 
 //genOccupancyTab Wrapper for Occupancy Table
-function genOccupancyTab(inData,outDiv,bkmark,level,curYr,fipsArr) {
+function genOccupancyTab(inData,outDiv,bkMark,level,curYr,fipsArr) {
 
 	const fmt_date = d3.timeFormat("%B %d, %Y");
     const fmt_yr = d3.format("0000");	
-	const tabtitle = bkmark.title;
+	const tabtitle = bkMark.title;
    
  if(level == "Region") {
 	 var tmpFips = regionCOL(fipsArr);
      var strFips = tmpFips[0].fips.map(i => i);
-	 var fileName = regionName(parseInt(fipsArr)) + " " + bkmark.title
-}  else {
+	 var fileName = regionName(parseInt(fipsArr)) + " " + bkMark.title
+}  
+if(level == "County"){
+	var fileName = countyName(parseInt(fipsArr)) + " " + bkMark.title
+	var strFips =  fipsArr;
+}
+if(level == "Municipality"){
+	var fileName = muniName(parseInt(fipsArr)) + " " + bkMark.title
 	var strFips =  fipsArr;
 }
 	
-
   	var row_labels = [
-     {'title' : 'Total Housing Units', 'URL_link' : genCEDSCIUrl(level,'B25002',curYr,strFips)},
+   {'title' : 'Total Housing Units', 'URL_link' : genCEDSCIUrl(level,'B25002',curYr,strFips)},
    {'title' : 'Occupied Housing Units', 'URL_link' : genCEDSCIUrl(level,'B25002',curYr,strFips)},
    {'title' : 'Vacant Housing Units', 'URL_link' : genCEDSCIUrl(level,'B25002',curYr,strFips)},
    {'title' : 'Vacant Housing Units for Sale or Rent', 'URL_link' : genCEDSCIUrl(level,'B25004',curYr,strFips)},
@@ -4647,12 +5825,13 @@ function genOccupancyTab(inData,outDiv,bkmark,level,curYr,fipsArr) {
 	];
 	
 
-var tab_obj = genSubjTab(level,inData, 5,row_labels,true);
+var tab_obj = genSubjTab(level,inData, bkMark.id,row_labels,true);
 
 var count_obj = tab_obj[0];
 var pct_obj = tab_obj[1];
 
-pgSetup(level,"table",outDiv,bkmark,false,true,"", "", 0)
+pgSetupPro(level,"table",outDiv,bkMark,false,true,fipsArr, "", 0)
+
 //footer
 var tblfoot = [
                ['Source: U.S. Census Bureau  ('+fmt_yr(curYr) + ') ' + fmt_yr(curYr - 4) + '-' + fmt_yr(curYr) +' American Community Survey, Tables B25002, B25004, and B25005'],
@@ -4662,7 +5841,11 @@ var tblfoot = [
 
 var ftrString = "<tfoot>"
 for(i = 0 ;i < tblfoot.length; i++){
-	ftrString = ftrString + "<tr><td colspan='5'>" + tblfoot[i] + "</td></tr>";
+	if(level == "Municipality"){
+		ftrString = ftrString + "<tr><td colspan='7'>" + tblfoot[i] + "</td></tr>";
+	} else {
+		ftrString = ftrString + "<tr><td colspan='5'>" + tblfoot[i] + "</td></tr>";
+	}
 }
 ftrString = ftrString + "</tfoot>"
 
@@ -4671,32 +5854,35 @@ var tabVal = 0;
 
 
 	//selecting initial dropdown values
-  $("#tabSelect2 option[value='0']").prop("selected", true);
+  $("#statSelect2 option[value='0']").prop("selected", true);
 
-   var dd0 = document.getElementById("tabSelect2");
+   var dd0 = document.getElementById("statSelect2");
+ if(level == "Region"){
    var btndown = document.getElementById("increment12");
    var btnup = document.getElementById("increment22");
-
-DTtab("tabDiv2",pct_obj,tabVal,row_labels,ftrString,tblfoot,"occupancy",fileName,tabtitle) 
+ }
+ 
+DTtab("TabDiv2",pct_obj,tabVal,row_labels,ftrString,tblfoot,"occupancy",fileName,tabtitle) 
 
    
   dd0.addEventListener('change', (event) => {
 	   if(event.target.value == "0") {
-		   DTtab("tabDiv2",pct_obj,tabVal,row_labels,ftrString,tblfoot,"occupancy",fileName,tabtitle);
+		   DTtab("TabDiv2",pct_obj,tabVal,row_labels,ftrString,tblfoot,"occupancy",fileName,tabtitle);
 	   } else {
-		   DTtab("tabDiv2",count_obj,tabVal,row_labels,ftrString,tblfoot,"occupancy",fileName,tabtitle);
+		   DTtab("TabDiv2",count_obj,tabVal,row_labels,ftrString,tblfoot,"occupancy",fileName,tabtitle);
 	   }
    });
 
+if(level == "Region"){
    btndown.addEventListener('click', function() {
      tabVal = tabVal - 1;
 	 if(tabVal < 0) {
 		tabVal = 5
 	 }
 	 if(dd0.value == "0") {
-		   DTtab("tabDiv2",pct_obj,tabVal,row_labels,ftrString,tblfoot,"occupancy",fileName,tabtitle);
+		   DTtab("TabDiv2",pct_obj,tabVal,row_labels,ftrString,tblfoot,"occupancy",fileName,tabtitle);
 	   } else {
-		   DTtab("tabDiv2",count_obj,tabVal,row_labels,ftrString,tblfoot,"occupancy",fileName,tabtitle);
+		   DTtab("TabDiv2",count_obj,tabVal,row_labels,ftrString,tblfoot,"occupancy",fileName,tabtitle);
 	  }
    });
   btnup.addEventListener('click', function() {
@@ -4705,12 +5891,243 @@ DTtab("tabDiv2",pct_obj,tabVal,row_labels,ftrString,tblfoot,"occupancy",fileName
 		tabVal = 0
 	 }
 	 if(dd0.value == "0") {
-		   DTtab("tabDiv2",pct_obj,tabVal,row_labels,ftrString,tblfoot,"occupancy",fileName,tabtitle);
+		   DTtab("TabDiv2",pct_obj,tabVal,row_labels,ftrString,tblfoot,"occupancy",fileName,tabtitle);
 	   } else {
-		   DTtab("tabDiv2",count_obj,tabVal,row_labels,ftrString,tblfoot,"occupancy",fileName,tabtitle);
+		   DTtab("TabDiv2",count_obj,tabVal,row_labels,ftrString,tblfoot,"occupancy",fileName,tabtitle);
 	  }
     });
+}
 } // genOccupancyTab
+
+
+//genHousingTemireTab Wrapper for Housing Tenure Table
+function genHousingTemireTab(inData,outDiv,bkMark,level,curYr,fipsArr) {
+
+	const fmt_date = d3.timeFormat("%B %d, %Y");
+    const fmt_yr = d3.format("0000");	
+	const tabtitle = bkMark.title;
+	
+
+
+   
+ if(level == "Region") {
+	 var tmpFips = regionCOL(fipsArr);
+     var strFips = tmpFips[0].fips.map(i => i);
+	 var fileName = regionName(parseInt(fipsArr)) + " " + bkMark.title
+	 var nPanels = Math.round((inData.length)/2); //This is the number of panels
+}  
+if(level == "County"){
+	var fileName = countyName(parseInt(fipsArr)) + " " + bkMark.title
+	var strFips =  fipsArr;
+}
+if(level == "Municipality"){
+	var fileName = muniName(parseInt(fipsArr)) + " " + bkMark.title
+	var strFips =  fipsArr;
+}
+
+  	var row_labels = [
+		{'title' : 'Occupied Housing Units', 'URL_link' : genCEDSCIUrl(level,'B25032',curYr,strFips)},
+		{'title' : 'Single Family Buildings', 'URL_link' : genCEDSCIUrl(level,'B25032',curYr,strFips)},
+		{'title' : '2 to 4 Unit Buildings', 'URL_link' : genCEDSCIUrl(level,'B25032',curYr,strFips)},
+		{'title' : '5 or More Unit Buildings', 'URL_link' : genCEDSCIUrl(level,'B25032',curYr,strFips)},
+		{'title' : 'Mobile Homes', 'URL_link' : genCEDSCIUrl(level,'B25032',curYr,strFips)},
+		{'title' : 'Boat, RV, Van, etc. ', 'URL_link' : genCEDSCIUrl(level,'B25032',curYr,strFips)},
+		{'title' : 'Median Year of Construction', 'URL_link' : genCEDSCIUrl(level,'B25037',curYr,strFips)},
+		{'title' : 'Average Persons Per Household', 'URL_link' : genCEDSCIUrl(level,'B25010',curYr,strFips)}
+	];
+	
+var tab_obj = genTenTab(level,inData,row_labels,true);
+
+var unit_obj = tab_obj[0];
+var pop_obj = tab_obj[1];
+
+console.log(unit_obj)
+console.log(pop_obj)
+debugger;
+
+pgSetupPro(level,"table",outDiv,bkMark,false,true,fipsArr, "", 0)
+
+//footer
+var tblfoot = [
+               ['Source: U.S. Census Bureau  ('+fmt_yr(curYr) + ') ' + fmt_yr(curYr - 4) + '-' + fmt_yr(curYr) +' American Community Survey, Tables B25010, B25032, B25033, and B25037'],
+			   ["Compiled by the Colorado State Demography Office"],
+               ['Print Date : ' + fmt_date(new Date)]
+      ];
+
+var ftrString = "<tfoot>"
+for(i = 0 ;i < tblfoot.length; i++){
+	if(level == "Municipality"){
+		ftrString = ftrString + "<tr><td colspan='13'>" + tblfoot[i] + "</td></tr>";
+	} else {
+		ftrString = ftrString + "<tr><td colspan='9'>" + tblfoot[i] + "</td></tr>";
+	}
+}
+ftrString = ftrString + "</tfoot>"
+
+//Initial Table
+var tabVal = 0;
+
+
+	//selecting initial dropdown values
+  $("#statSelect3 option[value='0']").prop("selected", true);
+
+   var dd3 = document.getElementById("statSelect3");
+ if(level == "Region"){
+   var btndown3 = document.getElementById("increment13");
+   var btnup3 = document.getElementById("increment23");
+ }
+
+DTtab("TabDiv3",unit_obj,tabVal,row_labels,ftrString,tblfoot,"houstype",fileName,tabtitle) 
+
+  dd3.addEventListener('change', (event) => {
+
+	   if(event.target.value == "0") {
+		   DTtab("TabDiv3",unit_obj,tabVal,row_labels,ftrString,tblfoot,"houstype",fileName,tabtitle) 
+	   } else {
+		   DTtab("TabDiv3",pop_obj,tabVal,row_labels,ftrString,tblfoot,"houstype",fileName,tabtitle);
+	   }
+   });
+
+if(level == "Region"){
+   btndown3.addEventListener('click', function() {
+     tabVal = tabVal - 1;
+	 if(tabVal < 0) {
+		tabVal = nPanels
+	 }
+	 if(dd3.value == "0") {
+		   DTtab("TabDiv3",unit_obj,tabVal,row_labels,ftrString,tblfoot,"houstype",fileName,tabtitle);
+	   } else {
+		   DTtab("TabDiv3",pop_obj,tabVal,row_labels,ftrString,tblfoot,"houstype",fileName,tabtitle);
+	  }
+   });
+  btnup3.addEventListener('click', function() {
+     tabVal = tabVal + 1;
+	 if(tabVal > nPanels) {
+		tabVal = 0
+	 }
+	 if(dd3.value == "0") {
+		   DTtab("TabDiv3",unit_obj,tabVal,row_labels,ftrString,tblfoot,"houstype",fileName,tabtitle);
+	   } else {
+		   DTtab("TabDiv3",pop_obj,tabVal,row_labels,ftrString,tblfoot,"houstype",fileName,tabtitle);
+	  }
+    });
+} else {
+	  dd3.addEventListener('change', (event) => {
+	   if(event.target.value == "0") {
+		   DTtab("TabDiv3",unit_obj,tabVal,row_labels,ftrString,tblfoot,"houstype",fileName,tabtitle) 
+	   } else {
+		   DTtab("TabDiv3",pop_obj,tabVal,row_labels,ftrString,tblfoot,"houstype",fileName,tabtitle);
+	   }
+   });
+} 
+} //genHousingTemireTab
+
+
+//genHHIncomeTab Wrapper for Housing Income Table
+function genHHIncomeTab(inDatamed, inDatapct,outDiv,bkMark,level,curYr,fipsArr) {
+
+	const fmt_date = d3.timeFormat("%B %d, %Y");
+    const fmt_yr = d3.format("0000");	
+	const fmt_pct = d3.format(".2%")
+    const fmt_comma = d3.format(",");
+    const fmt_dollar = d3.format("$,");
+	const tabtitle = bkMark.title;
+	
+ if(level == "Region") {
+	 var tmpFips = regionCOL(fipsArr);
+     var strFips = tmpFips[0].fips.map(i => i);
+	 var fileName = regionName(parseInt(fipsArr)) + " " + bkMark.title
+}  
+if(level == "County"){
+	var fileName = countyName(parseInt(fipsArr)) + " " + bkMark.title
+	var strFips =  fipsArr;
+}
+if(level == "Municipality"){
+	var fileName = muniName(parseInt(fipsArr)) + " " + bkMark.title
+	var strFips =  fipsArr;
+}
+  	var row_labels = [
+		{'title' : 'Median Value of Owner-Occupied Households (Current Dollars)', 'URL_link' : genCEDSCIUrl(level,'B25077',curYr,strFips)},
+		{'title' : 'Total Owner-Occupied Households', 'URL_link' : genCEDSCIUrl(level,'B25095',curYr,strFips)},
+		{'title' : 'Owner-Occupied Households paying 30% or more of income on housing', 'URL_link' : genCEDSCIUrl(level,'B25095',curYr,strFips)},
+		{'title' : 'Owner-Occupied Households paying 30-39% of income on housing', 'URL_link' : genCEDSCIUrl(level,'B25095',curYr,strFips)},
+		{'title' : 'Owner-Occupied Households paying 40-49% of ncome on housing', 'URL_link' : genCEDSCIUrl(level,'B25095',curYr,strFips)},
+		{'title' : 'Owner-Occupied Households paying 50% or more of income on housing', 'URL_link' : genCEDSCIUrl(level,'B25095',curYr,strFips)},
+		{'title' : 'Median Gross Rent of Rental Households (Current Dollars)', 'URL_link' : genCEDSCIUrl(level,'B25064',curYr,strFips)},
+		{'title' : 'Total Rental Households', 'URL_link' : genCEDSCIUrl(level,'B25074',curYr,strFips)},
+		{'title' : 'Rental Households paying 30% or more of income on housing', 'URL_link' : genCEDSCIUrl(level,'B25074',curYr,strFips)},
+		{'title' : 'Rental Households paying 30-39% of income on housing', 'URL_link' : genCEDSCIUrl(level,'B25074',curYr,strFips)},
+		{'title' : 'Rental Households paying 40-49% of income on housing', 'URL_link' : genCEDSCIUrl(level,'B25074',curYr,strFips)},
+		{'title' : 'Rental Households paying 50% or more of income on housing', 'URL_link' : genCEDSCIUrl(level,'B25074',curYr,strFips)}
+	];
+	
+var tab_obj = HHIncTab(level,inDatamed, inDatapct, 6,row_labels,true);
+
+var unit_obj = tab_obj[0];
+var pop_obj = tab_obj[1];
+
+pgSetupPro(level,"table",outDiv,bkMark,false,true,fipsArr, "", 0)
+
+//footer
+var tblfoot = [
+               ['Source: U.S. Census Bureau  ('+fmt_yr(curYr) + ') ' + fmt_yr(curYr - 4) + '-' + fmt_yr(curYr) +' American Community Survey, Tables B25077, B25064, B25095, and B25074'],
+			   ["Compiled by the Colorado State Demography Office"],
+               ['Print Date : ' + fmt_date(new Date)]
+      ];
+
+var ftrString = "<tfoot>"
+for(i = 0 ;i < tblfoot.length; i++){ //Change this for Municipalities
+	ftrString = ftrString + "<tr><td colspan='5'>" + tblfoot[i] + "</td></tr>";
+}
+ftrString = ftrString + "</tfoot>"
+
+//Initial Table
+var tabVal = 0;
+
+	//selecting initial dropdown values
+  $("#statSelect4 option[value='0']").prop("selected", true);
+
+   var dd4 = document.getElementById("statSelect4");
+ if(level == "Region"){
+   var btndown4 = document.getElementById("increment14");
+   var btnup4 = document.getElementById("increment24");
+ }
+
+DTtab("TabDiv4",pop_obj,tabVal,row_labels,ftrString,tblfoot,"housincome",fileName,tabtitle) 
+
+  dd4.addEventListener('change', (event) => {
+	   if(event.target.value == "0") {
+		   DTtab("TabDiv4",pop_obj,tabVal,row_labels,ftrString,tblfoot,"housincome",fileName,tabtitle) 
+	   } else {
+		   DTtab("TabDiv4",unit_obj,tabVal,row_labels,ftrString,tblfoot,"housincome",fileName,tabtitle);
+	   }
+   });
+
+if(level == "Region"){
+   btndown4.addEventListener('click', function() {
+     tabVal = tabVal - 1;
+	 if(tabVal < 0) {
+		tabVal = 5
+	 }
+	 if(dd4.value == "0") {
+		   DTtab("TabDiv4",pop_obj,tabVal,row_labels,ftrString,tblfoot,"housincome",fileName,tabtitle);
+	   } else {
+		   DTtab("TabDiv4",unit_obj,tabVal,row_labels,ftrString,tblfoot,"housincome",fileName,tabtitle);
+	  }
+   });
+  btnup4.addEventListener('click', function() {
+     tabVal = tabVal + 1;
+	 if(tabVal > 5) {
+		tabVal = 0
+	 }
+	 if(dd4.value == "0") {
+		   DTtab("TabDiv4",pop_obj,tabVal,row_labels,ftrString,tblfoot,"housincome",fileName,tabtitle);
+	   } else {
+		   DTtab("TabDiv4",unit_obj,tabVal,row_labels,ftrString,tblfoot,"housincome",fileName,tabtitle);
+	  }
+    });
+}
+} //genHHIncomeTab
 
 //genSel1map The first tab, map
 function genSel1map(level, fipsArr,nameArr,outDiv,bkMarkArr){
@@ -4733,7 +6150,7 @@ function genSel1map(level, fipsArr,nameArr,outDiv,bkMarkArr){
     var height = 300;
 //Prep dom
 
- pgSetup(level,"chart",outDiv,bkMarkArr,true,false,fipsArr, nameArr, 0)
+ pgSetupPro(level,"map",outDiv,bkMarkArr,true,false,fipsArr, nameArr, 0)
 
  //Generating output div
  var outDiv2 = document.getElementById("PlotDiv1");
@@ -4828,14 +6245,15 @@ if(ctyList.includes(level)) {
  
 //Buttons and image download  Check the elements and modify export to png...
 
-var profileImg1 = document.getElementById('profileImg1');
-profileImg1.onclick = function() {exportToPng(nameArr, 'map', outDiv2,0)};
+var profileDL1 = document.getElementById('profileDL1');
+profileDL1.onclick = function() {exportToPng(nameArr, 'map', outDiv2,0)};
 }; //end of genSel1map
 
 
-function genSel1tab(level, fipsArr, nameArr, bkMark, outputPro, curYr) {
+
+function genSel1tab(level, fipsArr, nameArr, bkMark, outputPro, curYr, acsYr) {
   const fmt_date = d3.timeFormat("%B %d, %Y");
- const fmt_dec = d3.format(".3");
+ const fmt_dec = d3.format(".2f");
  const fmt_pct = d3.format(".1%");
  const fmt_comma = d3.format(",");
     const fmt_dollar = d3.format("$,.0f");
@@ -4886,20 +6304,21 @@ if(regList.includes(level)) {
   
 
   //median Income ACS  B19013  
-  var incST = genACSUrl("profile",curYr,'B19013',1,1,'state',fipsACS)
-  var incCTY = genACSUrl("profile",curYr,'B19013',1,1,level,fipsACS)
+  var incST = genACSUrl("profile",acsYr,'B19013',1,1,'state',fipsACS)
+  var incCTY = genACSUrl("profile",acsYr,'B19013',1,1,level,fipsACS)
     
+	
   //median house value ACS B25077
-  var hvalST = genACSUrl("profile",curYr,'B25077',1,1,'state',fipsACS)
-  var hvalCTY = genACSUrl("profile",curYr,'B25077',1,1,level,fipsACS)
+  var hvalST = genACSUrl("profile",acsYr,'B25077',1,1,'state',fipsACS)
+  var hvalCTY = genACSUrl("profile",acsYr,'B25077',1,1,level,fipsACS)
   
   //pct poverty ACS B17001
-  var povST = genACSUrl("profile",curYr,'B17001',1,59,'state',fipsACS);
-  var povCTY = genACSUrl("profile",curYr,'B17001',1,59,level,fipsACS);
+  var povST = genACSUrl("profile",acsYr,'B17001',1,59,'state',fipsACS);
+  var povCTY = genACSUrl("profile",acsYr,'B17001',1,59,level,fipsACS);
   
   //pct native CO ACS B05002
-  var natST = genACSUrl("profile",curYr,'B05002',1,27,'state',fipsACS);
-  var natCTY = genACSUrl("profile",curYr,'B05002',1,27,level,fipsACS);
+  var natST = genACSUrl("profile",acsYr,'B05002',1,27,'state',fipsACS);
+  var natCTY = genACSUrl("profile",acsYr,'B05002',1,27,level,fipsACS);
 
   var prom = [d3.json(popST), d3.json(jobsST), d3.json(incST), d3.json(hvalST), d3.json(povST), d3.json(natST),
 			  d3.json(popCTY), d3.json(jobsCTY), d3.json(incCTY), d3.json(hvalCTY), d3.json(povCTY), d3.json(natCTY)
@@ -4918,25 +6337,25 @@ if(ctyList.includes(level)) {
   var popST =  'https://gis.dola.colorado.gov/lookups/components_region?reg_num=0&year=' + yrlist;
   var popCTY = 'https://gis.dola.colorado.gov/lookups/components?county=' + fips_list + '&year=' + yrlist;
   //Jobs
-  var jobsST = 'https://gis.dola.colorado.gov/lookups/jobs?county=0&year='+ curYr +'&sector=0';
-  var jobsCTY = 'https://gis.dola.colorado.gov/lookups/jobs?county='+fips_list+'&year='+ curYr +'&sector=0';
+  var jobsST = 'https://gis.dola.colorado.gov/lookups/jobs?county=0&year='+ acsYr +'&sector=0';
+  var jobsCTY = 'https://gis.dola.colorado.gov/lookups/jobs?county='+fips_list+'&year='+ acsYr +'&sector=0';
   
 
   //median Income ACS  B19013  
-  var incST = genACSUrl("profile",curYr,'B19013',1,1,'state',fipsACS)
-  var incCTY = genACSUrl("profile",curYr,'B19013',1,1,level,fipsACS)
+  var incST = genACSUrl("profile",acsYr,'B19013',1,1,'state',fipsACS)
+  var incCTY = genACSUrl("profile",acsYr,'B19013',1,1,level,fipsACS)
   
   //median house value ACS B25077
-  var hvalST = genACSUrl("profile",curYr,'B25077',1,1,'state',fipsACS)
-  var hvalCTY = genACSUrl("profile",curYr,'B25077',1,1,level,fipsACS)
+  var hvalST = genACSUrl("profile",acsYr,'B25077',1,1,'state',fipsACS)
+  var hvalCTY = genACSUrl("profile",acsYr,'B25077',1,1,level,fipsACS)
   
   //pct poverty ACS B17001
-  var povST = genACSUrl("profile",curYr,'B17001',1,59,'state',fipsACS);
-  var povCTY = genACSUrl("profile",curYr,'B17001',1,59,level,fipsACS);
+  var povST = genACSUrl("profile",acsYr,'B17001',1,59,'state',fipsACS);
+  var povCTY = genACSUrl("profile",acsYr,'B17001',1,59,level,fipsACS);
   
   //pct native CO ACS B05002
-  var natST = genACSUrl("profile",curYr,'B05002',1,27,'state',fipsACS);
-  var natCTY = genACSUrl("profile",curYr,'B05002',1,27,level,fipsACS);
+  var natST = genACSUrl("profile",acsYr,'B05002',1,27,'state',fipsACS);
+  var natCTY = genACSUrl("profile",acsYr,'B05002',1,27,level,fipsACS);
 
 
    var prom = [d3.json(popST), d3.json(jobsST), d3.json(incST), d3.json(hvalST), d3.json(povST), d3.json(natST),
@@ -4958,30 +6377,38 @@ if(ctyList.includes(level)) {
    fipsACS.push(fipsArr[i]);
   };
   
+  var popST =  'https://gis.dola.colorado.gov/lookups/components_region?reg_num=0&year=' + yrlist;
   var popCTY = 'https://gis.dola.colorado.gov/lookups/components?county=' + muni_cty + '&year=' + yrlist;
   var popMUNI = 'https://gis.dola.colorado.gov/lookups/munipophousing?year=' + yrlist + '&placefips=' + fips_list + '&compressed=no';
    
   // Jobs
-  var jobsCTY = 'https://gis.dola.colorado.gov/lookups/jobs?county='+ muni_cty+'&year='+ curYr +'&sector=0';
-  var jobsMUNI = 'https://gis.dola.colorado.gov/lookups/profilesql?table=estimates.muni_jobs_long&year='+ curYr + '&geo='+ fips_list;
+  var jobsST = 'https://gis.dola.colorado.gov/lookups/jobs?county=0&year='+ acsYr +'&sector=0';
+  var jobsCTY = 'https://gis.dola.colorado.gov/lookups/jobs?county='+ muni_cty+'&year='+ acsYr +'&sector=0';
+  var jobsMUNI = 'https://gis.dola.colorado.gov/lookups/profilesql?table=estimates.muni_jobs_long&year='+ acsYr + '&geo='+ fips_list;
  
+
  //median Income ACS  b19013001
-  var incCTY = genACSUrl("profile",curYr,'B19013',1,1,'county',muni_cty_acs);
-  var incMUNI = genACSUrl("profile",curYr,'B19013',1,1,level,fipsACS);
+  var incST = genACSUrl("profile",acsYr,'B19013',1,1,'state',fipsACS)
+  var incCTY = genACSUrl("profile",acsYr,'B19013',1,1,'county',muni_cty_acs);
+  var incMUNI = genACSUrl("profile",acsYr,'B19013',1,1,level,fipsACS);
     
  //median house value ACS B25077
-  var hvalCTY = genACSUrl("profile",curYr,'B25077',1,1,'county',muni_cty_acs)
-  var hvalMUNI = genACSUrl("profile",curYr,'B25077',1,1,level,fipsACS)
+  var hvalST = genACSUrl("profile",acsYr,'B25077',1,1,'state',fipsACS)
+  var hvalCTY = genACSUrl("profile",acsYr,'B25077',1,1,'county',muni_cty_acs)
+  var hvalMUNI = genACSUrl("profile",acsYr,'B25077',1,1,level,fipsACS)
   
  //pct poverty ACS B17001
-  var povCTY = genACSUrl("profile",curYr,'B17001',1,59,'county',muni_cty_acs);
-  var povMUNI = genACSUrl("profile",curYr,'B17001',1,59,level,fipsACS);
+  var povST = genACSUrl("profile",acsYr,'B17001',1,59,'state',fipsACS);
+  var povCTY = genACSUrl("profile",acsYr,'B17001',1,59,'county',muni_cty_acs);
+  var povMUNI = genACSUrl("profile",acsYr,'B17001',1,59,level,fipsACS);
   
   //pct native CO ACS B05002
-  var natCTY = genACSUrl("profile",curYr,'B05002',1,27,'county',muni_cty_acs);
-  var natMUNI = genACSUrl("profile",curYr,'B05002',1,27,level,fipsACS);
+  var natST = genACSUrl("profile",acsYr,'B05002',1,27,'state',fipsACS);
+  var natCTY = genACSUrl("profile",acsYr,'B05002',1,27,'county',muni_cty_acs);
+  var natMUNI = genACSUrl("profile",acsYr,'B05002',1,27,level,fipsACS);
 
-   var prom = [d3.json(popCTY), d3.json(jobsCTY), d3.json(incCTY), d3.json(hvalCTY), d3.json(povCTY), d3.json(natCTY),
+   var prom = [d3.json(popST), d3.json(jobsST), d3.json(incST), d3.json(hvalST), d3.json(povST), d3.json(natST),
+              d3.json(popCTY), d3.json(jobsCTY), d3.json(incCTY), d3.json(hvalCTY), d3.json(povCTY), d3.json(natCTY),
 			  d3.json(popMUNI), d3.json(jobsMUNI), d3.json(incMUNI), d3.json(hvalMUNI), d3.json(povMUNI), d3.json(natMUNI)
      ];
   }  //Muni
@@ -5074,7 +6501,7 @@ if(ctyList.includes(level)){
    //Population Growth 
    var tabgrST = calcpopGR(popSTdata,fips_list,'state',yrlist);
    var tabgrCTY = calcpopGR(popCTYdata,fips_list,level,yrlist);
-   var tabgrFIN =  tabgrST.concat(tabgrCTY);
+   var tabgrFIN =  tabgrCTY.concat(tabgrST);
    
    //Jobs
   var state_jobs = [];
@@ -5083,50 +6510,56 @@ if(ctyList.includes(level)){
    var cty_jobs = [];
      cty_jobs.push({'area_code' : jobsCTYdata[0].area_code, 'name' : countyName(jobsCTYdata[0].area_code), 'population_year' : jobsCTYdata[0].population_year, 'total_jobs' : +jobsCTYdata[0].total_jobs});
 
-	var jobsFIN = state_jobs.concat(cty_jobs);
+	var jobsFIN = cty_jobs.concat(state_jobs);
 
    //Median Income -- 
     var state_income = [];
-   state_income.push({'fips' : incSTdata[0].GEO1, 'name' : incSTdata[0].NAME, 'estimate' : incSTdata[0].B19013_001E, 'moe' : incSTdata[0].B19013_001M});
+   state_income.push({'fips' : incSTdata[0].GEO1, 'name' : incSTdata[0].NAME, 'est' : incSTdata[0].B19013_001E, 'moe' : incSTdata[0].B19013_001M});
 
    var county_income = [];
-   county_income.push({'fips' : incCTYdata[0].GEO2, 'name' : incCTYdata[0].NAME, 'estimate' : incCTYdata[0].B19013_001E, 'moe' : incCTYdata[0].B19013_001M});
-   var median_income = state_income.concat(county_income); 
+   county_income.push({'fips' : incCTYdata[0].GEO2, 'name' : incCTYdata[0].NAME, 'est' : incCTYdata[0].B19013_001E, 'moe' : incCTYdata[0].B19013_001M});
+   var median_income = county_income.concat(state_income); 
    
    //Median House Value
    var state_home = [];
-   state_home.push({'fips' : hvalSTdata[0].GEO1, 'name' : hvalSTdata[0].NAME, 'estimate' : hvalSTdata[0].B25077_001E, 'moe' : hvalSTdata[0].B25077_001M});
+   state_home.push({'fips' : hvalSTdata[0].GEO1, 'name' : hvalSTdata[0].NAME, 'est' : hvalSTdata[0].B25077_001E, 'moe' : hvalSTdata[0].B25077_001M});
 
    var county_home = [];
-   county_home.push({'fips' : hvalCTYdata[0].GEO2, 'name' : hvalCTYdata[0].NAME, 'estimate' : hvalCTYdata[0].B25077_001E, 'moe' : hvalCTYdata[0].B25077_001M});
-   var median_home = state_home.concat(county_home);
+   county_home.push({'fips' : hvalCTYdata[0].GEO2, 'name' : hvalCTYdata[0].NAME, 'est' : hvalCTYdata[0].B25077_001E, 'moe' : hvalCTYdata[0].B25077_001M});
+   var median_home = county_home.concat(state_home);
  
    //pct poverty
    var povertyST = procPCT(povSTdata,fipsArr,'B17001','state',nameArr);
    var povertyCTY = procPCT(povCTYdata,fipsArr,'B17001',level,nameArr);
-   var poverty  = povertyST.concat(povertyCTY);
+   var poverty  = povertyCTY.concat(povertyST);
    
    //pct native
    var coNativeST = procPCT(natSTdata,fipsArr,'B05002','county',nameArr);
    var coNativeCTY = procPCT(natCTYdata,fipsArr,'B05002',level,nameArr);
-   var coNative = coNativeST.concat(coNativeCTY);
+   var coNative = coNativeCTY.concat(coNativeST);
 }; //level = county   
 
 if(muniList.includes(level)){
-
-    var popCTYdata = data[0];
-    var jobsCTYdata = data[1];
-    var incCTYdata = acsPrep(data[2]);
-    var hvalCTYdata = acsPrep(data[3]);
-    var povCTYdata = acsPrep(data[4]);
-    var natCTYdata = acsPrep(data[5]);
+    var popSTdata = data[0];
+    var jobsSTdata = data[1];
+    var incSTdata = acsPrep(data[2]);
+    var hvalSTdata = acsPrep(data[3]);
+    var povSTdata = acsPrep(data[4]);
+    var natSTdata = acsPrep(data[5]);
+	
+    var popCTYdata = data[6];
+    var jobsCTYdata = data[7];
+    var incCTYdata = acsPrep(data[8]);
+    var hvalCTYdata = acsPrep(data[9]);
+    var povCTYdata = acsPrep(data[10]);
+    var natCTYdata = acsPrep(data[11]);
     
-	var popMUNIdata = data[6];
-    var jobsMUNIdata = data[7];
-    var incMUNIdata = acsPrep(data[8]);
-    var hvalMUNIdata = acsPrep(data[9]);
-    var povMUNIdata = acsPrep(data[10]);
-    var natMUNIdata = acsPrep(data[11]);
+	var popMUNIdata = data[12];
+    var jobsMUNIdata = data[13];
+    var incMUNIdata = acsPrep(data[14]);
+    var hvalMUNIdata = acsPrep(data[15]);
+    var povMUNIdata = acsPrep(data[16]);
+    var natMUNIdata = acsPrep(data[17]);
      
 
 //removing multi-county 
@@ -5136,44 +6569,56 @@ if(popMUNIdata.length > 2){
 	};
 
     //Population Growth 
+   var tabgrST = calcpopGR(popSTdata,fips_list,'state',yrlist);
    var tabgrCTY = calcpopGR(popCTYdata,fips_list,'County',yrlist);
    var tabgrMUNI = calcpopGR(popMUNIdata,fips_list,level,yrlist);
-   var tabgrFIN =  tabgrCTY.concat(tabgrMUNI);
+   var tabgrFIN =  tabgrMUNI.concat(tabgrCTY, tabgrST);
 
    //Jobs
+  var st_jobs = [];
+    st_jobs.push({'area_code' : jobsSTdata[0].area_code, 'name' : 'Colorado', 'population_year' : jobsSTdata[0].population_year, 'total_jobs' : +jobsSTdata[0].total_jobs});
+
   var cty_jobs = [];
     cty_jobs.push({'area_code' : jobsCTYdata[0].area_code, 'name' : countyName(jobsCTYdata.area_code), 'population_year' : jobsCTYdata[0].population_year, 'total_jobs' : +jobsCTYdata[0].total_jobs});
 
    var muni_jobs = [];
      muni_jobs.push({'area_code' : +jobsMUNIdata[0].placefips, 'name' : muniName(jobsMUNIdata[0].placefips), 'population_year' : +jobsMUNIdata[0].year, 'total_jobs' : +jobsMUNIdata[0].jobs});
 
-	var jobsFIN = cty_jobs.concat(muni_jobs);
+	var jobsFIN = muni_jobs.concat(cty_jobs,st_jobs);
     
    //Median Income
+   var st_income = [];
+   st_income.push({'fips' : incSTdata[0].GEO2, 'name' : incSTdata[0].NAME, 'est' : incSTdata[0].B19013_001E, 'moe' : incSTdata[0].B19013_001M});
+
    var county_income = [];
-   county_income.push({'fips' : incCTYdata[0].GEO2, 'name' : incCTYdata[0].NAME, 'eCTYimate' : incCTYdata[0].B19013_001E, 'moe' : incCTYdata[0].B19013_001M});
+   county_income.push({'fips' : incCTYdata[0].GEO2, 'name' : incCTYdata[0].NAME, 'est' : incCTYdata[0].B19013_001E, 'moe' : incCTYdata[0].B19013_001M});
 
    var muni_income = [];
-   muni_income.push({'fips' : incMUNIdata[0].GEO2, 'name' : incMUNIdata[0].NAME, 'eCTYimate' : incMUNIdata[0].B19013_001E, 'moe' : incMUNIdata[0].B19013_001M});
-   var median_income = county_income.concat(muni_income);
-   
+   muni_income.push({'fips' : incMUNIdata[0].GEO2, 'name' : incMUNIdata[0].NAME, 'est' : incMUNIdata[0].B19013_001E, 'moe' : incMUNIdata[0].B19013_001M});
+   var median_income = muni_income.concat(county_income,st_income);
+      
    //Median House Value
+   var st_home = [];
+   st_home.push({'fips' : hvalSTdata[0].GEO2, 'name' : hvalSTdata[0].NAME, 'est' : hvalSTdata[0].B25077_001E, 'moe' : hvalSTdata[0].B25077_001M});
+
    var county_home = [];
-   county_home.push({'fips' : hvalCTYdata[0].GEO2, 'name' : hvalCTYdata[0].NAME, 'eCTYimate' : hvalCTYdata[0].B25077_001E, 'moe' : hvalCTYdata[0].B25077_001M});
+   county_home.push({'fips' : hvalCTYdata[0].GEO2, 'name' : hvalCTYdata[0].NAME, 'est' : hvalCTYdata[0].B25077_001E, 'moe' : hvalCTYdata[0].B25077_001M});
 
    var muni_home = [];
-   muni_home.push({'fips' : hvalMUNIdata[0].GEO2, 'name' : hvalMUNIdata[0].NAME, 'eCTYimate' : hvalMUNIdata[0].B25077_001E, 'moe' : hvalMUNIdata[0].B25077_001M});
-   var median_home = county_home.concat(muni_home);
+   muni_home.push({'fips' : hvalMUNIdata[0].GEO2, 'name' : hvalMUNIdata[0].NAME, 'est' : hvalMUNIdata[0].B25077_001E, 'moe' : hvalMUNIdata[0].B25077_001M});
+   var median_home = muni_home.concat(county_home, st_home);
    
    //pct poverty
-   var povertyCTY = procPCT(povCTYdata,fipsArr,'B17001','state',nameArr);
-   var povertyMUNI = procPCT(povMUNIdata,fipsArr,'B17001','county',nameArr);
-   var poverty  = povertyCTY.concat(povertyMUNI);
+   var povertyST = procPCT(povSTdata,fipsArr,'B17001','state',nameArr);
+   var povertyCTY = procPCT(povCTYdata,fipsArr,'B17001','county',nameArr);
+   var povertyMUNI = procPCT(povMUNIdata,fipsArr,'B17001',level,nameArr);
+   var poverty  = povertyMUNI.concat(povertyCTY,povertyST);
    
    //pct native
+   var coNativeST = procPCT(natSTdata,fipsArr,'B05002','state',nameArr);
    var coNativeCTY = procPCT(natCTYdata,fipsArr,'B05002','county',nameArr);
    var coNativeMUNI = procPCT(natMUNIdata,fipsArr,'B05002',level,nameArr);
-   var coNative = coNativeCTY.concat(coNativeMUNI);
+   var coNative = coNativeMUNI.concat(coNativeCTY,coNativeST);
 
 
 }; //level = municipality   
@@ -5211,47 +6656,48 @@ var row_labels = [
        {'title': 'Population Change (' + prevyr + ' to ' + curyr + ')*', 'URL_link' : muniList.includes(level) ? 'https://coloradodemography.github.io/population/data/muni-pop-housing/' : 'https://coloradodemography.github.io/population/data/county-data-lookup/'},
        {'title': 'Percentage Change (' + prevyr + ' to ' + curyr + ')*', 'URL_link' : muniList.includes(level) ? 'https://coloradodemography.github.io/population/data/muni-pop-housing/' : 'https://coloradodemography.github.io/population/data/county-data-lookup/'},
        {'title': 'Total Employment (' + curyr + ')*', 'URL_link': 'https://coloradodemography.github.io/economy-labor-force/data/jobs-by-sector/#jobs-by-sector-naics'},
-       {'title': 'Median Household Income^', 'URL_link' :  genCEDSCIUrl(level,'B19013',curyr,fipsACS)},
-       {'title': 'Median Home Value^', 'URL_link' : genCEDSCIUrl(level,'B25077',curyr,fipsACS)},
-       {'title': 'Percentage of Population with incomes below poverty line.^', 'URL_link' : genCEDSCIUrl(level,'B17001',curyr,fipsACS)},
-       {'title': 'Percentage of Population born in Colorado^', 'URL_link' : genCEDSCIUrl(level,'B05002',curyr,fipsACS)}
+       {'title': 'Median Household Income^', 'URL_link' :  genCEDSCIUrl(level,'B19013',acsYr,fipsACS)},
+       {'title': 'Median Home Value^', 'URL_link' : genCEDSCIUrl(level,'B25077',acsYr,fipsACS)},
+       {'title': 'Percentage of Population with incomes below poverty line.^', 'URL_link' : genCEDSCIUrl(level,'B17001',acsYr,fipsACS)},
+       {'title': 'Percentage of Population born in Colorado^', 'URL_link' : genCEDSCIUrl(level,'B05002',acsYr,fipsACS)}
     ];
 
-var tab_obj = genSubjTab(level, outData, 1,row_labels,false);
-
+var tab_obj = genSubjTab(level, outData,bkMark.id,row_labels,false);
 
 var fileName = "Basic Statistics " + nameArr[0];
-pgSetup(level,"table",outputPro,bkMark,false,false,"", "", 0)
+pgSetupPro(level,"table",outputPro,bkMark,false,false,fipsArr, nameArr, 0)
 //Table Footer
 
-var acsyr1 = curyr - 4;
+var acsyr1 = acsYr - 4;
 
 var tblfoot = [
                ["Sources: * Colorado State Demography Office"],
-               ['^U.S. Census Bureau (' + fmt_yr(curyr) + '). '+fmt_yr(acsyr1) + '-' + fmt_yr(curyr) +' American Community Survey 5-year data set.'],
+               ['^U.S. Census Bureau (' + fmt_yr(curyr) + '). '+fmt_yr(acsyr1) + '-' + fmt_yr(acsYr) +' American Community Survey 5-year data set.'],
                ['Print Date : ' + fmt_date(new Date)]
       ];
 	  
 
 var ftrString = "<tfoot><tr>";
 for(i = 0; i < tblfoot.length; i++){
-     ftrString = ftrString + "<tr><td colspan='5'>" + tblfoot[i] + "</td></tr>";
+	if(muniList.includes(level)) {
+     ftrString = ftrString + "<tr><td colspan='7'>" + tblfoot[i] + "</td></tr>";
+	} else {
+	 ftrString = ftrString + "<tr><td colspan='5'>" + tblfoot[i] + "</td></tr>";
+	}
  }; 
 ftrString = ftrString + "</tr></tfoot>";
 
-var ftrMsg = "Sources: * Colorado State Demography Office " + '^U.S. Census Bureau (' + fmt_yr(curyr) + '). '+fmt_yr(acsyr1) + '-' + fmt_yr(curyr) +' American Community Survey 5-year data set.' +
+var ftrMsg = "Sources: * Colorado State Demography Office " + '^U.S. Census Bureau (' + fmt_yr(curyr) + '). '+fmt_yr(acsyr1) + '-' + fmt_yr(acsYr) +' American Community Survey 5-year data set.' +
    "Print Date : " + fmt_date(new Date);
-   
+
 //Initial Table
 var tabVal = 0;
 
-
-	//selecting initial dropdown values
-
+if(regList.includes(level)){
    var btndown = document.getElementById("increment12");
    var btnup = document.getElementById("increment22");
 
-DTtab("tabDiv2",tab_obj,tabVal,row_labels,ftrString,tblfoot,"summtab",fileName,bkMark.title) 
+DTtab("TabDiv2",tab_obj,tabVal,row_labels,ftrString,tblfoot,"summtabDT",fileName,bkMark.title) 
 
 
    btndown.addEventListener('click', function() {
@@ -5259,67 +6705,63 @@ DTtab("tabDiv2",tab_obj,tabVal,row_labels,ftrString,tblfoot,"summtab",fileName,b
 	 if(tabVal < 0) {
 		tabVal = 5
 	 }
-		   DTtab("tabDiv2",tab_obj,tabVal,row_labels,ftrString,tblfoot,"summtab",fileName,bkMark.title);
+		   DTtab("TabDiv2",tab_obj,tabVal,row_labels,ftrString,tblfoot,"summtabDT",fileName,bkMark.title);
    });
   btnup.addEventListener('click', function() {
      tabVal = tabVal + 1;
 	 if(tabVal > 5) {
 		tabVal = 0
 	 }
-		   DTtab("tabDiv2",tab_obj,tabVal,row_labels,ftrString,tblfoot,"summtab",fileName,bkMark.title);
+		   DTtab("TabDiv2",tab_obj,tabVal,row_labels,ftrString,tblfoot,"summtabDT",fileName,bkMark.title);
     });
-
+} else {
+	DTtab("TabDiv2",tab_obj,tabVal,row_labels,ftrString,tblfoot,"summtabDT",fileName,bkMark.title);
+}
   }); //End of Promise
 };  //End of genSel1Tab
 
 //genSel1display outputs objects for the first panel of the profile display
-function genSel1display(geotype, fipsArr, names, curyear, PRO_1, PRO_2, PRO_3, PRO_4) {
-
+function genSel1display(geotype, fipsArr, names, curyear, acsyr, PRO_1, PRO_2, PRO_3, PRO_4) {
    PRO_1.innerHTML = "";
    PRO_2.innerHTML = "";
    PRO_3.innerHTML = "";
    PRO_4.innerHTML = "";
-
+   
+ 
 //Generate Bookmark array
-var bkmarkArr = [{title : names[0] + " Basic Statistics", id : "map"},
-	{title: "Summary Statistics Table", id : "summtab"}
+var bkMarkArr = [{title : names[0] + " Basic Statistics", id : "map", srctxt : "Selection Map", srclink : ""},
+	{title: "Summary Statistics Table", id : "summtab", srctxt : "Summary Statistics Table", srclink : ""}
 	]
 
-insertBkmark(bkmarkArr);
-
-  genSel1map(geotype, fipsArr, names, PRO_1.id, bkmarkArr[0]);
-  genSel1tab(geotype, fipsArr, names, bkmarkArr[1], PRO_2.id,curyear);
+insertBkmark(bkMarkArr);
+debugger;
+document.body.style.backgroundColor = "red";
+  genSel1map(geotype, fipsArr, names, PRO_1.id, bkMarkArr[0]);
+  genSel1tab(geotype, fipsArr, names, bkMarkArr[1], PRO_2.id,curyear, acsyr);
+document.body.style.backgroundColor = "white";
 };
 
 //genSel2display  Outputs objects for the Population Trends panel of the profile... 
 function genSel2display(geotype, fipsArr, names, curyear, PRO_1, PRO_2, PRO_3, PRO_4) {
   const fmt_date = d3.timeFormat("%B %d, %Y");
- const fmt_dec = d3.format(".3");
- const fmt_pct = d3.format(".1%");
- const fmt_comma = d3.format(",");
-    const fmt_dollar = d3.format("$,.0f");
-    const fmt_yr = d3.format("00");
-
- const regList = ['Region', 'Regional Comparison'];
- const ctyList = ['County', 'County Comparison'];
-    const muniList = ['Municipality', 'Municipal Comparison'];
- const placeList = ['Census Designated Place', 'Census Designated Place Comparison'];
-    const range = (min, max) => Array.from({ length: max - min + 1 }, (_, i) => min + i);
-
-//Generate Bookmark array
-var bkmarkArr = [{title : 'Population Growth Table', id : 'popgr'},
-		{title : 'Population Estimate Chart', id : 'popest'},
-		{title : 'Population Forecast Chart', id : 'popfor'},
-		{title : 'Components of Change Chart',	id : 'popcoc'}
-	]
-
-insertBkmark(bkmarkArr);
+  const fmt_dec = d3.format(".2f");
+  const fmt_pct = d3.format(".1%");
+  const fmt_comma = d3.format(",");
+  const fmt_dollar = d3.format("$,.0f");
+  const fmt_yr = d3.format("00");
+  const regList = ['Region', 'Regional Comparison'];
+  const ctyList = ['County', 'County Comparison'];
+  const muniList = ['Municipality', 'Municipal Comparison'];
+  const placeList = ['Census Designated Place', 'Census Designated Place Comparison'];
+  const range = (min, max) => Array.from({ length: max - min + 1 }, (_, i) => min + i);
 
 //prepping general values 
  var yr_list = range(1985,curyear); 
- var forc_yrs = range(2020,2050); 
+ var forc_yrs = range(curyear,2050); 
  var state_list = [1,3,5,7,9,11,13,14,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49,51,53,55,57,59,61,63,65,67,69,71,73,75,77,79,81,83,85,87,89,91,93,95,97,99,101,103,105,107,109,111,113,115,117,119,121,123,125];
- var stateurl = "https://gis.dola.colorado.gov/lookups/profile?county=" + state_list + "&year=" + yr_list + "&vars=totalpopulation,births,deaths,netmigration";
+ var esturl_state = "https://gis.dola.colorado.gov/lookups/profile?county=" + state_list + "&year=" + yr_list + "&vars=totalpopulation,births,deaths,netmigration";
+  var forcurl_state = "https://gis.dola.colorado.gov/lookups/sya?county=" + state_list + "&year=" + forc_yrs + "&choice=single&group=3" 
+  
 //Clear out Divs
 
   PRO_1.innerHTML = "";
@@ -5329,17 +6771,35 @@ insertBkmark(bkmarkArr);
 
 //Regions
 if(regList.includes(geotype)){
-  var fips_tmp = regionCOL(parseInt(fipsArr));
+	//Generate Bookmark array
+var bkMarkArr = [{title : 'Population Growth Table', id : 'popgr', srctxt : "Population Growth Table", srclink : "https://coloradodemography.github.io/population/data/regional-data-lookup/"},
+		{title : 'Regional Population Estimates', id : 'popest', srctxt : "Regional Population Estimates", srclink : "https://coloradodemography.github.io/population/data/regional-data-lookup/"},
+		{title : 'Regional Population Forecasts', id : 'popfor', srctxt : "Regional Population Forecasts", srclink : "https://coloradodemography.github.io/population/data/sya-regions/"},
+		{title : 'Regional Components of Change',	id : 'popcoc', srctxt : "Regional Components of Change", srclink : "https://coloradodemography.github.io/births-deaths-migration/data/components-change-regions/"}
+	]
+
+insertBkmark(bkMarkArr);
+
+   var fips_tmp = regionCOL(parseInt(fipsArr));
      var fips_list =  fips_tmp[0].fips.map(x => parseInt(x, 10));
   var ctyurl = "https://gis.dola.colorado.gov/lookups/profile?county=" + fips_list + "&year=" + yr_list + "&vars=totalpopulation,births,deaths,netmigration";
         var forcurl = "https://gis.dola.colorado.gov/lookups/sya?county=" + fips_list + "&year=" + forc_yrs + "&choice=single&group=3"
+ 
   
-  var prom = [d3.json(ctyurl),d3.json(forcurl),d3.json(stateurl)];
+  var prom = [d3.json(ctyurl),d3.json(forcurl),d3.json(esturl_state), d3.json(forcurl_state)];
   };
 
 
 //Counties
 if(ctyList.includes(geotype)) {
+var bkMarkArr = [{title : 'Population Growth Table', id : 'popgr', srctxt : "County Population Estimates", srclink : "https://coloradodemography.github.io/population/data/county-data-lookup/"},
+		{title : 'County Population Estimates', id : 'popest', srctxt : "County Population Estimates", srclink : "https://coloradodemography.github.io/population/data/county-data-lookup/"},
+		{title : 'County Population Forecasts', id : 'popfor', srctxt : "County Population Forecasts", srclink : "https://coloradodemography.github.io/population/data/sya-county/#county-population-by-single-year-of-age"},
+		{title : 'County Components of Change',	id : 'popcoc', srctxt : "County Components of Change", srclink : "https://coloradodemography.github.io/births-deaths-migration/data/components-change/#components-of-change"}
+	]
+
+insertBkmark(bkMarkArr);	
+
  if(fipsArr == "000") {
       fips_list = [1,3,5,7,9,11,13,14,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49,51,53,55,57,59,61,63,65,67,69,71,73,75,77,79,81,83,85,87,89,91,93,95,97,99,101,103,105,107,109,111,113,115,117,119,121,123,125];
     } else {
@@ -5348,39 +6808,59 @@ if(ctyList.includes(geotype)) {
 
  var ctyurl = "https://gis.dola.colorado.gov/lookups/profile?county=" + fips_list + "&year=" + yr_list + "&vars=totalpopulation,births,deaths,netmigration";
     var forcurl = "https://gis.dola.colorado.gov/lookups/sya?county=" + fips_list + "&year=" + forc_yrs + "&choice=single&group=3" 
- var prom = [d3.json(ctyurl),d3.json(forcurl),d3.json(stateurl)];
+ var prom = [d3.json(ctyurl),d3.json(forcurl),d3.json(esturl_state), d3.json(forcurl_state)];
 }; 
 
-//Municipalities -- Only for the growth table
+//Municipalities -- Only for the growth table  
 if(muniList.includes(geotype)){
+var bkMarkArr = [{title : 'Population Growth Table', id : 'popgr', srctxt : "Municipal Population Estimates", srclink : "https://coloradodemography.github.io/population/data/county-muni-timeseries/"},
+		{title : 'Municipal Population Estimates', id : 'popest', srctxt : "Municipal Population Estimates", srclink : "https://coloradodemography.github.io/population/data/county-muni-timeseries/"},
+	]
 
+insertBkmark(bkMarkArr);	
     var munifips = parseInt(fipsArr);   
     var ctyfips = parseInt(muni_county(fipsArr));
     var muniurl = 'https://gis.dola.colorado.gov/lookups/countymuni?placefips='+ munifips + '&year=' + yr_list +'&compressed=no';
  var ctyurl = "https://gis.dola.colorado.gov/lookups/profile?county=" + ctyfips + "&year=" + yr_list + "&vars=totalpopulation,births,deaths,netmigration";
     var forcurl = "https://gis.dola.colorado.gov/lookups/sya?county=" + ctyfips + "&year=" + forc_yrs + "&choice=single&group=3" 
- var prom = [d3.json(ctyurl),d3.json(forcurl),d3.json(stateurl),d3.json(muniurl)];
+ var prom = [d3.json(ctyurl),d3.json(forcurl),d3.json(esturl_state),d3.json(muniurl)];
 };
 
 
 Promise.all(prom).then(data =>{
 // Processing State Table
-var columnsToSum = ['births', 'deaths', 'totalpopulation'];
+var columnsToSum = ['births', 'deaths', 'netmigration', 'totalpopulation'];
 
 //Rolling up data for table
-var state_sum =  d3.rollup(data[2], v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year)
+var estsum_state =  d3.rollup(data[2], v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year)
 
 //Flatten Arrays for output
-var state_data = [];
+var state_est = [];
+var state_coc = [];
 var state_gr_data = [];
-for (let [key, value] of state_sum) {
-  state_data.push({'fips' : 0, 'name' : 'Colorado', 'year' : key, 'totalpopulation' : value.totalpopulation});
+for (let [key, value] of estsum_state) {
+  state_est.push({'fips' : 0, 'name' : 'Colorado', 'year' : key, 'totalpopulation' : value.totalpopulation});
+  state_coc.push({'fips' : 0, 'name' : 'Colorado', 'year' : key, 'totalpopulation' : value.totalpopulation, 
+                  'births' : value.births, 'deaths' : value.deaths, 'netmigrarion' : value.netmigration});
+     };
+ 
+// Processing State forecast
+var columnsToSum = ['totalpopulation'];
+
+//Rolling up data for table
+var foresum_state =  d3.rollup(data[3], v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year)
+
+//Flatten Arrays for output
+var state_fore = [];
+
+for (let [key, value] of foresum_state) {
+  state_fore.push({'fips' : 0, 'name' : 'Colorado', 'year' : key, 'totalpopulation' : value.totalpopulation});
      };
  
 
-
 //Growth Table
 // Generate data set for output Table
+
 var sel_yr = range(1990,curyear);
 var sel_yr5 = [];
 for(i = 0; i < sel_yr.length;i++){
@@ -5388,21 +6868,26 @@ for(i = 0; i < sel_yr.length;i++){
   sel_yr5.push(sel_yr[i]);
  }
 };
+
+
 if(sel_yr5[sel_yr5.length] != curyear) {
- sel_yr5.push(curyear);
+	var val5 = sel_yr5.pop();
+	 for(i = val5; i <= curyear;i++){
+		 sel_yr5.push(i);
+	 }
 };
 
 var cty_gr_data = data[0].filter(function(d) {return sel_yr5.includes(d.year)});
-var state_gr_data = state_data.filter(function(d) {return sel_yr5.includes(d.year)});
+var state_gr_data = state_est.filter(function(d) {return sel_yr5.includes(d.year)});
 
 var tab_cty_data = []
 for(i = 0; i< cty_gr_data.length; i++){
   tab_cty_data.push({ 'fips' : cty_gr_data[i].countyfips, 'name' : countyName(cty_gr_data[i].countyfips), 'year' : cty_gr_data[i].year, 'totalpopulation' : +cty_gr_data[i].totalpopulation})
 }
 
-
 var fipsList = cty_gr_data[0].countyfips
 var ctyNameList = countyName(cty_gr_data[0].countyfips)
+
 //Regional Table
 if(regList.includes(geotype)) {
 var fileName = "Population Growth Table " + regionName(fipsArr);
@@ -5417,10 +6902,11 @@ for (let [key, value] of tab_reg_sum) {
   tab_reg_data.push({'fips' : regionNum, 'name' : regionName(fipsArr), 'year' : key, 'totalpopulation' : value});
     };
 
-var tab_gr = state_gr_data.concat(tab_reg_data).concat(tab_cty_data) //This is 5 year data
+var tab_gr = state_gr_data.concat(tab_reg_data,tab_cty_data) //This is 5 year data
 
 //Estimates data
 //Creating Single year data for the places and counties
+
 var est_cty_data = []
 for(i = 0; i< data[0].length; i++){
   est_cty_data.push({ 'fips' : data[0][i].countyfips, 'name' : countyName(data[0][i].countyfips), 'year' : data[0][i].year, 'totalpopulation' : +data[0][i].totalpopulation})
@@ -5435,12 +6921,15 @@ for (let [key, value] of est_reg_sum) {
   est_reg_data.push({'fips' : regionNum, 'name' : regionName(fipsArr), 'year' : key, 'totalpopulation' : value});
     };
 
-var est_data = est_reg_data.concat(est_cty_data) //This is single year data
+var est_data = state_est.concat(est_reg_data,est_cty_data) //This is single year data
+
+
 var fipsList = [...new Set(est_data.map(d => d.fips))];
 var ctyNameList = [...new Set(est_data.map(d => d.name))];
 
 //Generating Forecast data   
 //This is Forecast by SYA
+
 var forec_data = [];
 for(i = 0; i< data[1].length; i++){
   forec_data.push({ 'fips' : data[1][i].countyfips, 'name' : countyName(data[1][i].countyfips), 'year' : data[1][i].year, 'age' : +data[1][i].age, 'totalpopulation' : +data[1][i].totalpopulation})
@@ -5463,7 +6952,7 @@ for (let[key2, value2] of value) {
 }
 };
 
-var forec_data = forec_reg_data.concat(forec_cty_data);
+var forec_data = state_fore.concat(forec_reg_data, forec_cty_data);
 
 //Components of Change
 var columnsToSum = ['births', 'deaths', 'netmigration', 'totalpopulation'];
@@ -5483,22 +6972,23 @@ for (let [key, value] of coc_reg_sum) {
                'netmigration' : value.netmigration, 'totalpopulation' : value.totalpopulation});
     };
 
-var coc_data = coc_reg_data.concat(coc_cty_data) //This is single year data
+var coc_data = state_coc.concat(coc_reg_data,coc_cty_data) //This is single year data
 
 //Output
 
-growth_tab(geotype, tab_gr,bkmarkArr[0],fileName, PRO_1);  
+growth_tab(geotype, tab_gr,bkMarkArr[0],fileName, PRO_1.id);  
 //Plots
-genRegEstSetup(geotype,est_data,PRO_2.id,bkmarkArr[1], fipsList, ctyNameList);
-genRegForeSetup(geotype,forec_data,PRO_3.id, bkmarkArr[2],fipsList, ctyNameList);
-genRegcocSetup(geotype,coc_data,PRO_4.id, bkmarkArr[3],fipsList, ctyNameList);
+//Add Colorado to fipsList and ctyNameList
+
+var divArr = [PRO_2.id, PRO_3.id, PRO_4.id];
+genRegPopSetup(geotype,est_data, forec_data, coc_data, divArr,bkMarkArr, fipsList, ctyNameList);
 } //Regional
 
 //County -- Need Growth Tab, Estimates, Forecasts, COC
 if(ctyList.includes(geotype)) {
  var fileName = "Population Growth Table " + countyName(parseInt(fipsArr));
 
-var tab_gr = state_gr_data.concat(tab_cty_data) //This is 5 year data
+var tab_gr = tab_cty_data.concat(state_gr_data) //This is 5 year data
 
 //Estimates data
 //Creating Single year data for the places and counties
@@ -5540,10 +7030,10 @@ for(i = 0; i< data[0].length; i++){
 
 var coc_data = coc_cty_data; //This is single year data
 
- growth_tab(geotype, tab_gr,bkmarkArr[0],fileName, PRO_1);  
- estPlot(est_data, "profile", geotype, PRO_2.id, bkmarkArr[1], curyear, fipsList, ctyNameList);
- var fore_Data = forecastPlot(data[1], "profile", PRO_3.id, bkmarkArr[2], curyear, fipsList, ctyNameList);
- cocPlot(data[0],"profile", PRO_4.id, bkmarkArr[3], curyear, fipsList, ctyNameList);
+ growth_tab(geotype, tab_gr,bkMarkArr[0],fileName, PRO_1.id);  
+ estPlot(est_data, "profile", geotype, PRO_2.id, bkMarkArr[1], curyear, fipsList, ctyNameList);
+ var fore_Data = forecastPlot(data[1], "profile", geotype, PRO_3.id, bkMarkArr[2], curyear, fipsList, ctyNameList);
+ cocPlot(data[0],"profile", geotype, PRO_4.id, bkMarkArr[3], curyear, fipsList, ctyNameList);
 }; //County
 
 
@@ -5565,7 +7055,7 @@ var tab_muni_data = muni_raw_data.filter(function(d) {return sel_yr5.includes(d.
 var fileName = "Population Growth Table " + muniName(parseInt(fipsArr));
 
 
-var tab_gr = state_gr_data.concat(tab_cty_data).concat(tab_muni_data) //This is 5 year data
+var tab_gr = tab_muni_data.concat(tab_cty_data, state_gr_data) //This is 5 year data
 
 //Estimates data
 //Creating Single year data for the places and counties
@@ -5575,42 +7065,13 @@ for(i = 0; i< data[0].length; i++){
 }
 
 
-var est_data = est_cty_data; //This is single year data
+var est_data = tab_muni_data; //This is single year data
 var fipsList = [...new Set(est_data.map(d => d.fips))];
 var ctyNameList = [...new Set(est_data.map(d => d.name))];
 
-//Generating Forecast data   
-//This is Forecast by SYA
-var forec_data = [];
-for(i = 0; i< data[1].length; i++){
-  forec_data.push({ 'fips' : data[1][i].countyfips, 'name' : countyName(data[1][i].countyfips), 'year' : data[1][i].year, 'age' : +data[1][i].age, 'totalpopulation' : +data[1][i].totalpopulation})
-}
-
-//rolling up for counties 
-var forec_cty_sum = d3.rollup(forec_data, v => d3.sum(v, d => d.totalpopulation), d => d.year, d => d.fips);
-//Flatten Arrays for output
-var forec_cty_data = [];
-for (let [key, value] of forec_cty_sum) {
-  forec_cty_data.push({'fips' : fipsArr, 'name' : countyName(fipsArr), 'year' : key, 'totalpopulation' : value});
-    };
-
-var forec_data = forec_cty_data;
-
-//Components of Change
-var columnsToSum = ['births', 'deaths', 'netmigration'];
-var coc_cty_data = []
-for(i = 0; i< data[0].length; i++){
-  coc_cty_data.push({ 'fips' : data[0][i].countyfips, 'name' : countyName(data[0][i].countyfips), 'year' : data[0][i].year, 
-  'births' : +data[0][i].births, 'deaths' : +data[0][i].deaths, 'netmigration' : +data[0][i].netmigration})
-}
-
-
-var coc_data = coc_cty_data; //This is single year data
+ growth_tab(geotype, tab_gr,bkMarkArr[0],fileName, PRO_1.id);  
+ estPlot(est_data, "profile", geotype, PRO_2.id, bkMarkArr[1],curyear, fipsList, ctyNameList);
  
- growth_tab(geotype, tab_gr,bkmarkArr[0],fileName, PRO_1);  
- estPlot(est_data, "profile", geotype, PRO_2.id, bkmarkArr[1],curyear, fipsList, ctyNameList);
- var fore_Data = forecastPlot(data[1], "profile", PRO_3.id, bkmarkArr[2],curyear, fipsList, ctyNameList);
- cocPlot(data[0],"profile", PRO_4.id,bkmarkArr[3], curyear, fipsList, ctyNameList);
 }; //Municipality
 }); //End of Promise
 
@@ -5619,18 +7080,20 @@ var coc_data = coc_cty_data; //This is single year data
 
 //genSel3display  Produces age panel charts, Age estimates and forecasts facet chart, and Age Pyramid
 function genSel3display(geotype, fipsArr, names, curyear, PRO_1, PRO_2, PRO_3, PRO_4) {
-  const fmt_date = d3.timeFormat("%B %d, %Y");
- const fmt_dec = d3.format(".3");
- const fmt_pct = d3.format(".1%");
- const fmt_comma = d3.format(",");
+    const fmt_date = d3.timeFormat("%B %d, %Y");
+    const fmt_dec = d3.format(".2f");
+    const fmt_pct = d3.format(".1%");
+    const fmt_comma = d3.format(",");
     const fmt_dollar = d3.format("$,.0f");
     const fmt_yr = d3.format("00");
 
- const regList = ['Region', 'Regional Comparison'];
- const ctyList = ['County', 'County Comparison'];
+    const regList = ['Region', 'Regional Comparison'];
+    const ctyList = ['County', 'County Comparison'];
     const muniList = ['Municipality', 'Municipal Comparison'];
- const placeList = ['Census Designated Place', 'Census Designated Place Comparison'];
+    const placeList = ['Census Designated Place', 'Census Designated Place Comparison'];
     const range = (min, max) => Array.from({ length: max - min + 1 }, (_, i) => min + i);
+	
+
 
 //Clear out Divs
 
@@ -5649,34 +7112,28 @@ if(regList.includes(geotype)){
   fips_list = [parseInt(fipsArr)];
  };  
 
-
-
- 
-//Estimages and Forecasts --For Regions and Counties
-var acsyr = 0;  //The dummy year value
-   var forc_yrs = curyear + "," + (curyear+ 10); 
- var forcurlCO = "https://gis.dola.colorado.gov/lookups/sya_regions?reg_num=0&year=" + forc_yrs + "&choice=single"
- var forcurlCty = "https://gis.dola.colorado.gov/lookups/sya?county=" + fips_list + "&year=" + forc_yrs + "&choice=single&group=3"
-
-var prom = [d3.json(forcurlCO), d3.json(forcurlCty)];
-
-//Estimages and Forecasts --For muniipalities, take  from the ACS No forecast
+//Estimates  --For muniipalities, take  from the ACS No forecast
 if(muniList.includes(geotype)){
  var ctynum = muni_county(fipsArr);
- var forcurlCty = "https://api.census.gov/data/"+ curyear + "/acs/acs5?get=group(B01001)&for=county:" + ctynum +"&in=state:08&key=08fe07c2a7bf781b7771d7cccb264fe7ff8965ce";
-  var forcurlMuni = "https://api.census.gov/data/"+ curyear + "/acs/acs5?get=group(B01001)&for=place:" + fipsArr +"&in=state:08&key=08fe07c2a7bf781b7771d7cccb264fe7ff8965ce";
-    var prom = [d3.json(forcurlCty), d3.json(forcurlMuni)];
+ var forcurlCty = genACSUrl("profile",curyear,'B01001',1,49,'County',ctynum);
+ var forcurlMuni = genACSUrl("profile",curyear,'B01001',1,49,geotype,fipsArr);
+ var prom = [d3.json(forcurlCty), d3.json(forcurlMuni)];
+} else {
+  var forc_yrs = curyear + "," + (curyear+ 10); 
+  var forcurlCO = "https://gis.dola.colorado.gov/lookups/sya_regions?reg_num=0&year=" + forc_yrs + "&choice=single"
+  var forcurlCtySDO = "https://gis.dola.colorado.gov/lookups/sya?county=" + fips_list + "&year=" + forc_yrs + "&choice=single&group=3"
+  var prom = [d3.json(forcurlCO), d3.json(forcurlCtySDO)];
 }
 
 Promise.all(prom).then(data =>{
 //Selecting year range
 if(muniList.includes(geotype)){
-     var cty_age_pct = acsAgePct(data[0],ctynum, curyear, 'county');
+  var cty_age_pct = acsAgePct(data[0],ctynum, curyear, 'county');
   var cty_age_pyr = acsAgePyr(data[0],ctynum,curyear,'county');
   var muni_age_pct = acsAgePct(data[1],fipsArr[0], curyear, 'muni');
   var muni_age_pyr = acsAgePyr(data[1],fipsArr[0], curyear,'muni');
-     var fin_age_pct = cty_age_pct.concat(muni_age_pct);
-  var fin_age_pyr = cty_age_pyr.concat(muni_age_pyr);
+  var fin_age_pct = muni_age_pct.concat(cty_age_pct);
+  var fin_age_pyr = muni_age_pyr.concat(cty_age_pyr);
 } else { //County and Region data files
 //State data
 
@@ -5694,13 +7151,13 @@ if(muniList.includes(geotype)){
  
 //Assigning age categories
   CO_age_raw.forEach(function(obj) {
-     if(obj.age >=  0 && obj.age <= 4) {obj.age_cat = "0 to 4"; obj.agecatno = 1;}
+    if(obj.age >=  0 && obj.age <= 4) {obj.age_cat = "0 to 4"; obj.agecatno = 1;}
     if(obj.age >= 5 && obj.age <= 17) {obj.age_cat = "5 to 17"; obj.agecatno = 2;}
     if(obj.age >= 18 && obj.age <= 24) {obj.age_cat = "18 to 24"; obj.agecatno = 3;}
     if(obj.age >= 25 && obj.age <= 54) {obj.age_cat = "25 to 54"; obj.agecatno = 4;}
- if(obj.age >= 55 && obj.age <= 64) {obj.age_cat = "55 to 64"; obj.agecatno = 5;}
- if(obj.age >= 65 && obj.age <= 74) {obj.age_cat = "65 to 74"; obj.agecatno = 6;}
- if(obj.age >= 75 && obj.age <= 84) {obj.age_cat = "75 to 84"; obj.agecatno = 7;}
+    if(obj.age >= 55 && obj.age <= 64) {obj.age_cat = "55 to 64"; obj.agecatno = 5;}
+    if(obj.age >= 65 && obj.age <= 74) {obj.age_cat = "65 to 74"; obj.agecatno = 6;}
+    if(obj.age >= 75 && obj.age <= 84) {obj.age_cat = "75 to 84"; obj.agecatno = 7;}
     if(obj.age >= 85) {obj.age_cat = "85 +"; obj.agecatno = 8;}
     CO_age_data.push({'fips' : obj.fips, 'year' : obj.year, 'age' : obj.age, 'age_cat_no' : obj.agecatno, 'age_cat' : obj.age_cat, 
         'malepopulation_e' : obj.malepopulation_e, 'femalepopulation_e' : obj.femalepopulation_e, 'totalpopulation_e' : obj.totalpopulation_e});
@@ -5726,9 +7183,9 @@ if(muniList.includes(geotype)){
     if(obj.age >= 5 && obj.age <= 17) {obj.age_cat = "5 to 17"; obj.agecatno = 2;}
     if(obj.age >= 18 && obj.age <= 24) {obj.age_cat = "18 to 24"; obj.agecatno = 3;}
     if(obj.age >= 25 && obj.age <= 54) {obj.age_cat = "25 to 54"; obj.agecatno = 4;}
- if(obj.age >= 55 && obj.age <= 64) {obj.age_cat = "55 to 64"; obj.agecatno = 5;}
- if(obj.age >= 65 && obj.age <= 74) {obj.age_cat = "65 to 74"; obj.agecatno = 6;}
- if(obj.age >= 75 && obj.age <= 84) {obj.age_cat = "75 to 84"; obj.agecatno = 7;}
+    if(obj.age >= 55 && obj.age <= 64) {obj.age_cat = "55 to 64"; obj.agecatno = 5;}
+    if(obj.age >= 65 && obj.age <= 74) {obj.age_cat = "65 to 74"; obj.agecatno = 6;}
+    if(obj.age >= 75 && obj.age <= 84) {obj.age_cat = "75 to 84"; obj.agecatno = 7;}
     if(obj.age >= 85) {obj.age_cat = "85 +"; obj.agecatno = 8;}
     cty_age_data.push({'fips' : obj.fips, 'year' : obj.year, 'age' : obj.age, 'age_cat_no' : obj.agecatno, 'age_cat' : obj.age_cat, 
         'malepopulation_e' : obj.malepopulation_e, 'femalepopulation_e' : obj.femalepopulation_e, 'totalpopulation_e' : obj.totalpopulation_e});
@@ -5960,13 +7417,14 @@ var fin_age_pyr = bin_age5(CO_age_SYA.concat(cty_age_SYA));
 var fipsList = [...new Set(fin_age_pct.map(d => d.fips))];
 var ctyNameList = [...new Set(fin_age_pct.map(d => d.name))];
 
-genAgeSetup(geotype,fin_age_pct,fin_age_pyr,PRO_1.id, PRO_2.id, PRO_3.id, PRO_4.id, fipsList, ctyNameList,acsyr);
+genAgeSetup(geotype,fin_age_pct,fin_age_pyr,PRO_1.id, PRO_2.id, PRO_3.id, PRO_4.id, fipsList, ctyNameList,curyear);
 }); //End of Promise
 }; // End of selGen3display
 
 //Plotting and Tabulation Functions
 //genIncomePlot  Generates ACS Income Plot
 function genIncomePlot(level, inData,DDsel,outDiv, acsYear, acsTab) {
+
 const fmt_date = d3.timeFormat("%B %d, %Y");
 const fmt_pct = d3.format(".1%");
   
@@ -5987,6 +7445,7 @@ if(level == "Region") {
  var fipsList = [...new Set(inData.map(d => d.FIPS))];
 }
 
+
 var x_labs = ["Less<br>than<br>$10,000", "$10,000<br>to<br>$19,999", "$20,000<br>to<br>$29,999", "$30,000<br>to<br>$39,999", "$40,000<br>to<br>$49,999", "$50,000<br>to<br>$59,999",     "$60,000<br>to<br>$75,999", "$75,000<br>to<br>$99,999", "$100,000<br>to<br>$124,000", "$125,000<br>to<br>$149,999", "$150,000<br>to<br>$199,999", "Greater<br>than<br>$200,000"];
 var y_estvars = ["LT10K_E_PCT", "K10K19_E_PCT", "K20K29_E_PCT", "K30K39_E_PCT", "K40K49_E_PCT", "K50K59_E_PCT", 
     "K60K74_E_PCT", "K75K99_E_PCT", "K100K124_E_PCT", "K125K149_E_PCT", "K150K199_E_PCT", "GE200K_E_PCT"]
@@ -6005,7 +7464,10 @@ var PlaceNames = [...new Set(pltData.map(d => d.NAME))];
   var filtPlot = pltData.filter(d => d.FIPS == fipsList[i]);
   var y_est = selValsSing(filtPlot,y_estvars);
   var y_moe = selValsSing(filtPlot,y_moevars);
-
+  var pct_est_label = []
+  for(j = 0; j < y_est.length; j++) {
+	  pct_est_label.push(PlaceNames[i] + "<br>" + x_labs[j].replaceAll("<br>"," ") + "<br>Percent: "+ fmt_pct(y_est[j]) + "<br>Margin of Error: "+ fmt_pct(y_moe[j]))
+  }
   income_data.push({x : x_labs,
                  y : y_est,
      error_y: {
@@ -6014,8 +7476,8 @@ var PlaceNames = [...new Set(pltData.map(d => d.NAME))];
       thickness: 0.75,
       visible: true
      },
-   //  customdata : pct_est_0d,
-   //  hovertemplate : '%{customdata}',
+      customdata : pct_est_label,
+      hovertemplate : '%{customdata}',
 
      name : filtPlot[0].NAME,
                  type : 'bar'});
@@ -6033,7 +7495,7 @@ var ftrStr = 'U.S. Census Bureau ('+ acsYear + '). ' + (acsYear - 4) + '-' + acs
  var income_layout = {
   title: "Household Income, " + acsYear,
     autosize: false,
-    width: 1000,
+    width: 1200,
     height : 400,
     xaxis: {
    title : 'Household Income',
@@ -6060,7 +7522,7 @@ var ftrStr = 'U.S. Census Bureau ('+ acsYear + '). ' + (acsYear - 4) + '-' + acs
    gridwidth: 2,
    linecolor: 'black',
    linewidth: 2,
-    tickformat: '%'
+    tickformat: '0.0%'
     },
   annotations : [{text :  ftrStr , 
                 font: {
@@ -6085,10 +7547,10 @@ profileImg1.onclick = function() {exportToPng(ctyNames, 'income', outDiv,0)};
 } //End of genIncomePlot
 
 //genIncomeTab  Creates Income Source Tab
-function genIncomeTab(level, inData, tabDiv, curYr, fipsArr) {
+function genIncomeTab(level, DataIn, TabDiv, bkMark, curYr, fipsArr) {
 
   const fmt_date = d3.timeFormat("%B %d, %Y");
- const fmt_dec = d3.format(".3");
+ const fmt_dec = d3.format(".2f");
  const fmt_pct = d3.format(".1%");
  const fmt_comma = d3.format(",");
     const fmt_dollar = d3.format("$,.0f");
@@ -6102,11 +7564,11 @@ var varOrder = [["NAME", "HH_TOTAL_E", "HH_TOTAL_M", "AVG_INCOME_E", "AVG_INCOME
     "RAT_SALARY_E", "RAT_SALARY_M", "AVG_SALARY_E", "AVG_SALARY_M",
     "RAT_SELF_E", "RAT_SELF_M", "AVG_SELF_E", "AVG_SELF_M",
     "RAT_INTEREST_E", "RAT_INTEREST_M", "AVG_INTEREST_E", "AVG_INTEREST_M",
+    "RAT_RETIRE_E", "RAT_RETIRE_M", "AVG_RETIRE_E", "AVG_RETIRE_M",
     "RAT_SOCSEC_E", "RAT_SOCSEC_M", "AVG_SOCSEC_E", "AVG_SOCSEC_M",
     "RAT_SSI_E", "RAT_SSI_M", "AVG_SSI_E", "AVG_SSI_M",
     "RAT_PUBASST_E", "RAT_PUBASST_M", "AVG_PUBASST_E", "AVG_PUBASST_M",
     "RAT_SNAP_E", "RAT_SNAP_M", "AVG_SNAP_E", "AVG_SNAP_M",
-    "RAT_RETIRE_E", "RAT_RETIRE_M", "AVG_RETIRE_E", "AVG_RETIRE_M",
     "RAT_OTHER_E", "RAT_OTHER_M", "AVG_OTHER_E", "AVG_OTHER_M"],
   ["", "comma","comma", "dollar", "dollar",
      "percent", "percent", "dollar", "dollar",
@@ -6122,37 +7584,50 @@ var varOrder = [["NAME", "HH_TOTAL_E", "HH_TOTAL_M", "AVG_INCOME_E", "AVG_INCOME
 
 
 var plWidth = 4;
-var tab_data = selValsMulti(inData,varOrder,11,plWidth,"vert");
-for(i = 0; i < tab_data.length;i++){
-   tab_data[i].unshift(i + 1);
+var DataTab = selValsMulti(DataIn,varOrder,11,plWidth,"vert"); //DataTab is the formatted data 
+
+if(level == "Municipality") {
+   var npanels = 1;
+ } else {
+   var npanels = Math.round((DataIn.length)/2); //This is the number of panels
  }
 
+for(i = 0; i < DataTab.length;i++){
+   DataTab[i].unshift(i + 1);
+ }
 
 //Labels and urls for output
-  var labels = [
-     {'title' : 'Total Households', 'URL_link' : genCEDSCIUrl(level,'B19051',curYr,fipsArr)},
-   {'title' : 'Households with earnings', 'URL_link' : genCEDSCIUrl(level,'B19051',curYr,fipsArr)},
-   {'title' : 'Households with wage or salary income', 'URL_link' : genCEDSCIUrl(level,'B19052',curYr,fipsArr)},
-   {'title' : 'Households with self-employment income ', 'URL_link' : genCEDSCIUrl(level,'B19053',curYr,fipsArr)},
-   {'title' : 'Households with interest, dividends, or net rental income', 'URL_link' : genCEDSCIUrl(level,'B19054',curYr,fipsArr)},
-   {'title' : 'Households with retirement income', 'URL_link' : genCEDSCIUrl(level,'B19059',curYr,fipsArr)},
-   {'title' : 'Households with Social Security income', 'URL_link' : genCEDSCIUrl(level,'B19055',curYr,fipsArr)},
-   {'title' : 'Households with Supplemental Security Income (SSI)', 'URL_link' : genCEDSCIUrl(level,'B19056',curYr,fipsArr)},
-   {'title' : 'Households with public assistance income', 'URL_link' : genCEDSCIUrl(level,'B19057',curYr,fipsArr)},
-   {'title' : 'Households with cash public assistance or Food Stamps/SNAP', 'URL_link' : genCEDSCIUrl(level,'B19058',curYr,fipsArr)},
-   {'title' : 'Households with other types of income', 'URL_link' : genCEDSCIUrl(level,'B19060',curYr,fipsArr)}
+  var row_labels = [
+   {'title' : 'Total Households', 'URL_link' : genCEDSCIUrl(level,'B19051',curYr,fipsArr), 'stpos' : 2, 'endpos' : 5},
+   {'title' : 'Households with earnings', 'URL_link' : genCEDSCIUrl(level,'B19051',curYr,fipsArr), 'stpos' : 6, 'endpos' : 9},
+   {'title' : 'Households with wage or salary income', 'URL_link' : genCEDSCIUrl(level,'B19052',curYr,fipsArr), 'stpos' : 10, 'endpos' : 13},
+   {'title' : 'Households with self-employment income ', 'URL_link' : genCEDSCIUrl(level,'B19053',curYr,fipsArr), 'stpos' : 14, 'endpos' : 17},
+   {'title' : 'Households with interest, dividends, or net rental income', 'URL_link' : genCEDSCIUrl(level,'B19054',curYr,fipsArr), 'stpos' : 18, 'endpos' : 21},
+   {'title' : 'Households with retirement income', 'URL_link' : genCEDSCIUrl(level,'B19059',curYr,fipsArr), 'stpos' : 22, 'endpos' : 25},
+   {'title' : 'Households with Social Security income', 'URL_link' : genCEDSCIUrl(level,'B19055',curYr,fipsArr), 'stpos' : 26, 'endpos' : 29},
+   {'title' : 'Households with Supplemental Security Income (SSI)', 'URL_link' : genCEDSCIUrl(level,'B19056',curYr,fipsArr), 'stpos' : 30, 'endpos' : 33},
+   {'title' : 'Households with public assistance income', 'URL_link' : genCEDSCIUrl(level,'B19057',curYr,fipsArr), 'stpos' : 34, 'endpos' : 37},
+   {'title' : 'Households with cash public assistance or Food Stamps/SNAP', 'URL_link' : genCEDSCIUrl(level,'B19058',curYr,fipsArr), 'stpos' : 38, 'endpos' : 41},
+   {'title' : 'Households with other types of income', 'URL_link' : genCEDSCIUrl(level,'B19060',curYr,fipsArr), 'stpos' : 42, 'endpos' : 45}
       ];
+	  
+
+
 //Table Footer
 var tblfoot = [
                ["Source: U.S. Census Bureau ("+ fmt_yr(curYr) +"), "+ fmt_yr(prevYr) + '-' + fmt_yr(curYr) +' American Community Survey Tables B19051 to B20003'],
-      ["Compiled by the Colorado State Demography Office"],
+               ["Compiled by the Colorado State Demography Office"],
                ['Print Date : ' + fmt_date(new Date)]
       ];
       
 
 var ftrString = "<tfoot><tr>";
 for(i = 0; i < tblfoot.length; i++){
-     ftrString = ftrString + "<tr><td colspan='45'>" + tblfoot[i] + "</td></tr>";
+	if(level == "Municipality"){
+	 ftrString = ftrString + "<tr><td colspan='13'>" + tblfoot[i] + "</td></tr>";
+	} else {
+     ftrString = ftrString + "<tr><td colspan='9'>" + tblfoot[i] + "</td></tr>";
+	}
  }; 
 ftrString = ftrString + "</tr></tfoot>";
 
@@ -6160,89 +7635,42 @@ var ftrMsg = "\u200B\tSources: U.S. Census Bureau ("+ curYr +") "+fmt_yr(prevYr)
    "\n\u200B\tCompiled by the Colorado State Demography Office " +
    "Print Date: " + fmt_date(new Date);
  
-//Table Header 
-var headString = "<thead><tr>"
-for(i = 0; i < labels.length;i++) {  
- if(i == 0){
-  headString = headString + "<th> </th><th> </th>";
-     headString = headString + "<th align='center' colspan='" + plWidth + "'>"+ "<a href='" + labels[i].URL_link + "' target='_blank'>" + labels[i].title + "</a></th>";
- } else {
-  headString = headString + "<th align='center' colspan='" + plWidth + "'>"+ "<a href='" + labels[i].URL_link + "' target='_blank'>" + labels[i].title + "</a></th>";
- }
+ var income_tab = genSubjTab(level, DataTab, bkMark.id,row_labels,false);
+
+
+var nameArr = [...new Set(DataIn.map(d => d.NAME))];
+var fipsArr2 = [...new Set(DataIn.map(d => d.FIPS))];
+var fileName = "ACS Income Sources Table " + nameArr[1];
+
+pgSetupPro(level,"table",TabDiv,bkMark,true,false,fipsArr2, nameArr, curYr)
+
+//Initial Table
+var tabVal = 0;
+
+if(level == "Region"){
+   var btndown = document.getElementById("increment12");
+   var btnup = document.getElementById("increment22");
+
+DTtab("TabDiv2",income_tab,tabVal,row_labels,ftrString,ftrMsg,"incometabDT",fileName,bkMark.title) 
+
+   btndown.addEventListener('click', function() {
+     tabVal = tabVal - 1;
+	 if(tabVal < 0) {
+		tabVal = 5
+	 }
+		   DTtab("TabDiv2",income_tab,tabVal,row_labels,ftrString,ftrMsg,"incometabDT",fileName,bkMark.title) 
+   });
+  btnup.addEventListener('click', function() {
+     tabVal = tabVal + 1;
+	 if(tabVal > 5) {
+		tabVal = 0
+	 }
+		   DTtab("TabDiv2",income_tab,tabVal,row_labels,ftrString,ftrMsg,"incometabDT",fileName,bkMark.title) 
+    });
+} else {
+	DTtab("TabDiv2",income_tab,tabVal,row_labels,ftrString,ftrMsg,"incometabDT",fileName,bkMark.title);
 }
-headString = headString + "</tr><tr>";
-
-for(i = 0; i < labels.length;i++) {  
-  if(i ==0){
-     headString = headString + "<th>Index</th><th>Geography</th>";
-  headString = headString + "<th>Number of Households</th><th>Margin of Error</th><th>Average Earnings</th><th>Margin of Error</th>";
- } else {
-  headString = headString + "<th>Percent of Households</th><th>Margin of Error</th><th>Average Earnings</th><th>Margin of Error</th>";
- }
-}
-headString = headString + "</tr></thead>";
-
-
-//Generating final tables  tabpop_fin is the table rows in html...
-var tabpop = "";
-
-for(i = 0; i < tab_data.length;i++){
- tabpop = tabpop + '<tr>';
-
- for(j = 0; j < tab_data[i].length;j++){
-   tabpop = tabpop + '<td>' + tab_data[i][j] + '</td>';
- }
- tabpop = tabpop + "</tr>";
-}
-
-var tabpop_fin = headString + tabpop + ftrString;
-
-//Datatable Writing final table to DOM
-var fileName = inData[1].NAME + " Income Sources";
-
-var tabSel = document.getElementById(tabDiv);
-
-$(tabSel).append("<table id='summtabinc' class='DTTable' width='90%'></table>");
-$("#summtabinc").append(tabpop_fin);
-
-$('#summtabinc').DataTable({
-	"pageLength": 5,
-  "scrollY" : true,
-     "scrollX" : true,
-  "columnDefs" : [
-  {   
-   'targets' : '_all', 'className': 'dt-body-right',
-  }
-  ],
-  dom: 'Bfrtip',
-       buttons: [
-  {  
-                text :'Word',
-    action: function ( e, dt, node, config ) {
-                    genplexTab(tab_data,labels,tblfoot,fileName,'word',"incomesrc")
-                }
-        },
-        {  
-    text : 'Excel',
-      action: function ( e, dt, node, config ) {
-                    genplexTab(tab_data,labels,tblfoot,fileName,'xlsx',"incomesrc")
-    }
-        },
-        {  
-    text : 'CSV',
-      action: function ( e, dt, node, config ) {
-                    genplexTab(tab_data,labels,tblfoot,fileName,'csv',"incomesrc")
-    }
-  },
-        {
-          text :'PDF',
-    action: function ( e, dt, node, config ) {
-                    genplexTab(tab_data,labels,ftrMsg,fileName,'pdf',"incomesrc")
-           }
-  }
-     ],  //buttons
- } );
-
+//DTTable
 };  //genIncomeTab
 
 //genEducPlot  Generates ACS Educational attainment Plot
@@ -6273,19 +7701,27 @@ var x_labs = ["Less than<br>High School", "High School<br>Graduate (or GED)", "S
 var y_estvars = [ "LTHS_E_PCT",  "HSGED_E_PCT",  "SOMECOLL_E_PCT",  "AADEG_E_PCT",  "BADEG_E_PCT",  "GRADDEG_E_PCT"]
 var y_moevars = [ "LTHS_M_PCT",  "HSGED_M_PCT",  "SOMECOLL_M_PCT",  "AADEG_M_PCT",  "BADEG_M_PCT",  "GRADDEG_M_PCT"]
 
-
 var educ_data = [];
 var ctyNames;
 
 var pltData = inData.filter(d => fipsList.includes(d.FIPS));
 
 var PlaceNames = [...new Set(pltData.map(d => d.NAME))];
+//Adding break to placename label
+for(i = 0; i < PlaceNames.length; i++){
+	PlaceNames[i] = PlaceNames[i].replace(":",":<br>");
+}
+	
+console.log(PlaceNames)
 
  for(i = 0; i < fipsList.length; i++) {
   var filtPlot = pltData.filter(d => d.FIPS == fipsList[i]);
   var y_est = selValsSing(filtPlot,y_estvars);
   var y_moe = selValsSing(filtPlot,y_moevars);
-
+ var pct_est_label = []
+  for(j = 0; j < y_est.length; j++) {
+	  pct_est_label.push(PlaceNames[i] + "<br>" + x_labs[j].replaceAll("<br>"," ") + "<br>Percent: "+ fmt_pct(y_est[j]) + "<br>Margin of Error: "+ fmt_pct(y_moe[j]))
+  }
 
   educ_data.push({x : x_labs,
                  y : y_est,
@@ -6295,8 +7731,8 @@ var PlaceNames = [...new Set(pltData.map(d => d.NAME))];
       thickness: 0.75,
       visible: true
      },
-   //  customdata : pct_est_0d,
-   //  hovertemplate : '%{customdata}',
+    customdata : pct_est_label,
+    hovertemplate : '%{customdata}',
 
      name : filtPlot[0].NAME,
                  type : 'bar'});
@@ -6314,7 +7750,7 @@ var ftrStr = 'U.S. Census Bureau ('+ acsYear + '). ' + (acsYear - 4) + '-' + acs
  var educ_layout = {
   title: "Educational Attainment, Persons Age 25+, " + acsYear,
     autosize: false,
-    width: 1000,
+    width: 1200,
     height : 400,
     xaxis: {
    title : 'Educational Attainment',
@@ -6331,7 +7767,7 @@ var ftrStr = 'U.S. Census Bureau ('+ acsYear + '). ' + (acsYear - 4) + '-' + acs
    linecolor: 'black',
    linewidth: 2
     },
-    yaxis: {
+     yaxis: {
    title : 'Percent',
    automargin : true,
    showgrid: true,
@@ -6341,7 +7777,7 @@ var ftrStr = 'U.S. Census Bureau ('+ acsYear + '). ' + (acsYear - 4) + '-' + acs
    gridwidth: 2,
    linecolor: 'black',
    linewidth: 2,
-    tickformat: '%'
+    tickformat: '0.0%'
     },
   annotations : [{text :  ftrStr , 
                 font: {
@@ -6367,11 +7803,10 @@ profileImg3.onclick = function() {exportToPng(ctyNames, 'educatt', outDiv,0)};
 
 
 //genRaceTab Geneerates race tab
-function genRaceTab(level, inData, tabDiv, curYr, fipsArr) {
-
+function genRaceTab(level, inData, TabDiv, bkMark, curYr, fipsArr) {
 
  const fmt_date = d3.timeFormat("%B %d, %Y");
- const fmt_dec = d3.format(".3");
+ const fmt_dec = d3.format(".2f");
  const fmt_pct = d3.format(".1%");
  const fmt_comma = d3.format(",");
  const fmt_dollar = d3.format("$,.0f");
@@ -6381,154 +7816,130 @@ var prevYr = curYr - 4;
 
 
 //varOrder contains both the range of names and the formatting   
-var varOrder = [["NAME", "WHITENH_E_PCT", "WHITENH_M_PCT", "BLACKNH_E_PCT", "BLACKNH_M_PCT", 
-				"AIANNH_E_PCT", "AIANNH_M_PCT", "ASIANNH_E_PCT", "ASIANNH_M_PCT",
-				"NHPACNH_E_PCT", "NHPACNH_M_PCT", "OTHERNH_E_PCT", "OTHERNH_M_PCT", 
-				"TWONH_E_PCT", "TWONH_M_PCT", "HISP_E_PCT", "HISP_M_PCT"],
-  ["", "percent","percent", "percent", "percent", "percent",
-     "percent", "percent", "percent", "percent",
-     "percent", "percent", "percent", "percent",
-     "percent", "percent", "percent"]];
+var varOrder = [["NAME", "HISP_E", "HISP_M", "HISP_E_PCT", "HISP_M_PCT", 
+				"WHITENH_E", "WHITENH_M", "WHITENH_E_PCT", "WHITENH_M_PCT", 
+				"BLACKNH_E", "BLACKNH_M", "BLACKNH_E_PCT", "BLACKNH_M_PCT", 
+				"AIANNH_E", "AIANNH_M", "AIANNH_E_PCT", "AIANNH_M_PCT", 
+				"ASIANNH_E", "ASIANNH_M", "ASIANNH_E_PCT", "ASIANNH_M_PCT", 
+				"NHPACNH_E", "NHPACNH_M", "NHPACNH_E_PCT", "NHPACNH_M_PCT", 
+				"OTHERNH_E", "OTHERNH_M", "OTHERNH_E_PCT", "OTHERNH_M_PCT", 
+				"TWONH_E", "TWONH_M", "TWONH_E_PCT", "TWONH_M_PCT"],
+				["", "comma", "comma", "percent", "percent", 
+				"comma", "comma", "percent", "percent", 
+				"comma", "comma", "percent", "percent", 
+				"comma", "comma", "percent", "percent", 
+				"comma", "comma", "percent", "percent", 
+				"comma", "comma", "percent", "percent", 
+				"comma", "comma", "percent", "percent", 
+				"comma", "comma", "percent", "percent"]];
 
+var plWidth = 4;
 
-var plWidth = 2;
+if(level == "Municipality") {
+   var npanels = 1;
+ } else {
+   var npanels = Math.round((inData.length)/2); //This is the number of panels
+ }
 
+//Labels and urls for output
 var tab_data = selValsMulti(inData,varOrder,8,plWidth,"vert");
 for(i = 0; i < tab_data.length;i++){
    tab_data[i].unshift(i + 1);
  }
 
-
 //Labels and urls for output
-  var labels = [
-     {'title' : 'White, NH', 'URL_link' : genCEDSCIUrl(level,'B03002',curYr,fipsArr)},
-   {'title' : 'Black/ African American, NH', 'URL_link' : genCEDSCIUrl(level,'B03002',curYr,fipsArr)},
-   {'title' : 'Native American/ Alaska Native, NH', 'URL_link' : genCEDSCIUrl(level,'B03002',curYr,fipsArr)},
-   {'title' : 'Asian, NH', 'URL_link' : genCEDSCIUrl(level,'B03002',curYr,fipsArr)},
-   {'title' : 'Native Hawaiian/ Pacific Islander, NH', 'URL_link' : genCEDSCIUrl(level,'B03002',curYr,fipsArr)},
-   {'title' : 'Other, NH', 'URL_link' : genCEDSCIUrl(level,'B03002',curYr,fipsArr)},
-   {'title' : 'Two of More Races, NH', 'URL_link' : genCEDSCIUrl(level,'B03002',curYr,fipsArr)},
-   {'title' : 'Hispanic', 'URL_link' : genCEDSCIUrl(level,'B03002',curYr,fipsArr)}
+  var row_labels = [
+		{'title' : 'Hispanic', 'URL_link' : genCEDSCIUrl(level,'B03002',curYr,fipsArr),'stpos' : 2, 'endpos' : 5},
+		{'title' : 'White, NH', 'URL_link' : genCEDSCIUrl(level,'B03002',curYr,fipsArr),'stpos' : 6, 'endpos' : 9},
+		{'title' : 'Black/ African American, NH', 'URL_link' : genCEDSCIUrl(level,'B03002',curYr,fipsArr),'stpos' : 10, 'endpos' : 13},
+		{'title' : 'Native American/ Alaska Native, NH', 'URL_link' : genCEDSCIUrl(level,'B03002',curYr,fipsArr),'stpos' : 14, 'endpos' : 17},
+		{'title' : 'Asian, NH', 'URL_link' : genCEDSCIUrl(level,'B03002',curYr,fipsArr),'stpos' : 18, 'endpos' : 21},
+		{'title' : 'Native Hawaiian/ Pacific Islander, NH', 'URL_link' : genCEDSCIUrl(level,'B03002',curYr,fipsArr),'stpos' : 22, 'endpos' : 25},
+		{'title' : 'Other, NH', 'URL_link' : genCEDSCIUrl(level,'B03002',curYr,fipsArr),'stpos' : 26, 'endpos' : 29},
+		{'title' : 'Two of More Races, NH', 'URL_link' : genCEDSCIUrl(level,'B03002',curYr,fipsArr),'stpos' : 30, 'endpos' : 33}
       ];
 //Table Footer
 var tblfoot = [
-               ["Source: U.S. Census Bureau ("+ fmt_yr(curYr) +"), "+ fmt_yr(prevYr) + '-' + fmt_yr(curYr) +' American Community Survey Table B03002'],
+      ["Source: U.S. Census Bureau ("+ fmt_yr(curYr) +"), "+ fmt_yr(prevYr) + '-' + fmt_yr(curYr) +' American Community Survey Table B03002'],
       ["Compiled by the Colorado State Demography Office"],
-               ['Print Date : ' + fmt_date(new Date)]
+      ['Print Date : ' + fmt_date(new Date)]
       ];
       
 
 var ftrString = "<tfoot><tr>";
 for(i = 0; i < tblfoot.length; i++){
-     ftrString = ftrString + "<tr><td colspan='17'>" + tblfoot[i] + "</td></tr>";
+	if(level == "Municipality") {
+		ftrString = ftrString + "<tr><td colspan='13'>" + tblfoot[i] + "</td></tr>";
+	} else {
+     ftrString = ftrString + "<tr><td colspan='9'>" + tblfoot[i] + "</td></tr>";
+	}
  }; 
 ftrString = ftrString + "</tr></tfoot>";
+
 
 var ftrMsg = "\u200B\tSources: U.S. Census Bureau ("+ curYr +") "+fmt_yr(prevYr) + "-" + fmt_yr(curYr) +" American Community Survey Table B03002 "+
    "\n\u200B\tCompiled by the Colorado State Demography Office " +
    "Print Date: " + fmt_date(new Date);
  
-//Table Header 
-var headString = "<thead><tr>"
-for(i = 0; i < labels.length;i++) {  
- if(i == 0){
-  headString = headString + "<th colspan='2'> </th><th colspan = '14'>Non-Hispanic</th><th colspan='2'>Hispanic</th></tr>";
-     headString = headString + "<th colspan='2'> </th><th align='center' colspan='" + plWidth + "'>"+ "<a href='" + labels[i].URL_link + "' target='_blank'>" + labels[i].title + "</a></th>";
- } else {
-  headString = headString + "<th align='center' colspan='" + plWidth + "'>"+ "<a href='" + labels[i].URL_link + "' target='_blank'>" + labels[i].title + "</a></th>";
- }
+var race_tab = genSubjTab(level, tab_data, bkMark.id,row_labels,false);
+
+var nameArr = [...new Set(inData.map(d => d.NAME))];
+var fipsArr2 = [...new Set(inData.map(d => d.FIPS))];
+var fileName = "ACS Race and Ethnicity Table " + nameArr[1];
+
+pgSetupPro(level,"table",TabDiv,bkMark,true,false,fipsArr2, nameArr, curYr)
+
+
+//Initial Table
+var tabVal = 0;
+
+if(level == "Region"){
+   var btndown4 = document.getElementById("increment14");
+   var btnup4 = document.getElementById("increment24");
+
+DTtab("TabDiv4",race_tab,tabVal,row_labels,ftrString,ftrMsg,"racetabDT",fileName,bkMark.title) 
+
+   btndown4.addEventListener('click', function() {
+     tabVal = tabVal - 1;
+	 if(tabVal < 0) {
+		tabVal = 5
+	 }
+		   DTtab("TabDiv4",race_tab,tabVal,row_labels,ftrString,ftrMsg,"racetabDT",fileName,bkMark.title) 
+   });
+  btnup4.addEventListener('click', function() {
+     tabVal = tabVal + 1;
+	 if(tabVal > 5) {
+		tabVal = 0
+	 }
+		   DTtab("TabDiv4",race_tab,tabVal,row_labels,ftrString,ftrMsg,"racetabDT",fileName,bkMark.title) 
+    });
+} else {
+	DTtab("TabDiv4",race_tab,tabVal,row_labels,ftrString,ftrMsg,"racetabDT",fileName,bkMark.title) 
 }
-headString = headString + "</tr><tr>";
 
-for(i = 0; i < labels.length;i++) {  
-  if(i ==0){
-     headString = headString + "<th>Index</th><th>Geography</th>";
-     headString = headString + "<th>Percentage</th><th>Margin of Error</th>";
- } else {
-  headString = headString + "<th>Percentage</th><th>Margin of Error</th>";
- }
-}
-headString = headString + "</tr></thead>";
+//DTTable
 
-
-//Generating final tables  tabpop_fin is the table rows in html...
-var tabpop = "";
-
-for(i = 0; i < tab_data.length;i++){
- tabpop = tabpop + '<tr>';
-
- for(j = 0; j < tab_data[i].length;j++){
-   tabpop = tabpop + '<td>' + tab_data[i][j] + '</td>';
- }
- tabpop = tabpop + "</tr>";
-}
-
-var tabpop_fin = headString + tabpop + ftrString;
-
-//Datatable Writing final table to DOM
-var fileName = inData[1].NAME + " Race and Ethnicity";
-
-var tabSel = document.getElementById(tabDiv);
-$(tabSel).append("<h3>Race and Ethnicity</h3>");
-$(tabSel).append("<table id='summtabeth' class='DTTable' width='90%'></table>");
-$("#summtabeth").append(tabpop_fin);
-
-$('#summtabeth').DataTable({
-	"pageLength": 5,
-  "scrollY" : true,
-     "scrollX" : true,
-  "columnDefs" : [
-  {   
-   'targets' : '_all', 'className': 'dt-body-right',
-  }
-  ],
-  dom: 'Bfrtip',
-       buttons: [
-  {  
-                text :'Word',
-    action: function ( e, dt, node, config ) {
-                    genplexTab(tab_data,labels,tblfoot,fileName,'word',"raceeth")
-                }
-        },
-        {  
-    text : 'Excel',
-      action: function ( e, dt, node, config ) {
-                    genplexTab(tab_data,labels,tblfoot,fileName,'xlsx',"raceeth")
-    }
-        },
-        {  
-    text : 'CSV',
-      action: function ( e, dt, node, config ) {
-                    genplexTab(tab_data,labels,tblfoot,fileName,'csv',"raceeth")
-    }
-  },
-        {
-          text :'PDF',
-    action: function ( e, dt, node, config ) {
-                    genplexTab(tab_data,labels,ftrMsg,fileName,'pdf',"raceeth")
-           }
-  }
-     ],  //buttons
- } );
 } //genRaceTab
 
 //income_plot  ACS Income Plot Wrapper
-function income_plot(level,inData,outDiv, acsYear, acsTab) {
+
+function income_plot(level,inData,outDiv, bkMark, acsYear, acsTab) {
 const fmt_date = d3.timeFormat("%B %d, %Y");
 
-var fipsArr = inData.map(d => d.FIPS);
-var nameArr = inData.map(d => d.NAME);
+	var fipsArr = [...new Set(inData.map(d => d.FIPS))];
+	var nameArr = [...new Set(inData.map(d => d.NAME))];
+
 
 if(level == "Region") {
- pgSetup(level,"chart",outDiv,"Household Income Distribution",'inc01',true,false,fipsArr, nameArr, acsYear)
+ pgSetupPro(level,"chart",outDiv,bkMark,true,false,fipsArr, nameArr, acsYear)
 
    var selopts = "8,-101";
    $.each(selopts.split(","), function(i,e){
-          $("#RegSelect1 option[value='" + e + "']").prop("selected", true);
+          $("#geoSelect1 option[value='" + e + "']").prop("selected", true);
        }); 
   
-   var dd0 = document.getElementById("RegSelect1");
-   var btn0 = document.getElementById("RegBtn1");
+   var dd0 = document.getElementById("geoSelect1");
+   var btn0 = document.getElementById("plotBtn1");
 
   genIncomePlot(level, inData,dd0, "PlotDiv1",acsYear,acsTab);
 
@@ -6537,29 +7948,39 @@ if(level == "Region") {
        });
     
 } else {
- pgSetup(level,"chart",outDiv,"Household Income Distribution",'inc01',false,false,fipsArr, nameArr, acsYear);
+ pgSetupPro(level,"chart",outDiv,bkMark,true,false,fipsArr, nameArr, acsYear);
  genIncomePlot(level, inData,dd0, "PlotDiv1",acsYear, acsTab)
 
 }
 } // income_plot
 
 //educ_plot  Educational Attainment Plot wrapper
-function educ_plot(level,inData,outDiv, acsYear, acsTab) {
+function educ_plot(level,inData,outDiv, bkmark, acsYear, acsTab) {
+
 const fmt_date = d3.timeFormat("%B %d, %Y");
 
-var fipsArr = inData.map(d => d.FIPS);
-var nameArr = inData.map(d => d.NAME);
+if(inData.length === 1) {
+	var fipsArr = inData.FIPS;
+	var nameArr = inData.NAME;
+} else {
+	var fipsArr = [];
+	var nameArr = [];
+	for(i = 0; i < inData.length; i++){
+		fipsArr.push(inData[i].FIPS);
+		nameArr.push(inData[i].NAME);
+	}
+}
 
 if(level == "Region") {
- pgSetup(level,"chart",outDiv,"Educational Attainment, Age 25+",'educ',true,false,fipsArr, nameArr, acsYear)
-
+ pgSetupPro(level,"chart",outDiv,bkmark,true,false,fipsArr, nameArr, acsYear)
+ 
    var selopts = "8,-101";
    $.each(selopts.split(","), function(i,e){
-          $("#RegSelect3 option[value='" + e + "']").prop("selected", true);
+          $("#geoSelect3 option[value='" + e + "']").prop("selected", true);
        }); 
   
-   var dd0 = document.getElementById("RegSelect3");
-   var btn0 = document.getElementById("RegBtn3");
+   var dd0 = document.getElementById("geoSelect3");
+   var btn0 = document.getElementById("plotBtn3");
 
   genEducPlot(level, inData,dd0, "PlotDiv3",acsYear,acsTab);
 
@@ -6568,18 +7989,16 @@ if(level == "Region") {
        });
     
 } else {
- pgSetup(level,"chart",outDiv,"Educational Attainment, Age 25+",'educ',false,false,fipsArr, nameArr, acsYear);
+ pgSetupPro(level,"chart",outDiv,bkmark,true,false,fipsArr, nameArr, acsYear)
  genEducPlot(level, inData,dd0, "PlotDiv3",acsYear, acsTab)
 
 } 
 } // educ_plot
 
-//genSel4 Display  Produces Income, Educ and Race panel charts
-
-
+//genSel4Display  Produces Income, Educ and Race panel charts
 function genSel4display(geotype, fipsArr, names, curyear, PRO_1, PRO_2, PRO_3, PRO_4) {
  const fmt_date = d3.timeFormat("%B %d, %Y");
- const fmt_dec = d3.format(".3");
+ const fmt_dec = d3.format(".2f");
  const fmt_pct = d3.format(".1%");
  const fmt_comma = d3.format(",");
     const fmt_dollar = d3.format("$,.0f");
@@ -6688,15 +8107,19 @@ function genSel4display(geotype, fipsArr, names, curyear, PRO_1, PRO_2, PRO_3, P
   var hhinc_cty_url = genACSUrl("profile",curyear,hh_tab,1,1,'county',ctynum);
   var educ_cty_url = genACSUrl("profile",curyear,'B15003',1,25,'county',ctynum);
   var race_cty_url = genACSUrl("profile",curyear,'B03002',1,12,'county',ctynum);
+  var inc_st_url = genACSUrl("profile",curyear,'B19001',1,17,'state',fipsArr);
+  var hhinc_st_url = genACSUrl("profile",curyear,hh_tab,1,1,'state',fipsArr);
+  var educ_st_url = genACSUrl("profile",curyear,'B15003',1,25,'state',fipsArr);
+  var race_st_url = genACSUrl("profile",curyear,'B03002',1,12,'state',fipsArr);
+  
      var prom = [d3.json(inc_muni_url),d3.json(hhinc_muni_url), d3.json(educ_muni_url), d3.json(race_muni_url),
-              d3.json(inc_cty_url),d3.json(hhinc_cty_url), d3.json(educ_cty_url), d3.json(race_cty_url)];
-
+              d3.json(inc_cty_url),d3.json(hhinc_cty_url), d3.json(educ_cty_url), d3.json(race_cty_url),
+			  d3.json(inc_st_url),d3.json(hhinc_st_url), d3.json(educ_st_url), d3.json(race_st_url)];
  }
 
 Promise.all(prom).then(data =>{
  //Creating associative arrays from raw data  acsPrep creates the associative array, genACS... creates the combined data
- 
-   if(muniList.includes(geotype)){
+    if(muniList.includes(geotype)){
 	var inc_muni_data = genACSIncome(acsPrep(data[0]),'muni');
 	var hhinc_muni_data = genACSHHIncome(acsPrep(data[1]),'muni');
     var educ_muni_data = genACSEducation(acsPrep(data[2]),'muni');
@@ -6705,6 +8128,10 @@ Promise.all(prom).then(data =>{
 	var hhinc_cty_data = genACSHHIncome(acsPrep(data[5]),'cty');
     var educ_cty_data = genACSEducation(acsPrep(data[6]),'cty');
 	var race_cty_data = genACSRace(acsPrep(data[7]),'cty');
+	var inc_st_data = genACSIncome(acsPrep(data[8]),'st');
+	var hhinc_st_data = genACSHHIncome(acsPrep(data[9]),'st');
+    var educ_st_data = genACSEducation(acsPrep(data[10]),'st');
+	var race_st_data = genACSRace(acsPrep(data[11]),'st');
    } else {
 	var inc_cty_data = genACSIncome(acsPrep(data[0]),'cty');
 	var hhinc_cty_data = genACSHHIncome(acsPrep(data[1]),'cty');
@@ -6772,36 +8199,40 @@ var race_data = race_st_2.concat(race_reg_2,race_cty_2);
 if(ctyList.includes(geotype)) {
 var inc_cty_2 = acsMOE(inc_cty_data);
 var inc_st_2 = acsMOE(inc_st_data);
-var inc_data = inc_st_2.concat(inc_cty_2);
+var inc_data = inc_cty_2.concat(inc_st_2);
 
 var hhinc_cty_2 = hhincAVG(hhinc_cty_data);
 var hhinc_st_2 = hhincAVG(hhinc_st_data);
-var hhinc_data = hhinc_st_2.concat(hhinc_cty_2);
+var hhinc_data = hhinc_cty_2.concat(hhinc_st_2);
 
 var educ_cty_2 = acsMOE(educ_cty_data);
 var educ_st_2 = acsMOE(educ_st_data);
-var educ_data = educ_st_2.concat(educ_cty_2);
+var educ_data = educ_cty_2.concat(educ_st_2);
 
 var race_cty_2 = acsMOE(race_cty_data);
 var race_st_2 = acsMOE(race_st_data);
-var race_data = race_st_2.concat(race_cty_2);
+var race_data = race_cty_2.concat(race_st_2);
 }
 if(muniList.includes(geotype)) {
 var inc_muni_2 = acsMOE(inc_muni_data);
 var inc_cty_2 = acsMOE(inc_cty_data);
-var inc_data = inc_cty_2.concat(inc_muni_2);
+var inc_st_2 = acsMOE(inc_st_data);
+var inc_data = inc_muni_2.concat(inc_cty_2, inc_st_2);
 
 var hhinc_muni_2 = hhincAVG(hhinc_muni_data);
 var hhinc_cty_2 = hhincAVG(hhinc_cty_data);
-var hhinc_data = hhinc_cty_2.concat(hhinc_muni_2);
+var hhinc_st_2 = hhincAVG(hhinc_st_data);
+var hhinc_data = hhinc_muni_2.concat(hhinc_cty_2, hhinc_st_2);
 
 var educ_muni_2 = acsMOE(educ_muni_data);
 var educ_cty_2 = acsMOE(educ_cty_data);
-var educ_data = educ_cty_2.concat(educ_muni_2);
+var educ_st_2 = acsMOE(educ_st_data);
+var educ_data = educ_muni_2.concat(educ_cty_2, educ_st_2);
 
 var race_muni_2 = acsMOE(race_muni_data);
 var race_cty_2 = acsMOE(race_cty_data);
-var race_data = race_cty_2.concat(race_muni_2);
+var race_st_2 = acsMOE(race_st_data);
+var race_data = race_muni_2.concat(race_cty_2, race_st_2);
 } 
 //Calculating percentages
 
@@ -6810,16 +8241,17 @@ var educ_data_pct = genACSPct(educ_data)
 var race_data_pct = genACSPct(race_data)
 
 //Table and Output production
-var bkmarkArr = [{title : 'Household Income Chart', id :'inc01'},
-	{title : 'Income Sources Table', id : 'inc02'},
-	{title : 'Educational Attainment Chart', id : 'educ'},
-	{title : 'Race and Ethnicity Table', id : 'raceeth'}]
+var bkMarkArr = [{title : 'Household Income Chart', id :'inc01', srctxt : "ACS Household Income Estimates",srclink : genCEDSCIUrl(geotype,"B19001",curyear, fipsArr)},
+	{title : 'Income Sources Table', id : 'inc02', srctxt : "ACS Household Income Estimates",srclink : genCEDSCIUrl(geotype,"B19001",curyear, fipsArr)},
+	{title : 'Educational Attainment Chart', id : 'educ',srctxt : "ACS Educational Attainment Estimates",srclink : genCEDSCIUrl(geotype,"B15003",curyear, fipsArr)},
+	{title : 'Race and Ethnicity Table', id : 'raceeth',srctxt : "ACS Race and ethnicity Estimates",srclink : genCEDSCIUrl(geotype,"B03002",curyear, fipsArr)}]
 
-insertBkmark(bkmarkArr)
-income_plot(geotype,inc_data_pct, PRO_1.id,bkmarkArr[0], curyear,'B19001');
-genIncomeTab(geotype, hhinc_data, PRO_2.id, bkmarkArr[1], curyear,fips_str)
-educ_plot(geotype, educ_data_pct,PRO_3.id,bkmarkArr[2], curyear,'B15003');
-genRaceTab(geotype, race_data_pct,PRO_4.id,bkmarkArr[3],curyear,fips_str)
+insertBkmark(bkMarkArr)
+
+income_plot(geotype,inc_data_pct, PRO_1.id,bkMarkArr[0], curyear,'B19001');
+genIncomeTab(geotype, hhinc_data, PRO_2.id, bkMarkArr[1], curyear,fips_str)
+educ_plot(geotype, educ_data_pct,PRO_3.id,bkMarkArr[2], curyear,'B15003');
+genRaceTab(geotype, race_data_pct,PRO_4.id,bkMarkArr[3],curyear,fips_str)
 
 }); //end of Promise
 }; //end of genSel4Display
@@ -6827,17 +8259,17 @@ genRaceTab(geotype, race_data_pct,PRO_4.id,bkmarkArr[3],curyear,fips_str)
 //genSel5Display  Produces Housing and Household displays
 function genSel5display(geotype, fipsArr, names, curyear, PRO_1, PRO_2, PRO_3, PRO_4) {
  const fmt_date = d3.timeFormat("%B %d, %Y");
- const fmt_dec = d3.format(".3");
+ const fmt_dec = d3.format(".2f");
  const fmt_pct = d3.format(".1%");
  const fmt_comma = d3.format(",");
-    const fmt_dollar = d3.format("$,.0f");
-    const fmt_yr = d3.format("00");
+ const fmt_dollar = d3.format("$,.0f");
+ const fmt_yr = d3.format("00");
 
  const regList = ['Region', 'Regional Comparison'];
  const ctyList = ['County', 'County Comparison'];
-    const muniList = ['Municipality', 'Municipal Comparison'];
+ const muniList = ['Municipality', 'Municipal Comparison'];
  const placeList = ['Census Designated Place', 'Census Designated Place Comparison'];
-    const range = (min, max) => Array.from({ length: max - min + 1 }, (_, i) => min + i);
+ const range = (min, max) => Array.from({ length: max - min + 1 }, (_, i) => min + i);
 
 var maxYR = 2050;
 
@@ -6847,194 +8279,164 @@ var maxYR = 2050;
   PRO_2.innerHTML = "";
   PRO_3.innerHTML = "";
   PRO_4.innerHTML = "";
- 
+
 //The displays are limited by geography
 //Households by Age chart is only counties and regions
 //Housing Occupancy, Housing unit type. and Housing econ is available for all geographies
 
  
- if(muniList.includes(geotype)){
-    var fips_num = parseInt(muni_county(fipsArr));
-    } 
-	
  if(regList.includes(geotype)){
-	 var fips_tmp1 = regionCOL(parseInt(fipsArr));
-     var fips_tmp =  fips_tmp1[0].fips.map(function (x) { 
+	var fips_tmp1 = regionCOL(parseInt(fipsArr));
+    var fips_tmp =  fips_tmp1[0].fips.map(function (x) { 
      return parseInt(x); 
    });
    var fips_num = fips_tmp.toString();
-   var fips_str = fips_tmp1[0].fips;
+   var fips_arr = fips_tmp1[0].fips;
   };
 
 if(ctyList.includes(geotype)) {
-	var fips_num = parseInt(fipsArr);;
+	var fips_num = parseInt(fipsArr);
+	var fips_arr = fipsArr;
 }	
 
+
+
+ if(muniList.includes(geotype)){
+	var fips_arr = muni_county(fipsArr)
+    var fips_num = parseInt(fips_arr);
+    } 
+	
  	var yr_list = 2020;
 	for(i = 2021; i <= maxYR; i++){
 		if(i % 10 == 0){
 		yr_list = yr_list + "," + i;
 		}
 	};
+	
+	
 
-
-//Household by Age urls
+//List of All URLS
+//Households projections 
 var hhage_90_cty = "https://gis.dola.colorado.gov/capi/demog?limit=99999&db=c1990&schema=sf1&table=h12&sumlev=50&type=json&state=8&county=" + fips_num;
 var hhage_00_cty = "https://gis.dola.colorado.gov/capi/demog?limit=99999&db=c2000&schema=sf1&table=h16&sumlev=50&type=json&state=8&county=" + fips_num;
 var hhage_10_cty = "https://gis.dola.colorado.gov/capi/demog?limit=99999&db=c2010&schema=data&table=h17&sumlev=50&type=json&state=8&county=" + fips_num;
 var hhage_for_cty = "https://gis.dola.colorado.gov/lookups/household?county="+ fips_num + "&year=" + yr_list + "&age=0,1,2,3,4&household=0&group=opt08";
+
+var hhage_90_reg = "https://gis.dola.colorado.gov/capi/demog?limit=99999&db=c1990&schema=sf1&table=h12&sumlev=50&type=json&state=8&county=" + fips_num;
+var hhage_00_reg = "https://gis.dola.colorado.gov/capi/demog?limit=99999&db=c2000&schema=sf1&table=h16&sumlev=50&type=json&state=8&county=" + fips_num;
+var hhage_10_reg = "https://gis.dola.colorado.gov/capi/demog?limit=99999&db=c2010&schema=data&table=h17&sumlev=50&type=json&state=8&county=" + fips_num;
+var hhage_for_reg = "https://gis.dola.colorado.gov/lookups/household?county="+ fips_num + "&year=" + yr_list + "&age=0,1,2,3,4&household=0&group=opt08";
+
 
 var hhage_90_st = "https://gis.dola.colorado.gov/capi/demog?limit=99999&db=c1990&schema=sf1&table=h12&sumlev=40&type=json&state=8";
 var hhage_00_st = "https://gis.dola.colorado.gov/capi/demog?limit=99999&db=c2000&schema=sf1&table=h16&sumlev=40&type=json&state=8";
 var hhage_10_st = "https://gis.dola.colorado.gov/capi/demog?limit=99999&db=c2010&schema=data&table=h17&sumlev=40&type=json&state=8";
 var hhage_for_st = "https://gis.dola.colorado.gov/lookups/household?county=0&year=" + yr_list + "&age=0,1,2,3,4&household=0&group=opt08";
 
+//ACS Calls	
+//B25002	OCCUPANCY STATUS
+//B25004	VACANCY STATUS
+//B25005	VACANCY STATS CURRENT RESIDENCY ELSEWHERE
+//B25010	AVERAGE HOUSEHOLD SIZE OF OCCUPIED HOUSING UNITS BY TENURE
+//B25032	TENURE BY UNITS IN STRUCTURE
+//B25033	TOTAL POPULATION IN OCCUPIED HOUSING UNITS BY TENURE BY UNITS IN STRUCTURE
+//B25037	MEDIAN YEAR STRUCTURE BUILT BY TENURE
+//B25064	MEDIAN GROSS RENT (DOLLARS)
+//B25074	HOUSEHOLD INCOME BY GROSS RENT AS A PERCENTAGE OF HOUSEHOLD INCOME IN THE PAST 12 MONTHS
+//B25077	MEDIAN VALUE (DOLLARS)  OWNER OCCUPIED
+//B25095	HOUSEHOLD INCOME BY SELECTED MONTHLY OWNER COSTS AS A PERCENTAGE OF HOUSEHOLD INCOME IN THE PAST 12 MONTHS
 
-if(muniList.includes(geotype)) {
-//Occupancy Table URLs B25002, B25004, B25005
-var occ_muni_url = genACSUrl("profile",curyear,'B25002',1,3,geotype,fipsArr);
-var vac_muni_url = genACSUrl("profile",curyear,'B25004',1,8,geotype,fipsArr);
-var vacelse_muni_url = genACSUrl("profile",curyear,'B25005',1,3,geotype,fipsArr);
 
-var occ_cty_url = genACSUrl("profile",curyear,'B25002',1,3,'county',muni_county(fipsArr));
-var vac_cty_url = genACSUrl("profile",curyear,'B25004',1,8,'county',muni_county(fipsArr));
-var vacelse_cty_url = genACSUrl("profile",curyear,'B25005',1,3,'county',muni_county(fipsArr));
+//State Calls
+var B25002_st_url = genACSUrl("profile",curyear,'B25002',1,3,'state',fips_arr);
+var B25004_st_url = genACSUrl("profile",curyear,'B25004',1,8,'state',fips_arr);
+var B25005_st_url = genACSUrl("profile",curyear,'B25005',1,3,'state',fips_arr);
+var B25010_st_url = genACSUrl("profile",curyear,'B25010',1,3,'state',fips_arr);
+var B25032_st_url = genACSUrl("profile",curyear,'B25032',1,23,'state',fips_arr);
+var B25033_st_url = genACSUrl("profile",curyear,'B25033',1,13,'state',fips_arr);
+var B25037_st_url = genACSUrl("profile",curyear,'B25037',1,3,'state',fips_arr);
+var B25064_st_url = genACSUrl("profile",curyear,'B25064',1,1,'state',fips_arr);
+var B25074_st_url = genACSUrl("profile",curyear,'B25074',1,64,'state',fips_arr);
+var B25077_st_url = genACSUrl("profile",curyear,'B25077',1,1,'state',fips_arr);
+var B25095_st_url =  genACSUrl("profile",curyear,'B25095',1,73,'state',fips_arr);
 
-//Tenure by units in structure B25032, B25033, B25010, B25037
-var tenure_units_muni_url = genACSUrl("profile",curyear,'B25032',1,23,geotype,fipsArr);
-var tenure_pop_muni_url = genACSUrl("profile",curyear,'B25033',1,13,geotype,fipsArr);
-var pph_muni_url = genACSUrl("profile",curyear,'B25010',1,3,geotype,fipsArr);
-var medyr_muni_url =  genACSUrl("profile",curyear,'B25037',1,3,geotype,fipsArr);
-var tenure_units_cty_url = genACSUrl("profile",curyear,'B25032',1,23,'county',muni_county(fipsArr));
-var tenure_pop_cty_url = genACSUrl("profile",curyear,'B25033',1,13,'county',muni_county(fipsArr));
-var pph_cty_url = genACSUrl("profile",curyear,'B25010',1,3,'county',muni_county(fipsArr));
-var medyr_cty_url =  genACSUrl("profile",curyear,'B25037',1,3,'county',muni_county(fipsArr));
+// County Calls
 
-//Housing Economics
-//B25077  Median HH value
-//B25095 hh income as a pct of costs, Owner Occupied
-//B25064  Median Gross Rent
-//B25074 hh income as a pct of costs, renters
+var B25002_cty_url = genACSUrl("profile",curyear,'B25002',1,3,'county',fips_arr);
+var B25004_cty_url = genACSUrl("profile",curyear,'B25004',1,8,'county',fips_arr);
+var B25005_cty_url = genACSUrl("profile",curyear,'B25005',1,3,'county',fips_arr);
+var B25010_cty_url = genACSUrl("profile",curyear,'B25010',1,3,'county',fips_arr);
+var B25032_cty_url = genACSUrl("profile",curyear,'B25032',1,23,'county',fips_arr);
+var B25033_cty_url = genACSUrl("profile",curyear,'B25033',1,13,'county',fips_arr);
+var B25037_cty_url = genACSUrl("profile",curyear,'B25037',1,3,'county',fips_arr);
+var B25064_cty_url = genACSUrl("profile",curyear,'B25064',1,1,'county',fips_arr);
+var B25074_cty_url = genACSUrl("profile",curyear,'B25074',1,64,'county',fips_arr);
+var B25077_cty_url = genACSUrl("profile",curyear,'B25077',1,1,'county',fips_arr);
+var B25095_cty_url = genACSUrl("profile",curyear,'B25095',1,73,'county',fips_arr);
 
-var ooval_muni_url =  genACSUrl("profile",curyear,'B25077',1,1,geotype,fipsArr);
-var ooecon_muni_url =  genACSUrl("profile",curyear,'B25095',1,73,geotype,fipsArr);
-var rtval_muni_url =  genACSUrl("profile",curyear,'B25064',1,1,geotype,fipsArr);
-var rtecon_muni_url =  genACSUrl("profile",curyear,'B25074',1,64,geotype,fipsArr);
+if(ctyList.includes(geotype)) {
+	var prom = [d3.json(hhage_90_st), d3.json(hhage_00_st), d3.json(hhage_10_st), d3.json(hhage_for_st), d3.json(B25002_st_url), 
+   d3.json(B25004_st_url), d3.json(B25005_st_url), d3.json(B25010_st_url), d3.json(B25032_st_url), d3.json(B25033_st_url), 
+   d3.json(B25037_st_url), d3.json(B25064_st_url), d3.json(B25074_st_url), d3.json(B25077_st_url), d3.json(B25095_st_url), 
+   d3.json(hhage_90_cty), d3.json(hhage_00_cty), d3.json(hhage_10_cty), d3.json(hhage_for_cty), d3.json(B25002_cty_url), 
+   d3.json(B25004_cty_url), d3.json(B25005_cty_url), d3.json(B25010_cty_url), d3.json(B25032_cty_url), d3.json(B25033_cty_url), 
+   d3.json(B25037_cty_url), d3.json(B25064_cty_url), d3.json(B25074_cty_url), d3.json(B25077_cty_url), d3.json(B25095_cty_url)]
+};
 
-var ooval_cty_url =  genACSUrl("profile",curyear,'B25077',1,1,'county',muni_county(fipsArr));
-var ooecon_cty_url =  genACSUrl("profile",curyear,'B25095',1,73,'county',muni_county(fipsArr));
-var rtval_cty_url =  genACSUrl("profile",curyear,'B25064',1,1,'county',muni_county(fipsArr));
-var rtecon_cty_url =  genACSUrl("profile",curyear,'B25074',1,64,'county',muni_county(fipsArr));
-
-var prom = [d3.json(hhage_90_cty), d3.json(hhage_00_cty), d3.json(hhage_10_cty), d3.json(hhage_for_cty),
-			d3.json(hhage_90_st), d3.json(hhage_00_st), d3.json(hhage_10_st), d3.json(hhage_for_st),
-			d3.json(occ_muni_url), d3.json(vac_muni_url), d3.json(vacelse_muni_url), d3.json(occ_cty_url),
-			d3.json(vac_cty_url), d3.json(vacelse_cty_url), d3.json(tenure_units_muni_url), d3.json(tenure_pop_muni_url),
-			d3.json(pph_muni_url), d3.json(medyr_muni_url), d3.json(tenure_units_cty_url), d3.json(tenure_pop_cty_url),
-			d3.json(pph_cty_url), d3.json(medyr_cty_url), d3.json(ooval_muni_url), d3.json(ooecon_muni_url),
-			d3.json(rtval_muni_url), d3.json(rtecon_muni_url), d3.json(ooval_cty_url), d3.json(ooecon_cty_url),
-			d3.json(rtval_cty_url), d3.json(rtecon_cty_url)];
-} 
-
+//Regional Calls
 if(regList.includes(geotype)){
-//Occupancy Table URLs B25002, B25004, B25005
+	var B25002_reg_url = genACSUrl("profile",curyear,'B25002',1,3,'county',fips_arr);
+	var B25004_reg_url = genACSUrl("profile",curyear,'B25004',1,8,'county',fips_arr);
+	var B25005_reg_url = genACSUrl("profile",curyear,'B25005',1,3,'county',fips_arr);
+	var B25010_reg_url = genACSUrl("profile",curyear,'B25010',1,3,'county',fips_arr);
+	var B25032_reg_url = genACSUrl("profile",curyear,'B25032',1,23,'county',fips_arr);
+	var B25033_reg_url = genACSUrl("profile",curyear,'B25033',1,13,'county',fips_arr);
+	var B25037_reg_url = genACSUrl("profile",curyear,'B25037',1,3,'county',fips_arr);
+	var B25064_reg_url = genACSUrl("profile",curyear,'B25064',1,1,'county',fips_arr);
+	var B25074_reg_url = genACSUrl("profile",curyear,'B25074',1,64,'county',fips_arr);
+	var B25077_reg_url = genACSUrl("profile",curyear,'B25077',1,1,'county',fips_arr);
+	var B25095_reg_url = genACSUrl("profile",curyear,'B25095',1,73,'county',fips_arr);
+	 
+	var prom = [d3.json(hhage_90_st), d3.json(hhage_00_st), d3.json(hhage_10_st), d3.json(hhage_for_st), d3.json(B25002_st_url), 
+	   d3.json(B25004_st_url), d3.json(B25005_st_url), d3.json(B25010_st_url), d3.json(B25032_st_url), d3.json(B25033_st_url), 
+	   d3.json(B25037_st_url), d3.json(B25064_st_url), d3.json(B25074_st_url), d3.json(B25077_st_url), d3.json(B25095_st_url), 
+	   d3.json(hhage_90_reg), d3.json(hhage_00_reg), d3.json(hhage_10_reg), d3.json(hhage_for_reg), d3.json(B25002_reg_url), 
+	   d3.json(B25004_reg_url), d3.json(B25005_reg_url), d3.json(B25010_reg_url), d3.json(B25032_reg_url), d3.json(B25033_reg_url), 
+	   d3.json(B25037_reg_url), d3.json(B25064_reg_url), d3.json(B25074_reg_url), d3.json(B25077_reg_url), d3.json(B25095_reg_url)]
+  };
 
-var occ_cty_url = genACSUrl("profile",curyear,'B25002',1,3,geotype,fips_str);
-var vac_cty_url = genACSUrl("profile",curyear,'B25004',1,8,geotype,fips_str);
-var vacelse_cty_url = genACSUrl("profile",curyear,'B25005',1,3,geotype,fips_str);
 
-var occ_st_url = genACSUrl("profile",curyear,'B25002',1,3,'state',fipsArr);
-var vac_st_url = genACSUrl("profile",curyear,'B25004',1,8,'state',fipsArr);
-var vacelse_st_url = genACSUrl("profile",curyear,'B25005',1,3,'state',fipsArr);
+//Municipal Calls
+if(muniList.includes(geotype)){
+	var B25002_muni_url = genACSUrl("profile",curyear,'B25002',1,3,geotype,fipsArr);
+	var B25004_muni_url = genACSUrl("profile",curyear,'B25004',1,8,geotype,fipsArr);
+	var B25005_muni_url = genACSUrl("profile",curyear,'B25005',1,3,geotype,fipsArr);
+	var B25010_muni_url = genACSUrl("profile",curyear,'B25010',1,3,geotype,fipsArr);
+	var B25032_muni_url = genACSUrl("profile",curyear,'B25032',1,23,geotype,fipsArr);
+	var B25033_muni_url = genACSUrl("profile",curyear,'B25033',1,13,geotype,fipsArr);
+	var B25037_muni_url = genACSUrl("profile",curyear,'B25037',1,3,geotype,fipsArr);
+	var B25064_muni_url = genACSUrl("profile",curyear,'B25064',1,1,geotype,fipsArr);
+	var B25074_muni_url = genACSUrl("profile",curyear,'B25074',1,64,geotype,fipsArr);
+	var B25077_muni_url = genACSUrl("profile",curyear,'B25077',1,1,geotype,fipsArr);
+	var B25095_muni_url = genACSUrl("profile",curyear,'B25095',1,73,geotype,fipsArr);
 
-//Tenure by units in structure B25032, B25033, B25010, B25037
-var tenure_units_cty_url = genACSUrl("profile",curyear,'B25032',1,23,geotype,fips_str);
-var tenure_pop_cty_url = genACSUrl("profile",curyear,'B25033',1,13,geotype,fips_str);
-var pph_cty_url = genACSUrl("profile",curyear,'B25010',1,3,geotype,fips_str);
-var medyr_cty_url =  genACSUrl("profile",curyear,'B25037',1,3,geotype,fips_str);
-var tenure_units_st_url = genACSUrl("profile",curyear,'B25032',1,23,'state',fipsArr);
-var tenure_pop_st_url = genACSUrl("profile",curyear,'B25033',1,13,'state',fipsArr);
-var pph_st_url = genACSUrl("profile",curyear,'B25010',1,3,'state',fipsArr);
-var medyr_st_url =  genACSUrl("profile",curyear,'B25037',1,3,'state',fipsArr);
-
-
-//Housing Economics
-//B25077  Median HH value
-//B25095 hh income as a pct of costs, Owner Occupied
-//B25064  Median Gross Rent
-//B25074 hh income as a pct of costs, renters
-
-var ooval_cty_url =  genACSUrl("profile",curyear,'B25077',1,1,geotype,fips_str);
-var ooecon_cty_url =  genACSUrl("profile",curyear,'B25095',1,73,geotype,fips_str);
-var rtval_cty_url =  genACSUrl("profile",curyear,'B25064',1,1,geotype,fips_str);
-var rtecon_cty_url =  genACSUrl("profile",curyear,'B25074',1,64,geotype,fips_str);
-
-var ooval_st_url =  genACSUrl("profile",curyear,'B25077',1,1,'state',fipsArr);
-var ooecon_st_url =  genACSUrl("profile",curyear,'B25095',1,73,'state',fipsArr);
-var rtval_st_url =  genACSUrl("profile",curyear,'B25064',1,1,'state',fipsArr);
-var rtecon_st_url =  genACSUrl("profile",curyear,'B25074',1,64,'state',fipsArr);
-
-var prom = [d3.json(hhage_90_cty), d3.json(hhage_00_cty), d3.json(hhage_10_cty), d3.json(hhage_for_cty),
-			d3.json(hhage_90_st), d3.json(hhage_00_st), d3.json(hhage_10_st), d3.json(hhage_for_st),
-			d3.json(occ_cty_url), d3.json(vac_cty_url), d3.json(vacelse_cty_url), d3.json(occ_st_url),
-			d3.json(vac_st_url), d3.json(vacelse_st_url), d3.json(tenure_units_cty_url), d3.json(tenure_pop_cty_url),
-			d3.json(pph_cty_url), d3.json(medyr_cty_url), d3.json(tenure_units_st_url), d3.json(tenure_pop_st_url),
-			d3.json(pph_st_url), d3.json(medyr_st_url), d3.json(ooval_cty_url), d3.json(ooecon_cty_url),
-			d3.json(rtval_cty_url), d3.json(rtecon_cty_url), d3.json(ooval_st_url), d3.json(ooecon_st_url),
-			d3.json(rtval_st_url), d3.json(rtecon_st_url)];
-}
-
-if(ctyList.includes(geotype)){
-//Occupancy Table URLs B25002, B25004, B25005
-var occ_cty_url = genACSUrl("profile",curyear,'B25002',1,3,geotype,fipsArr);
-var vac_cty_url = genACSUrl("profile",curyear,'B25004',1,8,geotype,fipsArr);
-var vacelse_cty_url = genACSUrl("profile",curyear,'B25005',1,3,geotype,fipsArr);
-
-var occ_st_url = genACSUrl("profile",curyear,'B25002',1,3,'state',fipsArr);
-var vac_st_url = genACSUrl("profile",curyear,'B25004',1,8,'state',fipsArr);
-var vacelse_st_url = genACSUrl("profile",curyear,'B25005',1,3,'state',fipsArr);
-
-//Tenure by units in structure B25032, B25033, B25010, B25037
-var tenure_units_cty_url = genACSUrl("profile",curyear,'B25032',1,23,geotype,fipsArr);
-var tenure_pop_cty_url = genACSUrl("profile",curyear,'B25033',1,13,geotype,fipsArr);
-var pph_cty_url = genACSUrl("profile",curyear,'B25010',1,3,geotype,fipsArr);
-var medyr_cty_url =  genACSUrl("profile",curyear,'B25037',1,3,geotype,fipsArr);
-var tenure_units_st_url = genACSUrl("profile",curyear,'B25032',1,23,'state',fipsArr);
-var tenure_pop_st_url = genACSUrl("profile",curyear,'B25033',1,13,'state',fipsArr);
-var pph_st_url = genACSUrl("profile",curyear,'B25010',1,3,'state',fipsArr);
-var medyr_st_url =  genACSUrl("profile",curyear,'B25037',1,3,'state',fipsArr);
-
-//Housing Economics
-//B25077  Median HH value
-//B25095 hh income as a pct of costs, Owner Occupied
-//B25064  Median Gross Rent
-//B25074 hh income as a pct of costs, renters
-
-var ooval_cty_url =  genACSUrl("profile",curyear,'B25077',1,1,geotype,fipsArr);
-var ooecon_cty_url =  genACSUrl("profile",curyear,'B25095',1,73,geotype,fipsArr);
-var rtval_cty_url =  genACSUrl("profile",curyear,'B25064',1,1,geotype,fipsArr);
-var rtecon_cty_url =  genACSUrl("profile",curyear,'B25074',1,64,geotype,fipsArr);
-
-var ooval_st_url =  genACSUrl("profile",curyear,'B25077',1,1,'state',fipsArr);
-var ooecon_st_url =  genACSUrl("profile",curyear,'B25095',1,73,'state',fipsArr);
-var rtval_st_url =  genACSUrl("profile",curyear,'B25064',1,1,'state',fipsArr);
-var rtecon_st_url =  genACSUrl("profile",curyear,'B25074',1,64,'state',fipsArr);
-
-var prom = [d3.json(hhage_90_cty), d3.json(hhage_00_cty), d3.json(hhage_10_cty), d3.json(hhage_for_cty),
-			d3.json(hhage_90_st), d3.json(hhage_00_st), d3.json(hhage_10_st), d3.json(hhage_for_st),
-			d3.json(occ_cty_url), d3.json(vac_cty_url), d3.json(vacelse_cty_url), d3.json(occ_st_url),
-			d3.json(vac_st_url), d3.json(vacelse_st_url), d3.json(tenure_units_cty_url), d3.json(tenure_pop_cty_url),
-			d3.json(pph_cty_url), d3.json(medyr_cty_url), d3.json(tenure_units_st_url), d3.json(tenure_pop_st_url),
-			d3.json(pph_st_url), d3.json(medyr_st_url), d3.json(ooval_cty_url), d3.json(ooecon_cty_url),
-			d3.json(rtval_cty_url), d3.json(rtecon_cty_url), d3.json(ooval_st_url), d3.json(ooecon_st_url),
-			d3.json(rtval_st_url), d3.json(rtecon_st_url)];
-}
+	 var prom = [d3.json(hhage_90_st),  d3.json(hhage_00_st),  d3.json(hhage_10_st),  d3.json(hhage_for_st),  d3.json(B25002_st_url),  
+	   d3.json(B25004_st_url),  d3.json(B25005_st_url),  d3.json(B25010_st_url),  d3.json(B25032_st_url),  d3.json(B25033_st_url),  
+	   d3.json(B25037_st_url),  d3.json(B25064_st_url),  d3.json(B25074_st_url),  d3.json(B25077_st_url),  d3.json(B25095_st_url),  
+	   d3.json(hhage_90_cty),  d3.json(hhage_00_cty),  d3.json(hhage_10_cty),  d3.json(hhage_for_cty),  d3.json(B25002_cty_url),  
+	   d3.json(B25004_cty_url),  d3.json(B25005_cty_url),  d3.json(B25010_cty_url),  d3.json(B25032_cty_url),  d3.json(B25033_cty_url),  
+	   d3.json(B25037_cty_url),  d3.json(B25064_cty_url),  d3.json(B25074_cty_url),  d3.json(B25077_cty_url),  d3.json(B25095_cty_url),  
+	   d3.json(B25002_muni_url),  d3.json(B25004_muni_url),  d3.json(B25005_muni_url),  d3.json(B25010_muni_url),  d3.json(B25032_muni_url),  
+	   d3.json(B25033_muni_url),  d3.json(B25037_muni_url),  d3.json(B25064_muni_url),  d3.json(B25074_muni_url),  d3.json(B25077_muni_url),  
+	   d3.json(B25095_muni_url)] 
+ }
 
 Promise.all(prom).then(data =>{
-var cty_forecast = housingSum(data[0], data[1], data[2],data[3],'county');
-var st_forecast = housingSum(data[4],data[5],data[6],data[7],'state');
 
 if(regList.includes(geotype)){
+	var cty_forecast = housingSum(data[15], data[16], data[17],data[18],'county');
+    var st_forecast = housingSum(data[0],data[1],data[2],data[3],'state');
+
 	var reg_forecast = [];
 	 var reg_sum = d3.rollup(cty_forecast, v => d3.sum(v, d => d.total_households), d => d.year, d => d.age_group_id);   
 	 for (let [key, value] of reg_sum) {
@@ -7050,43 +8452,45 @@ if(regList.includes(geotype)){
 		 }
 	 }
   var hh_forecast = st_forecast.concat(reg_forecast, cty_forecast);
-   } else {
-	var hh_forecast = st_forecast.concat(cty_forecast);
-   };
 
-
-var hhforecast_fin = [];
-var grFips = [...new Set(hh_forecast.map(d => d.fips))]
-var age_arr = ["Total", "18 to 24", "25 to 44", "45 to 64", "65 and Older"]
-grFips.forEach(fp =>{
-	for(i = 0; i < 5; i++){ //age_group_id
-	    var tmpFore = hh_forecast.filter(d => d.fips == fp).filter(d2 => d2.age_group_id == i)
-		for(j = 0; j < tmpFore.length; j++){
-			hhforecast_fin.push({
-				'fips' : tmpFore[j].fips,
-			   'name' : tmpFore[j].name,
-			   'year' : tmpFore[j].year,
-			   'age_group_id' : age_arr[tmpFore[j].age_group_id],
-			   'household_type_id' : 0,
-			   'total_households' : tmpFore[j].total_households,
-			   'grlabel' : j == 0 ? "" :tmpFore[j-1].year + "-" + tmpFore[j].year,
-			   'growth'  : j == 0 ? 0 : tmpFore[j].total_households - tmpFore[j-1].total_households,
-			   'cagr' : j == 0 ? '-' : (Math.pow((tmpFore[j].total_households/tmpFore[j-1].total_households),(1/(tmpFore[j].year - tmpFore[j-1].year)))-1)
-		})
-	} //j
-	} //i
-});
-
+var hhforecast_fin = procHHForecast(hh_forecast);
 
 //processing the ACS Housing Tables
-if(regList.includes(geotype)){
+
 	//Region Data
 	var regid = {};
    regid.FIPS = -101
    regid.NAME = names[0];
 
+//ACS Tables
+
+var B25002_st = acsPrep(data[4]);
+var B25004_st = acsPrep(data[5]);
+var B25005_st = acsPrep(data[6]);
+var B25010_st = acsPrep(data[7]);
+var B25032_st = acsPrep(data[8]);
+var B25033_st = acsPrep(data[9]);
+var B25037_st = acsPrep(data[10]);
+var B25064_st = acsPrep(data[11]);
+var B25074_st = acsPrep(data[12]);
+var B25077_st = acsPrep(data[13]);
+var B25095_st = acsPrep(data[14]);
+var B25002_reg = acsPrep(data[19]);
+var B25004_reg = acsPrep(data[20]);
+var B25005_reg = acsPrep(data[21]);
+var B25010_reg = acsPrep(data[22]);
+var B25032_reg = acsPrep(data[23]);
+var B25033_reg = acsPrep(data[24]);
+var B25037_reg = acsPrep(data[25]);
+var B25064_reg = acsPrep(data[26]);
+var B25074_reg = acsPrep(data[27]);
+var B25077_reg = acsPrep(data[28]);
+var B25095_reg = acsPrep(data[29]);
+
+
+
 //processing Occupancy Table
-	var occ_tab_reg1 = gen_occ_tab(acsPrep(data[8]),acsPrep(data[9]),acsPrep(data[10]),geotype);
+	var occ_tab_reg1 = gen_occ_tab(B25002_reg,B25004_reg,B25005_reg,geotype);
 	//Rolling up regional total
 	var occ_tab_keys = Object.keys(occ_tab_reg1[0])
 	occ_tab_keys.splice(0,2);
@@ -7096,10 +8500,10 @@ if(regList.includes(geotype)){
     var occ_tab_reg = acsMOE(occ_reg_tmp);
    
     //County Data
-	var occ_tab_cty = gen_occ_tab(acsPrep(data[8]),acsPrep(data[9]),acsPrep(data[10]),'county') 
+	var occ_tab_cty = gen_occ_tab(B25002_reg,B25004_reg,B25005_reg,'county') 
 	               .sort(function(a, b){ return d3.ascending(a['FIPS'], b['FIPS']); }); 
 	//State Data
-	var occ_tab_st = gen_occ_tab(acsPrep(data[11]),acsPrep(data[12]),acsPrep(data[13]),'state');
+	var occ_tab_st = gen_occ_tab(B25002_st,B25004_st,B25005_st,'state');
 	
 	
 	//Final data
@@ -7108,7 +8512,7 @@ if(regList.includes(geotype)){
 	//processing the Housing Type table
 	//Regional Data
 	
-	var tenure_unit_reg1 = gen_str_unit(acsPrep(data[14]),geotype);
+	var tenure_unit_reg1 = gen_str_unit(B25032_reg ,geotype);
 	var tenure_unit_keys = Object.keys(tenure_unit_reg1[0])
 	tenure_unit_keys.splice(0,2);
 	var tenure_unit_sum =  d3.rollup(tenure_unit_reg1, v => Object.fromEntries(tenure_unit_keys.map(col => [col, d3.sum(v, d => +d[col])])));
@@ -7116,7 +8520,7 @@ if(regList.includes(geotype)){
     var tenure_unit_reg = acsMOE(tenure_unit_tmp);
 	
 	
-	var tenure_pop_reg1 = gen_str_pop(acsPrep(data[15]),geotype);
+	var tenure_pop_reg1 = gen_str_pop(B25033_reg ,geotype);
 	var tenure_pop_keys = Object.keys(tenure_pop_reg1[0])
 	tenure_pop_keys.splice(0,2);
 	var tenure_pop_sum =  d3.rollup(tenure_pop_reg1, v => Object.fromEntries(tenure_pop_keys.map(col => [col, d3.sum(v, d => +d[col])])));
@@ -7124,35 +8528,74 @@ if(regList.includes(geotype)){
     var tenure_pop_reg = acsMOE(tenure_pop_tmp);
 
    //County Data
-   	var pph_cty = acsPrep(data[16]);
-	var medyr_cty = acsPrep(data[17]);
-	var tenure_unit_cty = acsMOE(gen_str_unit(acsPrep(data[14]),'county')) 
-	               .sort(function(a, b){ return d3.ascending(a['FIPS'], b['FIPS']); }); 
-
-	var tenure_pop_cty = acsMOE(gen_str_pop(acsPrep(data[15]),'county')) 
-	               .sort(function(a, b){ return d3.ascending(a['FIPS'], b['FIPS']); }); 
-
-
-	//State Data
-  	var pph_st = acsPrep(data[20]);
-	var medyr_st = acsPrep(data[21]);
-	var tenure_unit_st = acsMOE(gen_str_unit(acsPrep(data[18]),'state')); 
-	var tenure_pop_st = acsMOE(gen_str_pop(acsPrep(data[19]),'state'));
+   	var pph_cty = B25010_reg;
+	var medyr_cty = B25037_reg;
 	
+	var tenure_unit_cty = acsMOE(gen_str_unit(B25032_reg,'county')) 
+	               .sort(function(a, b){ return d3.ascending(a['FIPS'], b['FIPS']); }); 
+
+	var tenure_pop_cty = acsMOE(gen_str_pop(B25033_reg,'county')) 
+	               .sort(function(a, b){ return d3.ascending(a['FIPS'], b['FIPS']); }); 
+				   
+	//Average PPH and Median Construction year for regions  -- create data with squared moe, sum,process
+	var pph_reg = aggPPH(B25010_reg, B25032_reg,regid);
+	//Median Year
+	var medyr_reg = [];
+	var medyr_tmp = [];
+	var medyrall_est = [];
+	var medyrall_moe = [];
+	var medyroo_est = [];
+	var medyroo_moe = [];
+	var medyrrt_est = [];
+	var medyrrt_moe = [];
+	B25037_reg.forEach( d => {
+		  medyrall_est.push(+d.B25037_001E);
+		  medyrall_moe.push(+d.B25037_001M);
+		  medyroo_est.push(+d.B25037_002E);
+		  medyroo_moe.push(+d.B25037_002M);
+		  medyrrt_est.push(+d.B25037_003E);
+		  medyrrt_moe.push(+d.B25037_003M);
+	})
+	
+	var medyrall_est_range = d3.extent(medyrall_est);
+	var medyrall_moe_range = d3.extent(medyrall_moe);
+	var medyroo_est_range = d3.extent(medyroo_est);
+	var medyroo_moe_range = d3.extent(medyroo_moe);
+	var medyrrt_est_range = d3.extent(medyrrt_est);
+	var medyrrt_moe_range = d3.extent(medyrrt_moe)
+
+	medyr_tmp.NAME = regid.NAME;
+	medyr_tmp.GEO1 = 8;
+	medyr_tmp.GEO2 = regid.FIPS;
+	medyr_tmp.B25037_001E = Math.round((medyrall_est_range[0] + medyrall_est_range[1])/2);
+	medyr_tmp.B25037_001M = Math.round((medyrall_moe_range[0] + medyrall_moe_range[1])/2);
+	medyr_tmp.B25037_002E = Math.round((medyroo_est_range[0] + medyroo_est_range[1])/2);
+	medyr_tmp.B25037_002M = Math.round((medyroo_moe_range[0] + medyroo_moe_range[1])/2);
+	medyr_tmp.B25037_003E = Math.round((medyrrt_est_range[0] + medyrrt_est_range[1])/2);
+	medyr_tmp.B25037_003M = Math.round((medyrrt_moe_range[0] + medyrrt_moe_range[1])/2);
+	
+	medyr_reg.push(medyr_tmp)
+	
+	//State Data
+  	var pph_st = B25010_st;
+	var medyr_st = B25037_st;
+	var tenure_unit_st = acsMOE(gen_str_unit(B25032_st,'state')); 
+	var tenure_pop_st = acsMOE(gen_str_pop(B25033_st,'state'));
 	
 	//Final data
 	var tenure_unit_fin = tenure_unit_st.concat(tenure_unit_reg, tenure_unit_cty);
 	var tenure_pop_fin = tenure_pop_st.concat(tenure_pop_reg, tenure_pop_cty);
+	var medyr_fin = medyr_st.concat(medyr_reg, medyr_cty)
+	var pph_fin = pph_st.concat(pph_reg, pph_cty);
+	var fin_tenure_tab = genTenureTab(tenure_unit_fin, medyr_fin,tenure_pop_fin,pph_fin);
 	
-    var fin_tenure_tab = genTenureTab(tenure_unit_fin,medyr_cty, medyr_st,tenure_pop_fin,pph_cty,pph_st);
-
 
 //Housing Economics Table  
 //Calculating the housing cost value for region
-
+//Region
 var reg_Med = []
-var OOMed_cty = acsPrep(data[22])
-var OOMed_st = acsPrep(data[26])
+var OOMed_cty = B25077_reg
+var OOMed_st = B25077_st;
 
 var OOMed_EST = [];
 var OOMed_MOE = [];
@@ -7167,8 +8610,8 @@ var OOMed_MOE_range = d3.extent(OOMed_MOE);
 var OOMed_EST_Value = (OOMed_EST_range[1] + OOMed_EST_range[0])/2;
 var OOMed_MOE_Value = (OOMed_MOE_range[1] + OOMed_MOE_range[0])/2;
   
-var RTMed_cty = acsPrep(data[24]);
-var RTMed_st = acsPrep(data[28]);
+var RTMed_cty = B25064_reg;
+var RTMed_st = B25064_st;
 
 var RTMed_EST = [];
 var RTMed_MOE = [];
@@ -7201,14 +8644,17 @@ for(i = 0; i < OOMed_cty.length; i++){
 					'RT_EST' : RTMed_cty[i].B25064_001E, 'RT_MOE' : RTMed_cty[i].B25064_001M})
 }
 
-var med_Fin = st_Med.concat(reg_Med,cty_Med);
+var med_fin = st_Med.concat(reg_Med,cty_Med);
 
-// Percent of home owners at 35% or more, 31-49% or more, 50% or more on housing
 
-var housingIncome = genhousIncome(acsPrep(data[23]),acsPrep(data[25]),geotype);
+// Percent of home owners at 30% or more, 31-49% or more, 50% or more on housing
+
+var housingIncome = genhousIncome(B25095_reg,B25074_reg,geotype);
 
 var housingIncome_keys = Object.keys(housingIncome[0])
-housingIncome_keys .splice(0,2);
+
+housingIncome_keys.splice(0,2);
+
 	var housingIncome_sum =  d3.rollup(housingIncome, v => Object.fromEntries(housingIncome_keys.map(col => [col, d3.sum(v, d => +d[col])])));
 	var housingIncome_tmp = [{...regid, ...housingIncome_sum}];
     var housingIncome_reg = acsMOE(housingIncome_tmp);
@@ -7217,7 +8663,7 @@ housingIncome_keys .splice(0,2);
 	var housingIncome_cty = acsMOE(housingIncome,'county') 
 	               .sort(function(a, b){ return d3.ascending(a['FIPS'], b['FIPS']); }); 
 //State Data
-var housingIncome_st = acsMOE(genhousIncome(acsPrep(data[27]),acsPrep(data[29]),'state'),'state');
+var housingIncome_st = acsMOE(genhousIncome(B25095_st,B25074_st,'state'),'state');
 
 //Final data
  var housingIncome_fin = housingIncome_st.concat(housingIncome_reg, housingIncome_cty);
@@ -7225,37 +8671,273 @@ var housingIncome_st = acsMOE(genhousIncome(acsPrep(data[27]),acsPrep(data[29]),
 } //Region
 
 if(ctyList.includes(geotype)){
-	   //County Data
-	var occ_tab_cty = gen_occ_tab(acsPrep(data[8]),acsPrep(data[9]),acsPrep(data[10]),geotype); 
-	//State Data
-	var occ_tab_st = gen_occ_tab(acsPrep(data[11]),acsPrep(data[12]),acsPrep(data[13]),'state');
+	var cty_forecast = housingSum(data[15], data[16], data[17],data[18],'county');
+    var st_forecast = housingSum(data[0],data[1],data[2],data[3],'state');
+    var hh_forecast = st_forecast.concat(cty_forecast);
+	
+	var hhforecast_fin = procHHForecast(hh_forecast);
 
-	var occ_tab_fin = occ_tab_st.concat(occ_tab_cty);
+	
+	//ACS Tables
+	var B25002_st = acsPrep(data[4]);
+	var B25004_st = acsPrep(data[5]);
+	var B25005_st = acsPrep(data[6]);
+	var B25010_st = acsPrep(data[7]);
+	var B25032_st = acsPrep(data[8]);
+	var B25033_st = acsPrep(data[9]);
+	var B25037_st = acsPrep(data[10]);
+	var B25064_st = acsPrep(data[11]);
+	var B25074_st = acsPrep(data[12]);
+	var B25077_st = acsPrep(data[13]);
+	var B25095_st = acsPrep(data[14]);
+	var B25002_cty = acsPrep(data[19]);
+	var B25004_cty = acsPrep(data[20]);
+	var B25005_cty = acsPrep(data[21]);
+	var B25010_cty = acsPrep(data[22]);
+	var B25032_cty = acsPrep(data[23]);
+	var B25033_cty = acsPrep(data[24]);
+	var B25037_cty = acsPrep(data[25]);
+	var B25064_cty = acsPrep(data[26]);
+	var B25074_cty = acsPrep(data[27]);
+	var B25077_cty = acsPrep(data[28]);
+	var B25095_cty = acsPrep(data[29]);
+
+//processing Occupancy Table
+   
+    //County Data
+	var occ_tab_cty = gen_occ_tab(B25002_cty,B25004_cty,B25005_cty,'county') 
+
+	//State Data
+	var occ_tab_st = gen_occ_tab(B25002_st,B25004_st,B25005_st,'state');
+	
+	
+	//Final data
+	var occ_tab_fin = occ_tab_cty.concat(occ_tab_st);
+	
+	//processing the Housing Type table
+
+   //County Data
+   	var pph_cty = B25010_cty
+	var medyr_cty = B25037_cty;
+	var tenure_unit_cty = acsMOE(gen_str_unit(B25032_cty,'county'))
+
+	var tenure_pop_cty = acsMOE(gen_str_pop(B25033_cty,'county')) 
+
+	//State Data
+  	var pph_st = B25010_st;
+	var medyr_st = B25037_st;
+	var tenure_unit_st = acsMOE(gen_str_unit(B25032_st,'state')); 
+	var tenure_pop_st = acsMOE(gen_str_pop(B25033_st,'state'));
+	
+	
+	//Final data
+	var tenure_unit_fin = tenure_unit_cty.concat(tenure_unit_st);
+	var tenure_pop_fin = tenure_pop_cty.concat(tenure_pop_st);
+	var medyr_fin = medyr_cty.concat(medyr_st)
+	var pph_fin = pph_cty.concat(pph_st);
+	
+    var fin_tenure_tab = genTenureTab(tenure_unit_fin,medyr_fin,tenure_pop_fin,pph_fin);
+
+//Housing Economics Table  
+//Calculating the housing cost value for County and State
+
+var OOMed_cty = B25077_cty
+var OOMed_st = B25077_st;
+
+var OOMed_EST = [];
+var OOMed_MOE = [];
+for(i = 0; i < OOMed_cty.length; i++){
+	  OOMed_EST.push(OOMed_cty[i].B25077_001E);
+	  OOMed_MOE.push(OOMed_cty[i].B25077_001M);
+	  };
+
+var RTMed_cty = B25064_cty;
+var RTMed_st = B25064_st;
+
+var RTMed_EST = [];
+var RTMed_MOE = [];
+for(i = 0; i < RTMed_cty.length; i++){
+	  RTMed_EST.push(RTMed_cty[i].B25064_001E);
+	  RTMed_MOE.push(RTMed_cty[i].B25064_001M);
+	  };
+	  
+
+
+//Assembling final tabs
+
+var st_Med = [];
+st_Med.push({'FIPS' : OOMed_st[0].GEO1, 'NAME' : OOMed_st[0].NAME, 'VAR' : 'Median Cost', 
+				'OO_EST' : OOMed_st[0].B25077_001E, 'OO_MOE' : OOMed_st[0].B25077_001M, 
+				'RT_EST' : RTMed_st[0].B25064_001E, 'RT_MOE' : RTMed_st[0].B25064_001M});
+				
+var cty_Med = [];
+for(i = 0; i < OOMed_cty.length; i++){
+	  cty_Med.push({'FIPS' : OOMed_cty[i].GEO2, 'NAME' : OOMed_cty[i].NAME, 'VAR' : 'Median Cost', 
+	                'OO_EST' : OOMed_cty[i].B25077_001E, 'OO_MOE' : OOMed_cty[i].B25077_001M, 
+					'RT_EST' : RTMed_cty[i].B25064_001E, 'RT_MOE' : RTMed_cty[i].B25064_001M})
+}
+
+var med_fin = cty_Med.concat(st_Med);
+
+// Percent of home owners at 30% or more, 31-49% or more, 50% or more on housing
+
+var housingIncome = genhousIncome(B25095_cty,B25074_cty,geotype);
+
+//County data
+	var housingIncome_cty = acsMOE(housingIncome,'county') 
+	               .sort(function(a, b){ return d3.ascending(a['FIPS'], b['FIPS']); }); 
+//State Data
+var housingIncome_st = acsMOE(genhousIncome(B25095_st,B25074_st,'state'),'state');
+
+//Final data
+ var housingIncome_fin = housingIncome_cty.concat(housingIncome_st);
 } // county
 
 if(muniList.includes(geotype)){
-	   //Muni Data
-	var occ_tab_muni = gen_occ_tab(acsPrep(data[8]),acsPrep(data[9]),acsPrep(data[10]),geotype); 
+	var cty_forecast = housingSum(data[15], data[16], data[17],data[18],'county');
+    var st_forecast = housingSum(data[0],data[1],data[2],data[3],'state');
+    var hh_forecast = st_forecast.concat(cty_forecast);
+	var hhforecast_fin = procHHForecast(hh_forecast);
 
-	//County Data
-	var occ_tab_cty
-	var occ_tab_fin = occ_tab_cty.concat(occ_tab_muni);
+
+	//ACS Data Calls
+
+	var B25002_st = acsPrep(data[4]);
+	var B25004_st = acsPrep(data[5]);
+	var B25005_st = acsPrep(data[6]);
+	var B25010_st = acsPrep(data[7]);
+	var B25032_st = acsPrep(data[8]);
+	var B25033_st = acsPrep(data[9]);
+	var B25037_st = acsPrep(data[10]);
+	var B25064_st = acsPrep(data[11]);
+	var B25074_st = acsPrep(data[12]);
+	var B25077_st = acsPrep(data[13]);
+	var B25095_st = acsPrep(data[14]);
+	var B25002_cty = acsPrep(data[19]);
+	var B25004_cty = acsPrep(data[20]);
+	var B25005_cty = acsPrep(data[21]);
+	var B25010_cty = acsPrep(data[22]);
+	var B25032_cty = acsPrep(data[23]);
+	var B25033_cty = acsPrep(data[24]);
+	var B25037_cty = acsPrep(data[25]);
+	var B25064_cty = acsPrep(data[26]);
+	var B25074_cty = acsPrep(data[27]);
+	var B25077_cty = acsPrep(data[28]);
+	var B25095_cty = acsPrep(data[29]);
+	var B25002_muni = acsPrep(data[30]);
+	var B25004_muni = acsPrep(data[31]);
+	var B25005_muni = acsPrep(data[32]);
+	var B25010_muni = acsPrep(data[33]);
+	var B25032_muni = acsPrep(data[34]);
+	var B25033_muni = acsPrep(data[35]);
+	var B25037_muni = acsPrep(data[36]);
+	var B25064_muni = acsPrep(data[37]);
+	var B25074_muni = acsPrep(data[38]);
+	var B25077_muni = acsPrep(data[39]);
+	var B25095_muni = acsPrep(data[40]);
+
+//processing Occupancy Table
+    //Muni Data
+	var occ_tab_muni = gen_occ_tab(B25002_muni,B25004_cty,B25005_muni,'muni')   
+    //County Data
+	var occ_tab_cty = gen_occ_tab(B25002_cty,B25004_cty,B25005_cty,'county') 
+
+	//State Data
+	var occ_tab_st = gen_occ_tab(B25002_st,B25004_st,B25005_st,'state');
+	
+	
+	//Final data
+	var occ_tab_fin = occ_tab_muni.concat(occ_tab_cty,occ_tab_st);
+	
+	//processing the Housing Type table
+   //Muni Data
+   	var pph_muni = B25010_muni
+	var medyr_muni = B25037_muni;
+	var tenure_unit_muni = acsMOE(gen_str_unit(B25032_muni,'muni'))
+	var tenure_pop_muni = acsMOE(gen_str_pop(B25033_muni,'muni')) 
+	
+   //County Data
+   	var pph_cty = B25010_cty
+	var medyr_cty = B25037_cty;
+	var tenure_unit_cty = acsMOE(gen_str_unit(B25032_cty,'county'))
+	var tenure_pop_cty = acsMOE(gen_str_pop(B25033_cty,'county')) 
+
+	//State Data
+  	var pph_st = B25010_st;
+	var medyr_st = B25037_st;
+	var tenure_unit_st = acsMOE(gen_str_unit(B25032_st,'state')); 
+	var tenure_pop_st = acsMOE(gen_str_pop(B25033_st,'state'));
+	
+	
+	//Final data
+	var tenure_unit_fin = tenure_unit_muni.concat(tenure_unit_cty,tenure_unit_st);
+	var tenure_pop_fin = tenure_pop_muni.concat(tenure_pop_cty,tenure_pop_st);
+	var medyr_fin = medyr_muni.concat(medyr_cty, medyr_st)
+	var pph_fin = pph_muni.concat(pph_cty,pph_st);
+	
+    var fin_tenure_tab = genTenureTab(tenure_unit_fin,medyr_fin,tenure_pop_fin,pph_fin);
+
+
+//Housing Economics Table  
+//Calculating the housing cost value for region
+
+var OOMed_muni = B25077_muni
+var OOMed_cty = B25077_cty
+var OOMed_st = B25077_st;
+
+var RTMed_muni = B25064_muni
+var RTMed_cty = B25064_cty
+var RTMed_st = B25064_st;
+
+				
+var st_Med = [];
+st_Med.push({'FIPS' : OOMed_st[0].GEO1, 'NAME' : OOMed_st[0].NAME, 'VAR' : 'Median Cost', 
+				'OO_EST' : OOMed_st[0].B25077_001E, 'OO_MOE' : OOMed_st[0].B25077_001M, 
+				'RT_EST' : RTMed_st[0].B25064_001E, 'RT_MOE' : RTMed_st[0].B25064_001M});
+				
+
+var cty_Med = [];
+cty_Med.push({'FIPS' : OOMed_cty[0].GEO2, 'NAME' : OOMed_cty[0].NAME, 'VAR' : 'Median Cost', 
+	                'OO_EST' : OOMed_cty[0].B25077_001E, 'OO_MOE' : OOMed_cty[0].B25077_001M, 
+					'RT_EST' : RTMed_cty[0].B25064_001E, 'RT_MOE' : RTMed_cty[0].B25064_001M})
+
+var muni_Med = [];
+muni_Med.push({'FIPS' : OOMed_muni[0].GEO2, 'NAME' : OOMed_muni[0].NAME, 'VAR' : 'Median Cost', 
+	                'OO_EST' : OOMed_muni[0].B25077_001E, 'OO_MOE' : OOMed_muni[0].B25077_001M, 
+					'RT_EST' : RTMed_muni[0].B25064_001E, 'RT_MOE' : RTMed_muni[0].B25064_001M})
+
+var med_fin = muni_Med.concat(cty_Med, st_Med);
+
+// Percent of home owners at 30% or more, 31-49% or more, 50% or more on housing
+var housingIncomemuni = genhousIncome(B25095_muni,B25074_muni,geotype);
+
+//Muni data
+	var housingIncome_muni = acsMOE(housingIncomemuni,'muni') 
+	               .sort(function(a, b){ return d3.ascending(a['FIPS'], b['FIPS']); }); 
+				   
+
+//County data
+var housingIncomecty = genhousIncome(B25095_cty,B25074_cty,geotype);
+var housingIncome_cty = acsMOE(housingIncomecty,'county') 
+	               .sort(function(a, b){ return d3.ascending(a['FIPS'], b['FIPS']); }); 
+//State Data
+var housingIncome_st = acsMOE(genhousIncome(B25095_st,B25074_st,'state'),'state');
+
+//Final data
+ var housingIncome_fin = housingIncome_muni.concat(housingIncome_cty, housingIncome_st);
 } // muni
 
-var bkmarkArr = [{title : 'Household Forecast', id :'house01'},
-	{title : 'Housing Occupancy and Vacancy Table', id : 'house02'},
-	{title : 'Housing Type Table', id : 'house03'},
-	{title : 'Housing Cost and Affordability Table', id : 'house04'}]
+var bkMarkArr = [{title : 'Household Forecast', id :'house01', srctxt : "Household Forecast", srclink : "https://coloradodemography.github.io/housing-and-households/data/household-projections/"},
+	{title : 'Housing Occupancy and Vacancy Table', id : 'house02', srctxt : "ACS Housing Unit Occupancy Estimates",srclink : genCEDSCIUrl(geotype,"B25002",curyear, fipsArr)},
+	{title : 'Housing Type Table', id : 'house03', srctxt : "ACS Housing Type Estimates",srclink : genCEDSCIUrl(geotype,"B25033",curyear, fipsArr)},
+	{title : 'Housing Cost and Affordability Table', id : 'house04', srctxt : "ACS Housing Cost and Affordability Estimates",srclink : genCEDSCIUrl(geotype,"B25095",curyear, fipsArr)}]
 //Outputs
-insertBkmark(bkmarkArr)
+insertBkmark(bkMarkArr)
 
-genHHForecastChart(hhforecast_fin,PRO_1.id,bkmarkArr[0], geotype);
-genOccupancyTab(occ_tab_fin,PRO_2.id,bkmarkArr[1],geotype,curyear,fipsArr);
+genHHForecastChart(hhforecast_fin,PRO_1.id,bkMarkArr[0], geotype);
+genOccupancyTab(occ_tab_fin,PRO_2.id,bkMarkArr[1],geotype,curyear,fipsArr);
+genHousingTemireTab(fin_tenure_tab,PRO_3.id,bkMarkArr[2],geotype,curyear,fipsArr);
+genHHIncomeTab(med_fin, housingIncome_fin,PRO_4.id,bkMarkArr[3],geotype,curyear,fipsArr);
 
-/*
-
-genHousingTypeTab(bkmarkArr[2]);
-genHHIncomeTab(bkmarkArr[3]);
-*/
 	}); //end of Promise
 }; //end of genSel5Display
