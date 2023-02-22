@@ -17,7 +17,9 @@ body{
 	font-size: 12pt;
 }
 
-
+body.waiting * {
+    cursor: progress;
+}
 hr {
     display: block;
     height: 1px;
@@ -54,6 +56,8 @@ hr {
 	font-family: "Trebuchet MS, Museo Slab; helvetica, lucida sans, tahoma, verdana", sans-serif;
 	font-size: 12pt;
 	text-align: justify;
+	margin-left: 10px;
+	margin-right: 20px;
 }
 
 li.crosstext {
@@ -556,6 +560,7 @@ details main {
   padding: 1px;
 }
 .grid-item {
+  position : relative;
   background-color: white;
   text-align: left;
   padding: 20px;
@@ -1288,6 +1293,20 @@ div.tooltip {
   background-color: #B0B0B0;
 }
 
+
+/* Summary Button */
+.summarybtn {
+  font-size : 11pt;
+  outline-style: solid;
+  text-align: left;
+  width: 100%;
+  display: block;
+  cursor: pointer;
+  padding: .5em .5em .5em .7em;
+  background:#D3D3D3;
+  color:blue;
+  border-radius: 3px 3px 0 0;
+}
 /*Datatables font */
 .DTtable.dataTable td {
   font-family: "Trebuchet MS, Museo Slab; helvetica, lucida sans, tahoma, verdana", sans-serif;
@@ -1313,41 +1332,43 @@ div.tooltip {
 .gis-container {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: 4em auto 4em repeat(4, auto) 4em auto 4em auto 4em auto 4em auto;
   grid-gap: 1px;
   background-color: #7a853b; 
   padding: 1px;
 }
-.gis-panel_main {  
+.gis-panel_main_a {  
+ gap : 0;
+  grid-column: 1 / span 6;
+  grid-row: 1;
+  }
+ .gis-panel_main_b {  
   gap : 0;
-  grid-column: 2 / span 7;
-  grid-row: 2 / span 2;
+  grid-column: 1 / span 6;
+  grid-row: 3;
+  } 
+  .gis-panel_main_c {  
+  gap : 0;
+  grid-column: 1 / span 6;
+  grid-row: 8;
+  }
+  .gis-panel_main_d {  
+  gap : 0;
+  grid-column: 1 / span 6;
+  grid-row: 10;
+  }
+  .gis-panel_main_e {  
+  gap : 0;
+  grid-column: 1 / span 6;
+  grid-row: 12;
+  }
+  .gis-panel_main_f {  
+  gap : 0;
+  grid-column: 1 / span 6;
+  grid-row: 14;
   }
   
- .gis-panel_1_1 {  
-   grid-column: 1;
-   grid-row: 1;   
-  }  
-  .gis-panel_1_2 {  
-   grid-column: 2;
-   grid-row: 1;   
-  }  
-  .gis-panel_1_3 {  
-   grid-column: 3;
-   grid-row: 1;   
-  }  
-  .gis-panel_1_4 {  
-   grid-column: 4;
-   grid-row: 1;   
-  }  
-  .gis-panel_1_5 {  
-   grid-column: 5;
-   grid-row: 1;   
-  }  
-  .gis-panel_1_6 {  
-   grid-column: 6;
-   grid-row: 1;   
-  }  
-  .gis-panel_2_1 {  
+ .gis-panel_2_1 {  
    grid-column: 1;
    grid-row: 2;   
   }  
@@ -1371,31 +1392,7 @@ div.tooltip {
    grid-column: 6;
    grid-row: 2;   
   }  
-  .gis-panel_3_1 {  
-    grid-column: 1;
-    grid-row: 3;   
-   }  
-   .gis-panel_3_2 {  
-    grid-column: 2;
-    grid-row: 3;   
-   }  
-   .gis-panel_3_3 {  
-    grid-column: 3;
-    grid-row: 3;   
-   }  
-   .gis-panel_3_4 {  
-    grid-column: 4;
-    grid-row: 3;   
-   }  
-   .gis-panel_3_5 {  
-    grid-column: 5;
-    grid-row: 3;   
-   }  
-   .gis-panel_3_6 {  
-    grid-column: 6;
-    grid-row: 3;   
-   }  
-   .gis-panel_4_1 {  
+  .gis-panel_4_1 {  
     grid-column: 1;
     grid-row: 4;   
    }  
@@ -1491,8 +1488,126 @@ div.tooltip {
     grid-column: 6;
     grid-row: 7;   
    }
-   
-   
+     .gis-panel_9_1 {  
+    grid-column: 1;
+    grid-row: 9;   
+   }  
+   .gis-panel_9_2 {  
+    grid-column: 2;
+    grid-row: 9;   
+   }  
+   .gis-panel_9_3 {  
+    grid-column: 3;
+    grid-row: 9;   
+   }  
+   .gis-panel_9_4 {  
+    grid-column: 4;
+    grid-row: 9;   
+   }  
+   .gis-panel_9_5 {  
+    grid-column: 5;
+    grid-row: 9;   
+   }  
+   .gis-panel_9_6 {  
+    grid-column: 6;
+    grid-row: 9;   
+   }
+  .gis-panel_11_1 {  
+    grid-column: 1;
+    grid-row: 11;   
+   }  
+   .gis-panel_11_2 {  
+    grid-column: 2;
+    grid-row: 11;   
+   }  
+   .gis-panel_11_3 {  
+    grid-column: 3;
+    grid-row: 11;   
+   }  
+   .gis-panel_11_4 {  
+    grid-column: 4;
+    grid-row: 11;   
+   }  
+   .gis-panel_11_5 {  
+    grid-column: 5;
+    grid-row: 11;   
+   }  
+   .gis-panel_11_6 {  
+    grid-column: 6;
+    grid-row: 11;   
+   }
+  .gis-panel_13_1 {  
+    grid-column: 1;
+    grid-row: 13;   
+   }  
+   .gis-panel_13_2 {  
+    grid-column: 2;
+    grid-row: 13;   
+   }  
+   .gis-panel_13_3 {  
+    grid-column: 3;
+    grid-row: 13;   
+   }  
+   .gis-panel_13_4 {  
+    grid-column: 4;
+    grid-row: 13;   
+   }  
+   .gis-panel_13_5 {  
+    grid-column: 5;
+    grid-row: 13;   
+   }  
+   .gis-panel_13_6 {  
+    grid-column: 6;
+    grid-row: 13;   
+   }
+  .gis-panel_15_1 {  
+    grid-column: 1;
+    grid-row: 15;   
+   }  
+   .gis-panel_15_2 {  
+    grid-column: 2;
+    grid-row: 15;   
+   }  
+   .gis-panel_15_3 {  
+    grid-column: 3;
+    grid-row: 15;   
+   }  
+   .gis-panel_15_4 {  
+    grid-column: 4;
+    grid-row: 15;   
+   }  
+   .gis-panel_15_5 {  
+    grid-column: 5;
+    grid-row: 15;   
+   }  
+   .gis-panel_15_6 {  
+    grid-column: 6;
+    grid-row: 15;   
+   }
+  .gis-panel_17_1 {  
+    grid-column: 1;
+    grid-row: 17;   
+   }  
+   .gis-panel_17_2 {  
+    grid-column: 2;
+    grid-row: 17;   
+   }  
+   .gis-panel_17_3 {  
+    grid-column: 3;
+    grid-row: 17;   
+   }  
+   .gis-panel_17_4 {  
+    grid-column: 4;
+    grid-row: 17;   
+   }  
+   .gis-panel_17_5 {  
+    grid-column: 5;
+    grid-row: 17;   
+   }  
+   .gis-panel_17_6 {  
+    grid-column: 6;
+    grid-row: 17;   
+   }
 /* Classes for lookups */
 /* Add a background color on hover */
 .lookup_cell {
@@ -1507,3 +1622,57 @@ div.tooltip {
 	color : black;
 	font-size: 11pt;
 }
+
+/* Styles for Navigation bar */
+
+.navul{
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.nava{
+    margin: 0;
+    text-align: left;
+    padding: 12px 15px 12px 15px;
+    background-color: #001970;
+    color: white;
+    display: block;
+    text-decoration: none;
+}
+.mainMenu {
+	width : 100%;
+	background-color: #001970;
+}
+.mainMenu>li{
+    display: inline-block;
+    margin-left: -5px;
+}
+li:hover>nava{
+    background-color: #001970;
+    cursor: pointer;
+}
+.subMenu{
+    position: absolute;
+    display: none;
+}
+.subMenu li{
+    border-top: 1px solid #575F6A;
+    border-bottom: 1px solid #6B727C;
+    position: relative;
+}
+.mainMenu>li:hover .subMenu{
+    display: block;
+}
+.SuperSubMenu{
+    position: absolute;
+    top: 0;
+    right: 0;
+    -ms-transform: translate(100%,0);
+    -webkit-transform: translate(100%,0);
+    transform:translate(78%,0); 
+    display: none;
+}
+.subMenu li:hover>.SuperSubMenu{
+    display: block;
+}
+
