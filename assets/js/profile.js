@@ -6,6 +6,8 @@
 //String FIPS codes need to be quoted e.g. '001'
 
 //Profile functions
+//Progress Bar https://www.w3schools.com/howto/howto_js_progressbar.asp
+
 //select_title selection of elements in header array
 function select_title(inArr,sel){
  var out_arr = [];
@@ -137,8 +139,6 @@ function mergeArrayObjects(arr1,arr2){
      }
   })
 }
-
-
 
 //range geneates string array of values between start and stop
 function range(start, end, step) {
@@ -3822,10 +3822,50 @@ inArr.forEach(bklink =>{
       bkDiv.appendChild(a);
 })
 
+/* Adding Progress Bar
+var pgMain = document.createElement("div");
+var pgLabel = document.createElement("span");
+var pgBar = document.createElement("progress");
 
-
+	pgLabel.innerHTML = "    Progress"
+	pgLabel.setAttribute("id","progresslab");
+	
+    pgBar.setAttribute("id","progress");
+	pgBar.setAttribute("min","0");
+	pgBar.setAttribute("value","0");
+	pgBar.setAttribute("max","100");
+    
+	pgMain.appendChild(pgLabel);
+	pgMain.appendChild(pgBar);
+	bkDiv.appendChild(pgMain);
+	document.getElementById("progresslab").style.display = "none";
+	document.getElementById("progress").style.display = "none";
+**/
 } //insertBkmark
 
+/* displayBar manages the display of the progress bar
+function //displayBar(){
+var lab = document.getElementById("progresslab");
+var bar = document.getElementById("progress");
+if(lab.style.display === "none") {
+    lab.style.display = "block";
+	bar.style.display = "block";
+  } else {
+    lab.style.display = "none";
+	bar.style.display = "none";
+  }
+}
+
+//updatepgBar updates the progress bar, takes in starting and ending values as whole numbers
+function updatepgBar(stpct, endpct) {
+	debugger
+ var bar = document.getElementById("progress");
+ bar.value = stpct.toString();
+ for(outval = stpct; outval <= endpct; outval++){
+	  bar.value = outval.toString();
+ }
+} 
+*/
 //Community Profile Functions
 
 
@@ -6734,11 +6774,12 @@ var bkMarkArr = [{title : names[0] + " Basic Statistics", id : "map", srctxt : "
 	]
 
 insertBkmark(bkMarkArr);
-debugger;
-document.body.style.backgroundColor = "red";
+ ////displayBar();
   genSel1map(geotype, fipsArr, names, PRO_1.id, bkMarkArr[0]);
+  //updatepgBar(1,50)
   genSel1tab(geotype, fipsArr, names, bkMarkArr[1], PRO_2.id,curyear, acsyr);
-document.body.style.backgroundColor = "white";
+  //updatepgBar(50,100)
+  //displayBar()
 };
 
 //genSel2display  Outputs objects for the Population Trends panel of the profile... 
@@ -6828,6 +6869,8 @@ insertBkmark(bkMarkArr);
 
 
 Promise.all(prom).then(data =>{
+//displayBar();
+//updatepgBar(1,30)
 // Processing State Table
 var columnsToSum = ['births', 'deaths', 'netmigration', 'totalpopulation'];
 
@@ -6860,7 +6903,7 @@ for (let [key, value] of foresum_state) {
 
 //Growth Table
 // Generate data set for output Table
-
+//updatepgBar(31,45)
 var sel_yr = range(1990,curyear);
 var sel_yr5 = [];
 for(i = 0; i < sel_yr.length;i++){
@@ -6890,6 +6933,7 @@ var ctyNameList = countyName(cty_gr_data[0].countyfips)
 
 //Regional Table
 if(regList.includes(geotype)) {
+//updatepgBar(46,60)
 var fileName = "Population Growth Table " + regionName(fipsArr);
 var regionNum = -101;
 
@@ -6975,17 +7019,20 @@ for (let [key, value] of coc_reg_sum) {
 var coc_data = state_coc.concat(coc_reg_data,coc_cty_data) //This is single year data
 
 //Output
-
+//updatepgBar(641,80)
 growth_tab(geotype, tab_gr,bkMarkArr[0],fileName, PRO_1.id);  
 //Plots
 //Add Colorado to fipsList and ctyNameList
 
 var divArr = [PRO_2.id, PRO_3.id, PRO_4.id];
 genRegPopSetup(geotype,est_data, forec_data, coc_data, divArr,bkMarkArr, fipsList, ctyNameList);
+//updatepgBar(81,100)
+//displayBar()
 } //Regional
 
 //County -- Need Growth Tab, Estimates, Forecasts, COC
 if(ctyList.includes(geotype)) {
+	//updatepgBar(46,60)
  var fileName = "Population Growth Table " + countyName(parseInt(fipsArr));
 
 var tab_gr = tab_cty_data.concat(state_gr_data) //This is 5 year data
@@ -7029,17 +7076,23 @@ for(i = 0; i< data[0].length; i++){
 
 
 var coc_data = coc_cty_data; //This is single year data
-
+//updatepgBar(61,70)
  growth_tab(geotype, tab_gr,bkMarkArr[0],fileName, PRO_1.id);  
+ //updatepgBar(71,80)
  estPlot(est_data, "profile", geotype, PRO_2.id, bkMarkArr[1], curyear, fipsList, ctyNameList);
+ //updatepgBar(81,90)
  var fore_Data = forecastPlot(data[1], "profile", geotype, PRO_3.id, bkMarkArr[2], curyear, fipsList, ctyNameList);
+ //updatepgBar(91,96)
  cocPlot(data[0],"profile", geotype, PRO_4.id, bkMarkArr[3], curyear, fipsList, ctyNameList);
+ //updatepgBar(97,100)
+ //displayBar();
 }; //County
 
 
 //Municipalities
 if(muniList.includes(geotype)) {
-
+//displayBar();
+//updatepgBar(1,30)
 
 //Checking for multi places
 var muni_data = data[3].filter(d => d.countyfips != 999);
@@ -7068,10 +7121,12 @@ for(i = 0; i< data[0].length; i++){
 var est_data = tab_muni_data; //This is single year data
 var fipsList = [...new Set(est_data.map(d => d.fips))];
 var ctyNameList = [...new Set(est_data.map(d => d.name))];
-
+//updatepgBar(31,60)
  growth_tab(geotype, tab_gr,bkMarkArr[0],fileName, PRO_1.id);  
+//updatepgBar(61,80)
  estPlot(est_data, "profile", geotype, PRO_2.id, bkMarkArr[1],curyear, fipsList, ctyNameList);
- 
+//updatepgBar(81,100) 
+//displayBar();
 }; //Municipality
 }); //End of Promise
 

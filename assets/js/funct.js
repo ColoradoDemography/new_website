@@ -100,7 +100,7 @@ if(muni == '12415'){cty_n = '035'};
 if(muni == '12635'){cty_n = '029'};
 if(muni == '12815'){cty_n = '005'};
 if(muni == '12855'){cty_n = '109'};
-if(muni == '12910'){cty_n = '999'};
+if(muni == '12910'){cty_n = '047'};
 if(muni == '13460'){cty_n = '089'};
 if(muni == '13845'){cty_n = '005'};
 if(muni == '14175'){cty_n = '017'};
@@ -1603,8 +1603,8 @@ if(regnum == 12) {fips.push({'fips' : ['101'],  'color' : '#DDCC77'})};
 if(regnum == 13) {fips.push({'fips' : ['003','021','023','079','105','109'],  'color' : '#999933'})};
 if(regnum == 14) {fips.push({'fips' : ['007','033','067','083','111'],  'color' : '#CC6677'})};
 if(regnum == 15) {fips.push({'fips' : ['029','051','053','085','091','113'], 'color' : '#F8F8F8'})};
-if(regnum == 16) {fips.push({'fips' : ['045','077','081','103','107'],  'color' : '#AA4499'})};
-if(regnum == 17) {fips.push({'fips' : ['037','049','057','097','117'], 'color' : '#DDDDDD'})};
+if(regnum == 16) {fips.push({'fips' : ['045','077','081','103'],  'color' : '#AA4499'})};
+if(regnum == 17) {fips.push({'fips' : ['037','049','057','097','107','117'], 'color' : '#DDDDDD'})};
 if(regnum == 18) {fips.push({'fips' : ['015','027','043','065'], 'color' : '#BBCC33'})};
 if(regnum == 19) {fips.push({'fips' : ['055','071'],  'color' : '#AAAA00'})};
 if(regnum == 20) {fips.push({'fips' : ['013'], 'color' : '#77AADD'})};
@@ -2399,11 +2399,12 @@ function genCEDSCIUrl(level,tableid, yrvalue, fipsArr) {
 	 urlGeo = urlGeo.slice(0, -1)
 	}
 	if(level == "County") {
-		urlGeo = urlGeo + '0400000US' + fipsArr[0] + '_';
-		urlGeo = urlGeo + "0500000US" + "08" + fipsArr[1];
+		urlGeo = urlGeo + '0400000US08_';
+		urlGeo = urlGeo + "0500000US" + "08" + fipsArr[0];
 	};
 	if(level == "Municipality") {
 		var ctycode = "08" + fipsArr[0].substring(4)
+		urlGeo = urlGeo + '0400000US08_';
 		urlGeo = urlGeo + "0500000US" + ctycode + "_";
 		urlGeo = urlGeo + "1600000US" + fipsArr[1];
 	}
@@ -2413,7 +2414,7 @@ var fullUrl = urlHead + urlGeo + urlTail;
 return(fullUrl)
 } //genCEDSCIUrl
 
-//acsPrep prepares data file for analysis, removing null valuees converting to numbers
+//acsPrep prepares data file for analysis, removing null values converting to numbers
 function acsPrep(inData) {
 
 //find position of name and FIPS variables 
@@ -2467,13 +2468,14 @@ for(i = 1; i < inData.length;i++){
 	  var tmp_data2 = []
 	  for(j = 0; j < tmp_data.length; j++){
 		  if(Number(tmp_data[j])){
-			  tmp_data2.push(parseInt(tmp_data[j]) < 0 ? 0 : parseInt(tmp_data[j]));
+			  tmp_data2.push(+tmp_data[j] < 0 ? 0 : +tmp_data[j]);
 		  } else {
 			  tmp_data2.push(tmp_data[j]);
 		  }
 	  }
   num_data.push(tmp_data2);
 }
+
 
 var fin_data = []
 for(i = 0; i < num_data.length; i++){
@@ -2500,7 +2502,7 @@ for(i = 0; i < num_data.length; i++){
  for(j = 3; j < tmp_keys.length; j++){
 	 var chk_key = tmp_keys[j];
 	 if(typeof tmp_name[chk_key] == 'string' || tmp_name[chk_key] instanceof String) {
-		 tmp_name[chk_key] = parseInt(tmp_name[chk_key]);
+		 tmp_name[chk_key] = +tmp_name[chk_key];
 	 }
  }
 	fin_data.push(tmp_name);
@@ -4347,7 +4349,7 @@ var config = {responsive: true,
 //Clearing out divs
 
 if(app == "profile") {
-	  pgSetup(level,"chart",plotdiv,bkmark,true,false,fips, ctyName, 0)
+	  pgSetupPro(level,"chart",plotdiv,bkmark,true,false,fips, ctyName, 0)
 	  var ESTIMATE = document.getElementById('PlotDiv2');
 } else {
 	var ESTIMATE = document.getElementById(plotdiv);
@@ -4432,7 +4434,7 @@ function forecastPlot(inData, app, level, plotdiv, bkmark, yrvalue,fips,ctyName)
               displayModeBar: false};
 			  
 if(app == "profile") {
-	  pgSetup(level,"chart",plotdiv,bkmark,true,false,fips, ctyName, 0)
+	  pgSetupPro(level,"chart",plotdiv,bkmark,true,false,fips, ctyName, 0)
 	  var FORECAST = document.getElementById('PlotDiv3');
 } else {
 	var FORECAST = document.getElementById(plotdiv);
@@ -4923,14 +4925,12 @@ var NetMig1020 = [];
 
 netmig_flat = inData.sort(function(a, b){ return d3.ascending(parseInt(a['age']), parseInt(b['age'])); });
 NetMigAge = netmig_flat.map(item => parseInt(item.age));
-NetMig9500 = netmig_flat.map(item => parseInt(item.NetMig9500));
-NetMig0010 = netmig_flat.map(item => parseInt(item.NetMig0010));
-NetMig1020 = netmig_flat.map(item => parseInt(item.NetMig1020));
+
+if(app == 'dashboard') {
+NetMig0010 = netmig_flat.map(item => parseInt(item.netMigration));
 
 //plotting
 
-
-if(app == 'dashboard') {
 var NetMig0010_bar = { 
                x: NetMigAge,
                y : NetMig0010,
@@ -4939,6 +4939,11 @@ var NetMig0010_bar = {
 			};
 var NetMig_data = [NetMig0010_bar];
 } else {	
+
+NetMig9500 = netmig_flat.map(item => parseInt(item.NetMig9500));
+NetMig0010 = netmig_flat.map(item => parseInt(item.NetMig0010));
+NetMig1020 = netmig_flat.map(item => parseInt(item.NetMig1020));
+
 var NetMig9500_line = { 
                x: NetMigAge,
                y : NetMig9500,
@@ -5026,7 +5031,24 @@ var NetMig_layout = {
 Plotly.newPlot(NETMIG, NetMig_data, NetMig_layout,config);
 
 //Netmig 
+
+if(app == 'dashboard') {
 var netmig_names = {
+	fips : "FIPS",
+	loc : "Location",
+	age : "Age Group",
+	netMigration : "Net Migration 2000 -2010"
+	}
+var netmig_shift = [];
+	netmig_flat.forEach( d => {
+    netmig_shift.push({ fips : fips,
+	                    loc : ctyName,
+	                    age : d.age,
+						netMigration : d.netMigration < 0 ?  ("-" + fmt_comma(Math.abs(d.netMigration))) : fmt_comma(d.netMigration)
+	})
+	}) 
+} else {
+	var netmig_names = {
 			fips : "FIPS",
 			loc : "Location",
 	        age : "Age Group",
@@ -5035,15 +5057,6 @@ var netmig_names = {
 			NetMig1020 : "Net Migration 2010-2020"
 		}
 var netmig_shift = [];
-if(app == 'dashboard') {
-	netmig_flat.forEach( d => {
-    netmig_shift.push({ fips : fips,
-	                    loc : ctyName,
-	                    age : d.age,
-						NetMig0010 : d.NetMig0010 < 0 ?  ("-" + fmt_comma(Math.abs(d.NetMig0010))) : fmt_comma(d.NetMig0010)
-	})
-	}) 
-} else {
 	netmig_flat .forEach( d => {
     netmig_shift.push({ fips : fips,
 	                    loc : ctyName,
@@ -5054,7 +5067,7 @@ if(app == 'dashboard') {
 	})
 	})
 	}
-	var netmig_out = changeKeyObjects(netmig_shift, netmig_names);
+var netmig_out = changeKeyObjects(netmig_shift, netmig_names);
 
 //Net Migration
 if(app == 'dashboard'){
@@ -5076,6 +5089,8 @@ function cocPlot(inData,app, level, plotdiv, bkmark,yrvalue,fips,ctyName) {
 	var config = {responsive: true,
               displayModeBar: false};
 
+
+
 var coc_flat = inData;
 
 //Calculating total population change for coc_flat
@@ -5085,7 +5100,7 @@ for(i = 1; i < coc_flat.length; i++){
 
 
 if(app == "profile") {
-	  pgSetup(level,"chart",plotdiv,bkmark,true,false,fips, ctyName, 0)
+	  pgSetupPro(level,"chart",plotdiv,bkmark,true,false,fips, ctyName, 0)
 	  var COC = document.getElementById('PlotDiv4');
 } else {
 	var COC = document.getElementById(plotdiv);
@@ -5220,7 +5235,7 @@ var coc_names = {
 		year : 'Year',
 		totalpopulation : 'Total Population',
 		births : 'Births',
-		death : 'Deaths',
+		deaths : 'Deaths',
 		naturalincrease : 'Natural Increase',
 		netmigration : 'Net Migration'
 }
@@ -5240,6 +5255,8 @@ coc_flat.forEach( d => {
 });
 	
 var coc_out = changeKeyObjects(coc_shift,coc_names);
+
+
 if(app == 'profile') {
 	var profileDat4 = document.getElementById('profileDat4');
 	var profileImg4 = document.getElementById('profileImg4');
@@ -5297,7 +5314,7 @@ function genDEMO(geotype, fips, unit, ctyName, yrvalue){
 
 //Net migration by age -- this is net migration by SYA  need to use this in net migr 18-64?
 //NEED TO FIND THE SOURCE OF THIS DATA and SEE IF WE CAN USE A DATA SERIES BY AGE
-   var netmigurl = "../data/NetMigrationByAgeComparison.csv";
+   var netmigurl = "../data/county_migbyage_sya.csv";
 
 
 var prom = [d3.json(esturl),d3.json(forcurl),d3.csv(netmigurl)];
@@ -5305,7 +5322,6 @@ var prom = [d3.json(esturl),d3.json(forcurl),d3.csv(netmigurl)];
 
 Promise.all(prom).then(function(data){
 
-	
 //Rollup for region
 if(geotype == "region"){
 //Estimates
@@ -5331,18 +5347,18 @@ if(geotype == "region"){
 	};
 
 //NetMig SEE NOTE ABOVE
-var columnsNet = ['NetMig9500',	'NetMig0010', 'NetMig1020'];
-var netMig_filt = data[2].filter(d => fips_list.includes(parseInt(d.FIPS)));
-var netmig_sum  =  d3.rollup(netMig_filt, v => Object.fromEntries(columnsNet.map(col => [col, d3.sum(v, d => +d[col])])), d => d.FiveYearAgeGroups);
+
+var columnsNet = ['netMigration'];
+var netMig_filt = data[2].filter(d => fips_list.includes(parseInt(d.countyfips)));
+var netmig_sum  =  d3.rollup(netMig_filt, v => Object.fromEntries(columnsNet.map(col => [col, d3.sum(v, d => +d[col])])), d => d.age);
 
 var netmig_data = [];
    for (let [key, value] of netmig_sum) {
-	  netmig_data.push({'type' : 'region', 'fips' : parseInt(fips), 'name' : ctyName, 'age' : parseInt(key), 
-	        'NetMig9500' : value.NetMig9500, 'NetMig0010' : value.NetMig0010, 'NetMig1020' : value.NetMig1020,});
+	  netmig_data.push({'type' : 'region', 'fips' : parseInt(fips), 'name' : ctyName, 'age' : parseInt(key),   'netMigration' : value.netMigration});
 		}
 		
 } else {
-	if(fips =="000") { //Colorado as a whole
+	if(fips == "000") { //Colorado as a whole
 	//estimate
 	var columnsEst = ['totalpopulation', 'births', 'deaths', 'naturalincrease','netmigration'];
  	var est_sum =      d3.rollup(data[0], v => Object.fromEntries(columnsEst.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year);
@@ -5364,14 +5380,7 @@ var netmig_data = [];
 		}
 	};	
 	//NetMig
-	var columnsNet = ['NetMig9500',	'NetMig0010', 'NetMig1020']; 
-	var netmig_sum  =  d3.rollup(data[2], v => Object.fromEntries(columnsNet.map(col => [col, d3.sum(v, d => +d[col])])), d => d.FiveYearAgeGroups);
-
-	var netmig_data = [];
-	   for (let [key, value] of netmig_sum) {
-		  netmig_data.push({'type' : 'region', 'fips' : parseInt(fips), 'name' : ctyName, 'age' : parseInt(key), 
-				'NetMig9500' : value.NetMig9500, 'NetMig0010' : value.NetMig0010, 'NetMig1020' : value.NetMig1020,});
-			}
+	var netmig_data = data[2].filter(d => (fips === d.countyfips))
 
 	} else {
 	var est_data = [];
@@ -5388,17 +5397,12 @@ var netmig_data = [];
         		   'age' : data[1][i].age, 'totalpopulation' : data[1][i].totalpopulation});
 		}
 
-	var columnsNet = ['NetMig9500',	'NetMig0010', 'NetMig1020'];
-	var netmig_sum = data[2].filter(d => fips_list.includes(parseInt(d.FIPS)));
-    var netmig_data = [];
-	   for(i = 0; i < netmig_sum.length; i++) {
-		  netmig_data.push({'type' : 'county', 'fips' : parseInt(fips), 'name' : ctyName, 'age' : parseInt(netmig_sum[i].FiveYearAgeGroups), 
-				'NetMig9500' : netmig_sum[i].NetMig9500, 'NetMig0010' : netmig_sum[i].NetMig0010, 'NetMig1020' : netmig_sum[i].NetMig1020,});
-			}
+	var netmig_data = data[2].filter(d => (fips == d.countyfips))
 };
 }; 
 
 //Plotting 
+
 	estPlot(est_data, "dashboard", "County",  "est_output", "", yrvalue, fips, ctyName);
 	forecastPlot(forecast_data, "dashboard", "County", "forec_output", "", yrvalue, fips, ctyName);
 	cocPlot(est_data, "dashboard","County", "coc_output", "", yrvalue, fips, ctyName);
