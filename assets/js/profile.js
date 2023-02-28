@@ -4877,7 +4877,7 @@ d3.json(yrstr).then(function(yeardata){
     var maxest = yeardata.filter(function(d){return d.datatype == 'Estimate'});
  var yrsList = maxest.map(function(d){return d.year;});
     var curyear = d3.max(yrsList);
- var acsyr = 2020;  ///CHANGE THIS WHEN 2021 ACS is available
+ var acsyr = 2021;  ///CHANGE THIS WHEN 2021 ACS is available
 //Create ouput array?
 
 //Triggering the first button  Expand these for each button...
@@ -8361,8 +8361,8 @@ if(ctyList.includes(geotype)) {
     var fips_num = parseInt(fips_arr);
     } 
 	
- 	var yr_list = 2020;
-	for(i = 2021; i <= maxYR; i++){
+ 	var yr_list = 2021;
+	for(i = 2022; i <= maxYR; i++){
 		if(i % 10 == 0){
 		yr_list = yr_list + "," + i;
 		}
