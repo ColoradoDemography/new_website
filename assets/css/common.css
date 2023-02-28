@@ -17,9 +17,6 @@ body{
 	font-size: 12pt;
 }
 
-body.waiting * {
-    cursor: progress;
-}
 hr {
     display: block;
     height: 1px;
@@ -27,6 +24,7 @@ hr {
     border-top: 1px solid #cbcbcb;
     margin: 1em 0;
 }
+
 /* Styles for crosstabs  blog entries*/
 .crosstab_grid {
   display: grid;
@@ -974,7 +972,7 @@ details main {
    grid-row: 10;   
   }  
  
-  /* Age Animation Panel */
+   /* Age Animation Panel */
    .app-ageani {  
    grid-column: 2 / span 6;
    grid-row: 3/ span 6;   
