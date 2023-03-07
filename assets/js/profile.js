@@ -1137,10 +1137,11 @@ if(pctTab) {
 }
 } //genSubjTab
 
-//genUnitArray created empty array with reow and column header information for housing unit table
+//genUnitArray created empty array with row and column header information for housing unit table
 
 function genUnitArray(level,row_topics,NameList){
-	  var unit_arr = new Array(30)
+
+var unit_arr = new Array(30)
 
 if(level == "Municipality") {
   var row_span = 12
@@ -1177,7 +1178,7 @@ if(level == "Municipality") {
 	  var row_offset = 22;
 	  } else {
 		 for(k = 0; k < row_topics.length;k++){
-			 unit_arr[k+row_offset][0] = "<a href='"+row_topics[k].URL_link+"' target='_blank'>"+row_topics[k].title+"</a>";
+			 unit_arr[k+row_offset][0] = "<td><a href='"+row_topics[k].URL_link+"' target='_blank'>"+row_topics[k].title+"</a></td>";
 		 }
 	  }
   } //i
@@ -1185,10 +1186,13 @@ if(level == "Municipality") {
   //Building Header
 	unit_arr[0][1] = "<th align='center' colspan='4'>" + NameList[0] + "</th>";
 	unit_arr[0][5] = "<th align='center' colspan='4'>" + NameList[1] + "</th>";
+	
 	if(level == "Municipality"){
 	unit_arr[0][9] = "<th align='center' colspan='4'>" + NameList[2]+ "</th>";
 	}
 	var term = "Counts"
+	unit_arr[1][0] = "<th></th>"
+	unit_arr[2][0] = "<th></th>"
 	for(j = 1; j < row_span + 1; j++){
 		if(j % 2 != 0) {
            	unit_arr[1][j] = "<th align='center' colspan='2'>"+ term + "</th>";
@@ -1203,6 +1207,17 @@ if(level == "Municipality") {
 		}
 	}
 	
+	if(typeof NameList[1] == 'undefined') {
+		unit_arr[0][2] = "";
+		unit_arr[0][5] = "";
+		unit_arr[1][5] = "";
+		unit_arr[1][7] = "";
+		unit_arr[2][5] = "";
+		unit_arr[2][6] = "";
+		unit_arr[2][7] = "";
+		unit_arr[2][8] = "";
+		}
+
 return(unit_arr)
 } //genUnitArray
 
@@ -1214,235 +1229,150 @@ const fmt_pct = d3.format(".1%");
 
  var geoNames =  [...new Set(inData.map(d => d.NAME))];
  
-
  
+ var unit_out = [];
+ var pop_out = [];
+
 if(level == "Municipality"){
   var unit_data = genUnitArray(level, row_topics, geoNames)
  } else {
-   var geoNames =  [...new Set(inData.map(d => d.NAME))];
    var npanels = Math.round((geoNames.length)/2); //This is the number of panels
+   
+   
+   //Build Array of names that match the panels
+    var nameArr = [];
+	for(x = 0; x < geoNames.length; x++){
+		if(x % 2 == 0){
+			nameArr.push([geoNames[x], geoNames[x+1]]);
+	    } else {
+			if(x == geoNames.length){
+				nameArr.push([geoNames[x]]);
+			}
+	}
+	} //x
    var unit_data = new Array(npanels);
-   for(i = 0; i < npanels; i++){
-	 var nameArr = []
-	 if(i % 2 == 0){
-			 nameArr.push(geoNames[i], geoNames[i+1]);
-		  } else {
-			if(i == npanels) {
-                nameArr.push(geoNames[i]);
-			  }
-		  }
-		 unit_data[i]  = genUnitArray(level, row_topics, nameArr)
-  } //i
+   var pop_data = new Array(npanels);
+   for(x = 0; x < npanels; x++){
+	unit_data[x] = genUnitArray(level, row_topics, nameArr[x])
+	pop_data[x] = genUnitArray(level, row_topics, nameArr[x])
+  } //x
  }
- 
-  var pop_data = unit_data;
-
-console.log(unit_data);
-debugger;
   
+
  //Column Addresses
    var unitRows = [
-			{vars :["ALLHU_E", "OOHU_E", "RTHU_E"], rows :[4, 13, 22]},
-			{vars :["ALLSFU_E", "OOSFU_E", "RTSFU_E"], rows :[5, 14, 23]},
-			{vars :["ALL24_E", "OO24_E",   "RT24_E"], rows :[6, 15, 24]},
-			{vars :["ALL550_E", "OO550_E", "RT550_E"], rows :[7, 16, 25]},
-			{vars :["ALLMOB_E", "OOMOB_E", "RTMOB_E"], rows :[8, 17, 26]},
-			{vars :["ALLOTH_E", "OOOTH_E", "RTOTH_E"], rows :[9, 18, 27]},
-			{vars :["ALLMEDYR_E", "OOMEDYR_E", "RTMEDYR_E"], rows :[10, 19, 28]},
-			{vars :["ALL_PPH_E", "OO_PPH_E", "RT_PPH_E"],rows :[11, 20, 29]}
+				{vars : 'ALLHU_E', row : 4},
+				{vars : 'ALLSFU_E', row : 5},
+				{vars : 'ALL24_E', row : 6},
+				{vars : 'ALL550_E', row : 7},
+				{vars : 'ALLMOB_E', row : 8},
+				{vars : 'ALLOTH_E', row : 9},
+				{vars : 'ALLMEDYR_E', row : 10},
+				{vars : 'ALL_PPH_E', row : 11},
+				{vars : 'OOHU_E', row : 13},
+				{vars : 'OOSFU_E', row : 14},
+				{vars : 'OO24_E', row : 15},
+				{vars : 'OO550_E', row : 16},
+				{vars : 'OOMOB_E', row : 17},
+				{vars : 'OOOTH_E', row : 18},
+				{vars : 'OOMEDYR_E', row : 19},
+				{vars : 'OO_PPH_E', row : 20},
+				{vars : 'RTHU_E', row : 22},
+				{vars : 'RTSFU_E', row : 23},
+				{vars : 'RT24_E', row : 24},
+				{vars : 'RT550_E', row : 25},
+				{vars : 'RTMOB_E', row : 26},
+				{vars : 'RTOTH_E', row : 27},
+				{vars : 'RTMEDYR_E', row : 28},
+				{vars : 'RT_PPH_E', row : 29}
 				]
 
-/*
+
+for(a = 0; a < npanels; a++) {
+var selData = inData.filter(d => nameArr[a].includes(d.NAME));
 
 for(b = 0; b < unitRows.length; b++){
 	    var filtvar_u = selData.filter(d => unitRows[b].vars.includes(d.VAR));
 	
-	    var tgt_row1 = unitRows[b].row[0]
-		var tgt_row2 = unitRows[b].row[1]
-		var tgt_row3 = unitRows[b].row[2]
-		
-		if(b < 6) {
-		    unit_data[tgt_row1][0] = row_tab[b + 3];
-			unit_data[tgt_row2][0] = row_tab[b + 3];
-			unit_data[tgt_row3][0] = row_tab[b + 3];
-			
-			pop_data[tgt_row1][0] = row_tab[b + 3];
-			pop_data[tgt_row2][0] = row_tab[b + 3];
-			pop_data[tgt_row3][0] = row_tab[b + 3];
-        }
-
-		if(b == 6){
-			unit_data[tgt_row1][0] = row_tab[b + 3];
-			unit_data[tgt_row2][0] = row_tab[b + 3];
-			unit_data[tgt_row3][0] = row_tab[b + 3];
-			
-
-			pop_data[tgt_row1][0] = row_tab[b + 4];
-			pop_data[tgt_row2][0] = row_tab[b + 4];
-			pop_data[tgt_row3][0] = row_tab[b + 4];
- 		}
+	    var tgt_row = unitRows[b].row
 
 for(c = 0; c < filtvar_u.length; c++){
-	switch (c) {
-			case 0 :
-			if(['ALLMEDYR_E', 'OOMEDYR_E', 'RTMEDYR_E'].includes(filtvar_u[c].VAR)){
-				unit_data[tgt_row1][1] = "<td align='right'>" + filtvar_u[c].UNIT_EST + "</td>";
-				unit_data[tgt_row1][2] = "<td align='right'>" + Math.round(filtvar_u[c].UNIT_MOE) + "</td>";
-				unit_data[tgt_row1][3] = "<td align='right'> </td>";
-				unit_data[tgt_row1][4] = "<td align='right'> </td>";
-			} else {
-				if(['ALL_PPH_E', 'OO_PPH_E', 'RT_PPH_E'].includes(filtvar_u[c].VAR)){
-				pop_data[tgt_row1][1] = "<td align='right'>" + fmt_dec(filtvar_u[c].POP_EST) + "</td>";
-				pop_data[tgt_row1][2] = "<td align='right'>" + fmt_dec(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
-				pop_data[tgt_row1][3] = "<td align='right'> </td>";
-				pop_data[tgt_row1][4] = "<td align='right'> </td>";
-				} else {
-				unit_data[tgt_row1][1] = "<td align='right'>" + fmt_comma(filtvar_u[c].UNIT_EST) + "</td>";
-				unit_data[tgt_row1][2] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].UNIT_MOE)) + "</td>";
-				unit_data[tgt_row1][3] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_EST) + "</td>";
-				unit_data[tgt_row1][4] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_MOE) + "</td>";
-				
-				pop_data[tgt_row1][1] = "<td align='right'>" + fmt_comma(filtvar_u[c].POP_EST) + "</td>";
-				pop_data[tgt_row1][2] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
-				pop_data[tgt_row1][3] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_EST) + "</td>";
-				pop_data[tgt_row1][4] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_MOE) + "</td>";
-			}
-			}
-			break;
-			case 1 :
-			if(['ALLMEDYR_E', 'OOMEDYR_E', 'RTMEDYR_E'].includes(filtvar_u[c].VAR)){
-				unit_data[tgt_row2][1] = "<td align='right'>" + filtvar_u[c].UNIT_EST + "</td>";
-				unit_data[tgt_row2][2] = "<td align='right'>" + Math.round(filtvar_u[c].UNIT_MOE) + "</td>";
-				unit_data[tgt_row2][3] = "<td align='right'> </td>";
-				unit_data[tgt_row2][4] = "<td align='right'> </td>";
-			} else {
-				if(['ALL_PPH_E', 'OO_PPH_E', 'RT_PPH_E'].includes(filtvar_u[c].VAR)){
-				pop_data[tgt_row2][1] = "<td align='right'>" + fmt_dec(filtvar_u[c].POP_EST) + "</td>";
-				pop_data[tgt_row2][2] = "<td align='right'>" + fmt_dec(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
-				pop_data[tgt_row2][3] = "<td align='right'> </td>";
-				pop_data[tgt_row2][4] = "<td align='right'> </td>";
-			} else {
-				unit_data[tgt_row2][1] = "<td align='right'>" + fmt_comma(filtvar_u[c].UNIT_EST) + "</td>";
-				unit_data[tgt_row2][2] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].UNIT_MOE)) + "</td>";
-				unit_data[tgt_row2][3] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_EST) + "</td>";
-				unit_data[tgt_row2][4] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_MOE) + "</td>";
-				
-				pop_data[tgt_row2][1] = "<td align='right'>" + fmt_comma(filtvar_u[c].POP_EST) + "</td>";
-				pop_data[tgt_row2][2] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
-				pop_data[tgt_row2][3] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_EST) + "</td>";
-				pop_data[tgt_row2][4] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_MOE) + "</td>";
-			}
-			}
-			break;
-			case 2 :
-			if(['ALLMEDYR_E', 'OOMEDYR_E', 'RTMEDYR_E'].includes(filtvar_u[c].VAR)){
-				unit_data[tgt_row3][1] = "<td align='right'>" + filtvar_u[c].UNIT_EST + "</td>";
-				unit_data[tgt_row3][2] = "<td align='right'>" + Math.round(filtvar_u[c].UNIT_MOE) + "</td>";
-				unit_data[tgt_row3][3] = "<td align='right'> </td>";
-				unit_data[tgt_row3][4] = "<td align='right'> </td>";
-			} else {
-				if(['ALL_PPH_E', 'OO_PPH_E', 'RT_PPH_E'].includes(filtvar_u[c].VAR)){
-				pop_data[tgt_row3][1] = "<td align='right'>" + fmt_dec(filtvar_u[c].POP_EST) + "</td>";
-				pop_data[tgt_row3][2] = "<td align='right'>" + fmt_dec(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
-				pop_data[tgt_row3][3] = "<td align='right'> </td>";
-				pop_data[tgt_row3][4] = "<td align='right'> </td>";
-			} else {
-				unit_data[tgt_row3][1] = "<td align='right'>" + fmt_comma(filtvar_u[c].UNIT_EST) + "</td>";
-				unit_data[tgt_row3][2] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].UNIT_MOE)) + "</td>";
-				unit_data[tgt_row3][3] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_EST) + "</td>";
-				unit_data[tgt_row3][4] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_MOE) + "</td>";
+	var unit_data_sel = [];
+    var pop_data_sel = [];
+	unit_data_sel.push(filtvar_u[c].UNIT_EST, filtvar_u[c].UNIT_MOE, filtvar_u[c].UNIT_PCT_EST, filtvar_u[c].UNIT_PCT_MOE);
+	pop_data_sel.push(filtvar_u[c].POP_EST, filtvar_u[c].POP_MOE, filtvar_u[c].POP_PCT_EST, filtvar_u[c].POP_PCT_MOE);
 
-				pop_data[tgt_row3][1] = "<td align='right'>" + fmt_comma(filtvar_u[c].POP_EST) + "</td>";
-				pop_data[tgt_row3][2] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
-				pop_data[tgt_row3][3] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_EST) + "</td>";
-				pop_data[tgt_row3][4] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_MOE) + "</td>";
-			}
-			}
-			break;
-			case 3 :
-			if(['ALLMEDYR_E', 'OOMEDYR_E', 'RTMEDYR_E'].includes(filtvar_u[c].VAR)){
-				unit_data[tgt_row1][5] = "<td align='right'>" + filtvar_u[c].UNIT_EST + "</td>";
-				unit_data[tgt_row1][6] = "<td align='right'>" + Math.round(filtvar_u[c].UNIT_MOE) + "</td>";
-				unit_data[tgt_row1][7] = "<td align='right'> </td>";
-				unit_data[tgt_row1][8] = "<td align='right'> </td>";
-			} else {
-				if(['ALL_PPH_E', 'OO_PPH_E', 'RT_PPH_E'].includes(filtvar_u[c].VAR)){
-				pop_data[tgt_row1][5] = "<td align='right'>" + fmt_dec(filtvar_u[c].POP_EST) + "</td>";
-				pop_data[tgt_row1][6] = "<td align='right'>" + fmt_dec(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
-				pop_data[tgt_row1][7] = "<td align='right'> </td>";
-				pop_data[tgt_row1][8] = "<td align='right'> </td>";
-			} else {
-				unit_data[tgt_row1][5] = "<td align='right'>" + fmt_comma(filtvar_u[c].UNIT_EST) + "</td>";
-				unit_data[tgt_row1][6] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].UNIT_MOE)) + "</td>";
-				unit_data[tgt_row1][7] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_EST) + "</td>";
-				unit_data[tgt_row1][8] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_MOE) + "</td>";
-			
-				pop_data[tgt_row1][5] = "<td align='right'>" + fmt_comma(filtvar_u[c].POP_EST) + "</td>";
-				pop_data[tgt_row1][6] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
-				pop_data[tgt_row1][7] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_EST) + "</td>";
-				pop_data[tgt_row1][8] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_MOE) + "</td>";
-			}
-			}
-			break;
-			case 4 :
-			if(['ALLMEDYR_E', 'OOMEDYR_E', 'RTMEDYR_E'].includes(filtvar_u[c].VAR)){
-				unit_data[tgt_row2][5] = "<td align='right'>" + filtvar_u[c].UNIT_EST + "</td>";
-				unit_data[tgt_row2][6] = "<td align='right'>" + Math.round(filtvar_u[c].UNIT_MOE) + "</td>";
-				unit_data[tgt_row2][7] = "<td align='right'> </td>";
-				unit_data[tgt_row2][8] = "<td align='right'> </td>";
-			} else {
-				if(['ALL_PPH_E', 'OO_PPH_E', 'RT_PPH_E'].includes(filtvar_u[c].VAR)){
-				pop_data[tgt_row2][5] = "<td align='right'>" + fmt_dec(filtvar_u[c].POP_EST) + "</td>";
-				pop_data[tgt_row2][6] = "<td align='right'>" + fmt_dec(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
-				pop_data[tgt_row2][7] = "<td align='right'> </td>";
-				pop_data[tgt_row2][8] = "<td align='right'> </td>";
-			} else {
-				unit_data[tgt_row2][5] = "<td align='right'>" + fmt_comma(filtvar_u[c].UNIT_EST) + "</td>";
-				unit_data[tgt_row2][6] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].UNIT_MOE)) + "</td>";
-				unit_data[tgt_row2][7] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_EST) + "</td>";
-				unit_data[tgt_row2][8] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_MOE) + "</td>";
+		if(c == 0){
+						unit_data[a][tgt_row][1] = "<td align='right'>" + fmt_comma(Math.round(unit_data_sel[0])) + "</td>";
+						unit_data[a][tgt_row][2] = "<td align='right'>" + fmt_comma(Math.round(unit_data_sel[1])) + "</td>";
+						unit_data[a][tgt_row][3] = "<td align='right'>" + fmt_pct(unit_data_sel[2]) + "</td>";
+						unit_data[a][tgt_row][4] = "<td align='right'>" + fmt_pct(unit_data_sel[3]) + "</td>";
 
-				pop_data[tgt_row2][5] = "<td align='right'>" + fmt_comma(filtvar_u[c].POP_EST) + "</td>";
-				pop_data[tgt_row2][6] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
-				pop_data[tgt_row2][7] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_EST) + "</td>";
-				pop_data[tgt_row2][8] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_MOE) + "</td>";
-			}
-			}
-			break;
-			case 5 :  
-			if(['ALLMEDYR_E', 'OOMEDYR_E', 'RTMEDYR_E'].includes(filtvar_u[c].VAR)){
-				unit_data[tgt_row3][5] = "<td align='right'>" + filtvar_u[c].UNIT_EST + "</td>";
-				unit_data[tgt_row3][6] = "<td align='right'>" + Math.round(filtvar_u[c].UNIT_MOE) + "</td>";
-				unit_data[tgt_row3][7] = "<td align='right'> </td>";
-				unit_data[tgt_row3][8] = "<td align='right'> </td>";
-			} else {
-		 	if(['ALL_PPH_E', 'OO_PPH_E', 'RT_PPH_E'].includes(filtvar_u[c].VAR)){
-				pop_data[tgt_row3][5] = "<td align='right'>" + fmt_dec(filtvar_u[c].POP_EST) + "</td>";
-				pop_data[tgt_row3][6] = "<td align='right'>" + fmt_dec(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
-				pop_data[tgt_row3][7] = "<td align='right'> </td>";
-				pop_data[tgt_row3][8] = "<td align='right'> </td>";
-			} else {
-				unit_data[tgt_row3][5] = "<td align='right'>" + fmt_comma(filtvar_u[c].UNIT_EST) + "</td>";
-				unit_data[tgt_row3][6] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].UNIT_MOE)) + "</td>";
-				unit_data[tgt_row3][7] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_EST) + "</td>";
-				unit_data[tgt_row3][8] = "<td align='right'>" + fmt_pct(filtvar_u[c].UNIT_PCT_MOE) + "</td>";
+						pop_data[a][tgt_row][1] = "<td align='right'>" + fmt_comma(Math.round(pop_data_sel[0])) + "</td>";
+						pop_data[a][tgt_row][2] = "<td align='right'>" + fmt_comma(Math.round(pop_data_sel[1])) + "</td>";
+						pop_data[a][tgt_row][3] = "<td align='right'>" + fmt_pct(pop_data_sel[2]) + "</td>";
+						pop_data[a][tgt_row][4] = "<td align='right'>" + fmt_pct(pop_data_sel[3]) + "</td>";
+						
+						if(['ALLMEDYR_E', 'OOMEDYR_E', 'RTMEDYR_E'].includes(unitRows[b].vars)){
+							unit_data[a][tgt_row][1] = "<td align='right'>" + unit_data_sel[0] + "</td>";
+							unit_data[a][tgt_row][2] = "<td align='right'>" + unit_data_sel[1] + "</td>";
+							unit_data[a][tgt_row][3] = "<td align='right'></td>";
+							unit_data[a][tgt_row][4] = "<td align='right'></td>";
+						
+							pop_data[a][tgt_row][1] = "<td align='right'></td>";
+							pop_data[a][tgt_row][2] = "<td align='right'></td>";
+							pop_data[a][tgt_row][3] = "<td align='right'></td>";
+							pop_data[a][tgt_row][4] = "<td align='right'></td>";
+						}
+						if(['ALL_PPH_E', 'OO_PPH_E', 'RT_PPH_E'].includes(unitRows[b].vars)){
+							unit_data[a][tgt_row][1] = "<td align='right'></td>";
+							unit_data[a][tgt_row][2] = "<td align='right'></td>";
+							unit_data[a][tgt_row][3] = "<td align='right'></td>";
+							unit_data[a][tgt_row][4] = "<td align='right'></td>";
+						
+							pop_data[a][tgt_row][1] = "<td align='right'>" + fmt_dec(pop_data_sel[0].toFixed(2)) + "</td>";
+							pop_data[a][tgt_row][2] = "<td align='right'>" + fmt_dec(pop_data_sel[1].toFixed(2)) + "</td>";
+							pop_data[a][tgt_row][3] = "<td align='right'></td>";
+							pop_data[a][tgt_row][4] = "<td align='right'></td>";
+						}
+		} else {
+						unit_data[a][tgt_row][5] = "<td align='right'>" + fmt_comma(Math.round(unit_data_sel[0])) + "</td>";
+						unit_data[a][tgt_row][6] = "<td align='right'>" + fmt_comma(Math.round(unit_data_sel[1])) + "</td>";
+						unit_data[a][tgt_row][7] = "<td align='right'>" + fmt_pct(unit_data_sel[2]) + "</td>";
+						unit_data[a][tgt_row][8] = "<td align='right'>" + fmt_pct(unit_data_sel[3]) + "</td>";
 
-				pop_data[tgt_row3][5] = "<td align='right'>" + fmt_comma(filtvar_u[c].POP_EST) + "</td>";
-				pop_data[tgt_row3][6] = "<td align='right'>" + fmt_comma(Math.round(filtvar_u[c].POP_MOE)) + "</td>";
-				pop_data[tgt_row3][7] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_EST) + "</td>";
-				pop_data[tgt_row3][8] = "<td align='right'>" + fmt_pct(filtvar_u[c].POP_PCT_MOE) + "</td>";
-			}
-			}
-			break;
-	}
-		} //c
-
+						pop_data[a][tgt_row][5] = "<td align='right'>" + fmt_comma(Math.round(pop_data_sel[0])) + "</td>";
+						pop_data[a][tgt_row][6] = "<td align='right'>" + fmt_comma(Math.round(pop_data_sel[1])) + "</td>";
+						pop_data[a][tgt_row][7] = "<td align='right'>" + fmt_pct(pop_data_sel[2]) + "</td>";
+						pop_data[a][tgt_row][8] = "<td align='right'>" + fmt_pct(pop_data_sel[3]) + "</td>";
+						
+						if(['ALLMEDYR_E', 'OOMEDYR_E', 'RTMEDYR_E'].includes(unitRows[b].vars)){
+							unit_data[a][tgt_row][5] = "<td align='right'>" + unit_data_sel[0] + "</td>";
+							unit_data[a][tgt_row][6] = "<td align='right'>" + unit_data_sel[1] + "</td>";
+							unit_data[a][tgt_row][7] = "<td align='right'></td>";
+							unit_data[a][tgt_row][8] = "<td align='right'></td>";
+						
+							pop_data[a][tgt_row][5] = "<td align='right'></td>";
+							pop_data[a][tgt_row][6] = "<td align='right'></td>";
+							pop_data[a][tgt_row][7] = "<td align='right'></td>";
+							pop_data[a][tgt_row][8] = "<td align='right'></td>";
+						}
+						if(['ALL_PPH_E', 'OO_PPH_E', 'RT_PPH_E'].includes(unitRows[b].vars)){
+							unit_data[a][tgt_row][5] = "<td align='right'></td>";
+							unit_data[a][tgt_row][6] = "<td align='right'></td>";
+							unit_data[a][tgt_row][7] = "<td align='right'></td>";
+							unit_data[a][tgt_row][8] = "<td align='right'></td>";
+						
+							pop_data[a][tgt_row][5] = "<td align='right'>" + fmt_dec(pop_data_sel[0].toFixed(2)) + "</td>";
+							pop_data[a][tgt_row][6] = "<td align='right'>" + fmt_dec(pop_data_sel[1].toFixed(2)) + "</td>";
+							pop_data[a][tgt_row][7] = "<td align='right'></td>";
+							pop_data[a][tgt_row][8] = "<td align='right'></td>";
+						}
+		} // c value
+	} //c loop
 } //b
-   unit_out.push(unit_data);
-   pop_out.push(pop_data);   
-*/
-
-
+ } //a
+ 
   //convert to html array, one row per panel
   //for each panel, 0 and 1 are the header, 2 to n is the table body
   var unit_html = [];
@@ -1450,10 +1380,10 @@ for(c = 0; c < filtvar_u.length; c++){
 
    for(a = 0; a < npanels; a++){ //panels
 	   var strhtml_count = "<thead>"
-	   for(b = 0; b < unit_out[a].length; b++) {  //geo
+	   for(b = 0; b < unit_data[a].length; b++) {  //geo
 		   strhtml_count = strhtml_count + "<tr>"
-		   for(c = 0; c < unit_out[a][b].length; c++){ //item
-			     strhtml_count = strhtml_count + unit_out[a][b][c]
+		   for(c = 0; c < unit_data[a][b].length; c++){ //item
+			     strhtml_count = strhtml_count + unit_data[a][b][c]
 		   } //c
 		  strhtml_count = strhtml_count + "</tr>";
 		if(b ==2) {strhtml_count = strhtml_count + "</thead>"	}
@@ -1465,10 +1395,10 @@ for(c = 0; c < filtvar_u.length; c++){
    
  for(a = 0; a < npanels; a++){ //panels
 	   var strhtml_pop = "<thead>"
-	   for(b = 0; b < pop_out[a].length; b++) {  //geo
+	   for(b = 0; b < pop_data[a].length; b++) {  //geo
 		   strhtml_pop = strhtml_pop + "<tr>"
-		   for(c = 0; c < pop_out[a][b].length; c++){ //item
-			     strhtml_pop = strhtml_pop + pop_out[a][b][c]
+		   for(c = 0; c < pop_data[a][b].length; c++){ //item
+			     strhtml_pop = strhtml_pop + pop_data[a][b][c]
 		   } //c
 		  strhtml_pop = strhtml_pop + "</tr>";
 		if(b == 2) {strhtml_pop = strhtml_pop + "</thead>"	}
@@ -1476,7 +1406,6 @@ for(c = 0; c < filtvar_u.length; c++){
 	   
 	 pop_html.push(strhtml_pop.replaceAll('undefined',''));
    } //a
-
 
 return([unit_html, pop_html]);
 } //genTenTab
@@ -3821,51 +3750,9 @@ inArr.forEach(bklink =>{
       a.href = "#" + bklink.id;
       bkDiv.appendChild(a);
 })
-
-/* Adding Progress Bar
-var pgMain = document.createElement("div");
-var pgLabel = document.createElement("span");
-var pgBar = document.createElement("progress");
-
-	pgLabel.innerHTML = "    Progress"
-	pgLabel.setAttribute("id","progresslab");
-	
-    pgBar.setAttribute("id","progress");
-	pgBar.setAttribute("min","0");
-	pgBar.setAttribute("value","0");
-	pgBar.setAttribute("max","100");
-    
-	pgMain.appendChild(pgLabel);
-	pgMain.appendChild(pgBar);
-	bkDiv.appendChild(pgMain);
-	document.getElementById("progresslab").style.display = "none";
-	document.getElementById("progress").style.display = "none";
-**/
 } //insertBkmark
 
-/* displayBar manages the display of the progress bar
-function //displayBar(){
-var lab = document.getElementById("progresslab");
-var bar = document.getElementById("progress");
-if(lab.style.display === "none") {
-    lab.style.display = "block";
-	bar.style.display = "block";
-  } else {
-    lab.style.display = "none";
-	bar.style.display = "none";
-  }
-}
 
-//updatepgBar updates the progress bar, takes in starting and ending values as whole numbers
-function updatepgBar(stpct, endpct) {
-	debugger
- var bar = document.getElementById("progress");
- bar.value = stpct.toString();
- for(outval = stpct; outval <= endpct; outval++){
-	  bar.value = outval.toString();
- }
-} 
-*/
 //Community Profile Functions
 
 
@@ -5940,8 +5827,8 @@ if(level == "Region"){
 } // genOccupancyTab
 
 
-//genHousingTemireTab Wrapper for Housing Tenure Table
-function genHousingTemireTab(inData,outDiv,bkMark,level,curYr,fipsArr) {
+//genHousingTenureTab Wrapper for Housing Tenure Table
+function genHousingTenureTab(inData,outDiv,bkMark,level,curYr,fipsArr) {
 
 	const fmt_date = d3.timeFormat("%B %d, %Y");
     const fmt_yr = d3.format("0000");	
@@ -5981,10 +5868,6 @@ var tab_obj = genTenTab(level,inData,row_labels,true);
 var unit_obj = tab_obj[0];
 var pop_obj = tab_obj[1];
 
-console.log(unit_obj)
-console.log(pop_obj)
-debugger;
-
 pgSetupPro(level,"table",outDiv,bkMark,false,true,fipsArr, "", 0)
 
 //footer
@@ -6007,9 +5890,12 @@ ftrString = ftrString + "</tfoot>"
 //Initial Table
 var tabVal = 0;
 
-
 	//selecting initial dropdown values
   $("#statSelect3 option[value='0']").prop("selected", true);
+debugger;
+console.log(unit_obj);
+console.log(pop_obj)
+
 
    var dd3 = document.getElementById("statSelect3");
  if(level == "Region"){
@@ -6020,7 +5906,6 @@ var tabVal = 0;
 DTtab("TabDiv3",unit_obj,tabVal,row_labels,ftrString,tblfoot,"houstype",fileName,tabtitle) 
 
   dd3.addEventListener('change', (event) => {
-
 	   if(event.target.value == "0") {
 		   DTtab("TabDiv3",unit_obj,tabVal,row_labels,ftrString,tblfoot,"houstype",fileName,tabtitle) 
 	   } else {
@@ -6060,7 +5945,7 @@ if(level == "Region"){
 	   }
    });
 } 
-} //genHousingTemireTab
+} //genHousingTenureTab
 
 
 //genHHIncomeTab Wrapper for Housing Income Table
@@ -6774,13 +6659,10 @@ var bkMarkArr = [{title : names[0] + " Basic Statistics", id : "map", srctxt : "
 	]
 
 insertBkmark(bkMarkArr);
- ////displayBar();
+
   genSel1map(geotype, fipsArr, names, PRO_1.id, bkMarkArr[0]);
-  //updatepgBar(1,50)
   genSel1tab(geotype, fipsArr, names, bkMarkArr[1], PRO_2.id,curyear, acsyr);
-  //updatepgBar(50,100)
-  //displayBar()
-};
+ };
 
 //genSel2display  Outputs objects for the Population Trends panel of the profile... 
 function genSel2display(geotype, fipsArr, names, curyear, PRO_1, PRO_2, PRO_3, PRO_4) {
@@ -6869,8 +6751,7 @@ insertBkmark(bkMarkArr);
 
 
 Promise.all(prom).then(data =>{
-//displayBar();
-//updatepgBar(1,30)
+
 // Processing State Table
 var columnsToSum = ['births', 'deaths', 'netmigration', 'totalpopulation'];
 
@@ -6903,7 +6784,7 @@ for (let [key, value] of foresum_state) {
 
 //Growth Table
 // Generate data set for output Table
-//updatepgBar(31,45)
+
 var sel_yr = range(1990,curyear);
 var sel_yr5 = [];
 for(i = 0; i < sel_yr.length;i++){
@@ -6933,7 +6814,6 @@ var ctyNameList = countyName(cty_gr_data[0].countyfips)
 
 //Regional Table
 if(regList.includes(geotype)) {
-//updatepgBar(46,60)
 var fileName = "Population Growth Table " + regionName(fipsArr);
 var regionNum = -101;
 
@@ -7019,20 +6899,16 @@ for (let [key, value] of coc_reg_sum) {
 var coc_data = state_coc.concat(coc_reg_data,coc_cty_data) //This is single year data
 
 //Output
-//updatepgBar(641,80)
 growth_tab(geotype, tab_gr,bkMarkArr[0],fileName, PRO_1.id);  
 //Plots
 //Add Colorado to fipsList and ctyNameList
 
 var divArr = [PRO_2.id, PRO_3.id, PRO_4.id];
 genRegPopSetup(geotype,est_data, forec_data, coc_data, divArr,bkMarkArr, fipsList, ctyNameList);
-//updatepgBar(81,100)
-//displayBar()
 } //Regional
 
 //County -- Need Growth Tab, Estimates, Forecasts, COC
 if(ctyList.includes(geotype)) {
-	//updatepgBar(46,60)
  var fileName = "Population Growth Table " + countyName(parseInt(fipsArr));
 
 var tab_gr = tab_cty_data.concat(state_gr_data) //This is 5 year data
@@ -7076,23 +6952,15 @@ for(i = 0; i< data[0].length; i++){
 
 
 var coc_data = coc_cty_data; //This is single year data
-//updatepgBar(61,70)
  growth_tab(geotype, tab_gr,bkMarkArr[0],fileName, PRO_1.id);  
- //updatepgBar(71,80)
  estPlot(est_data, "profile", geotype, PRO_2.id, bkMarkArr[1], curyear, fipsList, ctyNameList);
- //updatepgBar(81,90)
  var fore_Data = forecastPlot(data[1], "profile", geotype, PRO_3.id, bkMarkArr[2], curyear, fipsList, ctyNameList);
- //updatepgBar(91,96)
  cocPlot(data[0],"profile", geotype, PRO_4.id, bkMarkArr[3], curyear, fipsList, ctyNameList);
- //updatepgBar(97,100)
- //displayBar();
-}; //County
+ }; //County
 
 
 //Municipalities
 if(muniList.includes(geotype)) {
-//displayBar();
-//updatepgBar(1,30)
 
 //Checking for multi places
 var muni_data = data[3].filter(d => d.countyfips != 999);
@@ -7121,12 +6989,8 @@ for(i = 0; i< data[0].length; i++){
 var est_data = tab_muni_data; //This is single year data
 var fipsList = [...new Set(est_data.map(d => d.fips))];
 var ctyNameList = [...new Set(est_data.map(d => d.name))];
-//updatepgBar(31,60)
  growth_tab(geotype, tab_gr,bkMarkArr[0],fileName, PRO_1.id);  
-//updatepgBar(61,80)
  estPlot(est_data, "profile", geotype, PRO_2.id, bkMarkArr[1],curyear, fipsList, ctyNameList);
-//updatepgBar(81,100) 
-//displayBar();
 }; //Municipality
 }); //End of Promise
 
@@ -8991,7 +8855,7 @@ insertBkmark(bkMarkArr)
 
 genHHForecastChart(hhforecast_fin,PRO_1.id,bkMarkArr[0], geotype);
 genOccupancyTab(occ_tab_fin,PRO_2.id,bkMarkArr[1],geotype,curyear,fipsArr);
-genHousingTemireTab(fin_tenure_tab,PRO_3.id,bkMarkArr[2],geotype,curyear,fipsArr);
+genHousingTenureTab(fin_tenure_tab,PRO_3.id,bkMarkArr[2],geotype,curyear,fipsArr);
 genHHIncomeTab(med_fin, housingIncome_fin,PRO_4.id,bkMarkArr[3],geotype,curyear,fipsArr);
 
 	}); //end of Promise
