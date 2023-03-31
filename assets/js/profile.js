@@ -176,7 +176,7 @@ function fixNEG(invalue,fmt){
    if(fmt == 'cur') { fin_val = fmt_dollar(tmp_val);};
     }
 
-   return fin_val;
+   return(fin_val);
 }; //end of fixNEG
 
 //restructureACS data from wide to long 
@@ -795,8 +795,8 @@ if(pctTab){
   //Generate List of Keys
   var tmp_data_keys = Object.keys(inData[0]);
   var tgtrow = 0
-
- //Generate Tables by section 
+  
+   //Generate Tables by section 
 if(section == 'summtab') { //this is for the summary table
 for(a = 0; a < npanels;a++) {// panels
   var tmp_data = [];
@@ -811,6 +811,8 @@ for(a = 0; a < npanels;a++) {// panels
 	  }
   };
   tgtrow = tgtrow + 2
+  
+ 
  //Populate the output tables
 
  	var col_pos = 1
@@ -964,8 +966,7 @@ for(a = 0; a < npanels;a++) {// panels
 	}
   tgtrow = tgtrow + 2
  //Populate the output tables
-console.log(tmp_data)
-debugger;
+
  	var col_pos = 1
 	  for(i = 0; i < tmp_data.length;i++){  
 	        var col_pos2 = col_pos + 1;
@@ -977,10 +978,6 @@ debugger;
 			 out_pct[a][1][col_pos] = "<th align='center'>Estimate</th>";
 			 out_pct[a][1][col_pos2] = "<th align='center'>Margin of Error</th>";
 			 } //pctTab
-			 
-			 console.log(out_count)
-			 console.log(out_pct)
-			 debugger;
 			 
 			 var tot_est = tmp_data[i][tmp_data_keys[2]];
 			 var tot_moe = tmp_data[i][tmp_data_keys[3]];
@@ -1080,7 +1077,7 @@ for(h = 0; h < tmp_data.length; h++){ //Number of rows in tmp_data
 			  out_count[pnl][j][colpos] = "<th colspan='4' align='center'>" + tmp_data[h][1] +"</th>";
 			  }
 			  if(j == 1){
-			  out_count[pnl][j][colpos] = "<th>Number</th>";
+			  out_count[pnl][j][colpos] = "<th>Estimate</th>";
 			  out_count[pnl][j][colpos+1] = "<th>Margin of Error</th>";
 			  out_count[pnl][j][colpos+2] = "<th>Percentage</th>";
 			  out_count[pnl][j][colpos+3] = "<th>Margin of Error</th>";
@@ -1182,14 +1179,17 @@ if(level == "Municipality") {
 		 }
 	  }
   } //i
-  
+
   //Building Header
-	unit_arr[0][1] = "<th align='center' colspan='4'>" + NameList[0] + "</th>";
-	unit_arr[0][5] = "<th align='center' colspan='4'>" + NameList[1] + "</th>";
-	
-	if(level == "Municipality"){
-	unit_arr[0][9] = "<th align='center' colspan='4'>" + NameList[2]+ "</th>";
+  	if(level == "Municipality"){
+		unit_arr[0][1] = "<th align='center' colspan='4'>" + NameList[0][0] + "</th>";
+		unit_arr[0][5] = "<th align='center' colspan='4'>" + NameList[0][1] + "</th>";
+		unit_arr[0][9] = "<th align='center' colspan='4'>" + NameList[0][2]+ "</th>";
+	} else {
+		unit_arr[0][1] = "<th align='center' colspan='4'>" + NameList[0] + "</th>";
+		unit_arr[0][5] = "<th align='center' colspan='4'>" + NameList[1] + "</th>";
 	}
+
 	var term = "Counts"
 	unit_arr[1][0] = "<th></th>"
 	unit_arr[2][0] = "<th></th>"
@@ -1206,17 +1206,6 @@ if(level == "Municipality") {
 			unit_arr[2][j] = "<th align='center'>Margin of Error</th>"
 		}
 	}
-	
-	if(typeof NameList[1] == 'undefined') {
-		unit_arr[0][2] = "";
-		unit_arr[0][5] = "";
-		unit_arr[1][5] = "";
-		unit_arr[1][7] = "";
-		unit_arr[2][5] = "";
-		unit_arr[2][6] = "";
-		unit_arr[2][7] = "";
-		unit_arr[2][8] = "";
-		}
 
 return(unit_arr)
 } //genUnitArray
@@ -1229,18 +1218,24 @@ const fmt_pct = d3.format(".1%");
 
  var geoNames =  [...new Set(inData.map(d => d.NAME))];
  
- 
  var unit_out = [];
  var pop_out = [];
 
+
 if(level == "Municipality"){
-  var unit_data = genUnitArray(level, row_topics, geoNames)
- } else {
+   var npanels = 1;
+} else {
    var npanels = Math.round((geoNames.length)/2); //This is the number of panels
-   
-   
-   //Build Array of names that match the panels
-    var nameArr = [];
+}
+   var unit_data = new Array(npanels);
+   var pop_data = new Array(npanels);
+   var nameArr = [];
+if(level == "Municipality"){
+	nameArr = [geoNames];
+	unit_data[0] = genUnitArray(level, row_topics, nameArr);
+	pop_data[0] =  genUnitArray(level, row_topics, nameArr);
+} else {
+ //Build Array of names that match the panels
 	for(x = 0; x < geoNames.length; x++){
 		if(x % 2 == 0){
 			nameArr.push([geoNames[x], geoNames[x+1]]);
@@ -1250,14 +1245,12 @@ if(level == "Municipality"){
 			}
 	}
 	} //x
-   var unit_data = new Array(npanels);
-   var pop_data = new Array(npanels);
+ 
    for(x = 0; x < npanels; x++){
 	unit_data[x] = genUnitArray(level, row_topics, nameArr[x])
 	pop_data[x] = genUnitArray(level, row_topics, nameArr[x])
   } //x
- }
-  
+} //Municipalities
 
  //Column Addresses
    var unitRows = [
@@ -1289,12 +1282,15 @@ if(level == "Municipality"){
 
 
 for(a = 0; a < npanels; a++) {
-var selData = inData.filter(d => nameArr[a].includes(d.NAME));
+if(npanels == 1) {
+       var selData = inData;
+} else {
+       var selData = inData.filter(d => nameArr[a].includes(d.NAME));
+}
 
 for(b = 0; b < unitRows.length; b++){
 	    var filtvar_u = selData.filter(d => unitRows[b].vars.includes(d.VAR));
-	
-	    var tgt_row = unitRows[b].row
+	    var tgt_row = unitRows[b].row;
 
 for(c = 0; c < filtvar_u.length; c++){
 	var unit_data_sel = [];
@@ -1302,79 +1298,187 @@ for(c = 0; c < filtvar_u.length; c++){
 	unit_data_sel.push(filtvar_u[c].UNIT_EST, filtvar_u[c].UNIT_MOE, filtvar_u[c].UNIT_PCT_EST, filtvar_u[c].UNIT_PCT_MOE);
 	pop_data_sel.push(filtvar_u[c].POP_EST, filtvar_u[c].POP_MOE, filtvar_u[c].POP_PCT_EST, filtvar_u[c].POP_PCT_MOE);
 
-		if(c == 0){
-						unit_data[a][tgt_row][1] = "<td align='right'>" + fmt_comma(Math.round(unit_data_sel[0])) + "</td>";
-						unit_data[a][tgt_row][2] = "<td align='right'>" + fmt_comma(Math.round(unit_data_sel[1])) + "</td>";
-						unit_data[a][tgt_row][3] = "<td align='right'>" + fmt_pct(unit_data_sel[2]) + "</td>";
-						unit_data[a][tgt_row][4] = "<td align='right'>" + fmt_pct(unit_data_sel[3]) + "</td>";
+if(level == "Municipality"){
+switch(c){
+	case 0 :
+		unit_data[a][tgt_row][1] = "<td align='right'>" + fmt_comma(Math.round(unit_data_sel[0])) + "</td>";
+		unit_data[a][tgt_row][2] = "<td align='right'>" + fmt_comma(Math.round(unit_data_sel[1])) + "</td>";
+		unit_data[a][tgt_row][3] = "<td align='right'>" + fmt_pct(unit_data_sel[2]) + "</td>";
+		unit_data[a][tgt_row][4] = "<td align='right'>" + fmt_pct(unit_data_sel[3]) + "</td>";
 
-						pop_data[a][tgt_row][1] = "<td align='right'>" + fmt_comma(Math.round(pop_data_sel[0])) + "</td>";
-						pop_data[a][tgt_row][2] = "<td align='right'>" + fmt_comma(Math.round(pop_data_sel[1])) + "</td>";
-						pop_data[a][tgt_row][3] = "<td align='right'>" + fmt_pct(pop_data_sel[2]) + "</td>";
-						pop_data[a][tgt_row][4] = "<td align='right'>" + fmt_pct(pop_data_sel[3]) + "</td>";
-						
-						if(['ALLMEDYR_E', 'OOMEDYR_E', 'RTMEDYR_E'].includes(unitRows[b].vars)){
-							unit_data[a][tgt_row][1] = "<td align='right'>" + unit_data_sel[0] + "</td>";
-							unit_data[a][tgt_row][2] = "<td align='right'>" + unit_data_sel[1] + "</td>";
-							unit_data[a][tgt_row][3] = "<td align='right'></td>";
-							unit_data[a][tgt_row][4] = "<td align='right'></td>";
-						
-							pop_data[a][tgt_row][1] = "<td align='right'></td>";
-							pop_data[a][tgt_row][2] = "<td align='right'></td>";
-							pop_data[a][tgt_row][3] = "<td align='right'></td>";
-							pop_data[a][tgt_row][4] = "<td align='right'></td>";
-						}
-						if(['ALL_PPH_E', 'OO_PPH_E', 'RT_PPH_E'].includes(unitRows[b].vars)){
-							unit_data[a][tgt_row][1] = "<td align='right'></td>";
-							unit_data[a][tgt_row][2] = "<td align='right'></td>";
-							unit_data[a][tgt_row][3] = "<td align='right'></td>";
-							unit_data[a][tgt_row][4] = "<td align='right'></td>";
-						
-							pop_data[a][tgt_row][1] = "<td align='right'>" + fmt_dec(pop_data_sel[0].toFixed(2)) + "</td>";
-							pop_data[a][tgt_row][2] = "<td align='right'>" + fmt_dec(pop_data_sel[1].toFixed(2)) + "</td>";
-							pop_data[a][tgt_row][3] = "<td align='right'></td>";
-							pop_data[a][tgt_row][4] = "<td align='right'></td>";
-						}
-		} else {
-						unit_data[a][tgt_row][5] = "<td align='right'>" + fmt_comma(Math.round(unit_data_sel[0])) + "</td>";
-						unit_data[a][tgt_row][6] = "<td align='right'>" + fmt_comma(Math.round(unit_data_sel[1])) + "</td>";
-						unit_data[a][tgt_row][7] = "<td align='right'>" + fmt_pct(unit_data_sel[2]) + "</td>";
-						unit_data[a][tgt_row][8] = "<td align='right'>" + fmt_pct(unit_data_sel[3]) + "</td>";
+		pop_data[a][tgt_row][1] = "<td align='right'>" + fmt_comma(Math.round(pop_data_sel[0])) + "</td>";
+		pop_data[a][tgt_row][2] = "<td align='right'>" + fmt_comma(Math.round(pop_data_sel[1])) + "</td>";
+		pop_data[a][tgt_row][3] = "<td align='right'>" + fmt_pct(pop_data_sel[2]) + "</td>";
+		pop_data[a][tgt_row][4] = "<td align='right'>" + fmt_pct(pop_data_sel[3]) + "</td>";
 
-						pop_data[a][tgt_row][5] = "<td align='right'>" + fmt_comma(Math.round(pop_data_sel[0])) + "</td>";
-						pop_data[a][tgt_row][6] = "<td align='right'>" + fmt_comma(Math.round(pop_data_sel[1])) + "</td>";
-						pop_data[a][tgt_row][7] = "<td align='right'>" + fmt_pct(pop_data_sel[2]) + "</td>";
-						pop_data[a][tgt_row][8] = "<td align='right'>" + fmt_pct(pop_data_sel[3]) + "</td>";
-						
-						if(['ALLMEDYR_E', 'OOMEDYR_E', 'RTMEDYR_E'].includes(unitRows[b].vars)){
-							unit_data[a][tgt_row][5] = "<td align='right'>" + unit_data_sel[0] + "</td>";
-							unit_data[a][tgt_row][6] = "<td align='right'>" + unit_data_sel[1] + "</td>";
-							unit_data[a][tgt_row][7] = "<td align='right'></td>";
-							unit_data[a][tgt_row][8] = "<td align='right'></td>";
-						
-							pop_data[a][tgt_row][5] = "<td align='right'></td>";
-							pop_data[a][tgt_row][6] = "<td align='right'></td>";
-							pop_data[a][tgt_row][7] = "<td align='right'></td>";
-							pop_data[a][tgt_row][8] = "<td align='right'></td>";
-						}
-						if(['ALL_PPH_E', 'OO_PPH_E', 'RT_PPH_E'].includes(unitRows[b].vars)){
-							unit_data[a][tgt_row][5] = "<td align='right'></td>";
-							unit_data[a][tgt_row][6] = "<td align='right'></td>";
-							unit_data[a][tgt_row][7] = "<td align='right'></td>";
-							unit_data[a][tgt_row][8] = "<td align='right'></td>";
-						
-							pop_data[a][tgt_row][5] = "<td align='right'>" + fmt_dec(pop_data_sel[0].toFixed(2)) + "</td>";
-							pop_data[a][tgt_row][6] = "<td align='right'>" + fmt_dec(pop_data_sel[1].toFixed(2)) + "</td>";
-							pop_data[a][tgt_row][7] = "<td align='right'></td>";
-							pop_data[a][tgt_row][8] = "<td align='right'></td>";
-						}
-		} // c value
+		if(['ALLMEDYR_E', 'OOMEDYR_E', 'RTMEDYR_E'].includes(unitRows[b].vars)){
+			unit_data[a][tgt_row][1] = "<td align='right'>" + unit_data_sel[0] + "</td>";
+			unit_data[a][tgt_row][2] = "<td align='right'>" + unit_data_sel[1] + "</td>";
+			unit_data[a][tgt_row][3] = "<td align='right'></td>";
+			unit_data[a][tgt_row][4] = "<td align='right'></td>";
+		
+			pop_data[a][tgt_row][1] = "<td align='right'></td>";
+			pop_data[a][tgt_row][2] = "<td align='right'></td>";
+			pop_data[a][tgt_row][3] = "<td align='right'></td>";
+			pop_data[a][tgt_row][4] = "<td align='right'></td>";
+		}
+		if(['ALL_PPH_E', 'OO_PPH_E', 'RT_PPH_E'].includes(unitRows[b].vars)){
+			unit_data[a][tgt_row][1] = "<td align='right'></td>";
+			unit_data[a][tgt_row][2] = "<td align='right'></td>";
+			unit_data[a][tgt_row][3] = "<td align='right'></td>";
+			unit_data[a][tgt_row][4] = "<td align='right'></td>";
+		
+			pop_data[a][tgt_row][1] = "<td align='right'>" + fmt_dec(pop_data_sel[0].toFixed(2)) + "</td>";
+			pop_data[a][tgt_row][2] = "<td align='right'>" + fmt_dec(pop_data_sel[1].toFixed(2)) + "</td>";
+			pop_data[a][tgt_row][3] = "<td align='right'></td>";
+			pop_data[a][tgt_row][4] = "<td align='right'></td>";
+		}
+	break;
+	case 1:
+				unit_data[a][tgt_row][5] = "<td align='right'>" + fmt_comma(Math.round(unit_data_sel[0])) + "</td>";
+				unit_data[a][tgt_row][6] = "<td align='right'>" + fmt_comma(Math.round(unit_data_sel[1])) + "</td>";
+				unit_data[a][tgt_row][7] = "<td align='right'>" + fmt_pct(unit_data_sel[2]) + "</td>";
+				unit_data[a][tgt_row][8] = "<td align='right'>" + fmt_pct(unit_data_sel[3]) + "</td>";
+
+				pop_data[a][tgt_row][5] = "<td align='right'>" + fmt_comma(Math.round(pop_data_sel[0])) + "</td>";
+				pop_data[a][tgt_row][6] = "<td align='right'>" + fmt_comma(Math.round(pop_data_sel[1])) + "</td>";
+				pop_data[a][tgt_row][7] = "<td align='right'>" + fmt_pct(pop_data_sel[2]) + "</td>";
+				pop_data[a][tgt_row][8] = "<td align='right'>" + fmt_pct(pop_data_sel[3]) + "</td>";
+				
+				if(['ALLMEDYR_E', 'OOMEDYR_E', 'RTMEDYR_E'].includes(unitRows[b].vars)){
+					unit_data[a][tgt_row][5] = "<td align='right'>" + unit_data_sel[0] + "</td>";
+					unit_data[a][tgt_row][6] = "<td align='right'>" + unit_data_sel[1] + "</td>";
+					unit_data[a][tgt_row][7] = "<td align='right'></td>";
+					unit_data[a][tgt_row][8] = "<td align='right'></td>";
+				
+					pop_data[a][tgt_row][5] = "<td align='right'></td>";
+					pop_data[a][tgt_row][6] = "<td align='right'></td>";
+					pop_data[a][tgt_row][7] = "<td align='right'></td>";
+					pop_data[a][tgt_row][8] = "<td align='right'></td>";
+				}
+				if(['ALL_PPH_E', 'OO_PPH_E', 'RT_PPH_E'].includes(unitRows[b].vars)){
+					unit_data[a][tgt_row][5] = "<td align='right'></td>";
+					unit_data[a][tgt_row][6] = "<td align='right'></td>";
+					unit_data[a][tgt_row][7] = "<td align='right'></td>";
+					unit_data[a][tgt_row][8] = "<td align='right'></td>";
+				
+					pop_data[a][tgt_row][5] = "<td align='right'>" + fmt_dec(pop_data_sel[0].toFixed(2)) + "</td>";
+					pop_data[a][tgt_row][6] = "<td align='right'>" + fmt_dec(pop_data_sel[1].toFixed(2)) + "</td>";
+					pop_data[a][tgt_row][7] = "<td align='right'></td>";
+					pop_data[a][tgt_row][8] = "<td align='right'></td>";
+				}
+	break;
+	case 2 :
+			unit_data[a][tgt_row][9] = "<td align='right'>" + fmt_comma(Math.round(unit_data_sel[0])) + "</td>";
+			unit_data[a][tgt_row][10] = "<td align='right'>" + fmt_comma(Math.round(unit_data_sel[1])) + "</td>";
+			unit_data[a][tgt_row][11] = "<td align='right'>" + fmt_pct(unit_data_sel[2]) + "</td>";
+			unit_data[a][tgt_row][12] = "<td align='right'>" + fmt_pct(unit_data_sel[3]) + "</td>";
+
+			pop_data[a][tgt_row][9] = "<td align='right'>" + fmt_comma(Math.round(pop_data_sel[0])) + "</td>";
+			pop_data[a][tgt_row][10] = "<td align='right'>" + fmt_comma(Math.round(pop_data_sel[1])) + "</td>";
+			pop_data[a][tgt_row][11] = "<td align='right'>" + fmt_pct(pop_data_sel[2]) + "</td>";
+			pop_data[a][tgt_row][12] = "<td align='right'>" + fmt_pct(pop_data_sel[3]) + "</td>";
+			
+			if(['ALLMEDYR_E', 'OOMEDYR_E', 'RTMEDYR_E'].includes(unitRows[b].vars)){
+				unit_data[a][tgt_row][9] = "<td align='right'>" + unit_data_sel[0] + "</td>";
+				unit_data[a][tgt_row][10] = "<td align='right'>" + unit_data_sel[1] + "</td>";
+				unit_data[a][tgt_row][11] = "<td align='right'></td>";
+				unit_data[a][tgt_row][12] = "<td align='right'></td>";
+			
+				pop_data[a][tgt_row][9] = "<td align='right'></td>";
+				pop_data[a][tgt_row][10] = "<td align='right'></td>";
+				pop_data[a][tgt_row][11] = "<td align='right'></td>";
+				pop_data[a][tgt_row][12] = "<td align='right'></td>";
+			}
+			if(['ALL_PPH_E', 'OO_PPH_E', 'RT_PPH_E'].includes(unitRows[b].vars)){
+				unit_data[a][tgt_row][9] = "<td align='right'></td>";
+				unit_data[a][tgt_row][10] = "<td align='right'></td>";
+				unit_data[a][tgt_row][11] = "<td align='right'></td>";
+				unit_data[a][tgt_row][12] = "<td align='right'></td>";
+			
+				pop_data[a][tgt_row][9] = "<td align='right'>" + fmt_dec(pop_data_sel[0].toFixed(2)) + "</td>";
+				pop_data[a][tgt_row][10] = "<td align='right'>" + fmt_dec(pop_data_sel[1].toFixed(2)) + "</td>";
+				pop_data[a][tgt_row][11] = "<td align='right'></td>";
+				pop_data[a][tgt_row][12] = "<td align='right'></td>";
+			}
+	break;
+	} //switch 
+	} else {
+	if(c == 0){
+		unit_data[a][tgt_row][1] = "<td align='right'>" + fmt_comma(Math.round(unit_data_sel[0])) + "</td>";
+		unit_data[a][tgt_row][2] = "<td align='right'>" + fmt_comma(Math.round(unit_data_sel[1])) + "</td>";
+		unit_data[a][tgt_row][3] = "<td align='right'>" + fmt_pct(unit_data_sel[2]) + "</td>";
+		unit_data[a][tgt_row][4] = "<td align='right'>" + fmt_pct(unit_data_sel[3]) + "</td>";
+
+		pop_data[a][tgt_row][1] = "<td align='right'>" + fmt_comma(Math.round(pop_data_sel[0])) + "</td>";
+		pop_data[a][tgt_row][2] = "<td align='right'>" + fmt_comma(Math.round(pop_data_sel[1])) + "</td>";
+		pop_data[a][tgt_row][3] = "<td align='right'>" + fmt_pct(pop_data_sel[2]) + "</td>";
+		pop_data[a][tgt_row][4] = "<td align='right'>" + fmt_pct(pop_data_sel[3]) + "</td>";
+		
+		if(['ALLMEDYR_E', 'OOMEDYR_E', 'RTMEDYR_E'].includes(unitRows[b].vars)){
+			unit_data[a][tgt_row][1] = "<td align='right'>" + unit_data_sel[0] + "</td>";
+			unit_data[a][tgt_row][2] = "<td align='right'>" + unit_data_sel[1] + "</td>";
+			unit_data[a][tgt_row][3] = "<td align='right'></td>";
+			unit_data[a][tgt_row][4] = "<td align='right'></td>";
+		
+			pop_data[a][tgt_row][1] = "<td align='right'></td>";
+			pop_data[a][tgt_row][2] = "<td align='right'></td>";
+			pop_data[a][tgt_row][3] = "<td align='right'></td>";
+			pop_data[a][tgt_row][4] = "<td align='right'></td>";
+		}
+		if(['ALL_PPH_E', 'OO_PPH_E', 'RT_PPH_E'].includes(unitRows[b].vars)){
+			unit_data[a][tgt_row][1] = "<td align='right'></td>";
+			unit_data[a][tgt_row][2] = "<td align='right'></td>";
+			unit_data[a][tgt_row][3] = "<td align='right'></td>";
+			unit_data[a][tgt_row][4] = "<td align='right'></td>";
+		
+			pop_data[a][tgt_row][1] = "<td align='right'>" + fmt_dec(pop_data_sel[0].toFixed(2)) + "</td>";
+			pop_data[a][tgt_row][2] = "<td align='right'>" + fmt_dec(pop_data_sel[1].toFixed(2)) + "</td>";
+			pop_data[a][tgt_row][3] = "<td align='right'></td>";
+			pop_data[a][tgt_row][4] = "<td align='right'></td>";
+				}
+	} else {
+		unit_data[a][tgt_row][5] = "<td align='right'>" + fmt_comma(Math.round(unit_data_sel[0])) + "</td>";
+		unit_data[a][tgt_row][6] = "<td align='right'>" + fmt_comma(Math.round(unit_data_sel[1])) + "</td>";
+		unit_data[a][tgt_row][7] = "<td align='right'>" + fmt_pct(unit_data_sel[2]) + "</td>";
+		unit_data[a][tgt_row][8] = "<td align='right'>" + fmt_pct(unit_data_sel[3]) + "</td>";
+
+		pop_data[a][tgt_row][5] = "<td align='right'>" + fmt_comma(Math.round(pop_data_sel[0])) + "</td>";
+		pop_data[a][tgt_row][6] = "<td align='right'>" + fmt_comma(Math.round(pop_data_sel[1])) + "</td>";
+		pop_data[a][tgt_row][7] = "<td align='right'>" + fmt_pct(pop_data_sel[2]) + "</td>";
+		pop_data[a][tgt_row][8] = "<td align='right'>" + fmt_pct(pop_data_sel[3]) + "</td>";
+		
+		if(['ALLMEDYR_E', 'OOMEDYR_E', 'RTMEDYR_E'].includes(unitRows[b].vars)){
+			unit_data[a][tgt_row][5] = "<td align='right'>" + unit_data_sel[0] + "</td>";
+			unit_data[a][tgt_row][6] = "<td align='right'>" + unit_data_sel[1] + "</td>";
+			unit_data[a][tgt_row][7] = "<td align='right'></td>";
+			unit_data[a][tgt_row][8] = "<td align='right'></td>";
+		
+			pop_data[a][tgt_row][5] = "<td align='right'></td>";
+			pop_data[a][tgt_row][6] = "<td align='right'></td>";
+			pop_data[a][tgt_row][7] = "<td align='right'></td>";
+			pop_data[a][tgt_row][8] = "<td align='right'></td>";
+		}
+		if(['ALL_PPH_E', 'OO_PPH_E', 'RT_PPH_E'].includes(unitRows[b].vars)){
+			unit_data[a][tgt_row][5] = "<td align='right'></td>";
+			unit_data[a][tgt_row][6] = "<td align='right'></td>";
+			unit_data[a][tgt_row][7] = "<td align='right'></td>";
+			unit_data[a][tgt_row][8] = "<td align='right'></td>";
+		
+			pop_data[a][tgt_row][5] = "<td align='right'>" + fmt_dec(pop_data_sel[0].toFixed(2)) + "</td>";
+			pop_data[a][tgt_row][6] = "<td align='right'>" + fmt_dec(pop_data_sel[1].toFixed(2)) + "</td>";
+			pop_data[a][tgt_row][7] = "<td align='right'></td>";
+			pop_data[a][tgt_row][8] = "<td align='right'></td>";
+				}
+	} //c value
+	} //Municipality selection
 	} //c loop
+
 } //b
  } //a
- 
-  //convert to html array, one row per panel
-  //for each panel, 0 and 1 are the header, 2 to n is the table body
+
+//convert to html array, one row per panel
+//for each panel, 0 and 1 are the header, 2 to n is the table body
   var unit_html = [];
   var pop_html = [];
 
@@ -1415,6 +1519,8 @@ function HHIncTab(level,MedData, PctData,section, row_topics,pctTab) {
 	const fmt_pct = d3.format(".2%")
     const fmt_comma = d3.format(",");
     const fmt_dollar = d3.format("$,");
+	
+
 //Setup panels
 var nRows = row_topics.length + 2;
 //The idea is to create a 3D array:  array[panel][row_topic][6 column table string (2 cols for index and row_topic and 2 * 2 geography))]
@@ -1433,6 +1539,8 @@ var nRows = row_topics.length + 2;
 
 if(level == "Municipality") {
    var npanels = 1;
+   var Nfips = [...new Set(PctData.map(d => d.FIPS))];
+   var selfips = [Nfips];
  } else {
    var Nfips = [...new Set(PctData.map(d => d.FIPS))];
    var npanels = Math.round((Nfips.length)/2); //This is the number of panels
@@ -1481,6 +1589,7 @@ for(a = 0; a < npanels;a++) {
 		pct_tab[a][i][0] = row_tab[i];
 	} //i
 	
+
 	var tgtcol = 1;
 	for(b = 0; b < selmedian.length; b++){
 	 if(typeof selmedian[b].NAME !== undefined){
@@ -1539,7 +1648,7 @@ for(a = 0; a < npanels;a++) {
 		pct_tab[a][12][tgtcol+1] = "<td align='right'>" + fmt_pct(acsPctMOE(selpct[b].TOTAL_RT_E,selpct[b].TOTAL_RT_M,(selpct[b].PCT4049_RT_E/selpct[b].TOTAL_RT_E), selpct[b].PCT4049_RT_M)) + "</td>"
 		pct_tab[a][13][tgtcol] = "<td align='right'>"+ fmt_pct(selpct[b].PCTGE50_RT_E/selpct[b].TOTAL_RT_E) + "</td>"
 		pct_tab[a][13][tgtcol+1] = "<td align='right'>" + fmt_pct(acsPctMOE(selpct[b].TOTAL_RT_E,selpct[b].TOTAL_RT_M,(selpct[b].PCTGE50_RT_E/selpct[b].TOTAL_RT_E), selpct[b].PCTGE50_RT_M)) + "</td>"
-        tgtcol = 3
+		tgtcol = tgtcol + 2;
 	 } //undefined
 	} //b
 } //a
@@ -1611,10 +1720,10 @@ $(tabObj).DataTable({
 		"fixedHeader":   true,
  dom: 'Bfrtip',
        buttons: [
-		{ text :'Word',    action: function ( e, dt, node, config ) { genplexTab(tab_data,labels,footArr,fileName,'word',tabTitle)} },
+		{ text : 'Word',    action: function ( e, dt, node, config ) { genplexTab(tab_data,labels,footArr,fileName,'word',tabTitle)} },
         { text : 'Excel',  action: function ( e, dt, node, config ) { genplexTab(tab_data,labels,footArr,fileName,'xlsx',tabTitle)} },
         { text : 'CSV',    action: function ( e, dt, node, config ) { genplexTab(tab_data,labels,footArr,fileName,'csv',tabTitle)} },
-        { text :'PDF',     action: function ( e, dt, node, config ) { genplexTab(tab_data,labels,footArr,fileName,'pdf',tabTitle)} }
+        { text : 'PDF',    action: function ( e, dt, node, config ) { genplexTab(tab_data,labels,footArr,fileName,'pdf',tabTitle)} }
 		]  //buttons
  } );
 
@@ -1622,13 +1731,19 @@ $(tabObj).DataTable({
  
 //stripHTML Removes HTML codes from HTML table array Outputs
 function stripHTML(inData){
+	
+
 	var tArrt = []
-//Stripping out html tags
+	
+//Stripping out html tags and filling in empty fields
+
     inData.forEach(x => {
-     x = x.replace(/(<([^>]+)>)/gi, "|")
-	 var x2 = x.split("|")
+	 y = x.replaceAll("<td align='right'></td>","<td align='right'>empty</td>")
+     y2 = y.replace(/(<([^>]+)>)/gi, "|")
+	 var x2 = y2.split("|")
 	 tArrt.push(x2);
 	});
+
 
 //remove empty fields
 var tArr = [];
@@ -1641,6 +1756,14 @@ for(i = 0; i < tArrt.length; i++){
 	 }
     tmpar = tmpar.substr(0,(tmpar.length - 1))
 	tArr.push(tmpar.split("|"))
+}
+
+for(x = 0; x < tArr.length; x++){
+	for(y = 0; y < tArr[x].length; y++){
+		if(tArr[x][y] == "empty"){
+			tArr[x][y] = "";
+		}
+	}
 }
 
 return(tArr);
@@ -1657,117 +1780,449 @@ function checkHash(val,arr){
  return(outval)
 } //checkHash
 
+
 //HTMLtoArray converts HTML strings to an array  From https://stackoverflow.com/questions/9579721/convert-html-table-to-array-in-javascript
-function HTMLtoArray(inData,row_labels,type) {
+function HTMLtoArray(inData,row_labels,level,tabName) {
+	
+
+var tabinfo = [{tabName : 'Summary Statistics Table', ncols : 2, hdrCols : ['Estimate', 'Margin of Error']},
+			{tabName : 'Population Growth Table', ncols : 1, hdrCols : ['Estimate']},
+			{tabName : 'Income Sources Table', ncols : 4, hdrCols : ['Households', 'Margin of Error','Average Income','Margin of Error']},
+			{tabName : 'Race and Ethnicity Table', ncols : 4, hdrCols : ['Estimate', 'Margin of Error', 'Percent','Margin of Error']},
+			{tabName : 'Housing Occupancy and Vacancy Table', ncols : 2, hdrCols : ['Estimate', 'Margin of Error']},
+			{tabName : 'Housing Type Table', ncols : 4, hdrCols : ['Estimate', 'Margin of Error', 'Percent', 'Margin of Error']},
+			{tabName : 'Housing Cost and Affordability Table', ncols : 2, hdrCols : ['Estimate', 'Margin of Error']}
+		  ];
+		  
+//extracting the number of 
+var tabInfo = tabinfo.filter(d => tabName.includes(d.tabName));
+
 
 var tblArray = stripHTML(inData);
 
-//Restructuring 
-//creating lookup array
-var rowHash = [];
-for(i = 0 ; i < row_labels.length; i++){
-	rowHash.push({ label : row_labels[i], outrow : i +2});
-}
 
-//Header rows
-//Checking the structure of tblArray
-
-var jlen = 2
-if(tblArray.length == 1) {
-	if(tblArray[0][2] != "Estimate" && tblArray[0][3] == "Estimate"){  //check for muni
-	 var jlen = 3;
+var scantab = [];
+scantab[0] = tblArray[0].slice()
+//checking the length of rows; if all rows are equal than there are even numbers of elements
+if(tblArray.length > 1){
+	lenStart = tblArray[0].length;
+	lenEnd = tblArray[tblArray.length - 1].length
+	if(lenStart != lenEnd){
+		scantab[1] = tblArray[tblArray.length - 1].slice()
 	}
 }
 
-var hdrArray = [];
-var hdrstr1 = "|";
-var hdrstr2 = "|";
-for(i = 0; i < tblArray.length;i++){
-	for(j = 0 ; j < jlen; j++) {
-		if(tblArray[i][j] != 'Estimate'){
-		hdrstr1 = hdrstr1 + tblArray[i][j] + "||";
-		hdrstr2 = hdrstr2 + "Estimate|Margin of Error|"
-		};
-	}
+//building output array
+
+//number of geographies
+var nameArr = [];
+switch(tabInfo[0].tabName){
+case 'Income Sources Table' :
+for(a = 0; a < tblArray.length; a++){
+	   if((tblArray[a][0] != "Households") && (tblArray[a][0] != "Margin of Error")){
+		   nameArr.push({"Name" : tblArray[a][0], "dataRow" : a});
+	   }
+	   if((tblArray[a][1] != "Households") && (tblArray[a][1] != "Margin of Error")) {
+		   nameArr.push({"Name" : tblArray[a][1], "dataRow" : a});
+	   }
+	   if((tblArray[a][2] != "Households") && (tblArray[a][2] != "Margin of Error")) {
+		   nameArr.push({"Name" : tblArray[a][2], "dataRow" : a});
+	   }
+}
+break;
+case 'Housing Type Table' :
+	for(a = 0; a < tblArray.length; a++){
+	   if((tblArray[a][1] != "Counts") && (tblArray[a][1] != "Percent") && (tblArray[a][1] != "Estimate")) {
+		   nameArr.push({"Name" : tblArray[a][1], "dataRow" : a});
+	   }
+	   if((tblArray[a][3] != "Counts") && (tblArray[a][3] != "Percent") && (tblArray[a][3] != "Estimate")) {
+		   nameArr.push({"Name" : tblArray[a][3], "dataRow" : a});
+	   }
+	   if((tblArray[a][4] != "Counts") && (tblArray[a][4] != "Percent") && (tblArray[a][4] != "Estimate")) {
+		   nameArr.push({"Name" : tblArray[a][4], "dataRow" : a});
+	   }
+}
+break;
+default :
+	for(a = 0; a < tblArray.length; a++){
+	   if((tblArray[a][0] != "Estimate") && (tblArray[a][0] != "Margin of Error")){
+		   nameArr.push({"Name" : tblArray[a][0], "dataRow" : a});
+	   }
+	   if((tblArray[a][1] != "Estimate") && (tblArray[a][1] != "Margin of Error")) {
+		   nameArr.push({"Name" : tblArray[a][1], "dataRow" : a});
+	   }
+	   if((tblArray[a][2] != "Estimate") && (tblArray[a][2] != "Margin of Error")) {
+		   nameArr.push({"Name" : tblArray[a][2], "dataRow" : a});
+	   }
+}
+break;
 }
 
-hdrstr1 = hdrstr1.substr(0,(hdrstr1.length - 1));
-hdrstr2 = hdrstr2.substr(0,(hdrstr2.length - 1));
-
-hdrArray.push(hdrstr1.split("|"));
-hdrArray.push(hdrstr2.split("|"));
-
-  var finData = [];
-
-//Check for number of places between the first and second row id
-var rowid1 = rowHash[0].label
-var rowid2 = rowHash[1].label
-var rowpos1 = 0;
-var rowpos2 = 0;
-
-//This outputs the array that created the table
-
-
-//Builds the final output data set, to be created in the pdf table.
-for(z = 0; z < tblArray.length; z++){
-var rowpos = 0;
-var tmpData = [];
-for(a = 0; a < tblArray[z].length; a++){
-	if(tblArray[z][a] == rowid1) {  rowpos1 = a}
-	if(rowpos1 != 0){
-		if(tblArray[z][a] == rowid2) {  
-		   rowpos2 = a;
-		   break;
-		   }
-	}
-}
-
-var nvals = rowpos2 - rowpos1;
-
-for(a = 0; a < rowHash.length; a++){
-	var chkval = rowHash[a].label
-	//Getting position of label
-	for(b = 0; b < tblArray[z].length; b++){
-	  if(tblArray[z][b] == chkval) {
-		 rowpos = b;
-	  } else {
-		 rowpos = 0;
-	  }
-	  if(rowpos != 0){
-		  var selarr = []
-		  for(c = 0; c < nvals; c++){
-			  selarr.push(tblArray[z][rowpos + c]);
-		  } //c
-		  tmpData.push(selarr);
-	  } //rowpos
-	  } //b
-} //a
-
-finData.push(tmpData)
-} //z
-
-    var tableData = [];
-	for(i = 0; i < finData.length; i++){
-		if(i == 0) {
-		 for(j = 0; j < finData[i].length; j++){
-	       tableData.push(finData[i][j]);
-		 } //j
+//figuring out level
+if(inData.length > 1) {
+	var level = "Region"
+} else {
+	if(nameArr[0].Name.includes("County")) {
+	  var level = "County"
 	} else {
-		for(j = 0; j < finData[i].length; j++){
-			var shortrec = finData[i][j];
-			shortrec.shift()
-	        tableData[j] = tableData[j].concat(shortrec);
-		 } //j
+	  var level = "Municipality"
+	}
+}
+
+if(tabInfo[0].tabName == "Population Growth Table"){
+  var nameArrx = nameArr.filter(d => d.Name != '1990');
+  nameArr = nameArrx;
+}
+
+
+//Restructuring Creating the number of pages
+if(tabInfo[0].tabName == 'Population Growth Table'){
+	var npages = Math.ceil((tabInfo[0].ncols * nameArr.length)/7);
+	var nrows = row_labels.length + 2;
+	var ncols = 8;
+} else {
+	if(tabInfo[0].ncols == 2){
+	var npages = Math.ceil((tabInfo[0].ncols * nameArr.length)/8);
+	var ncols = 9;
+	}
+	if(tabInfo[0].ncols == 4){
+	var npages = Math.ceil((tabInfo[0].ncols * nameArr.length)/12);
+	var ncols = 13;
+	}
+	if(tabInfo[0].tabName == 'Housing Type Table'){
+		var nrows = ((row_labels.length + 1) * 3) + 3;
+	} else {
+		var nrows = row_labels.length + 2;
+	}
+}
+
+const outArr = Array(npages).fill('').map(() => new Array(nrows).fill('').map(() => new Array(ncols).fill('')))
+
+// augumenting nameArr -- nameArr2 will be recreated for the Housing Type Table
+
+var nameArr2 = [];
+var pgval = 0;
+var outStart = 1;
+var outEnd = outStart + (tabInfo[0].ncols - 1)
+
+for(x = 0; x < nameArr.length; x++){
+		if((scantab.length == 2) && (x == (nameArr.length - 1))) { //The last one in the series
+			   for(y = 0; y < row_labels.length;y++){
+			   //Creating instart and inend values
+					 for(c = 0; c < scantab[1].length; c++){
+						if(scantab[1][c] == row_labels[y]){
+							inStart = c + 1;
+							inEnd = inStart + (tabInfo[0].ncols - 1);
+						}
+					 } //c
+				nameArr2.push({"name" : nameArr[x].Name, "dataName" : row_labels[y], "dataRow" : nameArr[x].dataRow,
+					"inStart" : inStart, "inEnd" : inEnd,
+				"outPg" : pgval, "outRow" : y + 2, "outStart" : outStart, "outEnd" : outEnd});
+		   } //y
+		} else {
+		   for(y = 0; y < row_labels.length;y++){
+			   //Creating instart and inend values
+					 for(c = 0; c < scantab[0].length; c++){
+						if(scantab[0][c] == row_labels[y]){
+							inStart = c + 1;
+							inEnd = inStart + (tabInfo[0].ncols - 1);
+						}
+					 } //c
+				nameArr2.push({"name" : nameArr[x].Name, "dataName" : row_labels[y], "dataRow" : nameArr[x].dataRow,
+					"inStart" : inStart, "inEnd" : inEnd,
+					"outPg" : pgval, "outRow" : y + 2, "outStart" : outStart, "outEnd" : outEnd});
+		   } //y
+		}
+
+   var outStart = outStart + tabInfo[0].ncols 
+   var outEnd = outStart + (tabInfo[0].ncols - 1)
+   //Page Updates
+   switch(tabInfo[0].ncols){
+	   case 1 :
+	   if((x > 0) && (x % 7 == 0)) {
+		 pgval++
+	    var outStart = 1
+	    var outEnd = outStart + (tabInfo[0].ncols - 1)
+	   }
+	   break;
+      case 2: 
+	  if((x == 3) || (x == 7)) {
+	   pgval++
+	   var outStart = 1
+	   var outEnd = outStart + (tabInfo[0].ncols - 1)
+      }
+    break;
+	case 4: 
+	if(outStart > 12) {
+	   pgval++
+	   var outStart = 1
+	   var outEnd = outStart + (tabInfo[0].ncols - 1)
+      }
+	  break;
+   } //switch
+}  //x
+
+//Fixing inStart and inEnd
+
+var rowVar = 0;
+var curRow = 0;
+for(a = 0; a < nameArr2.length; a++){
+	if(nameArr2[a].dataRow == rowVar){
+		if(curRow > (row_labels.length - 1)){
+			var stval = nameArr2[a].inStart + tabInfo[0].ncols;
+			var endval = nameArr2[a].inEnd + tabInfo[0].ncols
+			nameArr2[a].inStart = stval;
+			nameArr2[a].inEnd = endval;
+		}
+		curRow++
+	} else {
+	rowVar++
+	var curRow = 1;
+	}
+}
+
+//Populate Array
+//Rowlabels
+
+if(tabInfo[0].tabName == "Housing Type Table"){
+	var housingtype = ["All Housing Units", "Owner-Occupied Housing Units", "Rental Housing Units"]
+	for(x = 0; x < npages; x++){
+		var rowchk = 3
+		for(y = 0; y < housingtype.length; y++) {
+			outArr[x][rowchk][0] = housingtype[y];
+			rowchk++
+			for(z = 0; z < row_labels.length; z++){
+				outArr[x][rowchk][0] = row_labels[z];
+				rowchk++
+			}
+		}
+	}
+} else {
+for(x = 0; x < npages; x++){
+	for(y = 2; y < nrows;y ++){
+     outArr[x][y][0] = row_labels[y-2]
+	} //y
+} //x
+}
+
+//Place header
+var arridx = 0;
+var hdrArr = [];
+hdrArr.push({'name' : nameArr2[arridx].name, 'outPg' : nameArr2[arridx].outPg, 'outStart' : nameArr2[arridx].outStart});
+
+for(x = 0; x < nameArr2.length;x++){
+	if(hdrArr[arridx].name != nameArr2[x].name) {
+		hdrArr.push({'name' : nameArr2[x].name, 'outPg' : nameArr2[x].outPg, 'outStart' : nameArr2[x].outStart});
+		arridx++;
     }
-   }
-   
+}
 
-var outData = hdrArray.concat(tableData);
-return(outData);
+var colval = 1
+for(x = 0; x < hdrArr.length; x++){
+     outArr[hdrArr[x].outPg][0][hdrArr[x].outStart] = hdrArr[x].name;
+     if(tabInfo[0].tabName == 'Housing Type Table'){
+		  outArr[hdrArr[x].outPg][1][hdrArr[x].outStart] = "Counts"
+		  outArr[hdrArr[x].outPg][1][hdrArr[x].outStart + 2] = "Percent"
+		  var outrow = 2
+	 } else {
+		 var outrow = 1;
+	 }
+	switch(tabInfo[0].ncols){
+	   case 1 :
+		outArr[hdrArr[x].outPg][outrow][hdrArr[x].outStart] = "Estimate";
+	   break;
+      case 2: 
+	  for(y = 1; y < ncols;y ++){
+	  if(y % 2 != 0){
+		outArr[hdrArr[x].outPg][outrow][y] = "Estimate";
+	 } else {
+		 outArr[hdrArr[x].outPg][outrow][y] = "Margin of Error";
+	 }
+	  }
+    break;
+	case 4: 
+		if(tabInfo[0].tabName == 'Income Sources Table'){
+		  outArr[hdrArr[x].outPg][outrow][hdrArr[x].outStart] = "Households";
+		  outArr[hdrArr[x].outPg][outrow][hdrArr[x].outStart+1] = "Margin of Error";
+		  outArr[hdrArr[x].outPg][outrow][hdrArr[x].outStart+2] = "Average Income";
+		  outArr[hdrArr[x].outPg][outrow][hdrArr[x].outStart+3] = "Margin of Error";
+        } else {
+		  outArr[hdrArr[x].outPg][outrow][hdrArr[x].outStart] = "Estimate";
+		  outArr[hdrArr[x].outPg][outrow][hdrArr[x].outStart+1] = "Margin of Error";
+		  outArr[hdrArr[x].outPg][outrow][hdrArr[x].outStart+2] = "Percentage";
+		  outArr[hdrArr[x].outPg][outrow][hdrArr[x].outStart+3] = "Margin of Error";
+        }
+	  break;
+   } //switch
+} //x
 
+
+//Special creaton of nameArr2 for Housing Type Table
+//Redoing nameArr2 for Housing Type Table
+if(tabInfo[0].tabName == 'Housing Type Table'){
+	var housingtype = ["All Housing Units", "Owner-Occupied Housing Units", "Rental Housing Units"]
+	var nameArr2 = [];
+
+if(level == "Municipality"){ //The length of a municipal data pull
+	for(a = 0; a < housingtype.length; a++){
+	switch(a){
+		case 0:
+		var outRow = 4;
+		var inStart = 25;
+		break;
+		case 1:
+		var outRow = 13;
+		var inStart = 130;
+		break;
+		case 2:
+		var outRow = 22;
+		var inStart = 235;
+		break;
+	}
+	var outEnd = outStart + (tabInfo[0].ncols - 1)
+	for(b = 0; b < row_labels.length; b++){
+		for(c = 0; c < hdrArr.length; c++){
+			switch(c) {
+				case 0:
+				var outStart = 1;
+				break;
+				case 1:
+				var outStart = 5;
+				break;
+				case 2:
+				var outStart = 9
+				break;
+			}
+			var outEnd = outStart + (tabInfo[0].ncols - 1)
+			var inEnd = inStart + (tabInfo[0].ncols - 1)
+			
+			nameArr2.push({"name" : hdrArr[c].name, "dataName" : row_labels[b], "dataRow" : 0,
+						"inStart" : inStart, "inEnd" : inEnd,
+						"outPg" : hdrArr[c].outPg, "outRow" : outRow, "outStart" : outStart, "outEnd" : outEnd});
+			inStart = inStart + tabInfo[0].ncols;
+		} //c
+		inStart++
+		outRow++
+	} //b
+	} //a
+	} else {
+	for(a = 0; a < hdrArr.length; a++){
+	for(b = 0; b < housingtype.length; b++){
+		if(scantab.length == 2 && a == hdrArr.length - 1){
+			switch(b){  //the short record
+				case 0:
+				var outRow = 4;
+				var inStart = 17;
+				break;
+				case 1:
+				var outRow = 13;
+				var inStart = 58;
+				break;
+				case 2:
+				var outRow = 22;
+				var inStart = 99
+				break;
+			}
+		} else {
+			switch(b){
+				case 0:
+				var outRow = 4;
+				var inStart = 18;
+				break;
+				case 1:
+				var outRow = 13;
+				var inStart = 91;
+				break;
+				case 2:
+				var outRow = 22;
+				var inStart = 164;
+				break;
+			}
+		if(hdrArr[a].outStart == 5) {
+			inStart = 22;
+		}
+		}
+		for(c = 0; c < row_labels.length; c++){
+			var inEnd = inStart + (tabInfo[0].ncols - 1)
+			var outEnd = hdrArr[a].outStart + (tabInfo[0].ncols - 1)
+			nameArr2.push({"name" : hdrArr[a].name, "dataName" : row_labels[c], "dataRow" : nameArr[a].dataRow,
+						"inStart" : inStart, "inEnd" : inEnd,
+						"outPg" : hdrArr[a].outPg, "outRow" : outRow, "outStart" : hdrArr[a].outStart, "outEnd" : outEnd});
+			if(scantab.length == 2 && a == hdrArr.length - 1){
+				inStart = inStart + (tabInfo[0].ncols + 1);
+			} else {
+				inStart = inStart + (tabInfo[0].ncols * 2) + 1;
+			}
+			outRow++;
+	} //c
+	} //b
+} //a
+}
+	}
+
+//Filling outArr with data
+for(x = 0; x < nameArr2.length; x++){
+	var iRow = nameArr2[x].dataRow;
+	var iStart = nameArr2[x].inStart;
+	var iEnd = nameArr2[x].inEnd;
+	var oPg = nameArr2[x].outPg;
+	var oRow = nameArr2[x].outRow;
+	var oSt = nameArr2[x].outStart;
+	var oEnd = nameArr2[x].outEnd;
+	var nIncrement = 0;
+	if(tabInfo[0].ncols == 1){
+		 outArr[oPg][oRow][oSt] = tblArray[iRow][iStart];
+	} else {
+	for(y = iStart; y <= iEnd; y++){
+	  outArr[oPg][oRow][oSt + nIncrement] = tblArray[iRow][y]; 
+	  nIncrement++
+	}
+	}
+}
+
+//Slicing out the empty columns in the last page of the array
+
+	var lastpg = npages - 1;
+	var emptycell = 0;
+	//Counting empty cells, cells without [A-Z,a-z,0-9]
+	var empReg = new RegExp("[A-Z,a-z,0-9]");
+	switch(tabInfo[0].tabName) {
+	case 'Housing Type Table'  :
+		var rowsel = 4;
+		break;
+	case 'Summary Statistics Table' :
+	    var rowsel = 6;
+		break;
+	case 'Population Growth Table' :
+	    var rowsel = 4;
+		break;
+	default :
+		var rowsel = 3;
+		break;
+	}
+	for(x = 0; x < outArr[lastpg][rowsel].length;x++){
+			if(!empReg.test(outArr[lastpg][rowsel][x])){
+				emptycell++
+			}
+	}
+	var nonempty = outArr[lastpg][rowsel].length - emptycell;
+	
+	var tmpArray = [];
+	for(a = 0; a < outArr[lastpg].length; a++){
+		var tmpRow = [];
+		for(b = 0; b < nonempty; b++){
+			tmpRow.push(outArr[lastpg][a][b]);
+		} //b
+			tmpArray.push(tmpRow);
+	} //a
+    //Splicing out the last page and adding the new array
+	outArr.splice(lastpg,1);
+	outArr.splice(lastpg,0,tmpArray);
+
+return(outArr)
 } //HTMLtoArray
 
-//dlContent  Generates the contents of the deopdown list
+//dlContent  Generates the contents of the dropdown list
 function dlContent(outtype, idxval, mark){
 
 	var dlDiv = document.createElement("div");
@@ -4318,24 +4773,88 @@ $.fn.dataTable.ext.buttons.word = {
 
 //plextabWord processes datatable elements and produces a word doc
 function plextabWord(inData,hdrArr,ftrArr,fName,tabType) {
-//Special processing for Housing Type Table
+	
+	var wordtab = HTMLtoArray(inData,hdrArr,"WORD",tabType)
+
+ var tabinfo = [{tabName : 'Summary Statistics Table', ncols : 2, hdrCols : ['Estimate', 'Margin of Error']},
+			{tabName : 'Population Growth Table', ncols : 1, hdrCols : ['Estimate']},
+			{tabName : 'Income Sources Table', ncols : 4, hdrCols : ['Households', 'Margin of Error','Average Income','Margin of Error']},
+			{tabName : 'Race and Ethnicity Table', ncols : 4, hdrCols : ['Estimate', 'Margin of Error', 'Percent','Margin of Error']},
+			{tabName : 'Housing Occupancy and Vacancy Table', ncols : 2, hdrCols : ['Estimate', 'Margin of Error']},
+			{tabName : 'Housing Type Table', ncols : 4, hdrCols : ['Estimate', 'Margin of Error', 'Percent', 'Margin of Error']},
+			{tabName : 'Housing Cost and Affordability Table', ncols : 2, hdrCols : ['Estimate', 'Margin of Error']}
+		  ];
+		  
+//extracting the number of 
+var tabInfo = tabinfo.filter(d => tabType.includes(d.tabName));
+
+//This applies the styles (alignment) to the cells of the body array
+var bodyArr = []
+for(a = 0; a < wordtab.length; a++){
+	var tmpbody = []
+	 for(b = 0; b < wordtab[a].length; b++) {
+		 var dataRow = "";
+		 for(c = 0; c < wordtab[a][b].length; c++){
+
+			 switch(b) {
+				case 0: 
+					if(tabType == "Population Growth Table"){
+						dataRow = dataRow +"<th align='center'>" + wordtab[a][b][c] + "</th>";
+					} else {
+						if(c == 0){
+							dataRow = dataRow +"<th align='center'>" + wordtab[a][b][c] + "</th>";
+						}
+						if(wordtab[a][b][c] != ""){
+							dataRow = dataRow +"<th align='center' colspan ='" + tabInfo[0].ncols + "'>" + wordtab[a][b][c] + "</th>";
+						}
+					};
+				    break;
+				case 1 :
+					dataRow = dataRow +"<th align='center'>" + wordtab[a][b][c] + "</th>"
+					break;
+				default :
+					if(c == 0) {
+						if(tabType == "Housing Type Table"){
+							if([3,12,21].includes(b)){
+								dataRow = dataRow +"<td align='left' colspan='" + wordtab[a][b].length + "'>" +  wordtab[a][b][c] + "</td>";
+							} else {
+						      dataRow = dataRow +"<td align='left'>" + wordtab[a][b][c] + "</td>";
+							}
+						}  else {
+							dataRow = dataRow +"<td align='left'>" + wordtab[a][b][c] + "</td>";
+						}
+					} else {
+						dataRow = dataRow +"<td align='right'>" + wordtab[a][b][c] +"</td>";
+					}
+					break
+				}; //switch
+		 } //c
+		 dataRow = "<tr>" + dataRow + "</tr>"
+		 tmpbody.push(dataRow)
+	 } //b
+	bodyArr.push(tmpbody);
+
+	
+} //a
+
+
 if(tabType == "Housing Type Table"){
-	for(i = 0; i < inData.length; i++){
-		headST = inData[i].indexOf("<thead>")
-		headEND = inData[i].indexOf("</thead>") + 8
-		headStr = inData[i].substring(headST,headEND)
-		colspanPOS = inData[i].indexOf("td colspan") + 12
-		colspanVal = inData[i].substr(colspanPOS,1);
-		
-		inData[i] = inData[i].replaceAll("<td style='display: none;'></td>","")
-		if(colspanVal == '5') {
-			inData[i] = inData[i].replace("<tr><td colspan='5'>Renter Occupied Housing Units</td>","</table><br style='page-break-before: always'><table border= '1' width= 100%>" + headStr + "<tr><td colspan='5'>Renter Occupied Housing Units</td>");
-        } else {
-			inData[i] = inData[i].replace("<tr><td colspan='9'>Renter Occupied Housing Units</td>","</table><br style='page-break-before: always'><table border= '1' width= 100%>" + headStr + "<tr><td colspan='9'>Renter Occupied Housing Units</td>");
+    var nHdr = 2;
+} else {
+	var nHdr = 1;
+}
+
+//Adding thead
+for(x = 0; x < bodyArr.length; x++){
+	for(y = 0; y < bodyArr[x].length; y++){
+		if(y == 0) {
+			bodyArr[x][y] = "<thead>" + bodyArr[x][y];
+		}
+		if(y == nHdr) {
+			bodyArr[x][y] = bodyArr[x][y] + "</thead>";
 		}
 	}
 }
-
 
 //Assembling Final Table
  var tblStart = "<table border= '1' width= 100%>";
@@ -4344,26 +4863,26 @@ if(tabType == "Housing Type Table"){
 
 var stackTab = "";
 
-for(i = 0; i < inData.length; i++){ 
+for(i = 0; i < bodyArr.length; i++){ 
 //Add Table footer
-colspanPOS = inData[i].indexOf("td colspan") + 12
-colspanVal = inData[i].substr(colspanPOS,1);
+colspanVal = wordtab[i][0].length
 
-var ftrString = "<tfoot><tr>";
+var ftrString = "<tfoot>";
 
 for(j = 0; j < ftrArr.length; j++){
 		ftrString = ftrString + "<tr><td colspan='" + colspanVal + "'>" + ftrArr[j] + "</td></tr>";
  }; 
 ftrString = ftrString + "</tr></tfoot>";
 
-	if(i < inData.length - 1){
-		stackTab = stackTab + tblStart + inData[i] + ftrString + tblEnd + pgbreak;
+	if(i < bodyArr.length - 1){
+		stackTab = stackTab + tblStart + bodyArr[i] + ftrString + tblEnd + pgbreak;
 	} else {
-		stackTab = stackTab + tblStart + inData[i] + ftrString + tblEnd;
+		stackTab = stackTab + tblStart + bodyArr[i] + ftrString + tblEnd;
 	}
  } 
  
- var stackTab2 = stackTab.replace(/−/g,"  -");
+ var stackTab2 = stackTab.replace(/−/g,"  -").replace(/<\/tr>\,/g,"</tr>").replace(/<\/thead>\,/g,"</thead>");
+
 
  Export2Word(stackTab2, fName);
 } //plextabWord
@@ -4417,108 +4936,54 @@ function plextabPDF(inData,hdrArr,ftrArr,fName,tabType) {
  //http://pdfmake.org/#/
  //Header Formatting  https://pdfmake.github.io/docs/0.1/document-definition-object/styling/
 
+ var pdfTab = HTMLtoArray(inData,hdrArr,"PDF",tabType)
+  var tabinfo = [{tabName : 'Summary Statistics Table', ncols : 2, hdrCols : ['Estimate', 'Margin of Error']},
+			{tabName : 'Population Growth Table', ncols : 1, hdrCols : ['Estimate']},
+			{tabName : 'Income Sources Table', ncols : 4, hdrCols : ['Households', 'Margin of Error','Average Income','Margin of Error']},
+			{tabName : 'Race and Ethnicity Table', ncols : 4, hdrCols : ['Estimate', 'Margin of Error', 'Percent','Margin of Error']},
+			{tabName : 'Housing Occupancy and Vacancy Table', ncols : 2, hdrCols : ['Estimate', 'Margin of Error']},
+			{tabName : 'Housing Type Table', ncols : 4, hdrCols : ['Estimate', 'Margin of Error', 'Percent', 'Margin of Error']},
+			{tabName : 'Housing Cost and Affordability Table', ncols : 2, hdrCols : ['Estimate', 'Margin of Error']}
+		  ];
+		  
+//extracting the number of 
+var tabInfo = tabinfo.filter(d => tabType.includes(d.tabName));
 
- var pdfTab = HTMLtoArray(inData,hdrArr,"PDF")
-  
-//Restructuring pdfTab into a 
-if(tabType == "Population Growth Table"){
-    var tableHdr = [];
-	for(a = 0; a < 2; a++){ 
-	var headrow = [];
-	for(b = 0; b < pdfTab[a].length; b++){
-		if(b <= 1) {
-			headrow.push(pdfTab[a][b]);
-		} else {
-			if(b %2 != 0) {
-			headrow.push(pdfTab[a][b]);
-			}
-		}
-	}
-	tableHdr.push(headrow);
-	}
-var tmpTab = pdfTab.slice(2);
-var pdfTab = tableHdr.concat(tmpTab);
-}
-
-//8 Columns per page...
-var nPanel = Math.ceil(pdfTab[0].length/8); //page
-var nRows = pdfTab.length
-
-
-var bodyOut = new Array(nPanel);
-for(i = 0; i < nPanel; i++){
-	  bodyOut[i] = new Array(nRows)
-	  for(c = 0; c < nRows; c++){
-		  bodyOut[i][c] = new Array(9)
-	  }
-} 
-
-
-for(b = 0; b < nPanel; b++){
-	for(c = 0; c < nRows; c++) {
-		bodyOut[b][c][0] = pdfTab[c][0]
-	}
-}
-
-for(a = 0; a < nRows; a++){
-	var pnl = 0;
-	var outpos = 1;
-	for (b = 1; b < pdfTab[a].length; b++){
-		  	bodyOut[pnl][a][outpos] = pdfTab[a][b];
-			outpos++
-			  if(b % 8 == 0) {
-				  pnl++;
-				  outpos = 1;
-			  }
-	       }
-	  }
-
-
-var rowlen = bodyOut[0][0].length
-
-var outBody =[];
-for(x = 0; x < bodyOut.length; x++){
-	var outArr = []
-	for(z = 0; z < bodyOut[x].length; z++){
-	 var empties = chkEmpty(bodyOut[x][z]);
-	 if(empties != 0){
-	    var outRow = bodyOut[x][z].slice(0,(rowlen-empties))
-	 } else {
-		 outRow = bodyOut[x][z];
-	 }
-	 outArr.push(outRow);
-	}
-outBody.push(outArr)
-}
-
-var bodyOut = outBody;
-
+//This applies the styles (alignment) to the cells of the body array
 var bodyArr = []
-for(a = 0; a < bodyOut.length; a++){
+for(a = 0; a < pdfTab.length; a++){
 	var tmpbody = []
-	 for(b = 0; b < bodyOut[a].length; b++) {
+	 for(b = 0; b < pdfTab[a].length; b++) {
 		 var dataRow = [];
-		 for(c = 0; c < bodyOut[a][b].length; c++){
+		 for(c = 0; c < pdfTab[a][b].length; c++){
 			 switch(b) {
 				case 0: 
 					if(tabType == "Population Growth Table"){
-						dataRow.push({text: bodyOut[a][b][c], style: 'headsty'});
+						dataRow.push({'text': pdfTab[a][b][c], 'style': 'headsty'});
 					} else {
-						if(bodyOut[a][b][c] != ""){
-							dataRow.push({text: bodyOut[a][b][c], style: 'headsty', colSpan:2});
+						if(pdfTab[a][b][c] != ""){
+							dataRow.push({'text': pdfTab[a][b][c], 'style': 'headsty', 'colSpan': tabInfo[0].ncols});
 						} else {
-							dataRow.push({text: bodyOut[a][b][c], style: 'headsty'});
+							dataRow.push({'text': pdfTab[a][b][c], 'style': 'headsty'});
 						}
 					};
 				    break;
 				case 1 :
-					dataRow.push({text: bodyOut[a][b][c], style: 'headsty'})
+					dataRow.push({'text': pdfTab[a][b][c], 'style': 'headsty'})
 					break;
 				default :
 					if(c == 0) {
-						dataRow.push({text: bodyOut[a][b][c], style: 'lnleft'});
+						if(tabType == "Housing Type Table"){
+							if([3,12,21].includes(b)){
+								dataRow.push({'text': pdfTab[a][b][c], 'style': 'lnleft', 'colSpan' : pdfTab[a][b].length});
+							} else {
+						      dataRow.push({'text': pdfTab[a][b][c], 'style': 'lnleft'});
+							}
+						}  else {
+							dataRow.push({'text': pdfTab[a][b][c], 'style': 'lnleft'});
+						}
 					} else {
-						dataRow.push({text: bodyOut[a][b][c], style: 'lnright' });
+						dataRow.push({'text': pdfTab[a][b][c], 'style': 'lnright' });
 					}
 					break
 				}; //switch
@@ -4528,25 +4993,40 @@ for(a = 0; a < bodyOut.length; a++){
 	bodyArr.push(tmpbody);
 } //a
 
+if(tabType == "Housing Type Table"){
+    var nHdr = 3;
+} else {
+	var nHdr = 2;
+}
 
  //Process footer
 
-var footout = []
-for(k = 0; k < ftrArr.length; k++){
-	 footout.push({text:  "\u200B\t" + ftrArr[k].toString(), fontSize: 9});
+var footout = ""
+for(x = 0; x < ftrArr.length; x++){
+footout = footout + "\u200B\t" + ftrArr[x] + "\n";
 }
 
+var btmmargin = ftrArr.length * 15;
 //Document output
 var dd = {
   pageOrientation : 'landscape',
-  header : {text: "\u200B\t" + fName,  fontSize: 10},
-  footer : footout,
+   pageMargins: [30, 20, 20, btmmargin],
+    header: function(currentPage, pageCount, pageSize) {
+    return [
+      { text: "\u200B\t" + fName, alignment: 'left', fontSize: 11},
+    ]
+	},
+      footer: function(currentPage, pageCount, pageSize) {
+    return [
+      { text: footout, alignment: 'left', fontSize: 9 },
+    ]
+  },
     content: [
-   genPDFTable(bodyArr,2)
+       genPDFTable(bodyArr,nHdr),
     ],
 //styleSheets
 defaultStyle: {
-    fontSize: 11
+    fontSize: 10
   },
   styles: {
     headsty: {
@@ -4719,6 +5199,7 @@ default:
 
 //genplexTab is a wrapper function that sends datatable elements out to file download functions plextabWord, plextabPDF, plextabCSV 
 function genplexTab(inData,hdrArr,ftrArr,fName,fmt,tabType) {
+
    switch(fmt) {
     case "word":
        plextabWord(inData,hdrArr,ftrArr,fName,tabType);
@@ -5892,10 +6373,6 @@ var tabVal = 0;
 
 	//selecting initial dropdown values
   $("#statSelect3 option[value='0']").prop("selected", true);
-debugger;
-console.log(unit_obj);
-console.log(pop_obj)
-
 
    var dd3 = document.getElementById("statSelect3");
  if(level == "Region"){
@@ -6001,9 +6478,14 @@ var tblfoot = [
       ];
 
 var ftrString = "<tfoot>"
-for(i = 0 ;i < tblfoot.length; i++){ //Change this for Municipalities
-	ftrString = ftrString + "<tr><td colspan='5'>" + tblfoot[i] + "</td></tr>";
+for(i = 0 ;i < tblfoot.length; i++){ 
+    if(level == "Municipality"){
+		ftrString = ftrString + "<tr><td colspan='7'>" + tblfoot[i] + "</td></tr>";
+	} else {
+		ftrString = ftrString + "<tr><td colspan='5'>" + tblfoot[i] + "</td></tr>";
+	}
 }
+
 ftrString = ftrString + "</tfoot>"
 
 //Initial Table
@@ -6309,7 +6791,7 @@ if(ctyList.includes(level)) {
   // Jobs
   var jobsST = 'https://gis.dola.colorado.gov/lookups/jobs?county=0&year='+ acsYr +'&sector=0';
   var jobsCTY = 'https://gis.dola.colorado.gov/lookups/jobs?county='+ muni_cty+'&year='+ acsYr +'&sector=0';
-  var jobsMUNI = 'https://gis.dola.colorado.gov/lookups/profilesql?table=estimates.muni_jobs_long&year='+ acsYr + '&geo='+ fips_list;
+  var jobsMUNI = 'https://gis.dola.colorado.gov/lookups/profilesql?table=estimates.muni_jobs_long&year='+ (acsYr - 1) + '&geo='+ fips_list;
  
 
  //median Income ACS  b19013001
@@ -6340,6 +6822,7 @@ if(ctyList.includes(level)) {
   
 
   Promise.all(prom).then(data =>{
+ 
    if(regList.includes(level)){
     //Extracting State data records
     var popSTdata = data[0];
@@ -7630,8 +8113,6 @@ var PlaceNames = [...new Set(pltData.map(d => d.NAME))];
 for(i = 0; i < PlaceNames.length; i++){
 	PlaceNames[i] = PlaceNames[i].replace(":",":<br>");
 }
-	
-console.log(PlaceNames)
 
  for(i = 0; i < fipsList.length; i++) {
   var filtPlot = pltData.filter(d => d.FIPS == fipsList[i]);
@@ -7799,6 +8280,7 @@ ftrString = ftrString + "</tr></tfoot>";
 var ftrMsg = "\u200B\tSources: U.S. Census Bureau ("+ curYr +") "+fmt_yr(prevYr) + "-" + fmt_yr(curYr) +" American Community Survey Table B03002 "+
    "\n\u200B\tCompiled by the Colorado State Demography Office " +
    "Print Date: " + fmt_date(new Date);
+
  
 var race_tab = genSubjTab(level, tab_data, bkMark.id,row_labels,false);
 
