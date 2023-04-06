@@ -3687,7 +3687,7 @@ var ctyNames = [...new Set(inData.map(d => d.name))];
   plotdiv.appendChild(plot_grid);
   
  plot_array.push({'loc' : ctyNames[i],
- 'fName' : "Age Pyramid " + ctyNames[i] + ".png",
+ 'fName' : ctyNames[i] + " Age Pyramid.png",
  'plot' : 'plotGrid'+i});
  } //i
  
@@ -4829,6 +4829,7 @@ for(a = 0; a < wordtab.length; a++){
 					break
 				}; //switch
 		 } //c
+		 //These are the housing tenure lines
 		 if([3,12,21].includes(b)){
 		 dataRow = dataRow.replaceAll("<td align='right'></td>","");
 		 }
@@ -4885,8 +4886,6 @@ ftrString = ftrString + "</tr></tfoot>";
  
  var stackTab2 = stackTab.replace(/−/g,"  -").replace(/<\/tr>\,/g,"</tr>").replace(/<\/thead>\,/g,"</thead>");
 
-console.log(stackTab2)
-debugger;
 
  export2Word(stackTab2, fName);
 } //plextabWord
@@ -6412,7 +6411,7 @@ var selNames = [...new Set(selData.map(d => d.name))];
   
   
  plot_array.push({'loc' : selNames[i],
- 'fName' : "Household Forecast " + selNames[i] + ".png",
+ 'fName' : selNames[i] + " Household Forecast.png",
  'plot' : 'multiPlot'+i});
 
   } //i

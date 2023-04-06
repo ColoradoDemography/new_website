@@ -1867,10 +1867,10 @@ function plotDownload(plotdiv,filename,type){
 //exportToPng  Exports plotly trace and layout to PNG file
 function exportToPng(cname, type, graphDiv, yr){
            fileName = genFilename(cname,type,"png",yr);
-	
+
 		if(Array.isArray(graphDiv)){
 			for(i = 0; i < graphDiv.length; i++){
-               plotDownload(graphDiv[i].plot,fileName,type);
+               plotDownload(graphDiv[i].plot,graphDiv[i].fName,type);
 			};  //i
 		} else {
 		var fn = fileName;
