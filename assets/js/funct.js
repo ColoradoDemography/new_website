@@ -1693,9 +1693,124 @@ function transpose(data) {
     }
   }
   return result;
-};
+}; //includeHTML
 
 
+//genFilename generates standardized file names
+function genFilename(outname, type, ext, yr) {
+	 switch(type){
+		case 'test' :
+		var fileName = "Test values " +  outname + "." + ext;
+		break;
+		case 'summary' :
+		    var fileName = outname + " Basic Statistics Table." + ext;
+		break;
+		case 'estimate' :
+			var fileName = outname + " Population Estimates." + ext;
+		break;
+		case 'forecast' :
+			var fileName = outname + " Population Forecast." + ext;
+		break;
+		case 'coc' :
+			var fileName = outname + " Components of Change." + ext;
+		break;
+		case 'netmig' :
+			var fileName = canme + " Net Migration by Age." + ext;
+		break;
+		case 'age' :
+			var fileName = outname + " Age Categories." + ext;
+		break;
+		case 'ageest' :
+			var fileName = outname + " Age Estimate." + ext;
+		break;
+		case 'agefor' :
+			var fileName = outname + " Age Forecast." + ext;
+		break;
+		case 'agepyr' :
+			var fileName = outname + " Age Pyramid." + ext;
+		break;
+		case 'popchng' :
+			var fileName = canem + " Population Change by Age Group." + ext;
+		break;
+		case 'line' :
+			var fileName = outname + " Single Year of Age by Race " + yr + "." + ext;
+		break;
+		case 'white' :
+			var fileName = outname +  "Single Year of Age by Race White NH " + yr + "." + ext;
+		break;
+		case 'hisp' :
+			var fileName = outname + " Single Year of Age by Race Hispanic " + yr + "." + ext;
+		break;
+		case 'black' :
+			var fileName = outname + " Single Year of Age by Race Black NH " + yr +  "." + ext;
+		break;
+		case 'asian' :
+			var fileName = outname + " Single Year of Age by Race Asian NH " + yr + "." + ext;
+		break;
+		case 'nhpi' :
+			var fileName = outname + " Single Year of Age by Race Native Hawaiian Pacific Islander NH " + yr + "." + ext;
+		break;
+		case  'amind' :
+			var fileName = outname + " Single Year of Age by Race American Indian NH " + yr + "." + ext;
+		break;
+		case 'amind' :
+			var fileName = canme + " Single Year of Age by Race Two or More Races NH " + yr + "." + ext;
+		break;
+		case 'netmign' :
+			var fileName =  outname + " Net Migration by Age." + ext
+		break;
+		case 'netmigrrate' :
+			var fileName =  outname + "Net Migration by Age." + ext
+		break;
+		case 'netmigwa' :
+			var fileName =  outname + " Net Migration by Year." + ext
+		break;
+		case 'netmigrwa' :
+			var fileName =  outname + " Net Migration by Year." + ext
+		break;
+		case 'nethist' :
+			var fileName = outname + " Long Term Trend Births Deaths Migration." + ext
+		break;
+		case 'hhchart' :
+			var fileName = outname + " Household Projections Age Group x Household Type." + ext
+		break;
+		case 'agechart' :
+			var fileName = outname + "Household Projections Household Type and Age Group." + ext
+		break;
+		case 'housing' :
+			var fileName = outname + " Households." + ext
+		break;
+		case 'income' :
+			var fileName = outname + "ACS Income Estimates." + ext
+		break;	
+		case 'incomesrc' :
+			var fileName = outname + " ACS Income Sources." + ext
+		break;	
+		case 'educatt' :
+			var fileName = outname + " ACS Educational Attainment." + ext
+		break;
+		case 'raceeth' :
+			var fileName = outname + " ACS Race and Ethnicity." + ext
+		break;
+		case 'hhforecast' :
+			var fileName = outname + " Household Forecast by Age." + ext
+		break;
+		case 'popgrowth' :
+			var fileName = outname + " Population Growth Table." + ext
+		break;
+		case 'houseocc' :
+			var fileName = outname + " ACS Housing Occupancy and Vacancy Table." + ext
+		break;
+		case 'housetype' :
+			var fileName = outname + " ACS Housing Type Table." + ext
+		break;
+		case 'houseecon' :
+			var fileName = outname + " ACS Housing Cost and Affordability Table." + ext
+		break;
+		} //switch
+	
+return(fileName)
+} //genFilename
 
 //exporttoCsv  downloads the a selected file
 function exportToCsv(cname, type, rows, yr) {
@@ -1706,113 +1821,7 @@ function exportToCsv(cname, type, rows, yr) {
 		}
 	  
         var csvFile = d3.csvFormat(rows);
-
-		if(type == 'test'){
-			var fileName = "Test values " +  cname + ".csv";
-			}
-		if(type == 'estimate') {
-			var fileName = "Population Estimates " + cname + ".csv";
-		};
-		if(type == 'forecast') {
-			var fileName = "Population Forecast " + cname + ".csv";
-		};
-		if(type == 'coc') {
-			var fileName = "Components of Change " + cname + ".csv";
-		};
-		if(type == 'netmig') {
-			var fileName = "Net Migration by Age " + cname + ".csv";
-		};
-		if(type == 'age') {
-			var fileName = "Age Categories " + cname + ".csv";
-		};
-		if(type == 'ageest') {
-			var fileName = "Age Estimate " + cname;
-		};
-		if(type == 'agefor') {
-			var fileName = "Age Forecast " + cname;
-		};
-		if(type == 'agepyr') {
-			var fileName = "Age Pyramid " + cname;
-		};
-
-		if(type == 'popchng') {
-			var fileName = "Population Change by Age Group " + cname + ".csv";
-		};
-		
-		if(type == 'line'){
-			var fileName = "Single Year of Age by Race " + cname +  " " + yr + ".csv";
-		};
-		if(type == 'white'){
-			var fileName = "Single Year of Age by Race White NH " + cname +  " " + yr + ".csv";
-		};
-		if(type == 'hisp'){
-			var fileName = "Single Year of Age by Race Hispanic " + cname +  " " + yr + ".csv";
-		};
-		if(type == 'black'){
-			var fileName = "Single Year of Age by Race Black NH " + cname +  " " + yr + ".csv";
-		};
-		if(type == 'asian'){
-			var fileName = "Single Year of Age by Race Asian NH " + cname +  " " + yr + ".csv";
-		};
-		if(type == 'nhpi'){
-			var fileName = "Single Year of Age by Race Native Hawaiian Pacific Islander NH " + cname +  " " + yr + ".csv";
-		};
-		if(type == 'amind'){
-			var fileName = "Single Year of Age by Race American Indian NH " + cname +  " " + yr + ".csv";
-		};
-		if(type == 'amind'){
-			var fileName = "Single Year of Age by Race Two or More Races NH " + cname +  " " + yr + ".csv";
-		};
-		if(type == 'netmign'){
-			var fileName =  "Net Migration by Age " + cname + ".csv"
-		};
-		if(type == 'netmigrrate'){
-			var fileName =  "Net Migration by Age " + cname + ".csv"
-		};
-		if(type == 'netmigwa'){
-			var fileName =  "Net Migration by Year.csv"
-		};
-		if(type == 'netmigrwa'){
-			var fileName =  "Net Migration by Year.csv"
-		};
-		if(type == 'nethist') {
-			var fileName = "Long Term Trend Births Deaths Migration " + cname + ".csv"
-		};
-		if(type == 'hhchart') {
-			var fileName = "Household Projections Age Group x Household Type " + cname + ".csv"
-		};
-		if(type == 'agechart') {
-			var fileName = "Household Projections Household Type x Age Group " + cname + ".csv"
-		};
-		if(type == 'housing'){
-			var fileName = "Households " + cname + ".csv"
-		}	
-		if(type == 'income'){
-			var fileName = "ACS Income Estimates " + cname + ".csv"
-		}	
-		if(type == 'incomesrc'){
-			var fileName = "ACS Income Sources " + cname + ".csv"
-		}	
-		
-		if(type == 'educatt'){
-			var fileName = "ACS Educational Attainment " + cname + ".csv"
-		}
-		if(type == 'raceeth'){
-			var fileName = "ACS Race and Ethnicity " + cname + ".csv"
-		}
-		if(type == 'hhforecast'){
-			var fileName = "Household Forecast by Age " + cname + ".csv"
-		}
-		
-		if(type == "Summary Statistics Table"){
-			var fileName = cname + ".csv"
-		}
-		if(type == "Population Growth Table"){
-			var fileName = cname + ".csv"
-		}
-		if(type == "Housing Occupancy and Vacancy"){
-			var fileName = cname + ".csv"
-		}
+        var fileName = genFilename(cname, type, "csv", yr)
 
 		
         var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
@@ -1857,107 +1866,14 @@ function plotDownload(plotdiv,filename,type){
 
 //exportToPng  Exports plotly trace and layout to PNG file
 function exportToPng(cname, type, graphDiv, yr){
-	  	if(type == 'map') {
-			var fileName = cname + " Base Map";
-		};
-	  	if(type == 'estimate') {
-			var fileName = "Population Estimates " + cname;
-		};
-		if(type == 'forecast') {
-			var fileName = "Population Forecast " + cname;
-		};
-		if(type == 'coc') {
-			var fileName = "Components of Change " + cname;
-		};
-		if(type == 'netmig') {
-			var fileName = "Net Migration by Age 2000-2010 " + cname;
-		};
-		if(type == 'age') {
-			var fileName = "Age Categories " + cname;
-		}
-		if(type == 'ageest') {
-			var fileName = "Age Estimate " + cname;
-		};
-		if(type == 'agefor') {
-			var fileName = "Age Forecast " + cname;
-		};
-		if(type == 'agepyr') {
-			var fileName = "Age Pyramid ";
-		};
-		if(type == 'popchng') {
-			var fileName = "Population Change by Age Group " + cname;
-		};
-		
-		if(type == 'line'){
-			var fileName = "Single Year of Age by Race " + cname +  " " + yr;
-		};
-		if(type == 'white'){
-			var fileName = "Single Year of Age by Race White NH " + cname +  " " + yr;
-		};
-		if(type == 'hisp'){
-			var fileName = "Single Year of Age by Race Hispanic " + cname +  " " + yr;
-		};
-		if(type == 'black'){
-			var fileName = "Single Year of Age by Race Black NH " + cname +  " " + yr;
-		};
-		if(type == 'asian'){
-			var fileName = "Single Year of Age by Race Asian NH " + cname +  " " + yr;
-		};
-		if(type == 'nhpi'){
-			var fileName = "Single Year of Age by Race Native Hawaiian Pacific Islander NH " + cname +  " " + yr;
-		};
-		if(type == 'amind'){
-			var fileName = "Single Year of Age by Race American Indian NH " + cname +  " " + yr;
-		};
-		if(type == 'multi'){
-			var fileName = "Single Year of Age by Race Two or More Races NH " + cname +  " " + yr;
-		};
-		if(type == 'netmign'){
-			var fileName =  "Net Migration by Age " + cname
-		};
-		if(type == 'netmigrrate'){
-			var fileName =  "Net Migration Rate by Age " + cname
-		};
-		if(type == 'netmigwa'){
-			var fileName =  "Net Migration by Year "
-		};
-		if(type == 'netmigrwa'){
-			var fileName =  "Net Migration by Year "
-		};
-		if(type == 'birth') {
-			var fileName = "Long Term Trend Births " + cname 
-		};
-		if(type == 'death') {
-			var fileName = "Long Term Trend Deaths " + cname 
-		};
-		if(type == 'mig') {
-			var fileName = "Long Term Trend Net Migration " + cname 
-		};
-		if(type == 'hhchart') {
-			var fileName = "Household Projections Age Group x Household Type " + cname 
-		};
-		if(type == 'agechart') {
-			var fileName = "Household Projections Household Type x Age Group " + cname 
-		};
-		if(type == 'housing') {
-			var fileName = "Household Units " + cname 
-		};
-		if(type == 'income'){
-			var fileName = "ACS Income Estimates " + cname 
-		}	
-		if(type == 'educatt'){
-			var fileName = "ACS Educational Attainment " + cname 
-		}
-		if(type == 'hhforecast'){
-			var fileName = "Houshehold Forecast by Age " + cname 
-		}
+           fileName = genFilename(cname,type,"png",yr);
 	
 		if(Array.isArray(graphDiv)){
 			for(i = 0; i < graphDiv.length; i++){
-               plotDownload(graphDiv[i].plot,graphDiv[i].fName,type);
+               plotDownload(graphDiv[i].plot,fileName,type);
 			};  //i
 		} else {
-		var fn = fileName + ".png";
+		var fn = fileName;
 		switch(type) {
 		case 'map': {
 			var count_node = d3.select("svg").node();
@@ -4451,15 +4367,12 @@ FORECAST.innerHTML = "";
 		   forecast_data.push({'fips' : fips, 'name' : ctyName, 'year' :  key, 'totalpopulation' : value.totalpopulation});
 		}
 
-
-
 var year_forec_arr =[];
 var pop_forec_arr = [];
 
 forec_flat = forecast_data.sort(function(a, b){ return d3.ascending(a['year'], b['year']); });
 year_forec_arr = forec_flat.map(item => item.year);
 pop_forec_arr = forec_flat.map(item => item.totalpopulation);
-
 
 if(app == 'dashboard'){
 var forec_trace = { 

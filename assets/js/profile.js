@@ -4627,8 +4627,8 @@ function saveSVG(svgdiv) {
 return outSVG;
 };
 
-//Export2Word  from https://www.codexworld.com/export-html-to-word-doc-docx-using-javascript/
-function Export2Word(intab, filename = ''){
+//export2Word  from https://www.codexworld.com/export-html-to-word-doc-docx-using-javascript/
+function export2Word(intab, filename = ''){
 
  filename = filename.replace(".docx","");
 
@@ -4672,8 +4672,8 @@ function Export2Word(intab, filename = ''){
     
     document.body.removeChild(downloadLink);
  };
-//End of Export2Word
-//generateTab creates html table and the passes table to the Export2Word function
+//End of export2Word
+//generateTab creates html table and the passes table to the export2Word function
 function generateTab(header, body, footer, tabTitle, fileName) {
  const fmt_date = d3.timeFormat("%B %d, %Y");
     const fmt_yr = d3.format("00");
@@ -4743,7 +4743,7 @@ for(a = 0; a < footer.length; a++){
 }
 table = table + "</tfoot></table>";
 
-Export2Word(table, filename = fileName);
+export2Word(table, filename = fileName);
 
  }; //end of generateTab
 
@@ -4815,7 +4815,7 @@ for(a = 0; a < wordtab.length; a++){
 				default :
 					if(c == 0) {
 						if(tabType == "Housing Type Table"){
-							if([3,12,21].includes(b)){
+							if([3,12,21].includes(b)){ //These are the housing tenure lines
 								dataRow = dataRow +"<td align='left' colspan='" + wordtab[a][b].length + "'>" +  wordtab[a][b][c] + "</td>";
 							} else {
 						      dataRow = dataRow +"<td align='left'>" + wordtab[a][b][c] + "</td>";
@@ -4829,12 +4829,13 @@ for(a = 0; a < wordtab.length; a++){
 					break
 				}; //switch
 		 } //c
+		 if([3,12,21].includes(b)){
+		 dataRow = dataRow.replaceAll("<td align='right'></td>","");
+		 }
 		 dataRow = "<tr>" + dataRow + "</tr>"
 		 tmpbody.push(dataRow)
 	 } //b
 	bodyArr.push(tmpbody);
-
-	
 } //a
 
 
@@ -4865,6 +4866,7 @@ var stackTab = "";
 
 for(i = 0; i < bodyArr.length; i++){ 
 //Add Table footer
+
 colspanVal = wordtab[i][0].length
 
 var ftrString = "<tfoot>";
@@ -4883,8 +4885,10 @@ ftrString = ftrString + "</tr></tfoot>";
  
  var stackTab2 = stackTab.replace(/−/g,"  -").replace(/<\/tr>\,/g,"</tr>").replace(/<\/thead>\,/g,"</thead>");
 
+console.log(stackTab2)
+debugger;
 
- Export2Word(stackTab2, fName);
+ export2Word(stackTab2, fName);
 } //plextabWord
  
  //pdfMake support functions...
@@ -5178,23 +5182,356 @@ var tabdata = []
 }//housingTypeCSV
 
 //plextabCSV processes datatable elements and produces a CSV File -- used for both Excel and CSV files
-function plextabCSV(inData,hdrArr,ftrArr,fName,tabType) {
-var fileName = fName + ".csv";
+function plextabCSV(inData,row_labels,ftrArr,fName,tabName) {
 
-switch(tabType) {
-case "Population Growth Table":
-	popGrowthCSV(inData);
+var tabinfo = [{tabName : 'Summary Statistics Table', tabcat: "summary", ncols : 2, hdrCols : ['Estimate', 'Margin of Error']},
+			{tabName : 'Population Growth Table', tabcat: "popgrowth",ncols : 1, hdrCols : ['Estimate']},
+			{tabName : 'Income Sources Table', tabcat: "incomesrc",ncols : 4, hdrCols : ['Households', 'Margin of Error','Average Income','Margin of Error']},
+			{tabName : 'Race and Ethnicity Table', tabcat: "raceeth",ncols : 4, hdrCols : ['Estimate', 'Margin of Error', 'Percent','Margin of Error']},
+			{tabName : 'Housing Occupancy and Vacancy Table', tabcat: "houseocc", ncols : 2, hdrCols : ['Estimate', 'Margin of Error']},
+			{tabName : 'Housing Type Table', tabcat: "housetype", ncols : 4, hdrCols : ['Estimate', 'Margin of Error', 'Percent', 'Margin of Error']},
+			{tabName : 'Housing Cost and Affordability Table', tabcat: "houseecon",ncols : 2, hdrCols : ['Estimate', 'Margin of Error']}
+		  ];
+		  
+//extracting the number of 
+var tabInfo = tabinfo.filter(d => tabName.includes(d.tabName));
+var tblArray = stripHTML(inData);
+
+
+var scantab = [];
+scantab[0] = tblArray[0].slice()
+//checking the length of rows; if all rows are equal than there are even numbers of elements
+if(tblArray.length > 1){
+	lenStart = tblArray[0].length;
+	lenEnd = tblArray[tblArray.length - 1].length
+	if(lenStart != lenEnd){
+		scantab[1] = tblArray[tblArray.length - 1].slice()
+	}
+}
+
+//building output array
+
+//number of geographies
+var nameArr = [];
+switch(tabInfo[0].tabName){
+case 'Income Sources Table' :
+for(a = 0; a < tblArray.length; a++){
+	   if((tblArray[a][0] != "Households") && (tblArray[a][0] != "Margin of Error")){
+		   nameArr.push({"Name" : tblArray[a][0], "dataRow" : a});
+	   }
+	   if((tblArray[a][1] != "Households") && (tblArray[a][1] != "Margin of Error")) {
+		   nameArr.push({"Name" : tblArray[a][1], "dataRow" : a});
+	   }
+	   if((tblArray[a][2] != "Households") && (tblArray[a][2] != "Margin of Error")) {
+		   nameArr.push({"Name" : tblArray[a][2], "dataRow" : a});
+	   }
+}
 break;
-case "Housing Type Table" :
-    housingTypeCSV(inData,hdrArr);
+case 'Housing Type Table' :
+	for(a = 0; a < tblArray.length; a++){
+	   if((tblArray[a][1] != "Counts") && (tblArray[a][1] != "Percent") && (tblArray[a][1] != "Estimate")) {
+		   nameArr.push({"Name" : tblArray[a][1], "dataRow" : a});
+	   }
+	   if((tblArray[a][3] != "Counts") && (tblArray[a][3] != "Percent") && (tblArray[a][3] != "Estimate")) {
+		   nameArr.push({"Name" : tblArray[a][3], "dataRow" : a});
+	   }
+	   if((tblArray[a][4] != "Counts") && (tblArray[a][4] != "Percent") && (tblArray[a][4] != "Estimate")) {
+		   nameArr.push({"Name" : tblArray[a][4], "dataRow" : a});
+	   }
+}
 break;
-default:
-	var outarr = HTMLtoArray(inData,hdrArr,"CSV")
-	exportToCsv(fName, tabType, outarr,0);
-} //end of switch
+default :
+	for(a = 0; a < tblArray.length; a++){
+	   if((tblArray[a][0] != "Estimate") && (tblArray[a][0] != "Margin of Error")){
+		   nameArr.push({"Name" : tblArray[a][0], "dataRow" : a});
+	   }
+	   if((tblArray[a][1] != "Estimate") && (tblArray[a][1] != "Margin of Error")) {
+		   nameArr.push({"Name" : tblArray[a][1], "dataRow" : a});
+	   }
+	   if((tblArray[a][2] != "Estimate") && (tblArray[a][2] != "Margin of Error")) {
+		   nameArr.push({"Name" : tblArray[a][2], "dataRow" : a});
+	   }
+}
+break;
+}
 
-    
+//figuring out level
+if(inData.length > 1) {
+	var level = "Region"
+	var plName = nameArr[1].Name
+} else {
+	if(nameArr[0].Name.includes("County")) {
+	  var level = "County"
+	  var plName = nameArr[0].Name
+	} else {
+	  var level = "Municipality"
+	  var plName = nameArr[0].Name
+	}
+	
+}
 
+if(tabInfo[0].tabName == "Population Growth Table"){
+  var nameArrx = nameArr.filter(d => d.Name != '1990');
+  nameArr = nameArrx;
+}
+
+//Restructuring Creating the number of pages
+if(tabInfo[0].tabName == 'Population Growth Table'){
+	var npages = Math.ceil((tabInfo[0].ncols * nameArr.length)/7);
+	var nrows = row_labels.length + 2;
+	var ncols = 8;
+} else {
+	if(tabInfo[0].ncols == 2){
+	var npages = Math.ceil((tabInfo[0].ncols * nameArr.length)/8);
+	var ncols = 9;
+	}
+	if(tabInfo[0].ncols == 4){
+	var npages = Math.ceil((tabInfo[0].ncols * nameArr.length)/12);
+	var ncols = 13;
+	}
+	if(tabInfo[0].tabName == 'Housing Type Table'){
+		var nrows = ((row_labels.length + 1) * 3) + 3;
+	} else {
+		var nrows = row_labels.length + 2;
+	}
+}
+
+// augumenting nameArr -- nameArr2 will be recreated for the Housing Type Table
+
+var nameArr2 = [];
+var pgval = 0;
+var outStart = 1;
+var outEnd = outStart + (tabInfo[0].ncols - 1)
+
+for(x = 0; x < nameArr.length; x++){
+		if((scantab.length == 2) && (x == (nameArr.length - 1))) { //The last one in the series
+			   for(y = 0; y < row_labels.length;y++){
+			   //Creating instart and inend values
+					 for(c = 0; c < scantab[1].length; c++){
+						if(scantab[1][c] == row_labels[y]){
+							inStart = c + 1;
+							inEnd = inStart + (tabInfo[0].ncols - 1);
+						}
+					 } //c
+				nameArr2.push({"name" : nameArr[x].Name, "dataName" : row_labels[y], "dataRow" : nameArr[x].dataRow,
+					"inStart" : inStart, "inEnd" : inEnd,
+				"outPg" : pgval, "outRow" : y + 2, "outStart" : outStart, "outEnd" : outEnd});
+		   } //y
+		} else {
+		   for(y = 0; y < row_labels.length;y++){
+			   //Creating instart and inend values
+					 for(c = 0; c < scantab[0].length; c++){
+						if(scantab[0][c] == row_labels[y]){
+							inStart = c + 1;
+							inEnd = inStart + (tabInfo[0].ncols - 1);
+						}
+					 } //c
+				nameArr2.push({"name" : nameArr[x].Name, "dataName" : row_labels[y], "dataRow" : nameArr[x].dataRow,
+					"inStart" : inStart, "inEnd" : inEnd,
+					"outPg" : pgval, "outRow" : y + 2, "outStart" : outStart, "outEnd" : outEnd});
+		   } //y
+		}
+
+   var outStart = outStart + tabInfo[0].ncols 
+   var outEnd = outStart + (tabInfo[0].ncols - 1)
+   //Page Updates
+   switch(tabInfo[0].ncols){
+	   case 1 :
+	   if((x > 0) && (x % 7 == 0)) {
+		 pgval++
+	    var outStart = 1
+	    var outEnd = outStart + (tabInfo[0].ncols - 1)
+	   }
+	   break;
+      case 2: 
+	  if((x == 3) || (x == 7)) {
+	   pgval++
+	   var outStart = 1
+	   var outEnd = outStart + (tabInfo[0].ncols - 1)
+      }
+    break;
+	case 4: 
+	if(outStart > 12) {
+	   pgval++
+	   var outStart = 1
+	   var outEnd = outStart + (tabInfo[0].ncols - 1)
+      }
+	  break;
+   } //switch
+}  //x
+
+//Fixing inStart and inEnd
+
+var rowVar = 0;
+var curRow = 0;
+for(a = 0; a < nameArr2.length; a++){
+	if(nameArr2[a].dataRow == rowVar){
+		if(curRow > (row_labels.length - 1)){
+			var stval = nameArr2[a].inStart + tabInfo[0].ncols;
+			var endval = nameArr2[a].inEnd + tabInfo[0].ncols
+			nameArr2[a].inStart = stval;
+			nameArr2[a].inEnd = endval;
+		}
+		curRow++
+	} else {
+	rowVar++
+	var curRow = 1;
+	}
+}
+
+//Place header
+var arridx = 0;
+var hdrArr = [];
+hdrArr.push({'name' : nameArr2[arridx].name, 'outPg' : nameArr2[arridx].outPg, 'outStart' : nameArr2[arridx].outStart});
+
+for(x = 0; x < nameArr2.length;x++){
+	if(hdrArr[arridx].name != nameArr2[x].name) {
+		hdrArr.push({'name' : nameArr2[x].name, 'outPg' : nameArr2[x].outPg, 'outStart' : nameArr2[x].outStart});
+		arridx++;
+    }
+}
+
+
+//Special creaton of nameArr2 for Housing Type Table
+//Redoing nameArr2 for Housing Type Table
+if(tabInfo[0].tabName == 'Housing Type Table'){
+	var housingtype = ["All Housing Units", "Owner-Occupied Housing Units", "Rental Housing Units"]
+	var nameArr2 = [];
+
+if(level == "Municipality"){ //The length of a municipal data pull
+	for(a = 0; a < housingtype.length; a++){
+	switch(a){
+		case 0:
+		var outRow = 4;
+		var inStart = 25;
+		break;
+		case 1:
+		var outRow = 13;
+		var inStart = 130;
+		break;
+		case 2:
+		var outRow = 22;
+		var inStart = 235;
+		break;
+	}
+	var outEnd = outStart + (tabInfo[0].ncols - 1)
+	for(b = 0; b < row_labels.length; b++){
+		for(c = 0; c < hdrArr.length; c++){
+			switch(c) {
+				case 0:
+				var outStart = 1;
+				break;
+				case 1:
+				var outStart = 5;
+				break;
+				case 2:
+				var outStart = 9
+				break;
+			}
+			var outEnd = outStart + (tabInfo[0].ncols - 1)
+			var inEnd = inStart + (tabInfo[0].ncols - 1)
+			
+			nameArr2.push({"name" : hdrArr[c].name, "housetype" : housingtype[a], "dataName" : row_labels[b], "dataRow" : 0,
+						"inStart" : inStart, "inEnd" : inEnd,
+						"outPg" : hdrArr[c].outPg, "outRow" : outRow, "outStart" : outStart, "outEnd" : outEnd});
+			inStart = inStart + tabInfo[0].ncols;
+		} //c
+		inStart++
+		outRow++
+	} //b
+	} //a
+	} else {
+	for(a = 0; a < hdrArr.length; a++){
+	for(b = 0; b < housingtype.length; b++){
+		if(scantab.length == 2 && a == hdrArr.length - 1){
+			switch(b){  //the short record
+				case 0:
+				var outRow = 4;
+				var inStart = 17;
+				break;
+				case 1:
+				var outRow = 13;
+				var inStart = 58;
+				break;
+				case 2:
+				var outRow = 22;
+				var inStart = 99
+				break;
+			}
+		} else {
+			switch(b){
+				case 0:
+				var outRow = 4;
+				var inStart = 18;
+				break;
+				case 1:
+				var outRow = 13;
+				var inStart = 91;
+				break;
+				case 2:
+				var outRow = 22;
+				var inStart = 164;
+				break;
+			}
+		if(hdrArr[a].outStart == 5) {
+			inStart = 22;
+		}
+		}
+		for(c = 0; c < row_labels.length; c++){
+			var inEnd = inStart + (tabInfo[0].ncols - 1)
+			var outEnd = hdrArr[a].outStart + (tabInfo[0].ncols - 1)
+			nameArr2.push({"name" : hdrArr[a].name, "housetype" : housingtype[b], "dataName" : row_labels[c], "dataRow" : nameArr[a].dataRow,
+						"inStart" : inStart, "inEnd" : inEnd,
+						"outPg" : hdrArr[a].outPg, "outRow" : outRow, "outStart" : hdrArr[a].outStart, "outEnd" : outEnd});
+			if(scantab.length == 2 && a == hdrArr.length - 1){
+				inStart = inStart + (tabInfo[0].ncols + 1);
+			} else {
+				inStart = inStart + (tabInfo[0].ncols * 2) + 1;
+			}
+			outRow++;
+	} //c
+	} //b
+} //a
+}
+	}
+
+//Output
+
+var outArr = [];
+switch(tabInfo[0].tabName){
+ case "Housing Type Table" :
+    nameArr2.forEach(d => {
+	 outArr.push({ "NAME" : d.name, "HOUSING_TYPE" : d.housetype, "CATEGORY" : d.dataName, "COUNTS" : tblArray[d.dataRow][d.inStart], "MARGIN_OF_ERROR" : tblArray[d.dataRow][d.inStart+1],
+	               "PERCENT" : tblArray[d.dataRow][d.inStart+2], "MARGIN_OF_ERROR " : tblArray[d.dataRow][d.inStart+3]})
+})
+break;
+case "Population Growth Table" :
+nameArr2.forEach(d => { 
+        var outval = tblArray[d.dataRow][d.inStart].replace(/−/g, ' -')
+		outArr.push({ "NAME" : d.name, "CATEGORY" : d.dataName, "ESTIMATE" : outval})
+})			
+
+break;
+case "Income Sources Table" :
+for(x = 0; x < nameArr2.length; x++){
+		outArr.push({ "NAME" : nameArr2[x].name, "CATEGORY" : nameArr2[x].dataName, "HOUSEHOLDS" : tblArray[nameArr2[x].dataRow][nameArr2[x].inStart], "MARGIN_OF_ERROR" :tblArray[nameArr2[x].dataRow][nameArr2[x].inStart+1], 
+		              "AVERAGE_INCOME" : tblArray[nameArr2[x].dataRow][nameArr2[x].inStart+2], "MARGIN_OF_ERROR " :tblArray[nameArr2[x].dataRow][nameArr2[x].inStart+3]})
+}			
+break;
+case "Race and Ethnicity Table" :
+for(x = 0; x < nameArr2.length; x++){
+		outArr.push({ "NAME" : nameArr2[x].name, "CATEGORY" : nameArr2[x].dataName, "ESTIMATE" : tblArray[nameArr2[x].dataRow][nameArr2[x].inStart], "MARGIN_OF_ERROR" :tblArray[nameArr2[x].dataRow][nameArr2[x].inStart+1], 
+		              "PERCENTAGE" : tblArray[nameArr2[x].dataRow][nameArr2[x].inStart+2], "MARGIN_OF_ERROR " :tblArray[nameArr2[x].dataRow][nameArr2[x].inStart+3]})
+}			
+break;
+default :
+    nameArr2.forEach(d => {
+	 outArr.push({ "NAME" : d.name, "CATEGORY" : d.dataName, "ESTIMATE" : tblArray[d.dataRow][d.inStart], "MARGIN_OF_ERROR" : tblArray[d.dataRow][d.inEnd]})
+})
+break;
+} //switch
+
+exportToCsv(plName, tabInfo[0].tabcat, outArr,0);
 } //plextabCSV
 
 //genplexTab is a wrapper function that sends datatable elements out to file download functions plextabWord, plextabPDF, plextabCSV 
@@ -7072,7 +7409,7 @@ var row_labels = [
 
 var tab_obj = genSubjTab(level, outData,bkMark.id,row_labels,false);
 
-var fileName = "Basic Statistics " + nameArr[0];
+var fileName = nameArr[0] + "Basic Statistics";
 pgSetupPro(level,"table",outputPro,bkMark,false,false,fipsArr, nameArr, 0)
 //Table Footer
 
@@ -7297,8 +7634,7 @@ var ctyNameList = countyName(cty_gr_data[0].countyfips)
 
 //Regional Table
 if(regList.includes(geotype)) {
-var fileName = "Population Growth Table " + regionName(fipsArr);
-var regionNum = -101;
+var fileName = regionName(fipsArr) + " Population Growth Table"
 
 //Rolling up data for table
 var tab_reg_sum = d3.rollup(tab_cty_data, v => d3.sum(v, d => d.totalpopulation), d => d.year);
@@ -7392,7 +7728,7 @@ genRegPopSetup(geotype,est_data, forec_data, coc_data, divArr,bkMarkArr, fipsLis
 
 //County -- Need Growth Tab, Estimates, Forecasts, COC
 if(ctyList.includes(geotype)) {
- var fileName = "Population Growth Table " + countyName(parseInt(fipsArr));
+ var fileName =  countyName(parseInt(fipsArr)) + " Population Growth Table";
 
 var tab_gr = tab_cty_data.concat(state_gr_data) //This is 5 year data
 
@@ -7456,7 +7792,7 @@ for (let [key, value] of muni_sum) {
  
 
 var tab_muni_data = muni_raw_data.filter(function(d) {return sel_yr5.includes(d.year)});
-var fileName = "Population Growth Table " + muniName(parseInt(fipsArr));
+var fileName = muniName(parseInt(fipsArr)) + "Population Growth Table" ;
 
 
 var tab_gr = tab_muni_data.concat(tab_cty_data, state_gr_data) //This is 5 year data
@@ -7848,7 +8184,9 @@ if(level == "Region") {
 }
 
 
-var x_labs = ["Less<br>than<br>$10,000", "$10,000<br>to<br>$19,999", "$20,000<br>to<br>$29,999", "$30,000<br>to<br>$39,999", "$40,000<br>to<br>$49,999", "$50,000<br>to<br>$59,999",     "$60,000<br>to<br>$75,999", "$75,000<br>to<br>$99,999", "$100,000<br>to<br>$124,000", "$125,000<br>to<br>$149,999", "$150,000<br>to<br>$199,999", "Greater<br>than<br>$200,000"];
+var x_labs = ["Less<br>than<br>$10,000", "$10,000<br>to<br>$19,999", "$20,000<br>to<br>$29,999", "$30,000<br>to<br>$39,999", "$40,000<br>to<br>$49,999", "$50,000<br>to<br>$59,999", 
+    "$60,000<br>to<br>$75,999", "$75,000<br>to<br>$99,999", "$100,000<br>to<br>$124,000", "$125,000<br>to<br>$149,999", "$150,000<br>to<br>$199,999", "Greater<br>than<br>$200,000"];
+
 var y_estvars = ["LT10K_E_PCT", "K10K19_E_PCT", "K20K29_E_PCT", "K30K39_E_PCT", "K40K49_E_PCT", "K50K59_E_PCT", 
     "K60K74_E_PCT", "K75K99_E_PCT", "K100K124_E_PCT", "K125K149_E_PCT", "K150K199_E_PCT", "GE200K_E_PCT"]
 var y_moevars = ["LT10K_M_PCT", "K10K19_M_PCT", "K20K29_M_PCT", "K30K39_M_PCT", "K40K49_M_PCT", "K50K59_M_PCT", 
@@ -8031,18 +8369,14 @@ for(i = 0; i < tblfoot.length; i++){
      ftrString = ftrString + "<tr><td colspan='9'>" + tblfoot[i] + "</td></tr>";
 	}
  }; 
-ftrString = ftrString + "</tr></tfoot>";
+ftrString = ftrString + "</tfoot>";
 
-var ftrMsg = "\u200B\tSources: U.S. Census Bureau ("+ curYr +") "+fmt_yr(prevYr) + "-" + fmt_yr(curYr) +" American Community Survey Tables B19051 to B20003" +
-   "\n\u200B\tCompiled by the Colorado State Demography Office " +
-   "Print Date: " + fmt_date(new Date);
- 
  var income_tab = genSubjTab(level, DataTab, bkMark.id,row_labels,false);
 
 
 var nameArr = [...new Set(DataIn.map(d => d.NAME))];
 var fipsArr2 = [...new Set(DataIn.map(d => d.FIPS))];
-var fileName = "ACS Income Sources Table " + nameArr[1];
+var fileName = nameArr[1] + " ACS Income Sources Table ";
 
 pgSetupPro(level,"table",TabDiv,bkMark,true,false,fipsArr2, nameArr, curYr)
 
@@ -8053,24 +8387,24 @@ if(level == "Region"){
    var btndown = document.getElementById("increment12");
    var btnup = document.getElementById("increment22");
 
-DTtab("TabDiv2",income_tab,tabVal,row_labels,ftrString,ftrMsg,"incometabDT",fileName,bkMark.title) 
+DTtab("TabDiv2",income_tab,tabVal,row_labels,ftrString,tblfoot,"incometabDT",fileName,bkMark.title) 
 
    btndown.addEventListener('click', function() {
      tabVal = tabVal - 1;
 	 if(tabVal < 0) {
 		tabVal = 5
 	 }
-		   DTtab("TabDiv2",income_tab,tabVal,row_labels,ftrString,ftrMsg,"incometabDT",fileName,bkMark.title) 
+		   DTtab("TabDiv2",income_tab,tabVal,row_labels,ftrString,tblfoot,"incometabDT",fileName,bkMark.title) 
    });
   btnup.addEventListener('click', function() {
      tabVal = tabVal + 1;
 	 if(tabVal > 5) {
 		tabVal = 0
 	 }
-		   DTtab("TabDiv2",income_tab,tabVal,row_labels,ftrString,ftrMsg,"incometabDT",fileName,bkMark.title) 
+		   DTtab("TabDiv2",income_tab,tabVal,row_labels,ftrString,tblfoot,"incometabDT",fileName,bkMark.title) 
     });
 } else {
-	DTtab("TabDiv2",income_tab,tabVal,row_labels,ftrString,ftrMsg,"incometabDT",fileName,bkMark.title);
+	DTtab("TabDiv2",income_tab,tabVal,row_labels,ftrString,tblfoot,"incometabDT",fileName,bkMark.title);
 }
 //DTTable
 };  //genIncomeTab
@@ -8275,18 +8609,12 @@ for(i = 0; i < tblfoot.length; i++){
 	}
  }; 
 ftrString = ftrString + "</tr></tfoot>";
-
-
-var ftrMsg = "\u200B\tSources: U.S. Census Bureau ("+ curYr +") "+fmt_yr(prevYr) + "-" + fmt_yr(curYr) +" American Community Survey Table B03002 "+
-   "\n\u200B\tCompiled by the Colorado State Demography Office " +
-   "Print Date: " + fmt_date(new Date);
-
  
 var race_tab = genSubjTab(level, tab_data, bkMark.id,row_labels,false);
 
 var nameArr = [...new Set(inData.map(d => d.NAME))];
 var fipsArr2 = [...new Set(inData.map(d => d.FIPS))];
-var fileName = "ACS Race and Ethnicity Table " + nameArr[1];
+var fileName = nameArr[1] + " ACS Race and Ethnicity Table";
 
 pgSetupPro(level,"table",TabDiv,bkMark,true,false,fipsArr2, nameArr, curYr)
 
@@ -8298,24 +8626,24 @@ if(level == "Region"){
    var btndown4 = document.getElementById("increment14");
    var btnup4 = document.getElementById("increment24");
 
-DTtab("TabDiv4",race_tab,tabVal,row_labels,ftrString,ftrMsg,"racetabDT",fileName,bkMark.title) 
+DTtab("TabDiv4",race_tab,tabVal,row_labels,ftrString,tblfoot,"racetabDT",fileName,bkMark.title) 
 
    btndown4.addEventListener('click', function() {
      tabVal = tabVal - 1;
 	 if(tabVal < 0) {
 		tabVal = 5
 	 }
-		   DTtab("TabDiv4",race_tab,tabVal,row_labels,ftrString,ftrMsg,"racetabDT",fileName,bkMark.title) 
+		   DTtab("TabDiv4",race_tab,tabVal,row_labels,ftrString,tblfoot,"racetabDT",fileName,bkMark.title) 
    });
   btnup4.addEventListener('click', function() {
      tabVal = tabVal + 1;
 	 if(tabVal > 5) {
 		tabVal = 0
 	 }
-		   DTtab("TabDiv4",race_tab,tabVal,row_labels,ftrString,ftrMsg,"racetabDT",fileName,bkMark.title) 
+		   DTtab("TabDiv4",race_tab,tabVal,row_labels,ftrString,tblfoot,"racetabDT",fileName,bkMark.title) 
     });
 } else {
-	DTtab("TabDiv4",race_tab,tabVal,row_labels,ftrString,ftrMsg,"racetabDT",fileName,bkMark.title) 
+	DTtab("TabDiv4",race_tab,tabVal,row_labels,ftrString,tblfoot,"racetabDT",fileName,bkMark.title) 
 }
 
 //DTTable
@@ -8887,8 +9215,6 @@ var B25064_reg = acsPrep(data[26]);
 var B25074_reg = acsPrep(data[27]);
 var B25077_reg = acsPrep(data[28]);
 var B25095_reg = acsPrep(data[29]);
-
-
 
 //processing Occupancy Table
 	var occ_tab_reg1 = gen_occ_tab(B25002_reg,B25004_reg,B25005_reg,geotype);
