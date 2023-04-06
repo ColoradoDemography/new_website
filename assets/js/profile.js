@@ -7527,7 +7527,7 @@ insertBkmark(bkMarkArr);
   var ctyurl = "https://gis.dola.colorado.gov/lookups/profile?county=" + fips_list + "&year=" + yr_list + "&vars=totalpopulation,births,deaths,netmigration";
         var forcurl = "https://gis.dola.colorado.gov/lookups/sya?county=" + fips_list + "&year=" + forc_yrs + "&choice=single&group=3"
  
-  
+  var regionNum = -101;
   var prom = [d3.json(ctyurl),d3.json(forcurl),d3.json(esturl_state), d3.json(forcurl_state)];
   };
 
@@ -7639,6 +7639,7 @@ var fileName = regionName(fipsArr) + " Population Growth Table"
 var tab_reg_sum = d3.rollup(tab_cty_data, v => d3.sum(v, d => d.totalpopulation), d => d.year);
 
 //Flatten Arrays for output
+
 var tab_reg_data = [];
 for (let [key, value] of tab_reg_sum) {
   tab_reg_data.push({'fips' : regionNum, 'name' : regionName(fipsArr), 'year' : key, 'totalpopulation' : value});
