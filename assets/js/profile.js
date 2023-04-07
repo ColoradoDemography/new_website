@@ -2250,6 +2250,9 @@ if(outtype == "chart") {
 		
 		var dlLink = document.createElement('a');
 		dlLink.href = linkref
+		if(linkref != "#"){
+		dlLink.target = '_blank';
+		}
 		dlLink.id = linkid;
 		dlLink.appendChild(linktxt);
 		
@@ -2264,12 +2267,16 @@ if(outtype == "table"){
 	var linkref = mark.srclink;
 	var dlLink = document.createElement('a');
 	dlLink.href = linkref
+	if(linkref != "#"){
+		dlLink.target = '_blank';
+	}
 	dlLink.id = linkid;
 	dlLink.appendChild(linktxt);
 }
     dlLi.appendChild(dlLink); 
     dlUl.appendChild(dlLi); 
     dlDiv.appendChild(dlUl);
+	
 return(dlDiv);
 }
 
@@ -2283,6 +2290,7 @@ function pgSetupPro(level, type, gridPanel, bkMark, multi, pctTable, ctyFips,cty
   var idxval = gridPanel.charAt(gridPanel.length - 1);
   
   const row1List = ["age01", "popest", "inc01", "educ", "raceeth", "house01"];
+  
 //Creating strFips
 
 if(level == "County"){
@@ -3439,11 +3447,8 @@ var PlaceNames = [...new Set(pltData.map(d => d.name))];
   var age_est_arr = filtPlot.map(d => d.age_cat);
   var pct_est_arr = filtPlot.map(d => d.pct_totalpopulation_e);
    
-  if(i == 0){
-           ctyNames = PlaceNames[i];
-  } else {
-   ctyNames = ctyNames + ", " + PlaceNames[i];
-  }
+     ctyNames = PlaceNames[i];
+
   // Mouseover description
 
   var pct_est_0d = filtPlot.map(d => PlaceNames[i] + " " + d.age_cat + '<br>Percent: ' + fmt_pct(d.pct_totalpopulation_e) + '<br>Persons: ' + fmt_comma(d.totalpopulation_e));
@@ -3567,11 +3572,8 @@ var PlaceNames = [...new Set(pltData.map(d => d.name))];
   var age_for_arr = filtPlot.map(d => d.age_cat);
   var pct_for_arr = filtPlot.map(d => d.pct_totalpopulation_e);
   var pct_for_0d = filtPlot.map(d => PlaceNames[i] + " " + d.age_cat + '<br>Percent: ' + fmt_pct(d.pct_totalpopulation_e) + '<br>Persons: ' + fmt_comma(d.totalpopulation_e));
-  if(i == 0){
-           ctyNames = PlaceNames[i];
-  } else {
-   ctyNames = ctyNames + ", " + PlaceNames[i];
-  }
+   ctyNames = PlaceNames[i];
+ 
 
   age_data.push({x : age_for_arr,
                  y : pct_for_arr,
@@ -7408,7 +7410,7 @@ var row_labels = [
 
 var tab_obj = genSubjTab(level, outData,bkMark.id,row_labels,false);
 
-var fileName = nameArr[0] + "Basic Statistics";
+var fileName = nameArr[0] + " Basic Statistics";
 pgSetupPro(level,"table",outputPro,bkMark,false,false,fipsArr, nameArr, 0)
 //Table Footer
 
@@ -8222,12 +8224,8 @@ var PlaceNames = [...new Set(pltData.map(d => d.NAME))];
      name : filtPlot[0].NAME,
                  type : 'bar'});
   
-if(i == 0){
     ctyNames = PlaceNames[i];
-  } else {
- ctyNames = ctyNames + ", " + PlaceNames[i];
-  }
- } //i
+   } //i
  
 
 var ftrStr = 'U.S. Census Bureau ('+ acsYear + '). ' + (acsYear - 4) + '-' + acsYear + ' American Community Survey Table: ' + acsTab +' Print Date: ' +  fmt_date(new Date)
@@ -8471,11 +8469,8 @@ for(i = 0; i < PlaceNames.length; i++){
      name : filtPlot[0].NAME,
                  type : 'bar'});
   
-if(i == 0){
     ctyNames = PlaceNames[i];
-  } else {
- ctyNames = ctyNames + ", " + PlaceNames[i];
-  }
+ 
  } //i
  
  
