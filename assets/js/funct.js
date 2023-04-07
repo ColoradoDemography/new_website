@@ -1702,6 +1702,9 @@ function genFilename(outname, type, ext, yr) {
 		case 'test' :
 		var fileName = "Test values " +  outname + "." + ext;
 		break;
+		case 'map' :
+		    var fileName = outname[0] + " Area Map." + ext;
+		break;
 		case 'summary' :
 		    var fileName = outname + " Basic Statistics Table." + ext;
 		break;
