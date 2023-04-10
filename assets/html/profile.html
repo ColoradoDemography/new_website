@@ -76,7 +76,7 @@
 		</p>
 		<p style='font-size:10pt;'>
 		<a href='https://data.colorado.gov/Government/Transparency-Online-Project-TOPS-State-Government-/rifs-n6ib' target='_blank'>Transparency Online</a> |
-		<a href='https://www.colorado.gov/accessibility-standards' target='_blank'>Accessibility</a>
+		<a href='https://cdola.colorado.gov/dola-accessibility-support' target='_blank'>Accessibility</a>
 		</p>
 </div> <!-- Profile Div -->
 </div> <!-- Grid panel_2_1 -->
@@ -129,15 +129,59 @@ d3.select("#profile-dropdown").on("change", function(d,i) {
 	   document.getElementById('location-dropdown').innerHTML = null;
 	   document.getElementById("location-label").innerHTML = null;
 	   document.getElementById("option-table").innerHTML = "";
+	   document.getElementById("profile-content1").innerHTML = "";
+	   document.getElementById("profile-content2").innerHTML = "";
+       document.getElementById("profile-content3").innerHTML = "";
+       document.getElementById("profile-content4").innerHTML = "";
+
+	   var selectedtype = d3.select('#profile-dropdown option:checked').text();
+	   var selectedfips = d3.select("#profile-dropdown").property('value');
+	   //Clearing buttons and sectLink
+	   var tablist = document.getElementById('pro-list');
+	   if (tablist !== null) {
+       var btns = tablist.getElementsByTagName('button');
+        //clearing output list and div	 
+	    for(j = 0; j < btns.length;j++){
+		    btns[j].style.display = "none";
+		}; //j loop 1
+	 }
+	 var sectLink = document.getElementById('sectLink');
+	  if(sectLink !== null){
+	    sectLink.innerHTML = "";
+	  }
+       popDropdown(selectedfips,'location-dropdown','profile'); 
+	   genUI(selectedtype, 'option-table');
+	   document.getElementById("genProfile").style.display = "block";
+ });
+
+d3.select("#location-dropdown").on("change", function(d,i) {
+
+	   //Clearing buttons and sectLink
+	   var tablist = document.getElementById('pro-list');
+	   if (tablist !== null) {
+       var btns = tablist.getElementsByTagName('button');
+        //clearing output list and div	 
+	    for(j = 0; j < btns.length;j++){
+		    btns[j].style.display = "none";
+		}; //j loop 1
+	 }
+	 var sectLink = document.getElementById('sectLink');
+	  if(sectLink !== null){
+	    sectLink.innerHTML = "";
+	  }
+	   document.getElementById("profile-content1").innerHTML = "";
+	   document.getElementById("profile-content2").innerHTML = "";
+       document.getElementById("profile-content3").innerHTML = "";
+       document.getElementById("profile-content4").innerHTML = "";
+
 
 	   var selectedtype = d3.select('#profile-dropdown option:checked').text();
 	   var selectedfips = d3.select("#profile-dropdown").property('value');
 	   
 
-       popDropdown(selectedfips,'location-dropdown','profile'); 
-	   genUI(selectedtype, 'option-table');
 	   document.getElementById("genProfile").style.display = "block";
  });
+
 
 document.getElementById('genProfile').onclick = function changeContent() {
 
