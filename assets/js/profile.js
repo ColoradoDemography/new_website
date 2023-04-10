@@ -8,6 +8,9 @@
 //Profile functions
 //Progress Bar https://www.w3schools.com/howto/howto_js_progressbar.asp
 
+//clr_scrn
+
+
 //select_title selection of elements in header array
 function select_title(inArr,sel){
  var out_arr = [];
@@ -243,8 +246,8 @@ function genUI(level, sidepanel){
 	const tblArr = ["Basic Statistics", "Population Trends", "Population Characteristics: Age", "Population Characteristics: Income, Education and Race",
 			"Housing and Households", "Commuting and Job Growth", "Employment by Industry", "Employment Forecast and Wage Information"]
 
-	var nrows = (level == "Region") ? 5 : 8;
-	
+ 	var nrows = (level == "Region") ? 5 : 8;
+		
 	var tbl = document.createElement("table");
       tbl.style.width = "90%";
       tbl.style.border = "0px solid black";
@@ -257,7 +260,7 @@ function genUI(level, sidepanel){
 	  var selval = "sel" + (i + 1);
 	  var ckbx = document.createElement("input");
           ckbx.setAttribute("type", "checkbox");
-		  ckbx.className = 'proInpur';
+		  ckbx.className = 'proInput';
 		  ckbx.id = selval;
 		  ckbx.name = selval;
 		  ckbx.value = selval;
@@ -276,6 +279,7 @@ function genUI(level, sidepanel){
 	  tblbody.appendChild(tblrow)
   }
   tbl.appendChild(tblbody)
+
   
   //Assemble final table
   var outDiv = document.getElementById(sidepanel);
@@ -1800,7 +1804,6 @@ var tabInfo = tabinfo.filter(d => tabName.includes(d.tabName));
 
 var tblArray = stripHTML(inData);
 
-
 var scantab = [];
 scantab[0] = tblArray[0].slice()
 //checking the length of rows; if all rows are equal than there are even numbers of elements
@@ -1880,17 +1883,23 @@ if(tabInfo[0].tabName == 'Population Growth Table'){
 	var npages = Math.ceil((tabInfo[0].ncols * nameArr.length)/7);
 	var nrows = row_labels.length + 2;
 	var ncols = 8;
+	var geospanel = 7;
 } else {
+	debugger;
 	if(tabInfo[0].ncols == 2){
 	var npages = Math.ceil((tabInfo[0].ncols * nameArr.length)/8);
 	var ncols = 9;
+	var geospanel = 4;
 	}
 	if(tabInfo[0].ncols == 4){
 	var npages = Math.ceil((tabInfo[0].ncols * nameArr.length)/12);
 	var ncols = 13;
+	var geospanel = 6
 	}
 	if(tabInfo[0].tabName == 'Housing Type Table'){
 		var nrows = ((row_labels.length + 1) * 3) + 3;
+		var ncols = tabInfo[0].ncols;
+		var geospanel = 4;
 	} else {
 		var nrows = row_labels.length + 2;
 	}
@@ -1906,6 +1915,13 @@ var outStart = 1;
 var outEnd = outStart + (tabInfo[0].ncols - 1)
 
 for(x = 0; x < nameArr.length; x++){
+	   //Page Updates
+   if(x > 0 && x % geospanel == 0) {
+	   pgval++
+	   var outStart = 1
+	   var outEnd = outStart + (tabInfo[0].ncols - 1)
+   }
+	
 		if((scantab.length == 2) && (x == (nameArr.length - 1))) { //The last one in the series
 			   for(y = 0; y < row_labels.length;y++){
 			   //Creating instart and inend values
@@ -1936,30 +1952,7 @@ for(x = 0; x < nameArr.length; x++){
 
    var outStart = outStart + tabInfo[0].ncols 
    var outEnd = outStart + (tabInfo[0].ncols - 1)
-   //Page Updates
-   switch(tabInfo[0].ncols){
-	   case 1 :
-	   if((x > 0) && (x % 7 == 0)) {
-		 pgval++
-	    var outStart = 1
-	    var outEnd = outStart + (tabInfo[0].ncols - 1)
-	   }
-	   break;
-      case 2: 
-	  if((x == 3) || (x == 7)) {
-	   pgval++
-	   var outStart = 1
-	   var outEnd = outStart + (tabInfo[0].ncols - 1)
-      }
-    break;
-	case 4: 
-	if(outStart > 12) {
-	   pgval++
-	   var outStart = 1
-	   var outEnd = outStart + (tabInfo[0].ncols - 1)
-      }
-	  break;
-   } //switch
+
 }  //x
 
 //Fixing inStart and inEnd
@@ -5010,6 +5003,9 @@ var footout = ""
 for(x = 0; x < ftrArr.length; x++){
 footout = footout + "\u200B\t" + ftrArr[x] + "\n";
 }
+
+console.log(bodyArr)
+debugger;
 
 var btmmargin = ftrArr.length * 15;
 //Document output
