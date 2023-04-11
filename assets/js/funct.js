@@ -2299,8 +2299,7 @@ return(acsUrl)
 }; //end of genACSUrl
 
 function genCEDSCIUrl(level,tableid, yrvalue, fipsArr) {
-
-	var urlHead = 'https://data.census.gov/cedsci/table?q=' + tableid;
+	var urlHead = 'https://data.census.gov/table?q=' + tableid;
 	var urlTail = '&tid=ACSDT5Y' + yrvalue + '.' + tableid;
 	var urlGeo = "&g=";
 	    if(level == "Region") {
@@ -2308,24 +2307,24 @@ function genCEDSCIUrl(level,tableid, yrvalue, fipsArr) {
 			urlGeo = urlGeo + '0400000US' + fipsArr[0] + '_';
 			var startVal = 1;
 		} else {
-			urlGeo = urlGeo + '0400000US08_';
+			urlGeo = urlGeo + '040XX00US08_';
 			var startVal = 0;
 		};
-		urlGeo = urlGeo + "0500000US"
+		urlGeo = urlGeo + "050XX00US"
 		for(i = startVal; i < fipsArr.length; i++) {
 			urlGeo = urlGeo + "08" + fipsArr[i] + ",";
 		}
 	 urlGeo = urlGeo.slice(0, -1)
 	}
 	if(level == "County") {
-		urlGeo = urlGeo + '0400000US08_';
-		urlGeo = urlGeo + "0500000US" + "08" + fipsArr[0];
+		urlGeo = urlGeo + '040XX00US08_';
+		urlGeo = urlGeo + "050XX00US" + "08" + fipsArr[0];
 	};
 	if(level == "Municipality") {
-		var ctycode = "08" + fipsArr[0].substring(4)
-		urlGeo = urlGeo + '0400000US08_';
-		urlGeo = urlGeo + "0500000US" + ctycode + "_";
-		urlGeo = urlGeo + "1600000US" + fipsArr[1];
+		var ctycode = "08" + muni_county(fipsArr[0])
+		urlGeo = urlGeo + '040XX00US08_';
+		urlGeo = urlGeo + "050XX00US" + ctycode + "_";
+		urlGeo = urlGeo + "160XX00US08" + fipsArr[0];
 	}
 	
 var fullUrl = urlHead + urlGeo + urlTail;
@@ -3608,7 +3607,7 @@ var tabname = ["Owner Occupied Housing Units", "Rental Housing Units"];
 if(fips == "000") {
     var censgeo = "&g=0400000US08&tid=ACSDT5Y"+ ACSYR + ".";
 } else {
-	var censgeo = "&g=0500000US08"+ fips +"&tid=ACSDT5Y"+ ACSYR + ".";
+	var censgeo = "&g=050XX00US08"+ fips +"&tid=ACSDT5Y"+ ACSYR + ".";
 };
 
 for(i = 0; i < tabname.length;i++) {
@@ -3925,7 +3924,7 @@ var tabname = ["% living in Poverty","% with Bachelor's Degree+",
 if(fips == "000") {
     var censgeo = "&g=0400000US08&tid=ACSDT5Y" + curyr + ".";
 } else {
-	var censgeo = "&g=0500000US08"+ fips +"&tid=ACSDT5Y" + curyr + ".";
+	var censgeo = "&g=050XX00US08"+ fips +"&tid=ACSDT5Y" + curyr + ".";
 };
 
 
