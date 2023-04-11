@@ -1885,7 +1885,6 @@ if(tabInfo[0].tabName == 'Population Growth Table'){
 	var ncols = 8;
 	var geospanel = 7;
 } else {
-	debugger;
 	if(tabInfo[0].ncols == 2){
 	var npages = Math.ceil((tabInfo[0].ncols * nameArr.length)/8);
 	var ncols = 9;
@@ -1894,12 +1893,12 @@ if(tabInfo[0].tabName == 'Population Growth Table'){
 	if(tabInfo[0].ncols == 4){
 	var npages = Math.ceil((tabInfo[0].ncols * nameArr.length)/12);
 	var ncols = 13;
-	var geospanel = 6
+	var geospanel = 3
 	}
 	if(tabInfo[0].tabName == 'Housing Type Table'){
 		var nrows = ((row_labels.length + 1) * 3) + 3;
-		var ncols = tabInfo[0].ncols;
-		var geospanel = 4;
+		var ncols = 13;
+		var geospanel = 3;
 	} else {
 		var nrows = row_labels.length + 2;
 	}
@@ -4630,7 +4629,7 @@ function export2Word(intab, filename = ''){
 
     var preHtml = "<html xmlns:office='urn:schemas-microsoft-com:office:office,  xmlns:word='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>" +
                   "<head><style> " +       
-                  "@page Section1 {size:841.7pt 595.45pt;mso-page-orientation:landscape;margin:1.0in 1.0in 1.0in 1.0in;mso-header-margin:.5in;mso-footer-margin:.5in;mso-paper-source:0;} " +
+                  "@page Section1 {size:841.7pt 595.45pt;mso-page-orientation:landscape;margin:0.25in 0.25in 0.5in 0.5in;mso-header-margin:.5in;mso-footer-margin:.5in;mso-paper-source:0;} " +
                   "div.Section1 {page:Section1;} " +
                   "</style> </head> <body><div class=Section1>";
 
@@ -4881,7 +4880,6 @@ ftrString = ftrString + "</tr></tfoot>";
  
  var stackTab2 = stackTab.replace(/−/g,"  -").replace(/<\/tr>\,/g,"</tr>").replace(/<\/thead>\,/g,"</thead>");
 
-
  export2Word(stackTab2, fName);
 } //plextabWord
  
@@ -5003,9 +5001,6 @@ var footout = ""
 for(x = 0; x < ftrArr.length; x++){
 footout = footout + "\u200B\t" + ftrArr[x] + "\n";
 }
-
-console.log(bodyArr)
-debugger;
 
 var btmmargin = ftrArr.length * 15;
 //Document output
