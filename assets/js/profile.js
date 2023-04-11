@@ -712,7 +712,7 @@ return (bindatafin);
 //genSubjTab Generates substantive table with topics in the rows and geographies in the columns. a n rows *5 column array of tables
 function genSubjTab(level,inData,section, row_topics,pctTab) {
 // section refers to the output section.  For section > 2, need to go through steps and format table.
-// for section <= 2, the table is alreary formatted and the tables have a different column layout
+// for section <= 2, the table is already formatted and the tables have a different column layout
 const fmt_comma = d3.format(",");
 const fmt_pct = d3.format(".1%");
 
@@ -9551,7 +9551,7 @@ if(muniList.includes(geotype)){
 
 //processing Occupancy Table
     //Muni Data
-	var occ_tab_muni = gen_occ_tab(B25002_muni,B25004_cty,B25005_muni,'muni')   
+	var occ_tab_muni = gen_occ_tab(B25002_muni,B25004_muni,B25005_muni,'muni')   
     //County Data
 	var occ_tab_cty = gen_occ_tab(B25002_cty,B25004_cty,B25005_cty,'county') 
 
