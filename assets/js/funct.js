@@ -7588,7 +7588,7 @@ for(i = 0; i < outchart.length;i++){
 	}
 }  
 
-var chartheight = outchart.length * 11;
+var chartheight = outchart.length * 12;
 var in_mig_lab = "Net In Migration: "+ fmt_comma(total_inmig);
 var out_mig_lab = "Net Out Migration: "+ fmt_comma(total_outmig);
 //Prepping out migration data
