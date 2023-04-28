@@ -7432,3 +7432,236 @@ vacantbar_png.onclick = function() { exportToPng(plName, 'housing', CHART2, 0); 
 }); //end of Promise
 
 }; //End  of Housdash
+
+//Migration Flows functions
+function genFLOWYR(inYR){
+	if(inYR > 2020) { inYR = 2020}  //Adjust this to the latest version of the ACS Migration Flows data
+	var prevYR = inYR - 4;
+	var yrArr = [];
+	var YRStr  = String(prevYR) + "-" + String(inYR)
+	yrArr.push({"YEAR" : inYR, "ACS_YR" : YRStr})
+	var chkYr = inYR
+	for(i = inYR; i >= 2010; i--) {
+	    if(i == chkYr - 5){
+			var prevYR = i - 4;
+			var YRStr  = String(prevYR) + "-" + String(i)
+	        yrArr.push({"YEAR" : i, "ACS_YR" : YRStr})
+			chkYr = i
+		}
+   }
+
+ return(yrArr)
+}
+
+function genFLOWS(fips, name, yearval){
+	var fmt_comma = d3.format(",");
+	const fmt_date = d3.timeFormat("%B %d, %Y");
+	var CHART0 = document.getElementById("net_output");
+	var CHART1 = document.getElementById("in_output");
+	var CHART2 = document.getElementById("out_output");
+
+	CHART0.innerHTML = "";
+	CHART1.innerHTML = "";
+	CHART2.innerHTML = "";
+	
+	var plname = countyName(parseInt(fips))
+	var titleValNet = "Net Migration " + plname + " " + (yearval - 4) + "-" + yearval;
+	var titleValOut = "Out Migration " + plname + " " + (yearval - 4) + "-" + yearval;
+	var titleValIn = "In Migration " + plname + " " + (yearval - 4) + "-" + yearval;
+	var citStr = "U.S. Census Bureau ("+ (yearval + 1) + ") County to County Migration Flows " + (yearval - 4) + "-" + yearval +
+	           " Print Date: "+ fmt_date(new Date);
+
+	
+	var censKey = '08fe07c2a7bf781b7771d7cccb264fe7ff8965ce'
+	if(fips == "000") {
+		var urlstr = "https://api.census.gov/data/" + yearval + "/acs/flows?get=MOVEDIN,GEOID1,GEOID2,MOVEDOUT,FULL1_NAME,FULL2_NAME,MOVEDNET&for=county:*&in=state:08&key=" + censKey;
+	} else {
+		var urlstr = "https://api.census.gov/data/" + yearval + "/acs/flows?get=MOVEDIN,GEOID1,GEOID2,MOVEDOUT,FULL1_NAME,FULL2_NAME,MOVEDNET&for=county:" + fips + "&in=state:08&key=" + censKey;
+	}
+
+//Reading data
+   d3.json(urlstr).then(function(data){
+	 var outdata = [];
+
+	 for(i = 1; i < data.length; i++){
+	 
+	 if(data[i][4].indexOf(",") > -1) {
+	     var namein = data[i][4].split(",")
+	 } else {
+		 var namein = [data[i][4]]
+	 }
+	 if(data[i][5].indexOf(",") > -1) {
+	     var nameout = data[i][5].split(",")
+		 if(nameout.length == 3){
+			 nameout.shift()
+		 }
+	 } else {
+		 var nameout = [data[i][5]]
+	 }
+	  outdata.push({
+		  "NAME1" : namein.length == 2 ? namein[0].trim() : "",
+		  "STATE1" : namein.length == 2 ? namein[1].trim() : namein[0].trim(),
+		  "NAME2" : nameout.length == 2 ? nameout[0].trim() : "",
+		  "STATE2" : nameout.length == 2 ? nameout[1].trim() : nameout[0].trim(),
+	      "MOVEDIN" : data[i][0] == null ? 0 : parseInt(data[i][0]),
+		  "MOVEDOUT" : data[i][3] == null ? 0 : parseInt(data[i][3]),
+		  "MOVEDNET" : data[i][6] == null ? 0 : parseInt(data[i][6])
+	  })
+	 } //for
+	 
+//summarizing state data and summarizing out-of state movement for other counties
+
+var columnsToSum = ["MOVEDIN", "MOVEDOUT", "MOVEDNET"] 
+var bindata = [];
+if(fips == "000"){
+	    var binroll =  d3.rollup(outdata, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.STATE1, d => d.STATE2);
+		for (let [key1, value] of binroll) {
+		for (let[key2, value2] of value) {
+		   bindata.push({'NAME1' : key1, 'STATE1' : '', 'NAME2' : key2, 'STATE2' : '',
+			 'MOVEDIN' : value2.MOVEDIN, 'MOVEDOUT' : value2.MOVEDOUT, 'MOVEDNET' : value2.MOVEDNET});
+		};
+		};
+		var outchart = bindata.filter(obj => obj.NAME1 != obj.NAME2)
+} else {  //out of state 
+  var outofstate = outdata.filter(obj => obj.STATE2 != "Colorado")
+  var binroll =  d3.rollup(outofstate, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.NAME1, d => d.STATE1, d => d.STATE2);;
+	for (let [key1, value] of binroll) {
+	for (let[key2, value2] of value) {
+	for (let[key3, value3] of value2) {
+		bindata.push({'NAME1' : key1, 'STATE1' : key2, 'NAME2' : key3,'STATE2' : '',
+			 'MOVEDIN' : value3.MOVEDIN, 'MOVEDOUT' : value3.MOVEDOUT, 'MOVEDNET' : value3.MOVEDNET});
+		}
+		};
+		};
+  var instate = outdata.filter(obj => obj.STATE2 == "Colorado");
+    instate.shift()
+	instate.shift()
+	var outchart = instate.concat(bindata);
+}
+
+// Creating Nodeslist
+var nodeslist = [];
+outchart.forEach(obj => { 
+	nodeslist.push({'location' : obj.NAME1})
+	nodeslist.push({'location' : obj.NAME2})
+})
+
+var nodesfilt = nodeslist.filter(obj => obj.location != plname)
+var nodessort = nodesfilt.sort(function(a, b){ return d3.ascending(a['location'], b['location']); });
+var nodesuniq = [...new Set(nodessort.map(d => d.location))]
+
+nodesuniq.unshift(plname)
+
+var nodes = [];
+var labarr = [];
+
+for(i = 0; i < nodesuniq.length; i++){
+	nodes.push({'location' : nodesuniq[i], "row_val" : i})
+	labarr.push(nodesuniq[i]);
+}
+
+// Prepping net migration data
+
+var src = [];
+var tgt = [];
+var val = [];
+var lablinks = []
+var total_inmig = 0
+var total_outmig = 0
+for(i = 0; i < outchart.length;i++){
+    if(outchart[i].MOVEDNET < 0){
+		var srcVal = nodes.filter(obj => obj.location == outchart[i].NAME1)
+		var tgtVal = nodes.filter(obj => obj.location == outchart[i].NAME2)
+		src.push(srcVal[0].row_val)
+		tgt.push(tgtVal[0].row_val)
+		val.push(Math.abs(outchart[i].MOVEDNET))
+		lablinks.push(outchart[i].NAME1 + " to " + outchart[i].NAME2 + ": " + fmt_comma(Math.abs(outchart[i].MOVEDNET)));
+		total_outmig = total_outmig + Math.abs(outchart[i].MOVEDNET)
+	} else {
+		var srcVal = nodes.filter(obj => obj.location == outchart[i].NAME2)
+		var tgtVal = nodes.filter(obj => obj.location == outchart[i].NAME1)
+		src.push(srcVal[0].row_val)
+		tgt.push(tgtVal[0].row_val)
+		val.push(Math.abs(outchart[i].MOVEDNET))
+		lablinks.push(outchart[i].NAME2 + " to " + outchart[i].NAME1 + ": " + fmt_comma(Math.abs(outchart[i].MOVEDNET)));
+		total_inmig = total_inmig + Math.abs(outchart[i].MOVEDNET)
+	}
+}  
+
+var chartheight = outchart.length * 11;
+var in_mig_lab = "Net In Migration: "+ fmt_comma(total_inmig);
+var out_mig_lab = "Net Out Migration: "+ fmt_comma(total_outmig);
+//Prepping out migration data
+
+//prepping in migration data
+
+//Net Migration Plot
+
+
+var data_net = {
+  type: "sankey",
+  orientation: "h",
+  node: {
+    pad: 15,
+    thickness: 30,
+    line: {
+      color: "black",
+      width: 0.5
+    },
+   label: labarr,
+   hoverinfo: 'none'
+      },
+
+  link: {
+    source: src,
+    target: tgt,
+    value:  val,
+	customdata : lablinks,
+	hovertemplate : '%{customdata}<extra></extra>'
+  }
+}
+
+var data_netp = [data_net];
+
+var layout = {
+  title: titleValNet,
+  width: 1100,
+  height: chartheight,
+  font: {
+    size: 10,
+	family : 'Arial Black'
+  },
+annotations : [{text :  citStr , 
+      font: { size : 9, color: 'black'},
+      xref : 'paper', 
+	  yref : 'paper', 
+	  xanchor : 'left',
+	  yanchor : 'bottom',
+      x : 0.25, 
+      y : 0, 
+      align : 'left', 
+      showarrow : false},
+	  {text : in_mig_lab,
+        font : {size : 10, color : 'black'},
+        xref : 'paper', 
+	    yref : 'paper', 
+	    xanchor : 'left',
+	    yanchor : 'bottom',
+	    x : 0.25,
+        y : 1,
+		showarrow : false },
+		{text : out_mig_lab,
+        font : {size : 10, color : 'black'},      
+		xref : 'paper', 
+	    yref : 'paper', 
+	    xanchor : 'left',
+	    yanchor : 'bottom',
+        x : 0.75,
+        y : 1,
+		showarrow : false }]
+}
+Plotly.newPlot(CHART0, data_netp, layout);
+
+//Export Code
+   }) //promise
+} //genFLOWS

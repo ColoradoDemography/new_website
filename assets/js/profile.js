@@ -5629,6 +5629,15 @@ if(firstbtn == 'sel5') {
    genSel5display(lvl, fipsArr, names, acsyr, PROFILE_1, PROFILE_2, PROFILE_3, PROFILE_4);
 }
 
+//Commuting button
+if(firstbtn == 'sel6') { 
+   PROFILE_1.innerHTML = "";
+   PROFILE_2.innerHTML = "";
+   PROFILE_3.innerHTML = "";
+   PROFILE_4.innerHTML = "";
+   genSel6display(lvl, fipsArr, names, acsyr, PROFILE_1, PROFILE_2, PROFILE_3, PROFILE_4);
+}
+
 //Setting Event Listeners  For a click on a section button...
 document.getElementById("sel1btn").addEventListener("click", function() {
    PROFILE_1.innerHTML = "";
@@ -5674,7 +5683,17 @@ document.getElementById("sel5btn").addEventListener("click", function() {
    PROFILE_3.innerHTML = "";
    PROFILE_4.innerHTML = "";
    genSel5display(lvl, fipsArr, names, acsyr, PROFILE_1, PROFILE_2, PROFILE_3, PROFILE_4);
-}); //end of sel4btn listener
+}); //end of sel5btn listener
+
+//Commuting Panel button
+document.getElementById("sel6btn").addEventListener("click", function() {
+   PROFILE_1.innerHTML = "";
+   PROFILE_2.innerHTML = "";
+   PROFILE_3.innerHTML = "";
+   PROFILE_4.innerHTML = "";
+   genSel6display(lvl, fipsArr, names, acsyr, PROFILE_1, PROFILE_2, PROFILE_3, PROFILE_4);
+}); //end of sel6btn listener
+
 
 }); //End of Promise 
 }; //end of genProfile
@@ -6865,6 +6884,57 @@ if(level == "Region"){
 }
 } //genHHIncomeTab
 
+//Commuting functions
+//genCommutingDiag generates a sankey flows diagram from the LODES data
+function genCommutingDiag(inData,outDivd,bkMark,level,fipsArr){
+   var chartData1 = [];
+   var chartData2 = [];
+   
+   inData.forEach(d => {
+	   if(d.type == 1){
+	     chartData1.push({ "type" : d.type, "source" : d.place, "target" : d.location, "value" : d.number, "percent" : parseFloat(d.percent)});
+	   } else {
+	     chartData2.push({ "type" : d.type, "source" : d.place, "target" : d.location, "value" : d.number, "percent" : parseFloat(d.percent)});
+	   }
+   })
+  //populating data objects
+  var label1 = [];
+  var label2 = [];
+  var color1 = [];
+  var color2 = [];
+  var source1 = [];
+  var source2 = [];
+  var target1 = [];
+  var target2 = [];
+  var value1 = [];
+  var value2 = [];
+  
+ 	label1.push(chartData1[i].source);
+	color1.push("blue");
+	source1.push(0) 
+	target1.push(0)
+	value1.push(0)
+  
+  for(i = 0; i < chartData1.length;i++){
+	  label1.push(chartData1[i].target);
+	  color1.push("blue");
+	  source1.push(0)
+	  target1.push(i+1)
+	  value1.push(chartData1[i].percent);
+  }
+ 
+  console.log(label1)
+  console.log(color1)
+  console.log(source1)
+  console.log(target1)
+  console.log(value1)
+  debugger
+   
+   //Building data Arrays
+   var label1 
+} //genCommutingDiag
+
+//MAIN FUNCTIONS
 //genSel1map The first tab, map
 function genSel1map(level, fipsArr,nameArr,outDiv,bkMarkArr){
 
@@ -9654,3 +9724,57 @@ genHHIncomeTab(med_fin, housingIncome_fin,PRO_4.id,bkMarkArr[3],geotype,curyear,
 
 	}); //end of Promise
 }; //end of genSel5Display
+
+
+//genSel6display  Commuting/LODES displays and jobs displays
+function genSel6display(geotype, fipsArr, names, curyear, PRO_1, PRO_2, PRO_3, PRO_4) {
+ const fmt_date = d3.timeFormat("%B %d, %Y");
+ const fmt_dec = d3.format(".2f");
+ const fmt_pct = d3.format(".1%");
+ const fmt_comma = d3.format(",");
+ const fmt_dollar = d3.format("$,.0f");
+ const fmt_yr = d3.format("00");
+
+  
+//Clear out Divs
+
+  PRO_1.innerHTML = "";
+  PRO_2.innerHTML = "";
+  PRO_3.innerHTML = "";
+  PRO_4.innerHTML = "";
+
+//The displays are limited by geography -- not available for Region
+ 
+if(geotype == "County") {
+	var fips_arr =  "08" + fipsArr;
+	var fips_num = parseInt(fipsArr);
+}	
+
+ if(geotype == "Municipality"){
+	var fips_arr = muni_county(fipsArr)
+    var fips_num = parseInt(fips_arr);
+    } 
+
+//Reading preliminary data for counties  UPDATE THIS TO API CALL....
+var ctySummary = "../data/OTM_County_Summary.csv"
+var ctyPlace = "../data/OTM_County_Place.csv"
+
+var prom = [d3.csv(ctySummary), d3.csv(ctyPlace)];
+
+Promise.all(prom).then(data =>{
+
+var PlaceData =  data[1].filter(d => d.fips == fips_arr);
+
+var bkMarkArr = [{title : 'Commuter Venn Diagram', id :'lodes01', srctxt : "Venn Diagram", srclink : "https://onthemap.ces.census.gov/"},
+	{title : 'Commuting Table', id : 'lodes02', srctxt : "Communting Table",srclink : "https://onthemap.ces.census.gov/"},
+	{title : 'Detailed Commuting Diagram', id : 'lodes03', srctxt : "Detailed Commuting Diagram",srclink : "https://onthemap.ces.census.gov/"}]
+//Outputs
+insertBkmark(bkMarkArr)
+
+//genVennDiagram(data[0],PRO_1.id,bkMarkArr[0], geotype,fipsArr);
+//genCommutingTab(data[0],PRO_2.id,bkMarkArr[1],geotype,fipsArr);
+genCommutingDiag(PlaceData,PRO_3.id,bkMarkArr[2],geotype,fipsArr);
+
+
+	}); 
+ }  //genSel6Display
