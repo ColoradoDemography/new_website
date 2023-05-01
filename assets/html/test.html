@@ -1,0 +1,145 @@
+<!-- Community Profile Secondary Page A Bickford 5/2022 -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>SDO Community Profile Page</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1" http-equiv="content-type" content="text/html; charset=utf-8">
+<!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
+<!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
+<
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" crossorigin="anonymous">
+
+<!-- SDO CSS -->
+<link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
+<!-- adding d3.js  for data manipulation-->
+ <script src="https://d3js.org/d3.v7.min.js"></script>
+<script type="text/javascript" src="https://demography.dola.colorado.gov/assets/js/saveSvgAsPng.js"></script>
+<!-- Adding Plotly.js for  charting -->
+<script src="https://cdn.plot.ly/plotly-2.20.0.min.js" charset="utf-8"></script>
+<!-- Adding jquery and datatables for table production -->
+<script
+  src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+  crossorigin="anonymous">
+</script>
+ 
+<!-- Datatables -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jq-3.6.0/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-html5-2.2.3/sc-2.0.6/sp-2.0.1/sl-1.4.0/datatables.min.css"/>
+ 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.5/pdfmake.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/vfs_fonts.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/v/dt/jq-3.6.0/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-html5-2.2.3/sc-2.0.6/sp-2.0.1/sl-1.4.0/datatables.min.js"></script> 
+
+
+	
+<!-- SDO functions -->
+<script type="text/javascript" src="../js/funct.js"></script>
+<script type="text/javascript" src="../js/profile.js"></script>
+<!-- GoogleAnalytics Script -->
+<script defer src="https://demography.dola.colorado.gov/assets/js/googleAnalytics.js"></script>
+
+</head>
+<body>
+<div>
+<a href="https://cdola.colorado.gov/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt="Department of Local Affairs Homepage"></a>
+</div>
+<div w3-include-html="./navheader.html"></div>
+<!-- First Grid, linked images -->
+<div id="profile-container" class="profile-container">
+  <div class="grid-item panel_2_1" id="leftHand">
+	<div id="profileDiv">
+		<ul class="breadcrumb">
+		  <li><a href="https://demography.dola.colorado.gov/">Home</a></li>
+		</ul>
+		<p>
+			<label class="prolabel" for="profile-dropdown">Select Profile Type:</label>
+			<select id="profile-dropdown"></select>
+		</p>
+		<p>
+			<label class="prolabel" for="location-dropdown" id="location-label"></label>
+			<select id="location-dropdown"></select>
+		</p>
+	<p>
+	<div id="option-table"></div>
+	</p>
+	<p>
+	<button class='databutton' ><a href="https://docs.google.com/forms/d/e/1FAIpQLSfaKgXqFYKNvnGFSWmiKymanBMeVKMRQtAs7exEdF6ZyDlD0w/viewform?usp=sf_link" target='_blank' style='font-size:10pt;'>Questions? Contact SDO</a></button>
+	</p>
+	  <hr>
+		<p style='font-size:10pt;'>
+		&#169; 2022 State of Colorado
+		</p>
+		<p style='font-size:10pt;'>
+		<a href='https://data.colorado.gov/Government/Transparency-Online-Project-TOPS-State-Government-/rifs-n6ib' target='_blank'>Transparency Online</a> |
+		<a href='https://www.colorado.gov/accessibility-standards' target='_blank'>Accessibility</a>
+		</p>
+</div> <!-- Profile Div -->
+</div> <!-- Grid panel_2_1 -->
+<div id="profile_2" class="grid-item profile_2">
+	<div id="pro-list" class="button-group">
+		<button id='sel1btn' class='selbtn' style='display: none;'>Basic Statistics</button>
+	</div>
+	<p></p>
+
+
+	<div class="grid-item app-panel_3_2" id='chartdiv_a'>
+	        <div id='profile-content1'>
+			</div>
+	</div>
+    <div class="grid-item app-panel_4_2" id='chartdiv_b'>
+      <button class='databutton' onclick="changeOpacity()">Overlay</button>
+	</div>
+   <div class="grid-item app-panel_5_2" id='chartdiv_c'>
+	</div>
+   <div class="grid-item app-panel_6_2" id='chartdiv_d'>
+
+	</div>
+</div> <!-- Grid  profile_2 -->
+</div>  <!-- end of profile-container -->
+
+
+<script>
+
+//Setting HTML include and Accordion
+ 
+includeHTML();
+
+//Initial set up
+document.getElementById("location-dropdown").style.display = "none";
+/* document.getElementById("genProfile").style.display = "none"; */
+
+
+popDropdown('profile','profile-dropdown','profile');
+
+d3.select("#profile-dropdown").on("change", function(d,i) {
+	   document.getElementById("location-label").innerHTML = "";
+       document.getElementById('location-dropdown').style.display = "block";
+	   document.getElementById('location-dropdown').innerHTML = null;
+	   document.getElementById("location-label").innerHTML = null;
+	   document.getElementById("option-table").innerHTML = "";
+
+	   var selectedtype = d3.select('#profile-dropdown option:checked').text();
+	   var selectedfips = d3.select("#profile-dropdown").property('value');
+	   
+
+       popDropdown(selectedfips,'location-dropdown','profile'); 
+	   genUI(selectedtype, 'option-table');
+	   document.getElementById("genProfile").style.display = "block";
+ });
+
+function changeOpacity() {
+debugger;
+var em = document.getElementById("profile-content1");
+var  pa = window.getComputedStyle(em).getPropertyValue("opacity");
+ 
+  opan = toNumber(opa) + .5;
+  document.getElementById('profile-content1').style.opacity = toString(opan);
+};
+
+
+</script>
+
+</body>
+</html> 
