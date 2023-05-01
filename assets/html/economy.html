@@ -12,18 +12,13 @@
 <!-- SDO CSS -->
 <link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
 <!-- adding d3.js  for data manipulation-->
- <script src="https://d3js.org/d3.v6.min.js"></script>
+ <script src="https://d3js.org/d3.v7.min.js"></script>
 <!-- SDO suport functions, genSYA, insertHTML, -->
-<script src="../js/funct.js"></script>
+<script src="https://demography.dola.colorado.gov/assets/js/funct.js"></script>
 <!-- GoogleAnalytics Script -->
-<script defer src="../js/googleAnalytics.js"></script>
+<script defer src="https://demography.dola.colorado.gov/assets/js/googleAnalytics.js"></script>
 </head>
 <body>
-<div class="alert__bar--covid-19" style="text-color:black;font-size:12px;">
-    <h2 style="background-color:#8fc6e8;text-align:center;">
-      Visit <a href="https://covid19.colorado.gov/for-coloradans/vaccine/where-can-i-get-vaccinated">"Where can I get vaccinated"</a> or call 1-877-COVAXCO (1-877-268-2926) for vaccine information.
-    </h2>
-</div>    
 <div>
 <a href="https://cdola.colorado.gov/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt="Department of Local Affairs Homepage"></a>
 </div>
@@ -48,12 +43,7 @@ Economic and Jobs information used in SDO Population Estimates.<br>
 <p>
 You can access visualizations, spreadsheets, data lookup applications, and background documents by clicking on the buttons below.
 </p>
- <details>
-	<summary>Economic Visualizations and Maps</summary>
-<main>
-		<div w3-include-html="./econ_applications.html"></div>
-</main>
-</details>
+<button class="summarybtn" onClick="location.href = './gis_applications.html#economy'">Economic Visualizations and Maps</button>
 <details>
 	<summary>Economic Forecasting Spreadsheets: Download population data for all geographies</summary>
 <main>

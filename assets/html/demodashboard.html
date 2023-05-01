@@ -13,7 +13,7 @@
 <!-- SDO CSS -->
 <link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
 <!-- adding d3.js  for data manipulation-->
- <script src="https://d3js.org/d3.v6.min.js"></script>
+ <script src="https://d3js.org/d3.v7.min.js"></script>
 <!-- Adding Plotly.js for  charting -->
 
 <!-- Adding jquery and datatables for table production -->
@@ -22,18 +22,13 @@
   integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
   crossorigin="anonymous">
 </script>
- <script src="https://cdn.plot.ly/plotly-2.2.0.min.js" charset="utf-8"></script>
+ <script src="https://cdn.plot.ly/plotly-2.20.0.min.js" charset="utf-8"></script>
 <!-- SDO suport functions, genSYA, insertHTML, -->
 <script src="../js/funct.js"></script>
 <!-- GoogleAnalytics Script -->
-<script defer src="../js/googleAnalytics.js"></script>
+<script defer src="https://demography.dola.colorado.gov/assets/js/googleAnalytics.js"></script>
 </head>
 <body>
-<div class="alert__bar--covid-19" style="text-color:black;font-size:12px;">
-    <h2 style="background-color:#8fc6e8;text-align:center;">
-      Visit <a href="https://covid19.colorado.gov/for-coloradans/vaccine/where-can-i-get-vaccinated">"Where can I get vaccinated"</a> or call 1-877-COVAXCO (1-877-268-2926) for vaccine information.
-    </h2>
-</div>    
 <div>
 <a href="https://cdola.colorado.gov/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt="Department of Local Affairs Homepage"></a>
 </div>
@@ -51,7 +46,7 @@
   <b>Demographic Dashboard</b>
    <br><br>INSTRUCTIONS:
    <p>
-   The following page shows graphs and charts for various datasets for Colorado, multi-county regions, and counties. 
+   The following page shows graphs and charts for Colorado, multi-county regions, and counties. 
    Select the geography type and geography from the list below. 
    You can hover over specific data points on each graph to view the data for that specific point.
    </p>
@@ -198,6 +193,7 @@ d3.json(urlstr).then(function(yeardata){
 showButtons();
 
 var selectedunit = d3.select("#unit-dropdown").property('value');
+
 genDEMO("county", "000", selectedunit,"Colorado", yrvalue);
 d3.select("#geo-dropdown").on("change", function(d,i) {
       var selectedGeo = d3.select("#geo-dropdown").property('value');
@@ -249,7 +245,7 @@ d3.select("#county-dropdown").on("change", function(d,i) {
 		var selectedcounty = d3.select('#county-dropdown option:checked').text();
 		var selectedunit = d3.select("#unit-dropdown").property('value');
 		if(selectedcounty.includes("County")){
-             genDEMO("county",selectedfips,selectedunit,selectedcounty,yrvalue); 
+              genDEMO("county",selectedfips,selectedunit,selectedcounty,yrvalue); 
 			 } else {
 			  genDEMO("region",selectedfips,selectedunit,selectedcounty,yrvalue); 
 			  }
