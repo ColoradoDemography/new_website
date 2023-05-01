@@ -7679,6 +7679,7 @@ for(i = 0; i < outchart.length;i++){
 		total_out_outmig = total_out_outmig + Math.abs(outchart[i].MOVEDOUT)
 	}
 
+
 var net_nodes = outchart.filter(d => d.MOVEDNET != 0)
 var in_nodes = outchart.filter(d => d.MOVEDIN != 0)
 var out_nodes = outchart.filter(d => d.MOVEDOUT != 0)
@@ -7691,6 +7692,7 @@ if(chartheight_in < 300) { var chartheight_in = 300};
 
 var chartheight_out = out_nodes.length * 15;
 if(chartheight_out < 300) { var chartheight_out = 300};
+
 
 //Net Migration Plot
 
@@ -7708,6 +7710,7 @@ var data_net = {
       width: 0.5
     },
    label: labarr,
+   pad : 10,
    hoverinfo: 'none'
       },
 
@@ -7775,6 +7778,7 @@ var data_in = {
       width: 0.5
     },
    label: labarr,
+   pad : 10,
    hoverinfo: 'none'
       },
 
@@ -7833,6 +7837,7 @@ var data_out = {
       width: 0.5
     },
    label: labarr,
+   pad : 10,
    hoverinfo: 'none'
       },
 
