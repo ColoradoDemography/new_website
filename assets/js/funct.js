@@ -1810,7 +1810,17 @@ function genFilename(outname, type, ext, yr) {
 		case 'houseecon' :
 			var fileName = outname + " ACS Housing Cost and Affordability Table." + ext
 		break;
+		case 'netflow' :
+			var fileName = outname + " ACS Net Migration Flows." + ext
+		break;
+		case 'inflow' :
+			var fileName = outname + " ACS In Migration Flows." + ext
+		break;
+		case 'outflow' :
+			var fileName = outname + " ACS Out Migration Flows." + ext
+		break;
 		} //switch
+		
 	
 return(fileName)
 } //genFilename
@@ -1897,6 +1907,39 @@ function exportToPng(cname, type, graphDiv, yr){
 		break;
 	    case 'popchng' : {
 		    Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 400 }).then(function (dataURL) {
+				var a = document.createElement('a');
+				a.href = dataURL;
+				a.download = fn;
+				document.body.appendChild(a);
+				 a.click();
+				document.body.removeChild(a);
+			});
+		} 
+		break;
+	    case 'netflow': {
+		    Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 1000 }).then(function (dataURL) {
+				var a = document.createElement('a');
+				a.href = dataURL;
+				a.download = fn;
+				document.body.appendChild(a);
+				 a.click();
+				document.body.removeChild(a);
+			});
+		} 
+		break;
+	    case 'inflow' : {
+		    Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 1200 }).then(function (dataURL) {
+				var a = document.createElement('a');
+				a.href = dataURL;
+				a.download = fn;
+				document.body.appendChild(a);
+				 a.click();
+				document.body.removeChild(a);
+			});
+		} 
+		break;
+	    case 'outflow' : {
+		    Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 1200 }).then(function (dataURL) {
 				var a = document.createElement('a');
 				a.href = dataURL;
 				a.download = fn;
@@ -7465,10 +7508,11 @@ function genFLOWS(fips, name, yearval){
 	CHART2.innerHTML = "";
 	
 	var plname = countyName(parseInt(fips))
-	var titleValNet = "Net Migration " + plname + " " + (yearval - 4) + "-" + yearval;
-	var titleValOut = "Out Migration " + plname + " " + (yearval - 4) + "-" + yearval;
-	var titleValIn = "In Migration " + plname + " " + (yearval - 4) + "-" + yearval;
-	var citStr = "U.S. Census Bureau ("+ (yearval + 1) + ") County to County Migration Flows " + (yearval - 4) + "-" + yearval +
+	var citval = yearval + 1
+	var titleValNet = plname + " Net Migration " + (yearval - 4) + "-" + yearval;
+	var titleValOut = plname + " Out Migration " +  (yearval - 4) + "-" + yearval;
+	var titleValIn = plname + " In Migration " + (yearval - 4) + "-" + yearval;
+	var citStr = "U.S. Census Bureau ("+ citval + ") County to County Migration Flows " + (yearval - 4) + "-" + yearval +
 	           " Print Date: "+ fmt_date(new Date);
 
 	
@@ -7498,7 +7542,16 @@ function genFLOWS(fips, name, yearval){
 	 } else {
 		 var nameout = [data[i][5]]
 	 }
+
+	 if(!!data[i][2]){ //GEOID2 is not NULL
+	    var chkval = data[i][2].toString();
+	 } else {
+		var chkval = "";
+	 }
+	 if(chkval.length <= 5){
 	  outdata.push({
+		 "GEOID1" : data[i][1],
+		 "GEOID2" : data[i][2],
 		  "NAME1" : namein.length == 2 ? namein[0].trim() : "",
 		  "STATE1" : namein.length == 2 ? namein[1].trim() : namein[0].trim(),
 		  "NAME2" : nameout.length == 2 ? nameout[0].trim() : "",
@@ -7507,8 +7560,10 @@ function genFLOWS(fips, name, yearval){
 		  "MOVEDOUT" : data[i][3] == null ? 0 : parseInt(data[i][3]),
 		  "MOVEDNET" : data[i][6] == null ? 0 : parseInt(data[i][6])
 	  })
+	 }
 	 } //for
 	 
+
 //summarizing state data and summarizing out-of state movement for other counties
 
 var columnsToSum = ["MOVEDIN", "MOVEDOUT", "MOVEDNET"] 
@@ -7562,41 +7617,85 @@ for(i = 0; i < nodesuniq.length; i++){
 
 // Prepping net migration data
 
-var src = [];
-var tgt = [];
-var val = [];
-var lablinks = []
-var total_inmig = 0
-var total_outmig = 0
+var srcnet = [];
+var tgtnet = [];
+var valnet = [];
+var lablinksnet = [];
+var total_net_inmig = 0
+var total_net_outmig = 0
+
+var srcin = [];
+var tgtin = [];
+var valin = [];
+var lablinksin = [];
+var total_in_inmig = 0;
+
+var srcout = [];
+var tgtout = [];
+var valout = [];
+var lablinksout = [];
+var total_out_outmig = 0
+
+// Prepping net migration data
 for(i = 0; i < outchart.length;i++){
     if(outchart[i].MOVEDNET < 0){
 		var srcVal = nodes.filter(obj => obj.location == outchart[i].NAME1)
 		var tgtVal = nodes.filter(obj => obj.location == outchart[i].NAME2)
-		src.push(srcVal[0].row_val)
-		tgt.push(tgtVal[0].row_val)
-		val.push(Math.abs(outchart[i].MOVEDNET))
-		lablinks.push(outchart[i].NAME1 + " to " + outchart[i].NAME2 + ": " + fmt_comma(Math.abs(outchart[i].MOVEDNET)));
-		total_outmig = total_outmig + Math.abs(outchart[i].MOVEDNET)
+		srcnet.push(srcVal[0].row_val)
+		tgtnet.push(tgtVal[0].row_val)
+		valnet.push(Math.abs(outchart[i].MOVEDNET))
+		lablinksnet.push(outchart[i].NAME1 + " to " + outchart[i].NAME2 + ": " + fmt_comma(Math.abs(outchart[i].MOVEDNET)));
+		total_net_outmig = total_net_outmig + Math.abs(outchart[i].MOVEDNET)
 	} else {
 		var srcVal = nodes.filter(obj => obj.location == outchart[i].NAME2)
 		var tgtVal = nodes.filter(obj => obj.location == outchart[i].NAME1)
-		src.push(srcVal[0].row_val)
-		tgt.push(tgtVal[0].row_val)
-		val.push(Math.abs(outchart[i].MOVEDNET))
-		lablinks.push(outchart[i].NAME2 + " to " + outchart[i].NAME1 + ": " + fmt_comma(Math.abs(outchart[i].MOVEDNET)));
-		total_inmig = total_inmig + Math.abs(outchart[i].MOVEDNET)
+		srcnet.push(srcVal[0].row_val)
+		tgtnet.push(tgtVal[0].row_val)
+		valnet.push(Math.abs(outchart[i].MOVEDNET))
+		lablinksnet.push(outchart[i].NAME2 + " to " + outchart[i].NAME1 + ": " + fmt_comma(Math.abs(outchart[i].MOVEDNET)));
+		total_net_inmig = total_net_inmig + Math.abs(outchart[i].MOVEDNET)
 	}
 }  
 
-var chartheight = outchart.length * 12;
-var in_mig_lab = "Net In Migration: "+ fmt_comma(total_inmig);
-var out_mig_lab = "Net Out Migration: "+ fmt_comma(total_outmig);
-//Prepping out migration data
+// Prepping in migration data
+for(i = 0; i < outchart.length;i++){
+		var srcVal = nodes.filter(obj => obj.location == outchart[i].NAME2)
+		var tgtVal = nodes.filter(obj => obj.location == outchart[i].NAME1)
+		srcin.push(srcVal[0].row_val)
+		tgtin.push(tgtVal[0].row_val)
+		valin.push(Math.abs(outchart[i].MOVEDIN))
+		lablinksin.push(outchart[i].NAME2 + " to " + outchart[i].NAME1 + ": " + fmt_comma(Math.abs(outchart[i].MOVEDIN)));
+		total_in_inmig = total_in_inmig + Math.abs(outchart[i].MOVEDIN)
+	}
+  
+// Prepping out migration data
+for(i = 0; i < outchart.length;i++){
+		var srcVal = nodes.filter(obj => obj.location == outchart[i].NAME1)
+		var tgtVal = nodes.filter(obj => obj.location == outchart[i].NAME2)
+		srcout.push(srcVal[0].row_val)
+		tgtout.push(tgtVal[0].row_val)
+		valout.push(Math.abs(outchart[i].MOVEDOUT))
+		lablinksout.push(outchart[i].NAME1 + " to " + outchart[i].NAME2 + ": " + fmt_comma(Math.abs(outchart[i].MOVEDOUT)));
+		total_out_outmig = total_out_outmig + Math.abs(outchart[i].MOVEDOUT)
+	}
 
-//prepping in migration data
+var net_nodes = outchart.filter(d => d.MOVEDNET != 0)
+var in_nodes = outchart.filter(d => d.MOVEDIN != 0)
+var out_nodes = outchart.filter(d => d.MOVEDOUT != 0)
+
+var chartheight_net = net_nodes.length * 12;
+if(chartheight_net < 300) { var chartheight_net = 300};
+
+var chartheight_in = in_nodes.length * 15;
+if(chartheight_in < 300) { var chartheight_in = 300};
+
+var chartheight_out = out_nodes.length * 15;
+if(chartheight_out < 300) { var chartheight_out = 300};
 
 //Net Migration Plot
 
+var net_in_mig_lab = "Net In Migration: "+ fmt_comma(total_net_inmig);
+var net_out_mig_lab = "Net Out Migration: "+ fmt_comma(total_net_outmig);
 
 var data_net = {
   type: "sankey",
@@ -7613,20 +7712,20 @@ var data_net = {
       },
 
   link: {
-    source: src,
-    target: tgt,
-    value:  val,
-	customdata : lablinks,
+    source: srcnet,
+    target: tgtnet,
+    value:  valnet,
+	customdata : lablinksnet,
 	hovertemplate : '%{customdata}<extra></extra>'
   }
 }
 
 var data_netp = [data_net];
 
-var layout = {
-  title: titleValNet,
+var layoutnet = {
+  title: titleValNet, autosize : false, 
   width: 1100,
-  height: chartheight,
+  height: chartheight_net,
   font: {
     size: 10,
 	family : 'Arial Black'
@@ -7641,7 +7740,7 @@ annotations : [{text :  citStr ,
       y : 0, 
       align : 'left', 
       showarrow : false},
-	  {text : in_mig_lab,
+	  {text : net_in_mig_lab,
         font : {size : 10, color : 'black'},
         xref : 'paper', 
 	    yref : 'paper', 
@@ -7650,7 +7749,7 @@ annotations : [{text :  citStr ,
 	    x : 0.25,
         y : 1,
 		showarrow : false },
-		{text : out_mig_lab,
+		{text : net_out_mig_lab,
         font : {size : 10, color : 'black'},      
 		xref : 'paper', 
 	    yref : 'paper', 
@@ -7660,8 +7759,143 @@ annotations : [{text :  citStr ,
         y : 1,
 		showarrow : false }]
 }
-Plotly.newPlot(CHART0, data_netp, layout);
+
+//in Migration Plot
+
+var in_in_mig_lab = "In Migration: "+ fmt_comma(total_in_inmig);
+
+var data_in = {
+  type: "sankey",
+  orientation: "h",
+  node: {
+    pad: 15,
+    thickness: 30,
+    line: {
+      color: "black",
+      width: 0.5
+    },
+   label: labarr,
+   hoverinfo: 'none'
+      },
+
+  link: {
+    source: srcin,
+    target: tgtin,
+    value:  valin,
+	customdata : lablinksin,
+	hovertemplate : '%{customdata}<extra></extra>'
+  }
+}
+
+var data_inp = [data_in];
+
+var layoutin = {
+  title: titleValIn, autosize: false,
+  width: 1100, 
+  height: chartheight_in, 
+  font: {
+    size: 10,
+	family : 'Arial Black'
+  },
+annotations : [{text :  citStr , 
+      font: { size : 9, color: 'black'},
+      xref : 'paper', 
+	  yref : 'paper', 
+	  xanchor : 'left',
+	  yanchor : 'bottom',
+      x : 0.75, 
+      y : 0, 
+      align : 'left', 
+      showarrow : false},
+	  {text : in_in_mig_lab,
+        font : {size : 10, color : 'black'},
+        xref : 'paper', 
+	    yref : 'paper', 
+	    xanchor : 'left',
+	    yanchor : 'bottom',
+	    x : 0.75,
+        y : 1,
+		showarrow : false }]
+}
+
+//out Migration Plot
+
+var out_out_mig_lab = "Out Migration: "+ fmt_comma(total_out_outmig);
+
+var data_out = {
+  type: "sankey",
+  orientation: "h",
+  node: {
+    pad: 15,
+    thickness: 30,
+    line: {
+      color: "black",
+      width: 0.5
+    },
+   label: labarr,
+   hoverinfo: 'none'
+      },
+
+  link: {
+    source: srcout,
+    target: tgtout,
+    value:  valout,
+	customdata : lablinksout,
+	hovertemplate : '%{customdata}<extra></extra>'
+  }
+}
+
+var data_outp = [data_out];
+
+var layoutout = {
+  title: titleValOut, autosize : false,
+  width: 1100,
+  height: chartheight_out, 
+  font: {
+    size: 10,
+	family : 'Arial Black'
+  },
+annotations : [{text :  citStr , 
+      font: { size : 9, color: 'black'},
+      xref : 'paper', 
+	  yref : 'paper', 
+	  xanchor : 'left',
+	  yanchor : 'bottom',
+      x : 0.25, 
+      y : 0, 
+      align : 'left', 
+      showarrow : false},
+		{text : out_out_mig_lab,
+        font : {size : 10, color : 'black'},      
+		xref : 'paper', 
+	    yref : 'paper', 
+	    xanchor : 'left',
+	    yanchor : 'bottom',
+        x : 0.25,
+        y : 1,
+		showarrow : false }]
+}
+
+//Plotting
+Plotly.newPlot(CHART0, data_netp, layoutnet);
+Plotly.newPlot(CHART1, data_inp, layoutin);
+Plotly.newPlot(CHART2, data_outp, layoutout);
+
 
 //Export Code
+var chartnet_csv = document.getElementById('net_csv');
+var chartnet_png = document.getElementById('net_png');
+chartnet_csv.onclick = function() {exportToCsv(plname, 'netflow', outchart,0)};
+chartnet_png.onclick = function() {exportToPng(plname, 'netflow', CHART0,0)};
+
+var chartin_csv = document.getElementById('in_csv');
+var chartin_png = document.getElementById('in_png');
+chartin_csv.onclick = function() {exportToCsv(plname, 'inflow', outchart,0)};
+chartin_png.onclick = function() {exportToPng(plname, 'inflow', CHART1,0)};
+
+var chartout_csv = document.getElementById('out_csv');
+var chartout_png = document.getElementById('out_png');
+chartout_csv.onclick = function() {exportToCsv(plname, 'outflow', outchart,0)};
+chartout_png.onclick = function() {exportToPng(plname, 'outflow', CHART2,0)};
    }) //promise
 } //genFLOWS
