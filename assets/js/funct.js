@@ -7791,7 +7791,7 @@ var data_inp = [data_in];
 
 var layoutin = {
   title: titleValIn, autosize: false,
-  width: 1100, 
+  width: 700, 
   height: chartheight_in, 
   font: {
     size: 10,
@@ -7849,7 +7849,7 @@ var data_outp = [data_out];
 
 var layoutout = {
   title: titleValOut, autosize : false,
-  width: 1100,
+  width: 700,
   height: chartheight_out, 
   font: {
     size: 10,
