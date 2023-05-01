@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <title>SDO GIS Resource Page</title>
 
@@ -10,16 +10,13 @@
 <!-- SDO CSS -->
 <link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
 <!-- adding d3.js  for data manipulation-->
- <script src="https://d3js.org/d3.v6.min.js"></script>
+ <script src="https://d3js.org/d3.v7.min.js"></script>
 <!-- SDO suport functions, genSYA, insertHTML, -->
-<script src="../js/funct.js"></script>
+<script src="https://demography.dola.colorado.gov/assets/js/funct.js"></script>
+<!-- GoogleAnalytics Script -->
+<script defer src="https://demography.dola.colorado.gov/assets/js/googleAnalytics.js"></script>
 </head>
 <body>
-<div class="alert__bar--covid-19" style="text-color:black;font-size:12px;">
-    <h2 style="background-color:#8fc6e8;text-align:center;">
-      Visit <a href="https://covid19.colorado.gov/for-coloradans/vaccine/where-can-i-get-vaccinated">"Where can I get vaccinated"</a> or call 1-877-COVAXCO (1-877-268-2926) for vaccine information.
-    </h2>
-</div>    
 <div>
 <a href="https://cdola.colorado.gov/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt="Department of Local Affairs Homepage"></a>
 </div>
@@ -41,12 +38,7 @@ GIS data and maps from the Colorado State Demography Office.<br>
 <p>
 You can access visualizations, data and external links by clicking on the buttons below.
 </p>
-<details>
-	<summary>Interactive Web Maps and Data Visualizations</summary>
-<main>
-		<div w3-include-html="./gis_applications.html"></div>
-</main>
-</details>
+<button class="summarybtn" onClick="location.href = './gis_applications.html'">Interactive Data Visualizations and Web Maps</button>
 <details>
 	<summary>GIS Shapefiles and Downloads</summary>
 <main>
