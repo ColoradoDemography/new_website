@@ -7513,7 +7513,7 @@ function genFLOWS(fips, name, yearval){
 	var titleValOut = plname + " Out Migration " +  (yearval - 4) + "-" + yearval;
 	var titleValIn = plname + " In Migration " + (yearval - 4) + "-" + yearval;
 	var citStr = "U.S. Census Bureau ("+ citval + ") County to County Migration Flows " + (yearval - 4) + "-" + yearval +
-	           " Print Date: "+ fmt_date(new Date);
+	           "<br>Print Date: "+ fmt_date(new Date);
 
 	
 	var censKey = '08fe07c2a7bf781b7771d7cccb264fe7ff8965ce'
@@ -7803,7 +7803,7 @@ annotations : [{text :  citStr ,
 	  yref : 'paper', 
 	  xanchor : 'left',
 	  yanchor : 'bottom',
-      x : 0.75, 
+      x : 0.5, 
       y : 0, 
       align : 'left', 
       showarrow : false},
@@ -7861,7 +7861,7 @@ annotations : [{text :  citStr ,
 	  yref : 'paper', 
 	  xanchor : 'left',
 	  yanchor : 'bottom',
-      x : 0.25, 
+      x : 0, 
       y : 0, 
       align : 'left', 
       showarrow : false},
@@ -7871,7 +7871,7 @@ annotations : [{text :  citStr ,
 	    yref : 'paper', 
 	    xanchor : 'left',
 	    yanchor : 'bottom',
-        x : 0.25,
+        x : 0,
         y : 1,
 		showarrow : false }]
 }
