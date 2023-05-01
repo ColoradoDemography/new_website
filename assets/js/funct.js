@@ -7684,14 +7684,14 @@ var net_nodes = outchart.filter(d => d.MOVEDNET != 0)
 var in_nodes = outchart.filter(d => d.MOVEDIN != 0)
 var out_nodes = outchart.filter(d => d.MOVEDOUT != 0)
 
-var chartheight_net = net_nodes.length * 12;
-if(chartheight_net < 300) { var chartheight_net = 300};
+var chartheight_net = net_nodes.length * 20;
+if(chartheight_net < 400) { var chartheight_net = 400};
 
-var chartheight_in = in_nodes.length * 15;
-if(chartheight_in < 300) { var chartheight_in = 300};
+var chartheight_in = in_nodes.length * 20;
+if(chartheight_in < 400) { var chartheight_in = 400};
 
-var chartheight_out = out_nodes.length * 15;
-if(chartheight_out < 300) { var chartheight_out = 300};
+var chartheight_out = out_nodes.length * 20;
+if(chartheight_out < 400) { var chartheight_out = 400};
 
 
 //Net Migration Plot
