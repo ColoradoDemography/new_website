@@ -7508,7 +7508,7 @@ function genFLOWS(fips, name, yearval){
 	CHART2.innerHTML = "";
 	
 	var plname = countyName(parseInt(fips))
-	var citval = yearval + 1
+	var citval = parseInt(yearval) + 1
 	var titleValNet = plname + " Net Migration " + (yearval - 4) + "-" + yearval;
 	var titleValOut = plname + " Out Migration " +  (yearval - 4) + "-" + yearval;
 	var titleValIn = plname + " In Migration " + (yearval - 4) + "-" + yearval;
