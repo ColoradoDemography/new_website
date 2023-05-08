@@ -1917,7 +1917,7 @@ function exportToPng(cname, type, graphDiv, yr){
 		} 
 		break;
 	    case 'netflow': {
-		    Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 1000 }).then(function (dataURL) {
+		    Plotly.toImage(graphDiv, { format: 'png', width: 800, height: 800 }).then(function (dataURL) {
 				var a = document.createElement('a');
 				a.href = dataURL;
 				a.download = fn;
@@ -1928,7 +1928,7 @@ function exportToPng(cname, type, graphDiv, yr){
 		} 
 		break;
 	    case 'inflow' : {
-		    Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 1200 }).then(function (dataURL) {
+		    Plotly.toImage(graphDiv, { format: 'png', width: 800, height: 800 }).then(function (dataURL) {
 				var a = document.createElement('a');
 				a.href = dataURL;
 				a.download = fn;
@@ -1939,7 +1939,7 @@ function exportToPng(cname, type, graphDiv, yr){
 		} 
 		break;
 	    case 'outflow' : {
-		    Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 1200 }).then(function (dataURL) {
+		    Plotly.toImage(graphDiv, { format: 'png', width: 800, height: 800 }).then(function (dataURL) {
 				var a = document.createElement('a');
 				a.href = dataURL;
 				a.download = fn;
@@ -7477,6 +7477,7 @@ vacantbar_png.onclick = function() { exportToPng(plName, 'housing', CHART2, 0); 
 }; //End  of Housdash
 
 //Migration Flows functions
+//genFLOWYR generates the ACS years
 function genFLOWYR(inYR){
 	if(inYR > 2020) { inYR = 2020}  //Adjust this to the latest version of the ACS Migration Flows data
 	var prevYR = inYR - 4;
@@ -7494,7 +7495,260 @@ function genFLOWYR(inYR){
    }
 
  return(yrArr)
+}  //genFLOWYR
+
+//condSort sorts dat records based on the valur of MOVEDNET_EST_EST
+function condSort(indata, variable) {
+	if(variable == 'MOVEDNET_EST') {
+	var pos = indata.filter(d => d.MOVEDNET_EST >= 0)
+	var possort = pos.sort(function(a, b){return d3.descending(a['MOVEDNET_EST'], b['MOVEDNET_EST']); })
+	var neg = indata.filter(d => d.MOVEDNET_EST < 0)
+	var negsort = neg.sort(function(a, b){return d3.ascending(a['MOVEDNET_EST'], b['MOVEDNET_EST']); })
+	} else {
+		var pos = indata.filter(d => d.value >= 0)
+		var possort = pos.sort(function(a, b){return d3.descending(a['value'], b['value']); })
+		var neg = indata.filter(d => d.value < 0)
+		var negsort = neg.sort(function(a, b){return d3.ascending(a['value'], b['value']); })
+	}
+
+	var outdata = possort.concat(negsort)
+
+	return(outdata)
 }
+
+//supressData compresses data sets to have a maximum of 35 entires (20 px per entry in a chart with 700 px)
+//OR entry with 10 or fewer movers
+function supressData(inData, type){
+	var fmt_comma = d3.format(",");
+	var outname = "Colorado"
+
+		switch(type) {
+		case 'net' :{
+ 		  var posdata = inData.filter(d => d.MOVEDNET_EST >= 0)
+          var possort = posdata.sort(function(a, b){return d3.descending(a['MOVEDNET_EST'], b['MOVEDNET_EST']); })
+		  var poscnt = 0;
+		  var posmax = 0;
+		  var posfin = [];
+          var posphrase = ""
+		  if(possort.length > 35) { //Check for long chart
+			  for(i = 0; i < possort.length; i++) {
+				  if(i <= 34){
+					  posfin[i] = possort[i];
+				  } else {
+				      poscnt++
+				      posmax =  possort[i].MOVEDNET_EST > posmax ? possort[i].MOVEDNET_EST : posmax;
+					  if(poscnt == 1){
+					  var posphrase = fmt_comma(poscnt) + ' location with ' + fmt_comma(posmax)+ ' or fewer movers'
+					  } else {
+					  var posphrase = fmt_comma(poscnt) + ' locations with ' + fmt_comma(posmax)+ ' or fewer movers'
+					  }  
+			      }
+			  }
+		  }  else { //supression for small cells, 10 or fewer
+			  for(i = 0; i < possort.length; i++) {
+				  if(possort[i].MOVEDNET_EST > 10){
+					  posfin[i] = possort[i];
+				  } else {
+				  if(possort[i].MOVEDNET_EST != 0){
+				      poscnt++
+					  posmax = 10;
+					  if(poscnt ==1) {
+					  var posphrase = fmt_comma(poscnt) + ' location with 10 or fewer movers'
+					  } else {
+					  var posphrase = fmt_comma(poscnt) + ' locations with 10 or fewer movers'
+					  }  
+				  }
+			      }
+			  }
+		}
+
+		//adding record for supression
+		 if(poscnt > 0){
+			  posfin.push({
+				"GEOID1" : "",
+				"GEOID2" : "",
+				"NAME1" : outname,
+				"STATE1" : "",
+				"NAME2" : posphrase.length > 0 ? posphrase : "",
+				"STATE2" : "",
+				"MOVEDIN_EST" : 0,
+				"MOVEDIN_MOE" : 0,
+				"MOVEDOUT_EST" : 0,
+				"MOVEDOUT_MOE" : 0,
+				"MOVEDNET_EST" : posmax,
+				"MOVEDNET_MOE" : 0 })
+			  }
+		  var negdata = inData.filter(d => d.MOVEDNET_EST < 0)
+
+          var negsort = negdata.sort(function(a, b){return d3.ascending(a['MOVEDNET_EST'], b['MOVEDNET_EST']); })
+		  var negcnt = 0;
+		  var negmax = 0;
+		  var negfin = [];
+		  var nedphrase = "";
+		  if(negsort.length > 35) { //Check for long chart
+			  for(i = 0; i < negsort.length; i++) {
+				  if(i <= 34){
+					  negfin[i] = negsort[i];
+				  } else {
+				      negcnt++
+				      negmax =  negsort[i].MOVEDNET_EST < negmax ? negsort[i].MOVEDNET_EST : negmax;
+					  if(negcnt == 1){
+							var negphrase = fmt_comma(negcnt) + ' location with ' + fmt_comma(Math.abs(negmax))+ ' or fewer movers';
+						} else {
+							var negphrase = fmt_comma(negcnt) + ' locations with ' + fmt_comma(Math.abs(negmax))+ ' or fewer movers';
+						}
+			      }
+			  }
+		  }  else { //supression for small cells, 10 or fewer
+			  for(i = 0; i < negsort.length; i++) {
+				  if(Math.abs(negsort[i].MOVEDNET_EST) > 10){
+					  negfin[i] = negsort[i];
+				  } else {
+					  if(negsort[i].MOVEDNET_EST != 0){
+				      negcnt++
+					  negmax = -10
+					  if(negcnt == 1){
+					  var negphrase = fmt_comma(negcnt) + ' location with 10 or fewer movers'
+					  } else {					  
+					  var negphrase = fmt_comma(negcnt) + ' locations with 10 or fewer movers'
+					  }
+					  }
+			      }
+			  }
+		}
+		
+				//adding record for supression
+		 if(negcnt > 0){
+			  negfin.push({
+				"GEOID1" : "",
+				"GEOID2" : "",
+				"NAME1" : outname,
+				"STATE1" : "",
+				"NAME2" : negphrase.length > 0 ? negphrase : "",
+				"STATE2" : "",
+				"MOVEDIN_EST" : 0,
+				"MOVEDIN_MOE" : 0,
+				"MOVEDOUT_EST" : 0,
+				"MOVEDOUT_MOE" : 0,
+				"MOVEDNET_EST" : negmax,
+				"MOVEDNET_MOE" : 0 })
+			  }
+		var outdata = posfin.concat(negfin);
+		break;
+		}  //net
+	case "in" : {
+          var insort = inData.sort(function(a, b){return d3.descending(a['MOVEDIN_EST'], b['MOVEDIN_EST']); })
+		  var incnt = 0;
+		  var inmax = 0;
+		  var infin = [];
+		  var inphrase = "";
+		  if(insort.length > 35) { //Check for long chart
+			  for(i = 0; i < insort.length; i++) {
+				  if(i <= 34){
+					  infin[i] = insort[i];
+				  } else {
+				      incnt++
+				      inmax =  insort[i].MOVEDIN_EST > inmax ? insort[i].MOVEDIN_EST : inmax;
+					  if(incnt == 1){
+					  var inphrase = fmt_comma(incnt) + ' location with ' + fmt_comma(inmax)+ ' or fewer movers'
+					  } else {
+						  var inphrase = fmt_comma(incnt) + ' locations with ' + fmt_comma(inmax)+ ' or fewer movers'
+					  }
+			      }
+			  }
+		  }  else { //supression for small cells, 10 or fewer
+			  for(i = 0; i < insort.length; i++) {
+				  if(insort[i].MOVEDIN_EST > 10){
+					  infin[i] = insort[i]; 
+				  } else {
+					  if(insort[i].MOVEDIN_EST != 0){
+				      incnt++
+					  if(incnt == 1){
+					  var inphrase = fmt_comma(incnt) + ' location with 10 or fewer movers'
+					  } else {
+						var inphrase = fmt_comma(incnt) + ' locations with 10 or fewer movers'  
+					  }
+			      }
+				  }
+			  }		
+		  }
+		 //adding record for supression
+		 if(incnt > 0){
+			  infin.push({
+				"GEOID1" : "",
+				"GEOID2" : "",
+				"NAME1" : outname,
+				"STATE1" : "",
+				"NAME2" : inphrase.length > 0 ? inphrase : "",
+				"STATE2" : "",
+				"MOVEDIN_EST" : 10,
+				"MOVEDIN_MOE" : 0,
+				"MOVEDOUT_EST" : 0,
+				"MOVEDOUT_MOE" : 0,
+				"MOVEDNET_EST" : 0,
+				"MOVEDNET_MOE" : 0 })
+			  }
+		var outdata = infin;
+		break;
+	} //in
+	case "out" : {
+          var outsort = inData.sort(function(a, b){return d3.descending(a['MOVEDOUT_EST'], b['MOVEDOUT_EST']); })
+		  var outcnt = 0;
+		  var outmax = 0;
+		  var outfin = [];
+		  var outphrase = "";
+		  if(outsort.length > 343) { //Check for long chart
+			  for(i = 0; i < outsort.length; i++) {
+				  if(i <= 34){
+					  outfin[i] = outsort[i];
+				  } else {
+				      outcnt++
+				      outmax =  outsort[i].MOVEDOUT_EST > inmax ? outsort[i].MOVEDOUT_EST : inmax;
+					  if(outcnt == 1){
+					  var outphrase = fmt_comma(outcnt) + ' location with ' + fmt_comma(outmax)+ ' or fewer movers'
+					  } else {
+						  var outphrase = fmt_comma(outcnt) + ' locations with ' + fmt_comma(outmax)+ ' or fewer movers'
+					  }
+			      }
+			  }
+		  }  else { //supression for small cells, 10 or fewer
+			  for(i = 0; i < outsort.length; i++) {
+				  if(outsort[i].MOVEDOUT_EST > 10){
+					  outfin[i] = outsort[i];
+				  } else {
+					  if(outsort[i] != 0){
+				      outcnt++
+					  if(outcnt == 1){
+					  var outphrase = fmt_comma(outcnt) + ' location with 10 or fewer movers'
+					  } else {
+						var outphrase = fmt_comma(outcnt) + ' locations with 10 or fewer movers'  
+					  }
+					  }
+			      }
+			  } 
+		}
+		//adding record for supression
+		 if(outcnt > 0){
+			  outfin.push({
+				"GEOID1" : "",
+				"GEOID2" : "",
+				"NAME1" : outname,
+				"STATE1" : "",
+				"NAME2" : outphrase.length > 0 ? outphrase : "",
+				"STATE2" : "",
+				"MOVEDIN_EST" : 0,
+				"MOVEDIN_MOE" : 0,
+				"MOVEDOUT_EST" : 10,
+				"MOVEDOUT_MOE" : 0,
+				"MOVEDNET_EST" : 0,
+				"MOVEDNET_MOE" : 0 })
+			  }
+		var outdata = outfin;
+		break;
+	} //out
+	} //switch
+return(outdata)
+} //supressData
 
 function genFLOWS(fips, name, yearval){
 	var fmt_comma = d3.format(",");
@@ -7509,19 +7763,20 @@ function genFLOWS(fips, name, yearval){
 	
 	var plname = countyName(parseInt(fips))
 	var citval = parseInt(yearval) + 1
-	var titleValNet = plname + " Net Migration " + (yearval - 4) + "-" + yearval;
-	var titleValOut = plname + " Out Migration " +  (yearval - 4) + "-" + yearval;
-	var titleValIn = plname + " In Migration " + (yearval - 4) + "-" + yearval;
-	var citStr = "U.S. Census Bureau ("+ citval + ") County to County Migration Flows " + (yearval - 4) + "-" + yearval +
-	           "<br>Print Date: "+ fmt_date(new Date);
+	var titleVal_net = plname + " Net Migration " + (yearval - 4) + "-" + yearval;
+	var titleVal_out = plname + " Out Migration " +  (yearval - 4) + "-" + yearval;
+	var titleVal_in = plname + " In Migration " + (yearval - 4) + "-" + yearval;
+	var citStr = "U.S. Census Bureau ("+ citval + ") County to County Migration Flows <br>" + (yearval - 4) + "-" + yearval +
+	           " Print Date: "+ fmt_date(new Date);
 
-	
+	var flowcall = "/acs/flows?get=GEOID1,GEOID2,FULL1_NAME,FULL2_NAME,MOVEDIN,MOVEDIN_M,MOVEDOUT,MOVEDOUT_M,MOVEDNET,MOVEDNET_M"
 	var censKey = '08fe07c2a7bf781b7771d7cccb264fe7ff8965ce'
 	if(fips == "000") {
-		var urlstr = "https://api.census.gov/data/" + yearval + "/acs/flows?get=MOVEDIN,GEOID1,GEOID2,MOVEDOUT,FULL1_NAME,FULL2_NAME,MOVEDNET&for=county:*&in=state:08&key=" + censKey;
+		var urlstr = "https://api.census.gov/data/" + yearval + flowcall + "&for=county:*&in=state:08&key=" + censKey;
 	} else {
-		var urlstr = "https://api.census.gov/data/" + yearval + "/acs/flows?get=MOVEDIN,GEOID1,GEOID2,MOVEDOUT,FULL1_NAME,FULL2_NAME,MOVEDNET&for=county:" + fips + "&in=state:08&key=" + censKey;
+		var urlstr = "https://api.census.gov/data/" + yearval + flowcall + "&for=county:" + fips + "&in=state:08&key=" + censKey;
 	}
+
 
 //Reading data
    d3.json(urlstr).then(function(data){
@@ -7529,169 +7784,216 @@ function genFLOWS(fips, name, yearval){
 
 	 for(i = 1; i < data.length; i++){
 	 
-	 if(data[i][4].indexOf(",") > -1) {
-	     var namein = data[i][4].split(",")
+	 if(data[i][2].indexOf(",") > -1) {
+	     var namein = data[i][2].split(",")
 	 } else {
-		 var namein = [data[i][4]]
+		 var namein = [data[i][2]]
 	 }
-	 if(data[i][5].indexOf(",") > -1) {
-	     var nameout = data[i][5].split(",")
+	 if(data[i][3].indexOf(",") > -1) {
+	     var nameout = data[i][3].split(",")
 		 if(nameout.length == 3){
 			 nameout.shift()
 		 }
 	 } else {
-		 var nameout = [data[i][5]]
+		 var nameout = [data[i][3]]
 	 }
 
-	 if(!!data[i][2]){ //GEOID2 is not NULL
-	    var chkval = data[i][2].toString();
+	 if(!!data[i][1]){ //GEOID2 is not NULL
+	    var chkval = data[i][1].toString();
 	 } else {
 		var chkval = "";
 	 }
 	 if(chkval.length <= 5){
 	  outdata.push({
-		 "GEOID1" : data[i][1],
-		 "GEOID2" : data[i][2],
+		 "GEOID1" : data[i][0],
+		 "GEOID2" : data[i][1],
 		  "NAME1" : namein.length == 2 ? namein[0].trim() : "",
 		  "STATE1" : namein.length == 2 ? namein[1].trim() : namein[0].trim(),
 		  "NAME2" : nameout.length == 2 ? nameout[0].trim() : "",
 		  "STATE2" : nameout.length == 2 ? nameout[1].trim() : nameout[0].trim(),
-	      "MOVEDIN" : data[i][0] == null ? 0 : parseInt(data[i][0]),
-		  "MOVEDOUT" : data[i][3] == null ? 0 : parseInt(data[i][3]),
-		  "MOVEDNET" : data[i][6] == null ? 0 : parseInt(data[i][6])
+	      "MOVEDIN_EST" : data[i][4] == null ? 0 : parseInt(data[i][4]),
+		  "MOVEDIN_MOE" : data[i][5] == null ? 0 : parseInt(data[i][5]),
+		  "MOVEDOUT_EST" : data[i][6] == null ? 0 : parseInt(data[i][6]),
+		  "MOVEDOUT_MOE" : data[i][7] == null ? 0 : parseInt(data[i][7]),
+		  "MOVEDNET_EST" : data[i][8] == null ? null :parseInt(data[i][8]),
+		  "MOVEDNET_MOE" : data[i][9] == null ? null :parseInt(data[i][9])
 	  })
 	 }
 	 } //for
 	 
 
+//Prepping data for summarization
+var sumdata = []
+outdata.forEach(d => {
+	sumdata.push({
+		 "GEOID1" : d.GEOID1,
+		 "GEOID2" : d.GEOID2,
+		 "NAME1" : d.NAME1,
+		 "STATE1" : d.STATE1,
+		 "NAME2" : d.NAME2,
+		 "STATE2" : d.STATE2,
+	     "MOVEDIN_EST" : d.MOVEDIN_EST,
+		 "MOVEDIN_MOE" : Math.pow(d.MOVEDIN_MOE,2),
+		 "MOVEDOUT_EST" : d.MOVEDOUT_EST,
+		 "MOVEDOUT_MOE" : Math.pow(d.MOVEDOUT_MOE,2), 
+		 "MOVEDNET_EST" : d.MOVEDNET_EST,
+		 "MOVEDNET_MOE" : Math.pow(d.MOVEDNET_MOE,2)
+	})
+})
+
+var sumdata2 = sumdata.filter(d => d.MOVEDNET_EST !== null)
+
 //summarizing state data and summarizing out-of state movement for other counties
 
-var columnsToSum = ["MOVEDIN", "MOVEDOUT", "MOVEDNET"] 
+var columnsToSum = ["MOVEDIN_EST", "MOVEDIN_MOE", "MOVEDOUT_EST", "MOVEDOUT_MOE", "MOVEDNET_EST", "MOVEDNET_MOE"] 
 var bindata = [];
 if(fips == "000"){
-	    var binroll =  d3.rollup(outdata, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.STATE1, d => d.STATE2);
+	    var binroll =  d3.rollup(sumdata2, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.STATE1, d => d.STATE2);
 		for (let [key1, value] of binroll) {
 		for (let[key2, value2] of value) {
 		   bindata.push({'NAME1' : key1, 'STATE1' : '', 'NAME2' : key2, 'STATE2' : '',
-			 'MOVEDIN' : value2.MOVEDIN, 'MOVEDOUT' : value2.MOVEDOUT, 'MOVEDNET' : value2.MOVEDNET});
+			 'MOVEDIN_EST' : value2.MOVEDIN_EST, 'MOVEDIN_MOE' : Math.sqrt(value2.MOVEDIN_MOE), 
+			 'MOVEDOUT_EST' : value2.MOVEDOUT_EST, 'MOVEDOUT_MOE' : Math.sqrt(value2.MOVEDOUT_MOE), 
+			 'MOVEDNET_EST' : value2.MOVEDNET_EST, 'MOVEDNET_MOE' : Math.sqrt(value2.MOVEDNET_MOE)});
 		};
 		};
-		var outchart = bindata.filter(obj => obj.NAME1 != obj.NAME2)
+		var outchartun = bindata.filter(obj => obj.NAME1 != obj.NAME2)
 } else {  //out of state 
-  var outofstate = outdata.filter(obj => obj.STATE2 != "Colorado")
+
+  var outofstate = sumdata2.filter(obj => obj.STATE2 != "Colorado")
   var binroll =  d3.rollup(outofstate, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.NAME1, d => d.STATE1, d => d.STATE2);;
 	for (let [key1, value] of binroll) {
 	for (let[key2, value2] of value) {
 	for (let[key3, value3] of value2) {
+		if(value3.MOVEDNET_EST >= 0){
 		bindata.push({'NAME1' : key1, 'STATE1' : key2, 'NAME2' : key3,'STATE2' : '',
-			 'MOVEDIN' : value3.MOVEDIN, 'MOVEDOUT' : value3.MOVEDOUT, 'MOVEDNET' : value3.MOVEDNET});
+			 'MOVEDIN_EST' : value3.MOVEDIN_EST, 'MOVEDIN_MOE' : Math.sqrt(value3.MOVEDIN_MOE), 
+			 'MOVEDOUT_EST' : value3.MOVEDOUT_EST, 'MOVEDOUT_MOE' : Math.sqrt(value3.MOVEDOUT_MOE), 
+			 'MOVEDNET_EST' : value3.MOVEDNET_EST, 'MOVEDNET_MOE' : Math.sqrt(value3.MOVEDNET_MOE)});
+		}
 		}
 		};
 		};
-  var instate = outdata.filter(obj => obj.STATE2 == "Colorado");
-    instate.shift()
-	instate.shift()
-	var outchart = instate.concat(bindata);
+  var instate = sumdata2.filter(obj => obj.STATE2 == "Colorado");
+  var instate_sum = [];
+  instate.forEach( d => {
+		instate_sum.push({
+		 "GEOID1" : d.GEOID1,
+		 "GEOID2" : d.GEOID2,
+		 "NAME1" : d.NAME1,
+		 "STATE1" : d.STATE1,
+		 "NAME2" : d.NAME2,
+		 "STATE2" : d.STATE2,
+	     "MOVEDIN_EST" : d.MOVEDIN_EST,
+		 "MOVEDIN_MOE" : Math.sqrt(d.MOVEDIN_MOE),
+		 "MOVEDOUT_EST" : d.MOVEDOUT_EST,
+		 "MOVEDOUT_MOE" : Math.sqrt(d.MOVEDOUT_MOE), 
+		 "MOVEDNET_EST" : d.MOVEDNET_EST,
+		 "MOVEDNET_MOE" : Math.sqrt(d.MOVEDNET_MOE)})
+  })
+  
+	var outchartun = instate_sum.concat(bindata);
 }
+var outchart_net = supressData(outchartun,"net")
+var outchart_in = supressData(outchartun,"in")
+var outchart_out = supressData(outchartun,"out")
 
 // Creating Nodeslist
-var nodeslist = [];
-outchart.forEach(obj => { 
-	nodeslist.push({'location' : obj.NAME1})
-	nodeslist.push({'location' : obj.NAME2})
+var nodeslist_net = [];
+var nodesuniq_net = [];  
+outchart_net.forEach(obj => { 
+	nodeslist_net.push({'location1' : obj.NAME1, 'location2' : obj.NAME2,  'value' : obj.MOVEDNET_EST})
 })
 
-var nodesfilt = nodeslist.filter(obj => obj.location != plname)
-var nodessort = nodesfilt.sort(function(a, b){ return d3.ascending(a['location'], b['location']); });
-var nodesuniq = [...new Set(nodessort.map(d => d.location))]
+var nodessort_net = condSort(nodeslist_net,'value')
 
-nodesuniq.unshift(plname)
+nodessort_net.forEach(d => {
+	nodesuniq_net.push(d.location2)
+})
+nodesuniq_net.unshift(plname)
 
-var nodes = [];
-var labarr = [];
+var nodes_net = [];
+var labarr_net = [];
 
-for(i = 0; i < nodesuniq.length; i++){
-	nodes.push({'location' : nodesuniq[i], "row_val" : i})
-	labarr.push(nodesuniq[i]);
+for(i = 0; i < nodesuniq_net.length; i++){
+	nodes_net.push({'location' : nodesuniq_net[i], "row_val" : i})
+	labarr_net.push(nodesuniq_net[i]);
 }
 
-// Prepping net migration data
 
-var srcnet = [];
-var tgtnet = [];
-var valnet = [];
-var lablinksnet = [];
+var neg = outchart_net.filter(d => d.MOVEDNET_EST < 0)
+var pos = outchart_net.filter(d => d.MOVEDNET_EST > 0)
+
+if(neg.length < pos.length) {
+	var inc = 1/pos.length;
+} else {
+	var inc = 1/neg.length;
+}
+var incr = parseFloat(inc.toFixed(3))
+
+
+// Prepping _net migration data
+
+var src_net = [];
+var tgt_net = [];
+var val_net = [];
+var lablinks_net = [];
+var xpos_net = [];
+var ypos_net = [];
 var total_net_inmig = 0
-var total_net_outmig = 0
+var total_net_outmig = 0;
+var y_net_pos = 0.1;
+var y_net_neg = 0.1;
 
-var srcin = [];
-var tgtin = [];
-var valin = [];
-var lablinksin = [];
-var total_in_inmig = 0;
+xpos_net.push(0.5)
+ypos_net.push(0.5)
 
-var srcout = [];
-var tgtout = [];
-var valout = [];
-var lablinksout = [];
-var total_out_outmig = 0
-
-// Prepping net migration data
-for(i = 0; i < outchart.length;i++){
-    if(outchart[i].MOVEDNET < 0){
-		var srcVal = nodes.filter(obj => obj.location == outchart[i].NAME1)
-		var tgtVal = nodes.filter(obj => obj.location == outchart[i].NAME2)
-		srcnet.push(srcVal[0].row_val)
-		tgtnet.push(tgtVal[0].row_val)
-		valnet.push(Math.abs(outchart[i].MOVEDNET))
-		lablinksnet.push(outchart[i].NAME1 + " to " + outchart[i].NAME2 + ": " + fmt_comma(Math.abs(outchart[i].MOVEDNET)));
-		total_net_outmig = total_net_outmig + Math.abs(outchart[i].MOVEDNET)
+// Prepping _net migration data
+for(i = 0; i < outchart_net.length;i++){
+    if(outchart_net[i].MOVEDNET_EST < 0){
+		var srcVal = nodes_net.filter(obj => obj.location == outchart_net[i].NAME1)
+		var tgtVal = nodes_net.filter(obj => obj.location == outchart_net[i].NAME2)
+		if(srcVal.length == 0){
+			src_net.push(0)
+		} else {
+			src_net.push(srcVal[0].row_val)
+		}
+		tgt_net.push(tgtVal[0].row_val)
+		val_net.push(Math.abs(outchart_net[i].MOVEDNET_EST))
+		lablinks_net.push(outchart_net[i].NAME1 + " to " + outchart_net[i].NAME2 + ": " + fmt_comma(Math.abs(outchart_net[i].MOVEDNET_EST)));
+		total_net_outmig = total_net_outmig + Math.abs(outchart_net[i].MOVEDNET_EST)
+		xpos_net.push(0.9);
+		ypos_net.push(parseFloat(y_net_neg.toFixed(3)));
+		y_net_neg = y_net_neg + incr;
 	} else {
-		var srcVal = nodes.filter(obj => obj.location == outchart[i].NAME2)
-		var tgtVal = nodes.filter(obj => obj.location == outchart[i].NAME1)
-		srcnet.push(srcVal[0].row_val)
-		tgtnet.push(tgtVal[0].row_val)
-		valnet.push(Math.abs(outchart[i].MOVEDNET))
-		lablinksnet.push(outchart[i].NAME2 + " to " + outchart[i].NAME1 + ": " + fmt_comma(Math.abs(outchart[i].MOVEDNET)));
-		total_net_inmig = total_net_inmig + Math.abs(outchart[i].MOVEDNET)
-	}
-}  
+		var srcVal = nodes_net.filter(obj => obj.location == outchart_net[i].NAME2)
+		var tgtVal = nodes_net.filter(obj => obj.location == outchart_net[i].NAME1)
 
-// Prepping in migration data
-for(i = 0; i < outchart.length;i++){
-		var srcVal = nodes.filter(obj => obj.location == outchart[i].NAME2)
-		var tgtVal = nodes.filter(obj => obj.location == outchart[i].NAME1)
-		srcin.push(srcVal[0].row_val)
-		tgtin.push(tgtVal[0].row_val)
-		valin.push(Math.abs(outchart[i].MOVEDIN))
-		lablinksin.push(outchart[i].NAME2 + " to " + outchart[i].NAME1 + ": " + fmt_comma(Math.abs(outchart[i].MOVEDIN)));
-		total_in_inmig = total_in_inmig + Math.abs(outchart[i].MOVEDIN)
-	}
-  
-// Prepping out migration data
-for(i = 0; i < outchart.length;i++){
-		var srcVal = nodes.filter(obj => obj.location == outchart[i].NAME1)
-		var tgtVal = nodes.filter(obj => obj.location == outchart[i].NAME2)
-		srcout.push(srcVal[0].row_val)
-		tgtout.push(tgtVal[0].row_val)
-		valout.push(Math.abs(outchart[i].MOVEDOUT))
-		lablinksout.push(outchart[i].NAME1 + " to " + outchart[i].NAME2 + ": " + fmt_comma(Math.abs(outchart[i].MOVEDOUT)));
-		total_out_outmig = total_out_outmig + Math.abs(outchart[i].MOVEDOUT)
-	}
+		src_net.push(srcVal[0].row_val)
+		if(tgtVal.length == 0) {
+			tgt_net.push(0)
+		} else {
+			tgt_net.push(tgtVal[0].row_val)
+		}
+		val_net.push(Math.abs(outchart_net[i].MOVEDNET_EST))
+		lablinks_net.push(outchart_net[i].NAME2 + " to " + outchart_net[i].NAME1 + ": " + fmt_comma(Math.abs(outchart_net[i].MOVEDNET_EST)));
+		total_net_inmig = total_net_inmig + Math.abs(outchart_net[i].MOVEDNET_EST);
+		xpos_net.push(0.1);
+		ypos_net.push(parseFloat(y_net_pos.toFixed(3)));
+		y_net_pos = y_net_pos + incr;
+	} 
+} //i
 
 
-var net_nodes = outchart.filter(d => d.MOVEDNET != 0)
-var in_nodes = outchart.filter(d => d.MOVEDIN != 0)
-var out_nodes = outchart.filter(d => d.MOVEDOUT != 0)
-
-var chartheight_net = net_nodes.length * 20;
-if(chartheight_net < 400) { var chartheight_net = 400};
-
-var chartheight_in = in_nodes.length * 20;
-if(chartheight_in < 400) { var chartheight_in = 400};
-
-var chartheight_out = out_nodes.length * 20;
-if(chartheight_out < 400) { var chartheight_out = 400};
+//combine nodes,xpos ypos and src, tgt,val
+var nodes_chk = [];
+var tgt_chk = []
+for(i = 0; i < nodes_net.length;i++){
+ nodes_chk.push({"location" : nodes_net[i].location, "row" : nodes_net[i].row_val, "xpos" : xpos_net[i], "ypos" : ypos_net[i]})
+}
+for(i = 0; i < src_net.length;i++){
+	tgt_chk.push({"src" : src_net[i], "tgt" : tgt_net[i], "val" : val_net[i]})
+}
 
 
 //Net Migration Plot
@@ -7702,33 +8004,35 @@ var net_out_mig_lab = "Net Out Migration: "+ fmt_comma(total_net_outmig);
 var data_net = {
   type: "sankey",
   orientation: "h",
+  arrangement : "fixed",
   node: {
-    pad: 15,
     thickness: 30,
     line: {
       color: "black",
       width: 0.5
     },
-   label: labarr,
+   label: labarr_net,
+   x : xpos_net,
+   y : ypos_net,
    pad : 10,
    hoverinfo: 'none'
       },
 
   link: {
-    source: srcnet,
-    target: tgtnet,
-    value:  valnet,
-	customdata : lablinksnet,
+    source: src_net,
+    target: tgt_net,
+    value:  val_net,
+	customdata : lablinks_net,
 	hovertemplate : '%{customdata}<extra></extra>'
   }
 }
 
 var data_netp = [data_net];
 
-var layoutnet = {
-  title: titleValNet, autosize : false, 
-  width: 1100,
-  height: chartheight_net,
+var layout_net = {
+  title: titleVal_net, autosize : false, 
+  width: 900,
+  height: 1000,
   font: {
     size: 10,
 	family : 'Arial Black'
@@ -7763,6 +8067,56 @@ annotations : [{text :  citStr ,
 		showarrow : false }]
 }
 
+ 
+
+// Prepping in migration data
+var nodeslist_in = [];
+var nodesuniq_in = [];
+outchart_in.forEach(obj => { 
+	nodeslist_in.push({'location1' : obj.NAME1, 'location2' : obj.NAME2,  'value' : obj.MOVEDIN_EST})
+})
+
+var nodessort_in = nodeslist_in.sort(function(a, b){ return d3.descending(a['value'], b['value']); });
+
+nodessort_in.forEach(d => {
+	nodesuniq_in.push(d.location2)
+})
+nodesuniq_in.unshift(plname)
+
+var nodes_in = [];
+var labarr_in = [];
+
+for(i = 0; i < nodesuniq_in.length; i++){
+	nodes_in.push({'location' : nodesuniq_in[i], "row_val" : i})
+	labarr_in.push(nodesuniq_in[i]);
+}
+
+var src_in = [];
+var tgt_in = [];
+var val_in = [];
+var lablinks_in = [];
+var total_in_inmig = 0;
+
+
+for(i = 0; i < outchart_in.length;i++){
+		var srcVal = nodes_in.filter(obj => obj.location == outchart_in[i].NAME2)
+		var tgtVal = nodes_in.filter(obj => obj.location == outchart_in[i].NAME1)
+		if(srcVal.length == 0){
+			src_in.push(0);
+		} else {
+			src_in.push(srcVal[0].row_val)
+		}
+		if(tgtVal.length == 0){
+			tgt_in.push(0);
+		} else {
+			tgt_in.push(tgtVal[0].row_val)
+		}
+		val_in.push(Math.abs(outchart_in[i].MOVEDIN_EST))
+		lablinks_in.push(outchart_in[i].NAME2 + " to " + outchart_in[i].NAME1 + ": " + fmt_comma(Math.abs(outchart_in[i].MOVEDIN_EST)));
+		total_in_inmig = total_in_inmig + Math.abs(outchart_in[i].MOVEDIN_EST)
+	}
+	
+
 //in Migration Plot
 
 var in_in_mig_lab = "In Migration: "+ fmt_comma(total_in_inmig);
@@ -7770,33 +8124,33 @@ var in_in_mig_lab = "In Migration: "+ fmt_comma(total_in_inmig);
 var data_in = {
   type: "sankey",
   orientation: "h",
+  arrangement : "fixed",
   node: {
-    pad: 15,
     thickness: 30,
     line: {
       color: "black",
       width: 0.5
     },
-   label: labarr,
+   label: labarr_in,
    pad : 10,
    hoverinfo: 'none'
       },
 
   link: {
-    source: srcin,
-    target: tgtin,
-    value:  valin,
-	customdata : lablinksin,
+    source: src_in,
+    target: tgt_in,
+    value:  val_in,
+	customdata : lablinks_in,
 	hovertemplate : '%{customdata}<extra></extra>'
   }
 }
 
 var data_inp = [data_in];
 
-var layoutin = {
-  title: titleValIn, autosize: false,
-  width: 700, 
-  height: chartheight_in, 
+var layout_in = {
+  title: titleVal_in, autosize: false,
+  width: 900, 
+  height: 900, 
   font: {
     size: 10,
 	family : 'Arial Black'
@@ -7821,6 +8175,51 @@ annotations : [{text :  citStr ,
         y : 1,
 		showarrow : false }]
 }
+  
+// Prepping out migration data
+var nodeslist_out = [];
+var nodesuniq_out = [];
+outchart_out.forEach(obj => { 
+	nodeslist_out.push({'location1' : obj.NAME1, 'location2' : obj.NAME2,  'value' : obj.MOVEDOUT_EST})
+})
+
+var nodessort_out = nodeslist_out.sort(function(a, b){ return d3.descending(a['value'], b['value']); });
+
+nodessort_out.forEach(d => {
+	nodesuniq_out.push(d.location2)
+})
+nodesuniq_out.unshift(plname)
+
+var nodes_out = [];
+var labarr_out = [];
+
+for(i = 0; i < nodesuniq_out.length; i++){
+	nodes_out.push({'location' : nodesuniq_out[i], "row_val" : i})
+	labarr_out.push(nodesuniq_out[i]);
+}
+var src_out = [];
+var tgt_out = [];
+var val_out = [];
+var lablinks_out = [];
+var total_out_outmig = 0
+
+for(i = 0; i < outchart_out.length;i++){
+		var srcVal = nodes_out.filter(obj => obj.location == outchart_out[i].NAME1)
+		var tgtVal = nodes_out.filter(obj => obj.location == outchart_out[i].NAME2)
+		if(srcVal.length == 0) {
+		   src_out.push(0);	
+		} else {
+		  src_out.push(srcVal[0].row_val)
+		}
+		if(tgtVal.length == 0) {
+		   tgt_out.push(0);	
+		} else {
+		  tgt_out.push(tgtVal[0].row_val)
+		}
+		val_out.push(Math.abs(outchart_out[i].MOVEDOUT_EST))
+		lablinks_out.push(outchart_out[i].NAME1 + " to " + outchart_out[i].NAME2 + ": " + fmt_comma(Math.abs(outchart_out[i].MOVEDOUT_EST)));
+		total_out_outmig = total_out_outmig + Math.abs(outchart_out[i].MOVEDOUT_EST)
+	}
 
 //out Migration Plot
 
@@ -7829,33 +8228,33 @@ var out_out_mig_lab = "Out Migration: "+ fmt_comma(total_out_outmig);
 var data_out = {
   type: "sankey",
   orientation: "h",
+  arrangement : "fixed",
   node: {
-    pad: 15,
-    thickness: 30,
+    thickness: 5,
     line: {
       color: "black",
       width: 0.5
     },
-   label: labarr,
-   pad : 10,
+   label: labarr_out,
+   pad : 25,
    hoverinfo: 'none'
       },
 
   link: {
-    source: srcout,
-    target: tgtout,
-    value:  valout,
-	customdata : lablinksout,
+    source: src_out,
+    target: tgt_out,
+    value:  val_out,
+	customdata : lablinks_out,
 	hovertemplate : '%{customdata}<extra></extra>'
   }
 }
 
 var data_outp = [data_out];
 
-var layoutout = {
-  title: titleValOut, autosize : false,
-  width: 700,
-  height: chartheight_out, 
+var layout_out = {
+  title: titleVal_out, autosize : false,
+  width: 800,
+  height: 800, 
   font: {
     size: 10,
 	family : 'Arial Black'
@@ -7881,26 +8280,27 @@ annotations : [{text :  citStr ,
 		showarrow : false }]
 }
 
+
 //Plotting
-Plotly.newPlot(CHART0, data_netp, layoutnet);
-Plotly.newPlot(CHART1, data_inp, layoutin);
-Plotly.newPlot(CHART2, data_outp, layoutout);
+Plotly.newPlot(CHART0, data_netp, layout_net);
+Plotly.newPlot(CHART1, data_inp, layout_in);
+Plotly.newPlot(CHART2, data_outp, layout_out);
 
 
 //Export Code
 var chartnet_csv = document.getElementById('net_csv');
 var chartnet_png = document.getElementById('net_png');
-chartnet_csv.onclick = function() {exportToCsv(plname, 'netflow', outchart,0)};
+chartnet_csv.onclick = function() {exportToCsv(plname, 'netflow', outchartun,0)};
 chartnet_png.onclick = function() {exportToPng(plname, 'netflow', CHART0,0)};
 
 var chartin_csv = document.getElementById('in_csv');
 var chartin_png = document.getElementById('in_png');
-chartin_csv.onclick = function() {exportToCsv(plname, 'inflow', outchart,0)};
+chartin_csv.onclick = function() {exportToCsv(plname, 'inflow', outchartun,0)};
 chartin_png.onclick = function() {exportToPng(plname, 'inflow', CHART1,0)};
 
 var chartout_csv = document.getElementById('out_csv');
 var chartout_png = document.getElementById('out_png');
-chartout_csv.onclick = function() {exportToCsv(plname, 'outflow', outchart,0)};
+chartout_csv.onclick = function() {exportToCsv(plname, 'outflow', outchartun,0)};
 chartout_png.onclick = function() {exportToPng(plname, 'outflow', CHART2,0)};
    }) //promise
 } //genFLOWS
