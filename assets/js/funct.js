@@ -7497,24 +7497,6 @@ function genFLOWYR(inYR){
  return(yrArr)
 }  //genFLOWYR
 
-//condSort sorts dat records based on the valur of MOVEDNET_EST_EST
-function condSort(indata, variable) {
-	if(variable == 'MOVEDNET_EST') {
-	var pos = indata.filter(d => d.MOVEDNET_EST >= 0)
-	var possort = pos.sort(function(a, b){return d3.descending(a['MOVEDNET_EST'], b['MOVEDNET_EST']); })
-	var neg = indata.filter(d => d.MOVEDNET_EST < 0)
-	var negsort = neg.sort(function(a, b){return d3.ascending(a['MOVEDNET_EST'], b['MOVEDNET_EST']); })
-	} else {
-		var pos = indata.filter(d => d.value >= 0)
-		var possort = pos.sort(function(a, b){return d3.descending(a['value'], b['value']); })
-		var neg = indata.filter(d => d.value < 0)
-		var negsort = neg.sort(function(a, b){return d3.ascending(a['value'], b['value']); })
-	}
-
-	var outdata = possort.concat(negsort)
-
-	return(outdata)
-}
 
 //supressData compresses data sets to have a maximum of 35 entires (20 px per entry in a chart with 700 px)
 //OR entry with 10 or fewer movers
@@ -7702,8 +7684,8 @@ function genFLOWS(fips, name, yearval){
 	var titleVal_net = plname + " Net Migration " + (yearval - 4) + "-" + yearval;
 	var titleVal_out = plname + " Out Migration " +  (yearval - 4) + "-" + yearval;
 	var titleVal_in = plname + " In Migration " + (yearval - 4) + "-" + yearval;
-	var citStr = "U.S. Census Bureau ("+ citval + ") County to County Migration Flows <br>" + (yearval - 4) + "-" + yearval +
-	           " Print Date: "+ fmt_date(new Date);
+	var citStr = "U.S. Census Bureau ("+ citval + ") County to County Migration Flows " + (yearval - 4) + "-" + yearval +
+	           "<br>Print Date: "+ fmt_date(new Date);
 
 	var flowcall = "/acs/flows?get=GEOID1,GEOID2,FULL1_NAME,FULL2_NAME,MOVEDIN,MOVEDIN_M,MOVEDOUT,MOVEDOUT_M,MOVEDNET,MOVEDNET_M"
 	var censKey = '08fe07c2a7bf781b7771d7cccb264fe7ff8965ce'
@@ -7939,7 +7921,7 @@ var data_netp = [data_net];
 
 var layout_net = {
   title: titleVal_net, autosize : false, 
-  width: 700,
+  width: 900,
   height: 700,
   font: {
     size: 10,
@@ -7952,7 +7934,7 @@ annotations : [{text :  citStr ,
 	  xanchor : 'left',
 	  yanchor : 'bottom',
       x : 0.25, 
-      y : 0, 
+      y : -0.13, 
       align : 'left', 
       showarrow : false},
 	  {text : net_in_mig_lab,
@@ -8061,7 +8043,7 @@ var data_inp = [data_in];
 
 var layout_in = {
   title: titleVal_in, autosize: false,
-  width: 700, 
+  width: 900, 
   height: 700, 
   font: {
     size: 10,
@@ -8172,7 +8154,7 @@ var data_outp = [data_out];
 
 var layout_out = {
   title: titleVal_out, autosize : false,
-  width: 700,
+  width: 900,
   height: 700, 
   font: {
     size: 10,
