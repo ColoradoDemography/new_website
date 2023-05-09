@@ -7612,7 +7612,7 @@ function supressData(inData, fips, type){
 			  }
 	
 		 //adding record for supression
-		 if(incnt > 0){
+		 if(incnt > 0 && inmax > 0){
 			  infin.push({
 				"GEOID1" : "",
 				"GEOID2" : "",
@@ -7651,7 +7651,7 @@ function supressData(inData, fips, type){
 			  }
 	
 		//adding record for supression
-		 if(outcnt > 0){
+		 if(outcnt > 0 && outmax > 0){
 			  outfin.push({
 				"GEOID1" : "",
 				"GEOID2" : "",
@@ -7885,8 +7885,8 @@ for(i = 0; i < nodeslist_net.length;i++){
 		if(nodeslist_net[i].src == -1) { nodeslist_net[i].src = 0}
 } //i
 var nodes_1 = []
-nodes_1.push({"location1" : "Colorado",
-		"location2" : "Colorado",
+nodes_1.push({"location1" : countyName(parseInt(fips)),
+		"location2" : countyName(parseInt(fips)),
 		"value" : 0,
 		"src" :0,
 		"tgt" : 0,
@@ -7917,7 +7917,7 @@ var data_net = {
    label: labarr_net,
    x : nodeslist_net.map(d => d.xpos),
    y : nodeslist_net.map(d => d.ypos),
-   pad : 40,
+   pad : 35,
    hoverinfo: 'none'
       },
 
@@ -7937,7 +7937,7 @@ var layout_net = {
   width: 900,
   height: 700,
   font: {
-    size: 10,
+    size: 11,
 	family : 'Arial Black'
   },
 annotations : [{text :  citStr , 
@@ -8000,10 +8000,10 @@ for(i = 0; i < nodeslist_in.length;i++){
 			nodeslist_in[i].src = labarr_in.indexOf(nodeslist_in[i].location2)
 			nodeslist_in[i].tgt = labarr_in.indexOf(nodeslist_in[i].location1)
 			nodeslist_in[i].val = Math.abs(nodeslist_in[i].value)
-			if(nodeslist_net[i].location2.includes("movers")){
-				nodeslist_net[i].lablink = nodeslist_net[i].location2;
+			if(nodeslist_in[i].location2.includes("movers")){
+				nodeslist_in[i].lablink = nodeslist_in[i].location2;
 			} else {
-				nodeslist_net[i].lablink = nodeslist_net[i].location1 + " to " + nodeslist_net[i].location2 + ": " + fmt_comma(Math.abs(nodeslist_net[i].value));	
+				nodeslist_in[i].lablink = nodeslist_in[i].location1 + " to " + nodeslist_in[i].location2 + ": " + fmt_comma(Math.abs(nodeslist_in[i].value));	
 			}			
 			nodeslist_in[i].xpos =  0.1;
 			nodeslist_in[i].ypos =  parseFloat(y_in_pos.toFixed(3));
@@ -8017,8 +8017,8 @@ for(i = 0; i < nodeslist_in.length;i++){
 		if(nodeslist_in[i].tgt == -1) { nodeslist_in[i].tgt = 0}
 } //i
 var nodes_1 = []
-nodes_1.push({"location1" : "Colorado",
-		"location2" : "Colorado",
+nodes_1.push({"location1" : countyName(parseInt(fips)),
+		"location2" : countyName(parseInt(fips)),
 		"value" : 0,
 		"src" :0,
 		"tgt" : 0,
@@ -8047,7 +8047,7 @@ var data_in = {
    label: labarr_in,
    x : nodeslist_in.map(d => d.xpos),
    y : nodeslist_in.map(d => d.ypos),
-   pad : 40,
+   pad : 35,
    hoverinfo: 'none'
       },
 
@@ -8067,7 +8067,7 @@ var layout_in = {
   width: 900, 
   height: 700, 
   font: {
-    size: 10,
+    size: 11,
 	family : 'Arial Black'
   },
 annotations : [{text :  citStr , 
@@ -8137,8 +8137,8 @@ for(i = 0; i < nodeslist_out.length;i++){
 		if(nodeslist_out[i].tgt == -1) { nodeslist_out[i].tgt = 0}
 } //i
 var nodes_1 = []
-nodes_1.push({"location1" : "Colorado",
-		"location2" : "Colorado",
+nodes_1.push({"location1" : countyName(parseInt(fips)),
+		"location2" : countyName(parseInt(fips)),
 		"value" : 0,
 		"src" :0,
 		"tgt" : 0,
@@ -8166,7 +8166,7 @@ var data_out = {
    label: labarr_out,
    x : nodeslist_out.map(d => d.xpos),
    y : nodeslist_out.map(d => d.ypos),
-   pad : 40,
+   pad : 35,
    hoverinfo: 'none'
       },
 
@@ -8186,7 +8186,7 @@ var layout_out = {
   width: 900,
   height: 700, 
   font: {
-    size: 10,
+    size: 11,
 	family : 'Arial Black'
   },
 annotations : [{text :  citStr , 
