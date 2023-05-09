@@ -7497,6 +7497,12 @@ function genFLOWYR(inYR){
  return(yrArr)
 }  //genFLOWYR
 
+//parsePhrase returns an adjusted total from the summary record
+function parsePhrase (phrase){
+	var outphrase = phrase.split(" ")
+	var outval = parseInt(outphrase[3].replaceAll(",",""))
+	return(outval)
+}
 
 //supressData compresses data sets to have a maximum of 35 entires (20 px per entry in a chart with 700 px)
 //OR entry with 10 or fewer movers
@@ -7518,11 +7524,11 @@ function supressData(inData, type){
 					  posfin[i] = possort[i];
 				  } else {
 				      poscnt++
-				      posmax =  possort[i].MOVEDNET_EST > posmax ? possort[i].MOVEDNET_EST : posmax;
+				      posmax =  posmax + possort[i].MOVEDNET_EST;
 					  if(poscnt == 1){
-					  var posphrase = fmt_comma(poscnt) + ' location with ' + fmt_comma(posmax)+ ' or fewer movers'
+					  var posphrase = fmt_comma(poscnt) + ' location with ' + fmt_comma(posmax)+ ' movers'
 					  } else {
-					  var posphrase = fmt_comma(poscnt) + ' locations with ' + fmt_comma(posmax)+ ' or fewer movers'
+					  var posphrase = fmt_comma(poscnt) + ' locations with ' + fmt_comma(posmax)+ ' movers'
 					  }  
 			      }
 			  }
@@ -7558,11 +7564,11 @@ function supressData(inData, type){
 					  negfin[i] = negsort[i];
 				  } else {
 				      negcnt++
-				      negmax =  negsort[i].MOVEDNET_EST < negmax ? negsort[i].MOVEDNET_EST : negmax;
+				      negmax =  negmax + Math.abs(negsort[i].MOVEDNET_EST);
 					  if(negcnt == 1){
-							var negphrase = fmt_comma(negcnt) + ' location with ' + fmt_comma(Math.abs(negmax))+ ' or fewer movers';
+							var negphrase = fmt_comma(negcnt) + ' location with ' + fmt_comma(Math.abs(negmax))+ ' movers';
 						} else {
-							var negphrase = fmt_comma(negcnt) + ' locations with ' + fmt_comma(Math.abs(negmax))+ ' or fewer movers';
+							var negphrase = fmt_comma(negcnt) + ' locations with ' + fmt_comma(Math.abs(negmax))+ ' movers';
 						}
 			      }
 			  }
@@ -7597,11 +7603,11 @@ function supressData(inData, type){
 					  infin[i] = insort[i];
 				  } else {
 				      incnt++
-				      inmax =  insort[i].MOVEDIN_EST > inmax ? insort[i].MOVEDIN_EST : inmax;
+				      inmax =  inmax + insort[i].MOVEDIN_EST;
 					  if(incnt == 1){
-					  var inphrase = fmt_comma(incnt) + ' location with ' + fmt_comma(inmax)+ ' or fewer movers'
+					  var inphrase = fmt_comma(incnt) + ' location with ' + fmt_comma(inmax)+ ' movers'
 					  } else {
-						  var inphrase = fmt_comma(incnt) + ' locations with ' + fmt_comma(inmax)+ ' or fewer movers'
+						  var inphrase = fmt_comma(incnt) + ' locations with ' + fmt_comma(inmax)+ ' movers'
 					  }
 			      }
 			  }
@@ -7636,11 +7642,11 @@ function supressData(inData, type){
 					  outfin[i] = outsort[i];
 				  } else {
 				      outcnt++
-				      outmax =  outsort[i].MOVEDOUT_EST > outmax ? outsort[i].MOVEDOUT_EST : outmax;
+				      outmax =  outmax + outsort[i].MOVEDOUT_EST;
 					  if(outcnt == 1){
-					  var outphrase = fmt_comma(outcnt) + ' location with ' + fmt_comma(outmax)+ ' or fewer movers'
+					  var outphrase = fmt_comma(outcnt) + ' location with ' + fmt_comma(outmax)+ ' movers'
 					  } else {
-						  var outphrase = fmt_comma(outcnt) + ' locations with ' + fmt_comma(outmax)+ ' or fewer movers'
+						  var outphrase = fmt_comma(outcnt) + ' locations with ' + fmt_comma(outmax)+ ' movers'
 					  }
 			      }
 			  }
@@ -7818,7 +7824,6 @@ var outchart_out = supressData(outchartun,"out")
 
 // Creating Nodeslist
 var nodeslist_net = [];
-var nodesuniq_net = [];  
 outchart_net.forEach(obj => { 
 	nodeslist_net.push({'location1' : obj.NAME1, 'location2' : obj.NAME2,  'value' : obj.MOVEDNET_EST})
 })
@@ -7854,7 +7859,11 @@ for(i = 0; i < nodeslist_net.length;i++){
 			nodeslist_net[i].src = labarr_net.indexOf(nodeslist_net[i].location1)
 			nodeslist_net[i].tgt = labarr_net.indexOf(nodeslist_net[i].location2)
 			nodeslist_net[i].val = Math.abs(nodeslist_net[i].value)
-			nodeslist_net[i].lablink = nodeslist_net[i].location1 + " to " + nodeslist_net[i].location2 + ": " + fmt_comma(Math.abs(nodeslist_net[i].value));
+			if(nodeslist_net[i].location2.includes("movers")){
+				nodeslist_net[i].lablink = nodeslist_net[i].location2;
+			} else {
+				nodeslist_net[i].lablink = nodeslist_net[i].location1 + " to " + nodeslist_net[i].location2 + ": " + fmt_comma(Math.abs(nodeslist_net[i].value));	
+			}
 			nodeslist_net[i].xpos =  0.9;
 			nodeslist_net[i].ypos =  parseFloat(y_net_neg.toFixed(3));
 			total_neg_netmig = total_neg_netmig + Math.abs(nodeslist_net[i].value)
@@ -7863,7 +7872,11 @@ for(i = 0; i < nodeslist_net.length;i++){
 			nodeslist_net[i].src = labarr_net.indexOf(nodeslist_net[i].location2)
 			nodeslist_net[i].tgt = labarr_net.indexOf(nodeslist_net[i].location1)
 			nodeslist_net[i].val = Math.abs(nodeslist_net[i].value)
-			nodeslist_net[i].lablink = nodeslist_net[i].location2 + " to " + nodeslist_net[i].location1 + ": " + fmt_comma(Math.abs(nodeslist_net[i].value));
+			if(nodeslist_net[i].location2.includes("movers")){
+				nodeslist_net[i].lablink = nodeslist_net[i].location2;
+			} else {
+				nodeslist_net[i].lablink = nodeslist_net[i].location1 + " to " + nodeslist_net[i].location2 + ": " + fmt_comma(Math.abs(nodeslist_net[i].value));	
+			}
 			nodeslist_net[i].xpos =  0.1;
 			nodeslist_net[i].ypos =  parseFloat(y_net_pos.toFixed(3));
 			total_pos_netmig = total_pos_netmig + Math.abs(nodeslist_net[i].value)
@@ -7987,10 +8000,18 @@ for(i = 0; i < nodeslist_in.length;i++){
 			nodeslist_in[i].src = labarr_in.indexOf(nodeslist_in[i].location2)
 			nodeslist_in[i].tgt = labarr_in.indexOf(nodeslist_in[i].location1)
 			nodeslist_in[i].val = Math.abs(nodeslist_in[i].value)
-			nodeslist_in[i].lablink = nodeslist_in[i].location2 + " to " + nodeslist_in[i].location1 + ": " + fmt_comma(Math.abs(nodeslist_in[i].value));
+			if(nodeslist_net[i].location2.includes("movers")){
+				nodeslist_net[i].lablink = nodeslist_net[i].location2;
+			} else {
+				nodeslist_net[i].lablink = nodeslist_net[i].location1 + " to " + nodeslist_net[i].location2 + ": " + fmt_comma(Math.abs(nodeslist_net[i].value));	
+			}			
 			nodeslist_in[i].xpos =  0.1;
 			nodeslist_in[i].ypos =  parseFloat(y_in_pos.toFixed(3));
-			total_pos_inmig = total_pos_inmig + Math.abs(nodeslist_in[i].value)
+			if(nodeslist_in[i].location2.includes("movers")){
+				total_pos_inmig = total_pos_inmig + parsePhrase(nodeslist_in[i].location2);
+			} else {
+			     total_pos_inmig = total_pos_inmig + nodeslist_in[i].value;
+			}
 			y_in_pos = y_in_pos + incr;
 	
 		if(nodeslist_in[i].tgt == -1) { nodeslist_in[i].tgt = 0}
@@ -8099,10 +8120,18 @@ for(i = 0; i < nodeslist_out.length;i++){
 			nodeslist_out[i].src = labarr_out.indexOf(nodeslist_out[i].location1)
 			nodeslist_out[i].tgt = labarr_out.indexOf(nodeslist_out[i].location2)
 			nodeslist_out[i].val = Math.abs(nodeslist_out[i].value)
-			nodeslist_out[i].lablink = nodeslist_out[i].location2 + " to " + nodeslist_out[i].location1 + ": " + fmt_comma(Math.abs(nodeslist_out[i].value));
+			if(nodeslist_out[i].location2.includes("movers")){
+				nodeslist_out[i].lablink = nodeslist_out[i].location2;
+			} else {
+				nodeslist_out[i].lablink = nodeslist_out[i].location1 + " to " + nodeslist_out[i].location2 + ": " + fmt_comma(nodeslist_out[i].value);	
+			}
 			nodeslist_out[i].xpos =  0.9;
 			nodeslist_out[i].ypos =  parseFloat(y_out_pos.toFixed(3));
-			total_pos_outmig = total_pos_outmig + Math.abs(nodeslist_out[i].value)
+			if(nodeslist_in[i].location2.includes("movers")){
+				total_pos_outmig = total_pos_outmig + parsePhrase(nodeslist_out[i].location2);
+			} else {
+			     total_pos_outmig = total_pos_outmig + nodeslist_out[i].value;
+			}			
 			y_out_pos = y_out_pos + incr;
 		
 		if(nodeslist_out[i].tgt == -1) { nodeslist_out[i].tgt = 0}
