@@ -7526,13 +7526,13 @@ function supressData(inData, type){
 		case 'net' :{
  		  var posdata = inData.filter(d => d.MOVEDNET_EST >= 0)
           var possort = posdata.sort(function(a, b){return d3.descending(a['MOVEDNET_EST'], b['MOVEDNET_EST']); })
+		 
 		  var poscnt = 0;
 		  var posmax = 0;
 		  var posfin = [];
           var posphrase = ""
-		  if(possort.length > 35) { //Check for long chart
 			  for(i = 0; i < possort.length; i++) {
-				  if(i <= 34){
+				  if(i < 20){
 					  posfin[i] = possort[i];
 				  } else {
 				      poscnt++
@@ -7544,23 +7544,7 @@ function supressData(inData, type){
 					  }  
 			      }
 			  }
-		  }  else { //supression for small cells, 10 or fewer
-			  for(i = 0; i < possort.length; i++) {
-				  if(possort[i].MOVEDNET_EST > 10){
-					  posfin[i] = possort[i];
-				  } else {
-				  if(possort[i].MOVEDNET_EST != 0){
-				      poscnt++
-					  posmax = 10;
-					  if(poscnt ==1) {
-					  var posphrase = fmt_comma(poscnt) + ' location with 10 or fewer movers'
-					  } else {
-					  var posphrase = fmt_comma(poscnt) + ' locations with 10 or fewer movers'
-					  }  
-				  }
-			      }
-			  }
-		}
+
 
 		//adding record for supression
 		 if(poscnt > 0){
@@ -7578,16 +7562,17 @@ function supressData(inData, type){
 				"MOVEDNET_EST" : posmax,
 				"MOVEDNET_MOE" : 0 })
 			  }
+			  
 		  var negdata = inData.filter(d => d.MOVEDNET_EST < 0)
 
           var negsort = negdata.sort(function(a, b){return d3.ascending(a['MOVEDNET_EST'], b['MOVEDNET_EST']); })
+		  
 		  var negcnt = 0;
 		  var negmax = 0;
 		  var negfin = [];
 		  var nedphrase = "";
-		  if(negsort.length > 35) { //Check for long chart
 			  for(i = 0; i < negsort.length; i++) {
-				  if(i <= 34){
+				  if(i < 20){
 					  negfin[i] = negsort[i];
 				  } else {
 				      negcnt++
@@ -7599,23 +7584,6 @@ function supressData(inData, type){
 						}
 			      }
 			  }
-		  }  else { //supression for small cells, 10 or fewer
-			  for(i = 0; i < negsort.length; i++) {
-				  if(Math.abs(negsort[i].MOVEDNET_EST) > 10){
-					  negfin[i] = negsort[i];
-				  } else {
-					  if(negsort[i].MOVEDNET_EST != 0){
-				      negcnt++
-					  negmax = -10
-					  if(negcnt == 1){
-					  var negphrase = fmt_comma(negcnt) + ' location with 10 or fewer movers'
-					  } else {					  
-					  var negphrase = fmt_comma(negcnt) + ' locations with 10 or fewer movers'
-					  }
-					  }
-			      }
-			  }
-		}
 		
 				//adding record for supression
 		 if(negcnt > 0){
@@ -7642,9 +7610,8 @@ function supressData(inData, type){
 		  var inmax = 0;
 		  var infin = [];
 		  var inphrase = "";
-		  if(insort.length > 35) { //Check for long chart
 			  for(i = 0; i < insort.length; i++) {
-				  if(i <= 34){
+				  if(i < 20){
 					  infin[i] = insort[i];
 				  } else {
 				      incnt++
@@ -7656,22 +7623,7 @@ function supressData(inData, type){
 					  }
 			      }
 			  }
-		  }  else { //supression for small cells, 10 or fewer
-			  for(i = 0; i < insort.length; i++) {
-				  if(insort[i].MOVEDIN_EST > 10){
-					  infin[i] = insort[i]; 
-				  } else {
-					  if(insort[i].MOVEDIN_EST != 0){
-				      incnt++
-					  if(incnt == 1){
-					  var inphrase = fmt_comma(incnt) + ' location with 10 or fewer movers'
-					  } else {
-						var inphrase = fmt_comma(incnt) + ' locations with 10 or fewer movers'  
-					  }
-			      }
-				  }
-			  }		
-		  }
+	
 		 //adding record for supression
 		 if(incnt > 0){
 			  infin.push({
@@ -7697,9 +7649,8 @@ function supressData(inData, type){
 		  var outmax = 0;
 		  var outfin = [];
 		  var outphrase = "";
-		  if(outsort.length > 343) { //Check for long chart
 			  for(i = 0; i < outsort.length; i++) {
-				  if(i <= 34){
+				  if(i <= 20){
 					  outfin[i] = outsort[i];
 				  } else {
 				      outcnt++
@@ -7711,22 +7662,7 @@ function supressData(inData, type){
 					  }
 			      }
 			  }
-		  }  else { //supression for small cells, 10 or fewer
-			  for(i = 0; i < outsort.length; i++) {
-				  if(outsort[i].MOVEDOUT_EST > 10){
-					  outfin[i] = outsort[i];
-				  } else {
-					  if(outsort[i] != 0){
-				      outcnt++
-					  if(outcnt == 1){
-					  var outphrase = fmt_comma(outcnt) + ' location with 10 or fewer movers'
-					  } else {
-						var outphrase = fmt_comma(outcnt) + ' locations with 10 or fewer movers'  
-					  }
-					  }
-			      }
-			  } 
-		}
+	
 		//adding record for supression
 		 if(outcnt > 0){
 			  outfin.push({
@@ -7905,101 +7841,73 @@ outchart_net.forEach(obj => {
 	nodeslist_net.push({'location1' : obj.NAME1, 'location2' : obj.NAME2,  'value' : obj.MOVEDNET_EST})
 })
 
-var nodessort_net = condSort(nodeslist_net,'value')
-
-nodessort_net.forEach(d => {
-	nodesuniq_net.push(d.location2)
-})
-nodesuniq_net.unshift(plname)
-
-var nodes_net = [];
 var labarr_net = [];
-
-for(i = 0; i < nodesuniq_net.length; i++){
-	nodes_net.push({'location' : nodesuniq_net[i], "row_val" : i})
-	labarr_net.push(nodesuniq_net[i]);
+labarr_net.push(nodeslist_net[0].location1);
+for(i = 0; i < nodeslist_net.length; i++){
+	labarr_net.push(nodeslist_net[i].location2);
 }
+		
 
+var neg = nodeslist_net.filter(d => d.value <= 0).length
+var pos = nodeslist_net.filter(d => d.value > 0).length
 
-var neg = outchart_net.filter(d => d.MOVEDNET_EST < 0)
-var pos = outchart_net.filter(d => d.MOVEDNET_EST > 0)
-
-if(neg.length < pos.length) {
-	var inc = 1/pos.length;
+if(neg < pos) {
+	var inc = 1/pos;
 } else {
-	var inc = 1/neg.length;
+	var inc = 1/neg;
 }
 var incr = parseFloat(inc.toFixed(3))
 
 
 // Prepping _net migration data
 
-var src_net = [];
-var tgt_net = [];
-var val_net = [];
-var lablinks_net = [];
-var xpos_net = [];
-var ypos_net = [];
-var total_net_inmig = 0
-var total_net_outmig = 0;
+var total_pos_netmig = 0;
+var total_neg_netmig = 0;
 var y_net_pos = 0.1;
-var y_net_neg = 0.1;
-
-xpos_net.push(0.5)
-ypos_net.push(0.5)
+var y_net_neg = 0.12;
 
 // Prepping _net migration data
-for(i = 0; i < outchart_net.length;i++){
-    if(outchart_net[i].MOVEDNET_EST < 0){
-		var srcVal = nodes_net.filter(obj => obj.location == outchart_net[i].NAME1)
-		var tgtVal = nodes_net.filter(obj => obj.location == outchart_net[i].NAME2)
-		if(srcVal.length == 0){
-			src_net.push(0)
+for(i = 0; i < nodeslist_net.length;i++){
+		if(nodeslist_net[i].value < 0) {
+			nodeslist_net[i].src = labarr_net.indexOf(nodeslist_net[i].location1)
+			nodeslist_net[i].tgt = labarr_net.indexOf(nodeslist_net[i].location2)
+			nodeslist_net[i].val = Math.abs(nodeslist_net[i].value)
+			nodeslist_net[i].lablink = nodeslist_net[i].location1 + " to " + nodeslist_net[i].location2 + ": " + fmt_comma(Math.abs(nodeslist_net[i].value));
+			nodeslist_net[i].xpos =  0.9;
+			nodeslist_net[i].ypos =  parseFloat(y_net_neg.toFixed(3));
+			total_neg_netmig = total_neg_netmig + Math.abs(nodeslist_net[i].value)
+			y_net_neg = y_net_neg + incr;
 		} else {
-			src_net.push(srcVal[0].row_val)
+			nodeslist_net[i].src = labarr_net.indexOf(nodeslist_net[i].location2)
+			nodeslist_net[i].tgt = labarr_net.indexOf(nodeslist_net[i].location1)
+			nodeslist_net[i].val = Math.abs(nodeslist_net[i].value)
+			nodeslist_net[i].lablink = nodeslist_net[i].location2 + " to " + nodeslist_net[i].location1 + ": " + fmt_comma(Math.abs(nodeslist_net[i].value));
+			nodeslist_net[i].xpos =  0.1;
+			nodeslist_net[i].ypos =  parseFloat(y_net_pos.toFixed(3));
+			total_pos_netmig = total_pos_netmig + Math.abs(nodeslist_net[i].value)
+			y_net_pos = y_net_pos + incr;
 		}
-		tgt_net.push(tgtVal[0].row_val)
-		val_net.push(Math.abs(outchart_net[i].MOVEDNET_EST))
-		lablinks_net.push(outchart_net[i].NAME1 + " to " + outchart_net[i].NAME2 + ": " + fmt_comma(Math.abs(outchart_net[i].MOVEDNET_EST)));
-		total_net_outmig = total_net_outmig + Math.abs(outchart_net[i].MOVEDNET_EST)
-		xpos_net.push(0.9);
-		ypos_net.push(parseFloat(y_net_neg.toFixed(3)));
-		y_net_neg = y_net_neg + incr;
-	} else {
-		var srcVal = nodes_net.filter(obj => obj.location == outchart_net[i].NAME2)
-		var tgtVal = nodes_net.filter(obj => obj.location == outchart_net[i].NAME1)
-
-		src_net.push(srcVal[0].row_val)
-		if(tgtVal.length == 0) {
-			tgt_net.push(0)
-		} else {
-			tgt_net.push(tgtVal[0].row_val)
-		}
-		val_net.push(Math.abs(outchart_net[i].MOVEDNET_EST))
-		lablinks_net.push(outchart_net[i].NAME2 + " to " + outchart_net[i].NAME1 + ": " + fmt_comma(Math.abs(outchart_net[i].MOVEDNET_EST)));
-		total_net_inmig = total_net_inmig + Math.abs(outchart_net[i].MOVEDNET_EST);
-		xpos_net.push(0.1);
-		ypos_net.push(parseFloat(y_net_pos.toFixed(3)));
-		y_net_pos = y_net_pos + incr;
-	} 
+		if(nodeslist_net[i].tgt == -1) { nodeslist_net[i].tgt = 0}
 } //i
-
-
-//combine nodes,xpos ypos and src, tgt,val
-var nodes_chk = [];
-var tgt_chk = []
-for(i = 0; i < nodes_net.length;i++){
- nodes_chk.push({"location" : nodes_net[i].location, "row" : nodes_net[i].row_val, "xpos" : xpos_net[i], "ypos" : ypos_net[i]})
-}
-for(i = 0; i < src_net.length;i++){
-	tgt_chk.push({"src" : src_net[i], "tgt" : tgt_net[i], "val" : val_net[i]})
-}
+var nodes_1 = []
+nodes_1.push({"location1" : "Colorado",
+		"location2" : "Colorado",
+		"value" : 0,
+		"src" :0,
+		"tgt" : 0,
+		"val" : 0,
+        "xpos" : 0.5,
+        "ypos" : 0.5,
+		"lablink" : ""	  
+})
+	 
+var nodeslist_net = nodes_1.concat(nodeslist_net)
 
 
 //Net Migration Plot
 
-var net_in_mig_lab = "Net In Migration: "+ fmt_comma(total_net_inmig);
-var net_out_mig_lab = "Net Out Migration: "+ fmt_comma(total_net_outmig);
+var net_in_mig_lab = "Net In Migration: "+ fmt_comma(total_pos_netmig);
+var net_out_mig_lab = "Net Out Migration: "+ fmt_comma(total_neg_netmig);
 
 var data_net = {
   type: "sankey",
@@ -8012,17 +7920,17 @@ var data_net = {
       width: 0.5
     },
    label: labarr_net,
-   x : xpos_net,
-   y : ypos_net,
-   pad : 10,
+   x : nodeslist_net.map(d => d.xpos),
+   y : nodeslist_net.map(d => d.ypos),
+   pad : 40,
    hoverinfo: 'none'
       },
 
   link: {
-    source: src_net,
-    target: tgt_net,
-    value:  val_net,
-	customdata : lablinks_net,
+    source: nodeslist_net.map(d => d.src),
+    target: nodeslist_net.map(d => d.tgt),
+    value:  nodeslist_net.map(d => d.val),
+	customdata : nodeslist_net.map(d => d.lablink),
 	hovertemplate : '%{customdata}<extra></extra>'
   }
 }
@@ -8031,8 +7939,8 @@ var data_netp = [data_net];
 
 var layout_net = {
   title: titleVal_net, autosize : false, 
-  width: 900,
-  height: 1000,
+  width: 700,
+  height: 700,
   font: {
     size: 10,
 	family : 'Arial Black'
@@ -8071,55 +7979,57 @@ annotations : [{text :  citStr ,
 
 // Prepping in migration data
 var nodeslist_in = [];
-var nodesuniq_in = [];
 outchart_in.forEach(obj => { 
 	nodeslist_in.push({'location1' : obj.NAME1, 'location2' : obj.NAME2,  'value' : obj.MOVEDIN_EST})
 })
 
-var nodessort_in = nodeslist_in.sort(function(a, b){ return d3.descending(a['value'], b['value']); });
-
-nodessort_in.forEach(d => {
-	nodesuniq_in.push(d.location2)
-})
-nodesuniq_in.unshift(plname)
-
-var nodes_in = [];
 var labarr_in = [];
-
-for(i = 0; i < nodesuniq_in.length; i++){
-	nodes_in.push({'location' : nodesuniq_in[i], "row_val" : i})
-	labarr_in.push(nodesuniq_in[i]);
+labarr_in.push(nodeslist_in[0].location1);
+for(i = 0; i < nodeslist_in.length; i++){
+	labarr_in.push(nodeslist_in[i].location2);
 }
+		
+	var inc = 1/nodeslist_in.length;
 
-var src_in = [];
-var tgt_in = [];
-var val_in = [];
-var lablinks_in = [];
-var total_in_inmig = 0;
+var incr = parseFloat(inc.toFixed(3))
 
 
-for(i = 0; i < outchart_in.length;i++){
-		var srcVal = nodes_in.filter(obj => obj.location == outchart_in[i].NAME2)
-		var tgtVal = nodes_in.filter(obj => obj.location == outchart_in[i].NAME1)
-		if(srcVal.length == 0){
-			src_in.push(0);
-		} else {
-			src_in.push(srcVal[0].row_val)
-		}
-		if(tgtVal.length == 0){
-			tgt_in.push(0);
-		} else {
-			tgt_in.push(tgtVal[0].row_val)
-		}
-		val_in.push(Math.abs(outchart_in[i].MOVEDIN_EST))
-		lablinks_in.push(outchart_in[i].NAME2 + " to " + outchart_in[i].NAME1 + ": " + fmt_comma(Math.abs(outchart_in[i].MOVEDIN_EST)));
-		total_in_inmig = total_in_inmig + Math.abs(outchart_in[i].MOVEDIN_EST)
-	}
+// Prepping _in migration data
+
+var total_pos_inmig = 0;
+var y_in_pos = 0.1;
+
+
+// Prepping _in migration data
+for(i = 0; i < nodeslist_in.length;i++){
+			nodeslist_in[i].src = labarr_in.indexOf(nodeslist_in[i].location2)
+			nodeslist_in[i].tgt = labarr_in.indexOf(nodeslist_in[i].location1)
+			nodeslist_in[i].val = Math.abs(nodeslist_in[i].value)
+			nodeslist_in[i].lablink = nodeslist_in[i].location2 + " to " + nodeslist_in[i].location1 + ": " + fmt_comma(Math.abs(nodeslist_in[i].value));
+			nodeslist_in[i].xpos =  0.1;
+			nodeslist_in[i].ypos =  parseFloat(y_in_pos.toFixed(3));
+			total_pos_inmig = total_pos_inmig + Math.abs(nodeslist_in[i].value)
+			y_in_pos = y_in_pos + incr;
 	
+		if(nodeslist_in[i].tgt == -1) { nodeslist_in[i].tgt = 0}
+} //i
+var nodes_1 = []
+nodes_1.push({"location1" : "Colorado",
+		"location2" : "Colorado",
+		"value" : 0,
+		"src" :0,
+		"tgt" : 0,
+		"val" : 0,
+        "xpos" : 0.5,
+        "ypos" : 0.5,
+		"lablink" : ""	  
+})
+	 
+var nodeslist_in = nodes_1.concat(nodeslist_in)
 
 //in Migration Plot
 
-var in_in_mig_lab = "In Migration: "+ fmt_comma(total_in_inmig);
+var in_in_mig_lab = "In Migration: "+ fmt_comma(total_pos_inmig);
 
 var data_in = {
   type: "sankey",
@@ -8132,15 +8042,17 @@ var data_in = {
       width: 0.5
     },
    label: labarr_in,
-   pad : 10,
+   x : nodeslist_in.map(d => d.xpos),
+   y : nodeslist_in.map(d => d.ypos),
+   pad : 40,
    hoverinfo: 'none'
       },
 
   link: {
-    source: src_in,
-    target: tgt_in,
-    value:  val_in,
-	customdata : lablinks_in,
+ source: nodeslist_in.map(d => d.src),
+    target: nodeslist_in.map(d => d.tgt),
+    value:  nodeslist_in.map(d => d.val),
+	customdata : nodeslist_in.map(d => d.lablink),
 	hovertemplate : '%{customdata}<extra></extra>'
   }
 }
@@ -8149,8 +8061,8 @@ var data_inp = [data_in];
 
 var layout_in = {
   title: titleVal_in, autosize: false,
-  width: 900, 
-  height: 900, 
+  width: 700, 
+  height: 700, 
   font: {
     size: 10,
 	family : 'Arial Black'
@@ -8183,68 +8095,75 @@ outchart_out.forEach(obj => {
 	nodeslist_out.push({'location1' : obj.NAME1, 'location2' : obj.NAME2,  'value' : obj.MOVEDOUT_EST})
 })
 
-var nodessort_out = nodeslist_out.sort(function(a, b){ return d3.descending(a['value'], b['value']); });
-
-nodessort_out.forEach(d => {
-	nodesuniq_out.push(d.location2)
-})
-nodesuniq_out.unshift(plname)
-
-var nodes_out = [];
 var labarr_out = [];
-
-for(i = 0; i < nodesuniq_out.length; i++){
-	nodes_out.push({'location' : nodesuniq_out[i], "row_val" : i})
-	labarr_out.push(nodesuniq_out[i]);
+labarr_out.push(nodeslist_out[0].location1);
+for(i = 0; i < nodeslist_out.length; i++){
+	labarr_out.push(nodeslist_out[i].location2);
 }
-var src_out = [];
-var tgt_out = [];
-var val_out = [];
-var lablinks_out = [];
-var total_out_outmig = 0
+		
+	var inc = 1/nodeslist_out.length;
 
-for(i = 0; i < outchart_out.length;i++){
-		var srcVal = nodes_out.filter(obj => obj.location == outchart_out[i].NAME1)
-		var tgtVal = nodes_out.filter(obj => obj.location == outchart_out[i].NAME2)
-		if(srcVal.length == 0) {
-		   src_out.push(0);	
-		} else {
-		  src_out.push(srcVal[0].row_val)
-		}
-		if(tgtVal.length == 0) {
-		   tgt_out.push(0);	
-		} else {
-		  tgt_out.push(tgtVal[0].row_val)
-		}
-		val_out.push(Math.abs(outchart_out[i].MOVEDOUT_EST))
-		lablinks_out.push(outchart_out[i].NAME1 + " to " + outchart_out[i].NAME2 + ": " + fmt_comma(Math.abs(outchart_out[i].MOVEDOUT_EST)));
-		total_out_outmig = total_out_outmig + Math.abs(outchart_out[i].MOVEDOUT_EST)
-	}
+var incr = parseFloat(inc.toFixed(3))
 
+
+// Prepping _out migration data
+
+var total_pos_outmig = 0;
+var y_out_pos = 0.1;
+
+
+// Prepping _out migration data
+for(i = 0; i < nodeslist_out.length;i++){
+			nodeslist_out[i].src = labarr_out.indexOf(nodeslist_out[i].location1)
+			nodeslist_out[i].tgt = labarr_out.indexOf(nodeslist_out[i].location2)
+			nodeslist_out[i].val = Math.abs(nodeslist_out[i].value)
+			nodeslist_out[i].lablink = nodeslist_out[i].location2 + " to " + nodeslist_out[i].location1 + ": " + fmt_comma(Math.abs(nodeslist_out[i].value));
+			nodeslist_out[i].xpos =  0.9;
+			nodeslist_out[i].ypos =  parseFloat(y_out_pos.toFixed(3));
+			total_pos_outmig = total_pos_outmig + Math.abs(nodeslist_out[i].value)
+			y_out_pos = y_out_pos + incr;
+		
+		if(nodeslist_out[i].tgt == -1) { nodeslist_out[i].tgt = 0}
+} //i
+var nodes_1 = []
+nodes_1.push({"location1" : "Colorado",
+		"location2" : "Colorado",
+		"value" : 0,
+		"src" :0,
+		"tgt" : 0,
+		"val" : 0,
+        "xpos" : 0.5,
+        "ypos" : 0.5,
+		"lablink" : ""	  
+})
+	 
+var nodeslist_out = nodes_1.concat(nodeslist_out)
 //out Migration Plot
 
-var out_out_mig_lab = "Out Migration: "+ fmt_comma(total_out_outmig);
+var out_out_mig_lab = "Out Migration: "+ fmt_comma(total_pos_outmig);
 
 var data_out = {
   type: "sankey",
   orientation: "h",
   arrangement : "fixed",
   node: {
-    thickness: 5,
+    thickness: 30,
     line: {
       color: "black",
       width: 0.5
     },
    label: labarr_out,
-   pad : 25,
+   x : nodeslist_out.map(d => d.xpos),
+   y : nodeslist_out.map(d => d.ypos),
+   pad : 40,
    hoverinfo: 'none'
       },
 
   link: {
-    source: src_out,
-    target: tgt_out,
-    value:  val_out,
-	customdata : lablinks_out,
+ source: nodeslist_out.map(d => d.src),
+    target: nodeslist_out.map(d => d.tgt),
+    value:  nodeslist_out.map(d => d.val),
+	customdata : nodeslist_out.map(d => d.lablink),
 	hovertemplate : '%{customdata}<extra></extra>'
   }
 }
@@ -8253,8 +8172,8 @@ var data_outp = [data_out];
 
 var layout_out = {
   title: titleVal_out, autosize : false,
-  width: 800,
-  height: 800, 
+  width: 700,
+  height: 700, 
   font: {
     size: 10,
 	family : 'Arial Black'
