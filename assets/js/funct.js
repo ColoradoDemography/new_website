@@ -7654,7 +7654,7 @@ function supressData(inData, type){
 					  outfin[i] = outsort[i];
 				  } else {
 				      outcnt++
-				      outmax =  outsort[i].MOVEDOUT_EST > inmax ? outsort[i].MOVEDOUT_EST : inmax;
+				      outmax =  outsort[i].MOVEDOUT_EST > outmax ? outsort[i].MOVEDOUT_EST : outmax;
 					  if(outcnt == 1){
 					  var outphrase = fmt_comma(outcnt) + ' location with ' + fmt_comma(outmax)+ ' or fewer movers'
 					  } else {
