@@ -7506,15 +7506,14 @@ function parsePhrase (phrase){
 
 //supressData compresses data sets to have a maximum of 35 entires (20 px per entry in a chart with 700 px)
 //OR entry with 10 or fewer movers
-function supressData(inData, type){
+function supressData(inData, fips, type){
 	var fmt_comma = d3.format(",");
-	var outname = "Colorado"
+	var outname = countyName(parseInt(fips))
 
 		switch(type) {
 		case 'net' :{
  		  var posdata = inData.filter(d => d.MOVEDNET_EST >= 0)
           var possort = posdata.sort(function(a, b){return d3.descending(a['MOVEDNET_EST'], b['MOVEDNET_EST']); })
-		 
 		  var poscnt = 0;
 		  var posmax = 0;
 		  var posfin = [];
@@ -7547,18 +7546,18 @@ function supressData(inData, type){
 				"MOVEDIN_MOE" : 0,
 				"MOVEDOUT_EST" : 0,
 				"MOVEDOUT_MOE" : 0,
-				"MOVEDNET_EST" : posmax,
+				"MOVEDNET_EST" : 10,
 				"MOVEDNET_MOE" : 0 })
 			  }
 			  
 		  var negdata = inData.filter(d => d.MOVEDNET_EST < 0)
 
           var negsort = negdata.sort(function(a, b){return d3.ascending(a['MOVEDNET_EST'], b['MOVEDNET_EST']); })
-		  
+
 		  var negcnt = 0;
 		  var negmax = 0;
 		  var negfin = [];
-		  var nedphrase = "";
+		  var negphrase = "";
 			  for(i = 0; i < negsort.length; i++) {
 				  if(i < 20){
 					  negfin[i] = negsort[i];
@@ -7586,7 +7585,7 @@ function supressData(inData, type){
 				"MOVEDIN_MOE" : 0,
 				"MOVEDOUT_EST" : 0,
 				"MOVEDOUT_MOE" : 0,
-				"MOVEDNET_EST" : negmax,
+				"MOVEDNET_EST" : -10,
 				"MOVEDNET_MOE" : 0 })
 			  }
 		var outdata = posfin.concat(negfin);
@@ -7638,7 +7637,7 @@ function supressData(inData, type){
 		  var outfin = [];
 		  var outphrase = "";
 			  for(i = 0; i < outsort.length; i++) {
-				  if(i <= 20){
+				  if(i < 20){
 					  outfin[i] = outsort[i];
 				  } else {
 				      outcnt++
@@ -7818,9 +7817,9 @@ if(fips == "000"){
   
 	var outchartun = instate_sum.concat(bindata);
 }
-var outchart_net = supressData(outchartun,"net")
-var outchart_in = supressData(outchartun,"in")
-var outchart_out = supressData(outchartun,"out")
+var outchart_net = supressData(outchartun, fips, "net")
+var outchart_in = supressData(outchartun, fips, "in")
+var outchart_out = supressData(outchartun, fips, "out")
 
 // Creating Nodeslist
 var nodeslist_net = [];
@@ -7883,6 +7882,7 @@ for(i = 0; i < nodeslist_net.length;i++){
 			y_net_pos = y_net_pos + incr;
 		}
 		if(nodeslist_net[i].tgt == -1) { nodeslist_net[i].tgt = 0}
+		if(nodeslist_net[i].src == -1) { nodeslist_net[i].src = 0}
 } //i
 var nodes_1 = []
 nodes_1.push({"location1" : "Colorado",
@@ -7946,8 +7946,8 @@ annotations : [{text :  citStr ,
 	  yref : 'paper', 
 	  xanchor : 'left',
 	  yanchor : 'bottom',
-      x : 0.25, 
-      y : -0.13, 
+      x : 0, 
+      y : -0.135, 
       align : 'left', 
       showarrow : false},
 	  {text : net_in_mig_lab,
