@@ -7534,7 +7534,7 @@ function supressData(inData, fips, type){
 
 
 		//adding record for supression
-		 if(poscnt > 0){
+		 if(poscnt > 0 && posmax > 0){
 			  posfin.push({
 				"GEOID1" : "",
 				"GEOID2" : "",
@@ -7573,7 +7573,7 @@ function supressData(inData, fips, type){
 			  }
 		
 				//adding record for supression
-		 if(negcnt > 0){
+		 if(negcnt > 0 && negmax > 0){
 			  negfin.push({
 				"GEOID1" : "",
 				"GEOID2" : "",
