@@ -7828,7 +7828,8 @@ outchart_net.forEach(obj => {
 })
 
 var labarr_net = [];
-labarr_net.push(nodeslist_net[0].location1);
+//labarr_net.push(nodeslist_net[0].location1);
+labarr_net.push("");
 for(i = 0; i < nodeslist_net.length; i++){
 	labarr_net.push(nodeslist_net[i].location2);
 }
@@ -7864,6 +7865,9 @@ for(i = 0; i < nodeslist_net.length;i++){
 				nodeslist_net[i].lablink = nodeslist_net[i].location1 + " to " + nodeslist_net[i].location2 + ": " + fmt_comma(Math.abs(nodeslist_net[i].value));	
 			}
 			nodeslist_net[i].xpos =  0.9;
+			nodeslist_net[i].labposx = 0.95;
+			nodeslist_net[i].labposy = 1 - parseFloat(y_net_neg.toFixed(3));
+			nodeslist_net[i].lab = nodeslist_net[i].location2;
 			nodeslist_net[i].ypos =  parseFloat(y_net_neg.toFixed(3));
 			total_neg_netmig = total_neg_netmig + Math.abs(nodeslist_net[i].value)
 			y_net_neg = y_net_neg + incr;
@@ -7877,6 +7881,10 @@ for(i = 0; i < nodeslist_net.length;i++){
 				nodeslist_net[i].lablink = nodeslist_net[i].location1 + " to " + nodeslist_net[i].location2 + ": " + fmt_comma(Math.abs(nodeslist_net[i].value));	
 			}
 			nodeslist_net[i].xpos =  0.1;
+			nodeslist_net[i].labposx = -0.05;
+			nodeslist_net[i].labposy = 1 - parseFloat(y_net_neg.toFixed(3));
+			nodeslist_net[i].lab = nodeslist_net[i].location2;
+			nodeslist_net[i].lab = nodeslist_net[i].location2;
 			nodeslist_net[i].ypos =  parseFloat(y_net_pos.toFixed(3));
 			total_pos_netmig = total_pos_netmig + Math.abs(nodeslist_net[i].value)
 			y_net_pos = y_net_pos + incr;
@@ -7898,6 +7906,18 @@ nodes_1.push({"location1" : countyName(parseInt(fips)),
 	 
 var nodeslist_net = nodes_1.concat(nodeslist_net)
 
+//Build Label Annotations
+var lab_annotation = [];
+nodeslist_net.forEach( d => {
+	lab_annotation.push({text: d.lab,
+		font : {size : 11, color : 'black'},      
+        x : d.labposx,
+        y : d.labposy,
+		showarrow : false})
+})
+
+console.log(lab_annotation);
+debugger
 
 //Net Migration Plot
 
@@ -7914,7 +7934,7 @@ var data_net = {
       color: "black",
       width: 0.5
     },
-   label: labarr_net,
+   label: nodeslist_net.map(d => d.lab),
    x : nodeslist_net.map(d => d.xpos),
    y : nodeslist_net.map(d => d.ypos),
    pad : 35,
@@ -7940,7 +7960,8 @@ var layout_net = {
     size: 11,
 	family : 'Arial Black'
   },
-annotations : [{text :  citStr , 
+annotations : [
+      {text :  citStr , 
       font: { size : 9, color: 'black'},
       xref : 'paper', 
 	  yref : 'paper', 
@@ -7956,7 +7977,7 @@ annotations : [{text :  citStr ,
 	    yref : 'paper', 
 	    xanchor : 'left',
 	    yanchor : 'bottom',
-	    x : 0.25,
+	    x : 0,
         y : 1,
 		showarrow : false },
 		{text : net_out_mig_lab,
@@ -7979,7 +8000,7 @@ outchart_in.forEach(obj => {
 })
 
 var labarr_in = [];
-labarr_in.push(nodeslist_in[0].location1);
+labarr_in.push("");
 for(i = 0; i < nodeslist_in.length; i++){
 	labarr_in.push(nodeslist_in[i].location2);
 }
@@ -8007,6 +8028,7 @@ for(i = 0; i < nodeslist_in.length;i++){
 			}			
 			nodeslist_in[i].xpos =  0.1;
 			nodeslist_in[i].ypos =  parseFloat(y_in_pos.toFixed(3));
+			nodeslist_in[i].lab = nodeslist_in[i].location2
 			if(nodeslist_in[i].location2.includes("movers")){
 				total_pos_inmig = total_pos_inmig + parsePhrase(nodeslist_in[i].location2);
 			} else {
@@ -8015,6 +8037,7 @@ for(i = 0; i < nodeslist_in.length;i++){
 			y_in_pos = y_in_pos + incr;
 	
 		if(nodeslist_in[i].tgt == -1) { nodeslist_in[i].tgt = 0}
+		if(nodeslist_in[i].src == -1) { nodeslist_in[i].src = 0}
 } //i
 var nodes_1 = []
 nodes_1.push({"location1" : countyName(parseInt(fips)),
@@ -8044,7 +8067,7 @@ var data_in = {
       color: "black",
       width: 0.5
     },
-   label: labarr_in,
+   label: nodeslist_in.map(d => d.lab),
    x : nodeslist_in.map(d => d.xpos),
    y : nodeslist_in.map(d => d.ypos),
    pad : 35,
@@ -8099,7 +8122,7 @@ outchart_out.forEach(obj => {
 })
 
 var labarr_out = [];
-labarr_out.push(nodeslist_out[0].location1);
+labarr_out.push("");
 for(i = 0; i < nodeslist_out.length; i++){
 	labarr_out.push(nodeslist_out[i].location2);
 }
@@ -8127,14 +8150,15 @@ for(i = 0; i < nodeslist_out.length;i++){
 			}
 			nodeslist_out[i].xpos =  0.9;
 			nodeslist_out[i].ypos =  parseFloat(y_out_pos.toFixed(3));
+			nodeslist_out[i].lab = nodeslist_out[i].location2
 			if(nodeslist_in[i].location2.includes("movers")){
 				total_pos_outmig = total_pos_outmig + parsePhrase(nodeslist_out[i].location2);
 			} else {
 			     total_pos_outmig = total_pos_outmig + nodeslist_out[i].value;
 			}			
 			y_out_pos = y_out_pos + incr;
-		
 		if(nodeslist_out[i].tgt == -1) { nodeslist_out[i].tgt = 0}
+		if(nodeslist_out[i].src == -1) { nodeslist_out[i].src = 0}
 } //i
 var nodes_1 = []
 nodes_1.push({"location1" : countyName(parseInt(fips)),
@@ -8163,7 +8187,7 @@ var data_out = {
       color: "black",
       width: 0.5
     },
-   label: labarr_out,
+   label: nodeslist_out.map(d => d.lab),
    x : nodeslist_out.map(d => d.xpos),
    y : nodeslist_out.map(d => d.ypos),
    pad : 35,
