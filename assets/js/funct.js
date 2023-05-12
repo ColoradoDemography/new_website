@@ -7878,7 +7878,7 @@ for(i = 0; i < nodeslist_net.length;i++){
 			if(nodeslist_net[i].location2.includes("movers")){
 				nodeslist_net[i].lablink = nodeslist_net[i].location2;
 			} else {
-				nodeslist_net[i].lablink = nodeslist_net[i].location1 + " to " + nodeslist_net[i].location2 + ": " + fmt_comma(Math.abs(nodeslist_net[i].value));	
+				nodeslist_net[i].lablink = nodeslist_net[i].location2 + " to " + nodeslist_net[i].location1 + ": " + fmt_comma(Math.abs(nodeslist_net[i].value));	
 			}
 			nodeslist_net[i].xpos =  0.1;
 			nodeslist_net[i].labposx = -0.05;
