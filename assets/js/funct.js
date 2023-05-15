@@ -7869,7 +7869,11 @@ for(i = 0; i < nodeslist_net.length;i++){
 			nodeslist_net[i].labposy = 1 - parseFloat(y_net_neg.toFixed(3));
 			nodeslist_net[i].lab = nodeslist_net[i].location2;
 			nodeslist_net[i].ypos =  parseFloat(y_net_neg.toFixed(3));
-			total_neg_netmig = total_neg_netmig + Math.abs(nodeslist_net[i].value)
+			if(nodeslist_net[i].location2.includes("movers")){
+				total_neg_netmig = total_neg_netmig + Math.abs(parsePhrase(nodeslist_net[i].location2));
+			} else {
+			     total_neg_netmig = total_neg_netmig + Math.abs(nodeslist_net[i].value);
+			}
 			y_net_neg = y_net_neg + incr;
 		} else {
 			nodeslist_net[i].src = labarr_net.indexOf(nodeslist_net[i].location2)
@@ -7886,7 +7890,11 @@ for(i = 0; i < nodeslist_net.length;i++){
 			nodeslist_net[i].lab = nodeslist_net[i].location2;
 			nodeslist_net[i].lab = nodeslist_net[i].location2;
 			nodeslist_net[i].ypos =  parseFloat(y_net_pos.toFixed(3));
-			total_pos_netmig = total_pos_netmig + Math.abs(nodeslist_net[i].value)
+			if(nodeslist_net[i].location2.includes("movers")){
+				total_pos_netmig = total_pos_netmig + parsePhrase(nodeslist_net[i].location2);
+			} else {
+			     total_pos_netmig = total_pos_netmig + nodeslist_net[i].value;
+			}
 			y_net_pos = y_net_pos + incr;
 		}
 		if(nodeslist_net[i].tgt == -1) { nodeslist_net[i].tgt = 0}
@@ -8137,6 +8145,8 @@ var y_out_pos = 0.1;
 
 
 // Prepping _out migration data
+
+
 for(i = 0; i < nodeslist_out.length;i++){
 			nodeslist_out[i].src = labarr_out.indexOf(nodeslist_out[i].location1)
 			nodeslist_out[i].tgt = labarr_out.indexOf(nodeslist_out[i].location2)
@@ -8148,8 +8158,8 @@ for(i = 0; i < nodeslist_out.length;i++){
 			}
 			nodeslist_out[i].xpos =  0.9;
 			nodeslist_out[i].ypos =  parseFloat(y_out_pos.toFixed(3));
-			nodeslist_out[i].lab = nodeslist_out[i].location2
-			if(nodeslist_in[i].location2.includes("movers")){
+			nodeslist_out[i].lab = nodeslist_out[i].location2;
+			if(nodeslist_out[i].location2.includes("movers")){
 				total_pos_outmig = total_pos_outmig + parsePhrase(nodeslist_out[i].location2);
 			} else {
 			     total_pos_outmig = total_pos_outmig + nodeslist_out[i].value;
