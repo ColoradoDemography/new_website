@@ -1916,30 +1916,11 @@ function exportToPng(cname, type, graphDiv, yr){
 			});
 		} 
 		break;
-	    case 'netflow': {
-		    Plotly.toImage(graphDiv, { format: 'png', width: 750, height: 750 }).then(function (dataURL) {
-				var a = document.createElement('a');
-				a.href = dataURL;
-				a.download = fn;
-				document.body.appendChild(a);
-				 a.click();
-				document.body.removeChild(a);
-			});
-		} 
-		break;
-	    case 'inflow' : {
-		    Plotly.toImage(graphDiv, { format: 'png', width: 750, height: 750 }).then(function (dataURL) {
-				var a = document.createElement('a');
-				a.href = dataURL;
-				a.download = fn;
-				document.body.appendChild(a);
-				 a.click();
-				document.body.removeChild(a);
-			});
-		} 
-		break;
-	    case 'outflow' : {
-		    Plotly.toImage(graphDiv, { format: 'png', width: 750, height: 750 }).then(function (dataURL) {
+	    case 'netflow':
+		case 'inflow' : 
+		case 'outflow':
+		{
+		    Plotly.toImage(graphDiv, { format: 'png', width: 840, height: 650 }).then(function (dataURL) {
 				var a = document.createElement('a');
 				a.href = dataURL;
 				a.download = fn;
@@ -7960,8 +7941,8 @@ var data_netp = [data_net];
 
 var layout_net = {
   title: titleVal_net, autosize : false, 
-  width: 750,
-  height: 750,
+  width: 840,
+  height: 700,
   font: {
     size: 11,
 	family : 'Arial Black'
@@ -8093,8 +8074,8 @@ var data_inp = [data_in];
 
 var layout_in = {
   title: titleVal_in, autosize: false,
-  width: 750, 
-  height: 750, 
+  width: 840, 
+  height: 700, 
   font: {
     size: 11,
 	family : 'Arial Black'
@@ -8215,8 +8196,8 @@ var data_outp = [data_out];
 
 var layout_out = {
   title: titleVal_out, autosize : false,
-  width: 750,
-  height: 750, 
+  width: 840,
+  height: 700, 
   font: {
     size: 11,
 	family : 'Arial Black'
