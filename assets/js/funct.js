@@ -1920,7 +1920,7 @@ function exportToPng(cname, type, graphDiv, yr){
 		case 'inflow' : 
 		case 'outflow':
 		{
-		    Plotly.toImage(graphDiv, { format: 'png', width: 840, height: 650 }).then(function (dataURL) {
+		    Plotly.toImage(graphDiv, { format: 'png', width: 840, height: 700 }).then(function (dataURL) {
 				var a = document.createElement('a');
 				a.href = dataURL;
 				a.download = fn;
