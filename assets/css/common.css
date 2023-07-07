@@ -1,11 +1,10 @@
 * {
   box-sizing: border-box;
 }
-h1, h2, h3, h4, h5{
+h1, h2, h3, h4, h5, h6 {
   font-family: "Trebuchet MS, Museo Slab; helvetica, lucida sans, tahoma, verdana", sans-serif;
   line-height: 1;
 }
-
 
 body{
     margin:0;
@@ -393,7 +392,7 @@ details {
   overflow: hidden;
   margin-top: 0.125em;
   border: 1px solid #dddddd;
-  background:#D3D3D3;
+  background:#d6d2c4;
   color:blue;
   border-radius: 3px;
   border-color: black;
@@ -404,20 +403,20 @@ details summary {
   display: block;
   cursor: pointer;
   padding: .5em .5em .5em .7em;
-  background:#D3D3D3;
+  background:#d6d2c4;
   color:blue;
   border-radius: 3px 3px 0 0;
 }
 
 details:not([open]) summary:hover,
 details:not([open]) summary:focus {      
-  background:#D3D3D3;
+  background:#d6d2c4; /* #d6d2c4; */
   color:blue;
 }
 
 details:not([open]) summary {
   border: 1px solid #003eff;
-   background:#D3D3D3;
+   background: #d6d2c4; /*#d6d2c4;*/ 
   color:blue;
 }
 details[open] summary {
@@ -436,7 +435,7 @@ details main {
 /* Data Button Style */
 .databutton { 
 	  font-size: 90%; 
-	  background:#D3D3D3;
+	  background:#d6d2c4;
 	  color: black; 
 	  text-decoration: none;
 	  display: table-cell; 
@@ -1068,6 +1067,10 @@ details main {
    grid-row: 3;   
   } 
   
+  .sect-spread_1_1 { 
+   grid-column: 1/ span 6;
+   grid-row: 1;   
+  }  
  .sect-spread_1 { 
    grid-column: 1/ span 3;
    grid-row: 2 /span 2;   
@@ -1199,7 +1202,7 @@ ul.breadcrumb li+li:before {
 
 /* Add a color to all links inside the list */
 ul.breadcrumb li a {
-  color: #0275d8;
+  color: #003b49;
   text-decoration: none;
 }
 
@@ -1209,6 +1212,11 @@ ul.breadcrumb li a:hover {
   text-decoration: underline;
 }
 
+ul.no-bullets {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
 
 /* List  styles for Profile */
 .profilelist li {
@@ -1301,7 +1309,7 @@ div.tooltip {
   display: block;
   cursor: pointer;
   padding: .5em .5em .5em .7em;
-  background:#D3D3D3;
+  background:#d6d2c4;
   color:blue;
   border-radius: 3px 3px 0 0;
 }
@@ -1336,6 +1344,19 @@ div.tooltip {
   background-color: #7a853b; 
   padding: 1px;
 }
+
+.cens-panel_spread_a {  
+ gap : 0;
+  grid-column: 2 / span 3;
+  grid-row: 2 /span 2;
+  }
+  
+ .cens-panel_spread_b {  
+ gap : 0;
+  grid-column: 5 / span 3;
+  grid-row: 2 / span 2;
+  }
+  
 .cens-panel_cens_a {  
  gap : 0;
   grid-column: 1 / span 6;
@@ -1794,3 +1815,81 @@ li:hover>nava{
     display: block;
 }
 
+/* Accessbility Styles 6/27/2023 */
+/* Skip Nav*/
+.skipnav a { position: absolute; left: -10000px; }
+.skipnav a:hover, .skipnav a:focus, .skipnav a:active { 
+    position: 
+	static; left: 0; 
+   }
+   
+ /* New Nav button*/
+ .sum_btn {
+  overflow: hidden;
+  background-color: #d8d4d4;
+  margin-top: 0.125em;
+  border: 1px solid #dddddd;
+  border-width : 2px;
+  color: #0806a2;
+  border-color: black;
+  font-size : 11pt;
+  display: block;
+  cursor: pointer;
+  padding: .5em .5em .5em .7em;
+  border-radius: 3px 3px 0 0;
+ }
+ 
+ /*New Header sizes and Colors 6/28/2023 */
+.h1_style  {
+  font-size : 24px;
+  color : #003b49;
+}
+.h2_style  {
+  font-size : 20px;
+  color : #003b49;
+}
+
+.h3_style  {
+  font-size : 16px;
+  color : #003b49;
+}
+
+.h4_style  {
+  font-size : 12px;
+  color : #003b49;
+}
+
+.h5_style  {
+  font-size : 16px;
+  color : #003b49;
+}
+
+.h6_style  {
+  font-size : 14px;
+  color : #003b49;
+}
+/* New Accordion Structure 7/6/2023 */
+.accordion {
+  font-size : 11pt;
+  outline-style: solid;
+  text-align: left;
+  width: 100%;
+  display: block;
+  cursor: pointer;
+  padding: .5em .5em .5em .7em;
+  background-color: #d8d4d4;
+  border-radius: 3px 3px 0 0;
+}
+
+/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+.active, .accordion:hover {
+  background-color: #ccc;
+}
+
+/* Style the accordion panel. Note: hidden by default */
+.panel {
+  padding: 0 18px;
+  background-color: white;
+  display: none;
+  overflow: hidden;
+}
