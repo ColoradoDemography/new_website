@@ -1653,6 +1653,29 @@ function restructureRace(inData) {
 // end restructureRace
 
 
+//accordionFun  manages the accordion  panels
+function accordionFun() {
+	debugger;
+var acc = document.getElementsByClassName("accordion");
+var i;
+for (i = 0; i < acc.length; i++) {
+  acc[i].addEventListener("click", function() {
+    /* Toggle between adding and removing the "active" class,
+    to highlight the button that controls the panel */
+    this.classList.toggle("active");
+
+    /* Toggle between hiding and showing the active panel */
+    var panel = this.nextElementSibling;
+    if (panel.style.display === "block") {
+      panel.style.display = "none";
+    } else {
+      panel.style.display = "block";
+    }
+  });
+}
+} //accordionFun
+
+
 //includeHTML  taken from W3  https://www.w3schools.com/howto/howto_html_include.asp
 function includeHTML() {
   var z, i, elmnt, file, xhttp;
@@ -1693,7 +1716,7 @@ function transpose(data) {
     }
   }
   return result;
-}; //includeHTML
+}; //transpose
 
 
 //genFilename generates standardized file names
@@ -1895,7 +1918,7 @@ function exportToPng(cname, type, graphDiv, yr){
 		} 
 		break;
 		case 'agepyr' : {
-		Plotly.toImage(graphDiv, { format: 'png', width: 900, height: 500 }).then(function (dataURL) {
+		Plotly.toImage(graphDiv, { format: 'png', width: 900, height: 480 }).then(function (dataURL) {
 			var a = document.createElement('a');
 			a.href = dataURL;
 			a.download = fn;
@@ -1906,7 +1929,7 @@ function exportToPng(cname, type, graphDiv, yr){
 		} 
 		break;
 	    case 'popchng' : {
-		    Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 400 }).then(function (dataURL) {
+		    Plotly.toImage(graphDiv, { format: 'png', width: 900, height: 480 }).then(function (dataURL) {
 				var a = document.createElement('a');
 				a.href = dataURL;
 				a.download = fn;
@@ -1920,7 +1943,7 @@ function exportToPng(cname, type, graphDiv, yr){
 		case 'inflow' : 
 		case 'outflow':
 		{
-		    Plotly.toImage(graphDiv, { format: 'png', width: 840, height: 700 }).then(function (dataURL) {
+		    Plotly.toImage(graphDiv, { format: 'png', width: 900, height: 480 }).then(function (dataURL) {
 				var a = document.createElement('a');
 				a.href = dataURL;
 				a.download = fn;
@@ -1931,7 +1954,7 @@ function exportToPng(cname, type, graphDiv, yr){
 		} 
 		break;
 	  default : {
-	   Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 400 }).then(function (dataURL) {
+	   Plotly.toImage(graphDiv, { format: 'png', width: 900, height: 480 }).then(function (dataURL) {
         var a = document.createElement('a');
         a.href = dataURL;
         a.download = fn;
@@ -3209,13 +3232,14 @@ for(i = 0; i < ages.length; i++) {
   };
 
 //Generate Table
-var tblcolumns1 = [
-    {'text' :'Population Estimates by Age', 'colspan' : 2},
-	{'text' : "<a href='https://gis.dola.colorado.gov/population/data/sya-county/' target=_blank>Single Year of Age Lookup</a>", 'colspan' : 2}
-	 ];
+d3.select('#PopTab').html("");
+$("#PopTab" ).append( "<h2 class='h2_style'>Population Estimates by Age</h2>" );
+$("#PopTab").append( "<a href='https://gis.dola.colorado.gov/population/data/sya-county/' target='_blank'>Single Year of Age Lookup</a>" );
+$("#PopTab").append("<p></p>");
+
 var tblcolumns2 = ['Ages','Number, '+ prevyear,'Number, '+ yrvalue,'2030 Forecast'];
 // Output table 
-d3.select('#PopTab').html("");
+//d3.select('#PopTab').html("");
 var syatab = d3.select('#PopTab')
                .append('table')
                .style('table-layout', 'fixed');
@@ -3223,15 +3247,7 @@ var syatab = d3.select('#PopTab')
 thead = syatab.append('thead');
 tbody = syatab.append('tbody');
 //Header
-thead.append('tr')
-       .selectAll('th')
-   .data(tblcolumns1).enter()
-   .append('th')
-   .html(function(d) {return d.text;})
-   .attr("colspan", function(d) {return d.colspan;})
-   .style("border", "1px black solid")
-   .style("width","50%")
- 	
+
 thead.append('tr')
    .selectAll('th')
    .data(tblcolumns2).enter()
@@ -3319,13 +3335,15 @@ for(i = 2; i <= 4; i++){
 	tbl_arr.push({'coc_name' : outname, 'prevval' : fmt_comma(prevVal), 'curval' : fmt_comma(curVal), 'pct_chg' : fmt_pct(pctchg)});
 }
 //Generate Table
-var tblcolumns1 = [
-    {'text' :'Components of Change', 'colspan' : 2},
-	{'text' : "<a href='https://gis.dola.colorado.gov/births-deaths-migration/data/components-change/#components-of-change' target=_blank>Components of Change Lookup</a>", 'colspan' : 2}
-	 ];
+d3.select('#COCTab').html("");
+$("#COCTab").append( "<h2 class='h2_style'>Births, Deaths, and Migration</h2>");
+$("#COCTab").append("<a href='https://gis.dola.colorado.gov/births-deaths-migration/data/components-change/#components-of-change' target='_blank'>Components of Change Lookup</a>");
+$("#COCTab").append("<p></p>");
+
+
 var tblcolumns2 = ['Component','Number,  ' + prevyear,'Number,  ' + yrvalue,'Change'];
 // Output table 
-d3.select('#COCTab').html("");
+
 var syatab = d3.select('#COCTab')
                .append('table')
                .style('table-layout', 'fixed');
@@ -3333,15 +3351,6 @@ var syatab = d3.select('#COCTab')
 thead = syatab.append('thead');
 tbody = syatab.append('tbody');
 //Header
-thead.append('tr')
-       .selectAll('th')
-   .data(tblcolumns1).enter()
-   .append('th')
-   .html(function(d) {return d.text;})
-   .attr("colspan", function(d) {return d.colspan;})
-   .style("border", "1px black solid")
-   .style("width","50%")
- 	
 thead.append('tr')
    .selectAll('th')
    .data(tblcolumns2).enter()
@@ -3486,22 +3495,15 @@ for(i = 0; i < raceth.length; i++) {
   };
 
 //Generate Table
-/*
-var tblcolumns1 = [
-    {'text' :'Race/ Ethnicity: '+ yrvalue, 'colspan' : 2},
-	{'text' : "<a href='https://demography.dola.colorado.gov/assets/lookups/county_sya_race_lookup.html' target=_blank>Race/Ethnicity Lookup</a>", 'colspan' : 2}
-	 ];
-*/
+d3.select('#RaceTab').html("");
+$("#RaceTab" ).append( "<h2 class='h2_style'>Race/Ethnicity</h2>" );
+$("#RaceTab").append("<a href='https://demography.dola.colorado.gov/assets/lookups/county_sya_race_lookup.html' target='_blank'>Race/Ethnicity by Single Year of Age</a>");
+$("#RaceTab").append("<p></p>");
 
-var tblcolumns1 = [
-    {'text' :'Race/ Ethnicity: '+ yrvalue, 'colspan' : 2},
-	{'text' : "<a href='https://demography.dola.colorado.gov/assets/lookups/county_sya_race_lookup.html' target=_blank>Race/Ethnicity Lookup</a>"}
-	 ];
 	 
-//var tblcolumns2 = ['Race/ Ethnicity','Percentage, ' + yrvalue,'Number,  '+ yrvalue,year10 + ' Forecast'];
 var tblcolumns2 = ['Race/ Ethnicity',  'Percentage, ' + yrvalue, 'Number,  '+ yrvalue];
 // Output table 
-d3.select('#RaceTab').html("");
+
 var syatab = d3.select('#RaceTab')
                .append('table')
                .style('table-layout', 'fixed');
@@ -3509,15 +3511,6 @@ var syatab = d3.select('#RaceTab')
 thead = syatab.append('thead');
 tbody = syatab.append('tbody');
 //Header
-thead.append('tr')
-       .selectAll('th')
-   .data(tblcolumns1).enter()
-   .append('th')
-   .html(function(d) {return d.text;})
-   .attr("colspan", function(d) {return d.colspan;})
-   .style("border", "1px black solid")
-   .style("width", d => {d.text == 'Race/ Ethnicity: '+ yrvalue ? "60%" : "40%"})
- 	
 thead.append('tr')
    .selectAll('th')
    .data(tblcolumns2).enter()
@@ -3647,16 +3640,16 @@ var curyr4 = ACSYR - 4;
 
 
 //Generate Table
-var tblcolumns1 = [
-    {'text' :'Housing Tenure '+ ACSYR},
-	{'text' : "<a href='https://data.census.gov/cedsci/' target=_blank>American Community Survey "+ curyr4 + "-" + ACSYR + " 5-year data</a>", 'colspan' : 2}
-	];
+d3.select('#TenureTab').html("");
+$("#TenureTab" ).append( "<h2 class='h2_style'>Housing Tenure, "+ ACSYR +"</h2>" );
+$("#TenureTab").append("<a href='https://data.census.gov/' target='_blank'>American Community Survey "+ curyr4 + "-" + ACSYR + " 5-year data</a>");
+$("#TenureTab").append("<p></p>");
 
-     var tblcolumns2 = ['Housing Units', 'Number', 'Percentage'];
+var tblcolumns2 = ['Housing Units', 'Number', 'Percentage'];
 
 
 // Output table 
-d3.select('#TenureTab').html("");
+
 var tenuretab = d3.select('#TenureTab')
                .append('table')
                .style('table-layout', 'fixed');
@@ -3664,15 +3657,7 @@ var tenuretab = d3.select('#TenureTab')
 thead = tenuretab.append('thead');
 tbody = tenuretab.append('tbody');
 //Header
-thead.append('tr')
-       .selectAll('th')
-   .data(tblcolumns1).enter()
-   .append('th')
-   .html(function(d) {return d.text;})
-   .attr("colspan", function(d) {return d.colspan;})
-   .style("border", "1px black solid")
-   .style("width","20%")
- 	
+
 thead.append('tr')
    .selectAll('th')
    .data(tblcolumns2).enter()
@@ -4034,10 +4019,10 @@ var curyr4 = curyr - 4;
 var prevyr4 = prevyr - 4;
 
 //Generate Table
-var tblcolumns1 = [
-    {'text' :'Selected Statistics: '+ curyr, 'colspan' :2},
-	{'text' : "<a href='https://data.census.gov/cedsci/' target=_blank>American Community Survey "+ curyr4 + "-" + curyr + " 5-year data</a>", 'colspan' : 2}
-	];
+d3.select('#ACSTab').html("");
+$("#ACSTab" ).append( "<h2 class='h2_style'>Selected Statistics, "+curyr+"</h2>" );
+$("#ACSTab").append("<a href='https://data.census.gov/' target='_blank'>American Community Survey "+ curyr4 + "-" + curyr + " 5-year data</a>");
+$("#ACSTab").append("<p></p>");
 
 if(fips == "000"){	
      var tblcolumns2 = ['Topic', 'Number', 'Change from ' + prevyr4 + "-" + prevyr + " ACS","U. S. Rank"];
@@ -4046,7 +4031,7 @@ if(fips == "000"){
 };
 
 // Output table 
-d3.select('#ACSTab').html("");
+
 var syatab = d3.select('#ACSTab')
                .append('table')
                .style('table-layout', 'fixed');
@@ -4054,15 +4039,6 @@ var syatab = d3.select('#ACSTab')
 thead = syatab.append('thead');
 tbody = syatab.append('tbody');
 //Header
-thead.append('tr')
-       .selectAll('th')
-   .data(tblcolumns1).enter()
-   .append('th')
-   .html(function(d) {return d.text;})
-   .attr("colspan", function(d) {return d.colspan;})
-   .style("border", "1px black solid")
-   .style("width","20%")
- 	
 thead.append('tr')
    .selectAll('th')
    .data(tblcolumns2).enter()
@@ -4220,13 +4196,14 @@ for(i = 1; i < housing_fint.length; i++){
 };
 
 //Generate Table
-var tblcolumns1 = [
-    {'text' :'Housing Characteristics: '+ yrvalue, 'colspan' : 1},
-	{'text' : "<a href='https://gis.dola.colorado.gov/population/data/county-data-lookup/' target=_blank>County Profile Lookup</a>", 'colspan' : 2}
-	 ];
+d3.select('#HousTab').html("");
+$("#HousTab" ).append( "<h2 class='h2_style'>Housing Characteristics, "+yrvalue+"</h2>" );
+$("#HousTab").append("<a href='https://gis.dola.colorado.gov/population/data/county-data-lookup/' target='_blank'>County Profile Lookup</a>" );
+$("#HousTab").append("<p></p>");
+
 var tblcolumns2 = ['Housing Type', 'Number', 'Change from ' + prevyear];
 // Output table 
-d3.select('#HousTab').html("");
+
 var syatab = d3.select('#HousTab')
                .append('table')
                .style('table-layout', 'fixed');
@@ -4234,15 +4211,6 @@ var syatab = d3.select('#HousTab')
 thead = syatab.append('thead');
 tbody = syatab.append('tbody');
 //Header
-thead.append('tr')
-       .selectAll('th')
-   .data(tblcolumns1).enter()
-   .append('th')
-   .html(function(d) {return d.text;})
-   .attr("colspan", function(d) {return d.colspan;})
-   .style("border", "1px black solid")
-   .style("width","33%")
- 	
 thead.append('tr')
    .selectAll('th')
    .data(tblcolumns2).enter()
