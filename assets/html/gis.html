@@ -10,11 +10,12 @@
 <!-- SDO CSS -->
 <link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
 <!-- adding d3.js  for data manipulation-->
- <script src="https://d3js.org/d3.v7.min.js"></script>
+ <script src="https://d3js.org/d3.v6.min.js"></script>
 <!-- SDO suport functions, genSYA, insertHTML, -->
-<script src="https://demography.dola.colorado.gov/assets/js/funct.js"></script>
-<!-- GoogleAnalytics Script -->
-<script defer src="https://demography.dola.colorado.gov/assets/js/googleAnalytics.js"></script>
+<script src="../js/funct.js"></script>
+<!-- GoogleAnalytics Script 
+<script defer src="./js/googleAnalytics.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W27DQ8VRCX"></script>  -->
 </head>
 <body>
 <div>
@@ -30,7 +31,8 @@
 	<div w3-include-html="./left_hand_index.html"></div>
   </div> <!-- Grid  panel2_2_1 -->
  <div class="grid-item app-panel_2_span">
-GIS data and maps from the Colorado State Demography Office.<br>
+ <h1 class='h1_style'>SDO GIS Resource Page</h1>
+<h2 class='h2_style'>GIS data and maps from the Colorado State Demography Office.</h2>
 <ul>
 <li>Shapefiles for use with GIS software</li>
 <li>Interactive and static maps</li>
@@ -38,25 +40,19 @@ GIS data and maps from the Colorado State Demography Office.<br>
 <p>
 You can access visualizations, data and external links by clicking on the buttons below.
 </p>
-<button class="summarybtn" onClick="location.href = './gis_applications.html'">Interactive Data Visualizations and Web Maps</button>
-<details>
-	<summary>GIS Shapefiles and Downloads</summary>
-<main>
+<button class="summarybtn" onClick="location.href = './gis_applications.html'"><h3 class='h3_style'>Interactive Data Visualizations and Web Maps</h3></button>
+<button class='accordion'><h3 class='h3_style'>GIS Shapefiles and Downloads</h3></button>
+<div class='panel'>
 		<div w3-include-html="./gis_data.html"></div>
-</main>
-</details>
-<details>
-	<summary>Thematic Maps</summary>
-<main>
+</div>
+<button class='accordion'><h3 class='h3_style'>Thematic Maps</h3></button>
+<div class='panel'>
 		<div w3-include-html="./thematic_maps.html"></div>
-</main>
-</details>
-<details>
-	<summary>GIS External Links and Technical Documentation</summary>
-<main>
+</div>
+<button class='accordion'><h3 class='h3_style'>GIS External Links and Technical Documentation</h3></button>
+<div class='panel'>
 		<div w3-include-html="./gis_links.html"></div>
-</main>
-</details>
+</div>
 </div> <!-- app -->
 
  <div class="grid-item panel2_4_2">
@@ -74,6 +70,7 @@ You can access visualizations, data and external links by clicking on the button
 <script>
 
 //Setting HTML include and Accordion
+accordionFun();
 includeHTML(); 
 
 </script>

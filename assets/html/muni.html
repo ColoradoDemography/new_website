@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>SDO Municipal & place Data Resource Page</title>
+<title>SDO Municipal & Place Data Resource Page</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
@@ -12,11 +12,12 @@
 <!-- SDO CSS -->
 <link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
 <!-- adding d3.js  for data manipulation-->
- <script src="https://d3js.org/d3.v7.min.js"></script>
+ <script src="https://d3js.org/d3.v6.min.js"></script>
 <!-- SDO suport functions, genSYA, insertHTML, -->
-<script src="https://demography.dola.colorado.gov/assets/js/funct.js"></script>
+<script src="./js/funct.js"></script>
 <!-- GoogleAnalytics Script -->
-<script defer src="https://demography.dola.colorado.gov/assets/js/googleAnalytics.js"></script>
+<script defer src="./js/googleAnalytics.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W27DQ8VRCX"></script>
 </head>
 <body>
 <div>
@@ -33,29 +34,24 @@
   </div> <!-- Grid  panel2_2_1 -->
   
 <div class="grid-item app-panel_2_span">
-Applications providing Municipal & Place data summaries.
+<h1 class='h1_style'>SDO Municipal & place Data Resource Page</h1>
+<h2 class='h2_style'>Applications providing Municipal & Place data summaries</h2>
 <p>
 You can access visualizations, spreadsheets, and documentation applications by clicking on the buttons below.
 </p>
 <button class="summarybtn" onClick="location.href = './gis_applications.html#census'">Municipal & Place Visualizations and Maps</button>
-<details>
-<summary>Municipal & Place Spreadsheets: Download population data for all geographies</summary>
-<main>
+<button class='accordion'>Municipal & Place Spreadsheets: Download population data for all geographies</button>
+<div class='panel'>
 		<div w3-include-html="./muni_spreadsheets.html"></div>
-</main>
-</details>
-<details>
-<summary>Municipal & Place Lookup Applications: Download population data for specific geographies</summary>
-<main>
+</div>
+<button class='accordion'><h3 class='h3_style'>Municipal & Place Lookup Applications: Download population data for specific geographies</h3></button>
+<div class='panel'>
 		<div w3-include-html="./muni_lookup.html"></div>
-</main>
-</details>
-<details>
-	<summary>Municipal & Place Documentation and Links</summary>
-<main>
+</div>
+<button class='accordion'><h3 class='h3_style'>Municipal & Place Documentation and Links</h3></button>
+<div class='panel>
 		<div w3-include-html="./muni_documents.html"></div>
-</main>
-</details>
+</div>
 </div> <!-- app -->
 
  <div class="grid-item panel2_4_2">
@@ -73,6 +69,7 @@ You can access visualizations, spreadsheets, and documentation applications by c
 <script>
 
 //Setting HTML include and Accordion
+accordionFun();
 includeHTML(); 
 
 </script>

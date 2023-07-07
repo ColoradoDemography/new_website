@@ -12,11 +12,12 @@
 <!-- SDO CSS -->
 <link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
 <!-- adding d3.js  for data manipulation-->
- <script src="https://d3js.org/d3.v7.min.js"></script>
+ <script src="https://d3js.org/d3.v6.min.js"></script>
 <!-- SDO suport functions, genSYA, insertHTML, -->
-<script src="https://demography.dola.colorado.gov/assets/js/funct.js"></script>
+<script src="../js/funct.js"></script>
 <!-- GoogleAnalytics Script -->
-<script defer src="https://demography.dola.colorado.gov/assets/js/googleAnalytics.js"></script>
+<script defer src="./js/googleAnalytics.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W27DQ8VRCX"></script>  
 </head>
 <body>
 <div>
@@ -34,7 +35,8 @@
 
 
 <div class="grid-item app-panel_2_span">
-Population estimates and forecasts are produced annually by the State Demography Office.<br>
+<h1 class='h1_style'>SDO Population Resource Page</h1>
+<h2 class='h2_style'>Population estimates and forecasts are produced annually by the State Demography Office.</h2>
 <ul>
 <li>Population estimate series are available at the state, regional, county, and municipal levels.</li>
 <li>Population forecast series are available at the state, regional, and county levels.</li>
@@ -43,25 +45,19 @@ Population estimates and forecasts are produced annually by the State Demography
 You can access population visualizations, spreadsheets, data lookup applications, and background documents by clicking on the buttons below.
 </p>
 
-<button class="summarybtn" onClick="location.href = './gis_applications.html#population'">Population, Totals, Age & Race/Hispanic Origin Visualizations and Maps</button>
-<details>
-	<summary>Population, Totals, Age & Race/Hispanic Origin  Spreadsheets: Download population data for all geographies</summary>
-<main>
-		<div w3-include-html="./population_spreadsheets.html"></div>
-</main>
-</details>
-<details>
-	<summary>Population, Totals, Age & Race/Hispanic Origin  Data Lookup Applications: Download population data for specific geographies</summary>
-<main>
+<button class="summarybtn" onClick="location.href = './gis_applications.html#population'"><h3 class='h3_style'>Population, Totals, Age & Race/Hispanic Origin Visualizations and Maps</h3></button>
+<button class="accordion"><h3 class='h3_style'>Population, Totals, Age & Race/Hispanic Origin  Spreadsheets: Download population data for all geographies</h3></button>
+<div class="panel">
+	<div w3-include-html="./population_spreadsheets.html"></div>
+</div>
+<button class="accordion"><h3 class='h3_style'>Population, Totals, Age & Race/Hispanic Origin  Data Lookup Applications: Download population data for specific geographies</h3></button>
+<div class="panel">
 		<div w3-include-html="./population_lookup.html"></div>
-</main>
-</details>
-<details>
-	<summary>Population Methodologies and Background Documents</summary>
-<main>
+</div>
+<button class="accordion"><h3 class='h3_style'>Population Methodologies and Background Documents</h3></button>
+<div class="panel">
 		<div w3-include-html="./population_methods.html"></div>
-</main>
-</details>
+</div>
 </div> <!-- app -->
 
  <div class="grid-item panel2_4_2">
@@ -79,7 +75,10 @@ You can access population visualizations, spreadsheets, data lookup applications
 <script>
 
 //Setting HTML include and Accordion
+accordionFun();
 includeHTML(); 
+
+
 
 </script>
 

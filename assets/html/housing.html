@@ -12,11 +12,12 @@
 <!-- SDO CSS -->
 <link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
 <!-- adding d3.js  for data manipulation-->
- <script src="https://d3js.org/d3.v7.min.js"></script>
+ <script src="https://d3js.org/d3.v6.min.js"></script>
 <!-- SDO suport functions, genSYA, insertHTML, -->
-<script src="https://demography.dola.colorado.gov/assets/js/funct.js"></script>
+<script src="./js/funct.js"></script>
 <!-- GoogleAnalytics Script -->
-<script defer src="https://demography.dola.colorado.gov/assets/js/googleAnalytics.js"></script>
+<script defer src="./js/googleAnalytics.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W27DQ8VRCX"></script>
 </head>
 <body>
 <div>
@@ -33,29 +34,24 @@
   </div> <!-- Grid  panel2_2_1 -->
   
  <div class="grid-item app-panel_2_span">
-Housing Unit estimates  are produced annually by the State Demography Office.<br>
+ <h1 class='h1_style'>SDO Housing & Household Resource Page</h1>
+<h2 class='h2_style'>Housing Unit estimates are produced annually by the State Demography Office</h2>
 
 <p>
 You can access  visualizations, spreadsheets, data lookup applications, and external links by clicking on the buttons below.
 </p>
 <button class="summarybtn" onClick="location.href = './gis_applications.html#housing'">Housing Visualizations and Maps</button>
 <details>
-	<summary>Housing Spreadsheets: Download housing data for all geographies</summary>
-<main>
+	<summary><h3 class='h3_style'>Housing Spreadsheets: Download housing data for all geographies</h3></summary>
 		<div w3-include-html="./housing_spreadsheets.html"></div>
-</main>
 </details>
 <details>
-	<summary>Housing Data Lookup Applications: Download housing data for specific geographies</summary>
-<main>
+	<summary><h3 class='h3_style'>Housing Data Lookup Applications: Download housing data for specific geographies</h3></summary>
 		<div w3-include-html="./housing_lookup.html"></div>
-</main>
 </details>
 <details>
-	<summary>External Links for Housing and Household data</summary>
-<main>
+	<summary><h3 class='h3_style'>External Links for Housing and Household data</h3></summary>
 		<div w3-include-html="./housing_links.html"></div>
-</main>
 </details>
 </div> <!-- app -->
 

@@ -12,11 +12,12 @@
 <!-- SDO CSS -->
 <link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
 <!-- adding d3.js  for data manipulation-->
- <script src="https://d3js.org/d3.v7.min.js"></script>
+ <script src="https://d3js.org/d3.v6.min.js"></script>
 <!-- SDO suport functions, genSYA, insertHTML, -->
-<script src="https://demography.dola.colorado.gov/assets/js/funct.js"></script>
+<script src="../js/funct.js"></script>
 <!-- GoogleAnalytics Script -->
-<script defer src="https://demography.dola.colorado.gov/assets/js/googleAnalytics.js"></script>
+<script defer src="../js/googleAnalytics.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W27DQ8VRCX"></script>
 </head>
 <body>
 <div>
@@ -33,7 +34,8 @@
   </div> <!-- Grid  panel2_2_1 -->
   
 <div class="grid-item app-panel_2_span">
-Economic and Jobs information used in SDO Population Estimates.<br>
+<h1 class='h1_style'>SDO Economy and Jobs Resource Page</h1>
+<h2 class='h2_style'>Economic and Jobs information used in SDO Population Estimates.</h2>
 <ul>
 <li>Jobs data by sector</li>
 <li>Wage Information</li>
@@ -43,31 +45,23 @@ Economic and Jobs information used in SDO Population Estimates.<br>
 <p>
 You can access visualizations, spreadsheets, data lookup applications, and background documents by clicking on the buttons below.
 </p>
-<button class="summarybtn" onClick="location.href = './gis_applications.html#economy'">Economic Visualizations and Maps</button>
-<details>
-	<summary>Economic Forecasting Spreadsheets: Download population data for all geographies</summary>
-<main>
+<button class="summarybtn" onClick="location.href = './gis_applications.html#economy'"><h3 class='h3_style'>Economic Visualizations and Maps</h3></button>
+<button class='accordion'><h3 class='h3_style'>Economic Forecasting Spreadsheets: Download population data for all geographies</h3></button>
+<div class='panel'>
 		<div w3-include-html="./econ_spreadsheets.html"></div>
-</main>
-</details>
-<details>
-	<summary>Economic and Jobs Data Lookup Applications: Download population data for specific geographies</summary>
-<main>
+</div>
+<button class='accordion'><h3 class='h3_style'>Economic and Jobs Data Lookup Applications: Download population data for specific geographies</h3></button>
+<div class='panel'>
 		<div w3-include-html="./econ_lookup.html"></div>
-</main>
-</details>
-<details>
-	<summary>Economic Data External Links</summary>
-<main>
+</div>
+<button class='accordion'><h3 class='h3_style'>Economic Data External Links</h3></button>
+<div class='panel'>
 		<div w3-include-html="./econ_links.html"></div>
-</main>
-</details>
-<details>
-	<summary>Economic Forecast Methodologies and Background Documents</summary>
-<main>
+</div>
+<button class='accordion'><h3 class='h3_style'>Economic Forecast Methodologies and Background Documents</h3></button>
+<div class='panel'>
 		<div w3-include-html="./econ_methods.html"></div>
-</main>
-</details>
+</div>
 </div> <!-- app -->
 
  <div class="grid-item panel2_4_2">
@@ -85,6 +79,7 @@ You can access visualizations, spreadsheets, data lookup applications, and backg
 <script>
 
 //Setting HTML include and Accordion
+accordionFun();
 includeHTML(); 
 
 </script>

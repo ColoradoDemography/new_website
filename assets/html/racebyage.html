@@ -11,14 +11,15 @@
 <!-- SDO CSS -->
 <link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
 <!-- adding d3.js  for data manipulation-->
- <script src="https://d3js.org/d3.v7.min.js"></script>
+ <script src="https://d3js.org/d3.v6.min.js"></script>
 <!-- Adding Plotly.js for  charting -->
- <script src="https://cdn.plot.ly/plotly-2.20.0.min.js" charset="utf-8"></script>
+ <script src="https://cdn.plot.ly/plotly-2.2.0.min.js" charset="utf-8"></script>
 <!-- SDO suport functions, genSYA, insertHTML, -->
-<script type="text/javascript" src="https://demography.dola.colorado.gov/assets/js/funct.js"></script>
-<script type="text/javascript" src="https://demography.dola.colorado.gov/assets/js/lookup.js"></script>
+<script type="text/javascript" src="./js/funct.js"></script>
+<script type="text/javascript" src="./js/lookup.js"></script>
 <!-- GoogleAnalytics Script -->
-<script defer src="https://demography.dola.colorado.gov/assets/js/googleAnalytics.js"></script>
+<script defer src="./js/googleAnalytics.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W27DQ8VRCX"></script>
 </head>
 <body>
 <div>
@@ -35,7 +36,8 @@
 	<div w3-include-html="./left_hand_index.html"></div>
   </div> <!-- Grid  panel2_2_1 -->
   <div class="grid-item app-panel_2_2">
-  <b>Race by Age Visualization</b>
+  <h1 class='h1_style'>SDO Race by Age Visualization</h1>
+  <h2 class='h2_style'>Race by Age Visualization</h2>
    <br><br>INSTRUCTIONS:
    <p class="lookup_p">
    The following page provides charts showing single year estimates of age by racial and ethnic groups for multi-county regions, and counties from 2010 to the current year.
