@@ -13,7 +13,7 @@
 <!-- SDO CSS -->
 <link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
 <!-- adding d3.js  for data manipulation-->
- <script src="https://d3js.org/d3.v7.min.js"></script>
+ <script src="https://d3js.org/d3.v6.min.js"></script>
 <!-- Adding Plotly.js for  charting -->
 
 <!-- Adding jquery and datatables for table production -->
@@ -22,11 +22,12 @@
   integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
   crossorigin="anonymous">
 </script>
- <script src="https://cdn.plot.ly/plotly-2.20.0.min.js" charset="utf-8"></script>
+ <script src="https://cdn.plot.ly/plotly-2.12.1.min.js" charset="utf-8"></script>
 <!-- SDO suport functions, genSYA, insertHTML, -->
 <script src="../js/funct.js"></script>
 <!-- GoogleAnalytics Script -->
-<script defer src="https://demography.dola.colorado.gov/assets/js/googleAnalytics.js"></script>
+<script defer src="./js/googleAnalytics.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W27DQ8VRCX"></script>
 </head>
 <body>
 <div>
@@ -43,10 +44,10 @@
 	<div w3-include-html="./left_hand_index.html"></div>
   </div> <!-- Grid  panel2_2_1 -->
   <div class="grid-item app-panel_2_2">
-  <b>Demographic Dashboard</b>
+  <h1 class='h1_style'>SDO Regional and County Demographic Dashboard</h1>
    <br><br>INSTRUCTIONS:
    <p>
-   The following page shows graphs and charts for Colorado, multi-county regions, and counties. 
+   The following page shows graphs and charts for various datasets for Colorado, multi-county regions, and counties. 
    Select the geography type and geography from the list below. 
    You can hover over specific data points on each graph to view the data for that specific point.
    </p>
@@ -82,6 +83,7 @@
 	</tr>
 	</table>
   <div class="grid-item app-panel_3_2">
+  <h2 class='h2_style'>Population Estimates</h2>
       <div class="dropdown AClass">
 		  <button class="dropbtn"  id="estimate"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
 		  <div class="dropdown-content">
@@ -95,6 +97,7 @@
 	 <div id="est_output"></div>
   </div>
   <div class="grid-item app-panel_4_2">
+  <h2 class='h2_style'>Population Forecasts and Projections</h2>
 	<div class="dropdown AClass">
 		<button class="dropbtn" id="forecast"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
 	<div class="dropdown-content">
@@ -108,6 +111,7 @@
     <div id="forec_output"></div>
   </div>
   <div class="grid-item app-panel_5_2">
+  <h2 class='h2_style'>BIrths, Deaths & New Migration</h2>
   	<div class="dropdown AClass">
 		<button class="dropbtn" id="coc"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
 	<div class="dropdown-content">
@@ -121,6 +125,7 @@
     <div id="coc_output"></div>
   </div>
   <div class="grid-item app-panel_6_2">
+  <h2 class='h2_style'>Net Migration by Age</h2>
     <div class="dropdown AClass">
 		<button class="dropbtn" id="migr"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
 	<div class="dropdown-content">
@@ -133,6 +138,7 @@
 	<div id="mig_output"></div>
   </div>
   <div class="grid-item app-panel_7_2">
+  <h2 class='h2_style'>Population by Age Group</h2>
     <div class="dropdown AClass">
 		<button class="dropbtn" id="age"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button> 
 	<div class="dropdown-content">
@@ -144,7 +150,7 @@
 	 </div>
 	</div>
     <div id="ageest_output"></div>
-  </div>  
+  <h2 class='h2_style'>Population Change by Age Group</H3?
   <div class="grid-item app-panel_8_2">
       <div class="dropdown AClass">
 		<button class="dropbtn" id="popchng"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>

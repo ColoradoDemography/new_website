@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>SDO American Community Survey Resource Page</title>
+<title>SDO Census and American Community Survey Resource Page</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
@@ -12,11 +12,12 @@
 <!-- SDO CSS -->
 <link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
 <!-- adding d3.js  for data manipulation-->
- <script src="https://d3js.org/d3.v7.min.js"></script>
+ <script src="https://d3js.org/d3.v6.min.js"></script>
 <!-- SDO suport functions, genSYA, insertHTML, -->
-<script src="https://demography.dola.colorado.gov/assets/js/funct.js"></script>
+<script src="../js/funct.js"></script>
 <!-- GoogleAnalytics Script -->
-<script defer src="https://demography.dola.colorado.gov/assets/js/googleAnalytics.js"></script>
+<script defer src="../js/googleAnalytics.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W27DQ8VRCX"></script>
 </head>
 <body>
 <div>
@@ -31,8 +32,9 @@
   <div class="grid-item panel2_2_1" id="leftHand">
 	<div w3-include-html="./left_hand_index.html"></div>
   </div> <!-- Grid  panel2_2_1 -->
- <div class="grid-item app-panel_2_span">
-Population data from the U.S. Census Bureau.<br>
+<div class="grid-item app-panel_2_span">
+<h1 class="h1_style">SDO Census and American Community Survey Resource Page</h1>
+<h2 class="h2_style">Population data from the U.S. Census Bureau.</h2>
 <ul>
 <li>Decennial Census data, 1870 to 2020.</li>
 <li>American Community Survey (ACS) 5-year data for census geographies down to the block group level</li>
@@ -40,30 +42,16 @@ Population data from the U.S. Census Bureau.<br>
 <p>
 You can access  visualizations, spreadsheets, data lookup applications, and external links by clicking on the buttons below.
 </p>
-<details>
-	<summary>Census and ACS Visualizations and Maps</summary>
-<main>
-		<div w3-include-html="./acs_applications.html"></div>
-</main>
-</details>
-<details>
-	<summary>Decennial Census Data, Maps, and Spreadsheets</summary>
-<main>
-		<div w3-include-html="./census_spreadsheets.html"></div>
-</main>
-</details>
-<details>
-	<summary>American Community Survey Spreadsheets</summary>
-<main>
-		<div w3-include-html="./acs_spreadsheets.html"></div>
-</main>
-</details>
-<details>
-	<summary>Census/ACS External Links and Technical Documentation</summary>
-<main>
+<button class='accordion'><h3 class="h3_style">Census and ACS Visualizations and Maps</h3></button>
+<div class='panel'>
+	<div w3-include-html="./acs_applications.html"></div>
+</div>
+<button class="summarybtn" onClick="location.href = './census_spreadsheets.html'"><h3 class="h3_style">Decennial Census Data, Maps, and Spreadsheets</h3></button>
+<button class="summarybtn" onClick="location.href = './acs_spreadsheets.html'"><h3 class='h3_style'>American Community Survey Spreadsheets</h3></button>
+<button class='accordion'><h3 class="h3_style">Census/ACS External Links and Technical Documentation</h3></button>
+<div class='panel'>
 		<div w3-include-html="./acs_links.html"></div>
-</main>
-</details>
+</div>
 </div> <!-- app -->
 
  <div class="grid-item panel2_4_2">
@@ -81,6 +69,7 @@ You can access  visualizations, spreadsheets, data lookup applications, and exte
 <script>
 
 //Setting HTML include and Accordion
+accordionFun();
 includeHTML(); 
 
 </script>

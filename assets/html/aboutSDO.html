@@ -11,11 +11,12 @@
 <!--SDO CSS -->
 <link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
 <!--adding d3.js  for data manipulation-->
- <script src="https://d3js.org/d3.v7.min.js"></script>
+ <script src="https://d3js.org/d3.v6.min.js"></script>
 <!--SDO suport functions, genSYA, insertHTML, -->
-<script src="https://demography.dola.colorado.gov/assets/js/funct.js"></script>
+<script src="./js/funct.js"></script>
 <!--GoogleAnalytics Script -->
-<script defer src="https://demography.dola.colorado.gov/assets/js/googleAnalytics.js"></script>
+<script defer src="./js/googleAnalytics.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W27DQ8VRCX"></script>
 </head>
 <body>
 <div>
@@ -32,6 +33,7 @@
   </div> <!--Grid  panel2_2_1 -->
 
 <div class="grid-item app-panel_2_span">
+<h1 class="h1_style">About the State Demography Office</h1>
 <p>
 The State Demography Office is the primary state agency for population and demographic information. 
 Its data are used by state agencies to forecast demand for facilities and services. 
@@ -40,11 +42,11 @@ decline and to plan and develop programs and community resources.
 The office's location in the Department of Local Affairs insures that its data and information is developed in ways that account for local input and needs. The office makes the data publicly available on their website, answers requests for economic and demographic data and provides training workshops on accessing and using the data.  
 </p>
 <details>
-<summary>Population Data and Programs</summary>
-<main>
+<summary><h2 class="h2_style">Population Data and Programs</h2></summary>
+<div>
  <ul>
  <li>
- <b><i><a href="https://demography.dola.colorado.gov/assets/html/acs.html">Census:</a></i></b><br>
+ <b><i><a href="./html/acs.html">Census:</a></i></b><br>
  <p class='mainlist'>
  The U.S. Census Bureau conducts a complete survey of the population every ten years (ending in zero). 
  The office represents state and local needs and concerns relating to the conduct of the decennial census. 
@@ -56,7 +58,7 @@ The office's location in the Department of Local Affairs insures that its data a
  </p>
  </li>
  <li>
-<b><i><a href="https://demography.dola.colorado.gov/assets/html/population.html">Population Estimates:</a></i></b><br>
+<b><i><a href="./html/population.html">Population Estimates</a></i></b><br>
 <p class='mainlist'>
 The State Demography Office prepares annual estimates of the total population for Colorado counties, municipalities and special districts that 
 provide park and recreation services. The estimates are based on data indicative of population change: births, deaths, migration, 
@@ -65,26 +67,26 @@ data since Conservation Trust Fund allocations are tied to the population estima
 </p>
 </li>
 <li>
-<b><i><a href="https://demography.dola.colorado.gov/assets/html/population.html">Population Forecasts:</a></i></b>
+<b><i><a href="./html/population.html">Population Forecasts</a></i></b>
 <p class='mainlist'>
 The State Demography Office prepares population forecasts for the counties and regions of the state by age and sex and ethnicity/race (state only) 
 to the year 2050. Population change is tied to understandings of both economic and demographic change.
 </p>
 <p class='mainlist'>
-The <i><a href="https://demography.dola.colorado.gov/assets/html/population.html">demographic forecast</a></i> estimates the current population from one year to the next by age and sex. 
+The <i><a href="./html/population.html">demographic forecast</a></i> estimates the current population from one year to the next by age and sex. 
 Deaths are forecast according to age and sex specific death rates. Women of child-bearing age give birth to 
 children according to age-specific fertility rates. Demographic migration for groups such as students, military, prisoners 
 and retirees are also included. Characteristics of the population that are fundamental to understanding the relationship 
 between the economy and the population include commuting, labor force participation rates, and multiple job holding rates.
 </p>
 <p class='mainlist'>
-An <i><a href="https://demography.dola.colorado.gov/assets/html/economy.html">economic forecast</a></i> establishes the demand for labor while our demographic cohort-survival model indicates supply of labor 
+An <i><a href="./html/economy.html">economic forecast</a></i> establishes the demand for labor while our demographic cohort-survival model indicates supply of labor 
 provided by existing populations. The difference between the demand and the labor supply sets the foundation for the net migration of 
 population and households.
 </p>
 <p class='mainlist'>
-The economic forecast is prepared by analyzing and forecasting economic base or market "drivers" f
-or the state and its counties. National and regional conditions are studied as well as local attitudes toward growth to 
+The economic forecast is prepared by analyzing and forecasting economic base or market "drivers" 
+for the state and its counties. National and regional conditions are studied as well as local attitudes toward growth to 
 determine the market potential for specific drivers. The final economic forecast includes local, regional and national perspectives.
 </p>
 <p class='mainlist'>
@@ -93,7 +95,7 @@ and sets the foundation for economic migration from either job growth or decline
 </p>
 </li>
 <li>
-<b><i><a href="https://gis.dola.colorado.gov/gis/">GIS Data and Maps:</a></i></b> 
+<b><i><a href="https://gis.dola.colorado.gov/gis/">GIS Data and Maps</a></i></b> 
 <p class='mainlist'>
 The State Demography Office collects boundaries from municipalities and special districts via the Conservation Trust Fund program 
 which are integrated into a GIS for our annual population estimates program. We also manage state participation in census geographic programs.  
@@ -101,7 +103,7 @@ Thematic and reference maps are available on our website; custom maps are availa
 </p>
 </li>  
 <li>
-<b><i>Data Dissemination:</i></b><br>
+<b><i>Data Dissemination</i></b><br>
 <p class='mainlist'>
 The State Demography Office is committed to increasing data accessibility for the public. This includes informing state agencies, 
 local governments and the news media of new demographic developments and assisting them in understanding and interpreting 
@@ -109,35 +111,35 @@ demographic data and information.
 </p>
 </li> 
 </ul>
-</main>
+</div>
 </details>
 
 <details>
-<summary>Data Available</summary>
-<main>
+<summary><h2 class="h2_style">Data Available</h2></summary>
+<div>
 <ul>
-<li><b><a href="https://demography.dola.colorado.gov/assets/html/population.html">Population: Past, Present and Future</a></b></li>
+<li><b><a href="./html/population.html">Population: Past, Present and Future</a></b></li>
 	<ul class='mainlist'>
 		<li>Total Age and Sex Groups</li>
 		<li>Race and Ethnic Groups</li>
 	</ul>
-<li><b><a href="https://demography.dola.colorado.gov/assets/html/coc.html">Components of Change</a></b><li>
+<li><b><a href="./html/coc.html">Components of Change</a></b><li>
 	<ul class='mainlist'>
 		<li>Births and Deaths</li>
 		<li>Migration</li>
 	</ul>
-<li><b><a href="https://demography.dola.colorado.gov/assets/html/housing.html">Housing</a></b></li>
+<li><b><a href="./html/housing.html">Housing</a></b></li>
 	<ul class='mainlist'>
 		<li>Housing Units</li>
 		<li>Group Quarters</li>
 		<li>Building Permits</li>
 	</ul>
-<li><b><a href="https://demography.dola.colorado.gov/assets/html/economy.html">The Economy</a></b></li>
+<li><b><a href="./html/economy.html">The Economy</a></b></li>
 	<ul class='mainlist'>
 		<li>Jobs</li>
 		<li>Economic Forecasts and Analyses</li>
 	</ul>
-<li><b><a href="https://demography.dola.colorado.gov/assets/html/economy.html">Households</a></b></li>
+<li><b><a href="./html/economy.html">Households</a></b></li>
 	<ul class='mainlist'>
 		<li>Type and Growth</li>
 		<li>Housing Tenure (Renters and Owners)</li>
@@ -148,7 +150,7 @@ demographic data and information.
 		<li>Boundary Maps</li>
 		<li>Descriptions of Geographic Areas</li>
 	</ul>
-<li><b><a href="https://demography.dola.colorado.gov/assets/html/economy.html">Economic Characteristics of the Population</a></b></li>
+<li><b><a href="./html/economy.html">Economic Characteristics of the Population</a></b></li>
 	<ul class='mainlist'>
 		<li>Labor Force Status</li>
 		<li>Veteran Status</li>
@@ -163,7 +165,7 @@ demographic data and information.
 		<li>State, County and Municipality profiles</li>
 		<li>School District profiles</li>
 	</ul>
-<li><b><a href="https://demography.dola.colorado.gov/assets/html/acs.html">Social Characteristics of the Population</a></b></li>
+<li><b><a href="./html/acs.html">Social Characteristics of the Population</a></b></li>
 	<ul class='mainlist'>
 		<li>Ancestry</li>
 		<li>Citizenship</li>
@@ -175,11 +177,11 @@ demographic data and information.
 		<li>Disability</li>
 	</ul>
 </ul>
-</main>
+</div>
 </details>
 <details>
-<summary>Uses of the Data</summary>
-<main>
+<summary><h2 class="h2_style">Uses of the Data</h2></summary>
+<div>
 <b>In Land Use and Other Resource Use Planning</b>
 	<ul class='mainlist'>
 		<li>Base economic, population, and housing data for the analyses of land, water and other resource use.</li>
@@ -236,11 +238,11 @@ demographic data and information.
 		<li>Preparation of thematic and reference maps.</li>
 		<li>Performs County Commissioner redistricting analysis.</li>
 	</ul>
-</main>
+</div>
 </details>
 <details>
-<summary>Contact Information and SDO Staff</summary>
-<main>
+<summary><h2 class="h2_style">Contact Information and SDO Staff</h2></summary>
+<div>
 <b>Contact Us</b>
 <p class='mainlist'>
 State Demography Office<br> 
@@ -289,7 +291,7 @@ Phone: 303-864-7755<br>
 <a href='mailto:nancy.gedeon@state.co.us'>nancy.gedeon@state.co.us</a><br>
 Population Estimates and Forecasts, Demographic Methods  
 </p>
-</main>
+</div>
 </details>
 </div> <!-- app -->
 

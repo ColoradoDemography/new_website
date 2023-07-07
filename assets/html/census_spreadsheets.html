@@ -1,17 +1,101 @@
-<!-- State Spreadsheets Secondary Page A Bickford 5/2021 -->
+<!-- Census Spreadsheets Secondary Page A Bickford 5/2021 -->
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<script defer src="https://demography.dola.colorado.gov/assets/js/googleAnalytics.js"></script>
+<title>SDO Decennial Census Data for Colorado</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
+<!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
+<!-- SDO CSS -->
+<link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
+<!-- adding d3.js  for data manipulation-->
+ <script src="https://d3js.org/d3.v6.min.js"></script>
+<!-- SDO suport functions, genSYA, insertHTML, -->
+<script src="../js/funct.js"></script>
+<!-- GoogleAnalytics Script -->
+<script defer src="../js/googleAnalytics.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W27DQ8VRCX"></script>
 </head>
 <body>
-<div class= "sect-container">
-<div class="grid-item sect-spread_1">
-<h3>Census Data for Colorado (2020)</h3>
+<div>
+<a href="https://cdola.colorado.gov/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt="Department of Local Affairs Homepage"></a>
+</div>
+<div w3-include-html="./navheader.html"></div>
+<!-- First Grid, linked images -->
+<div class="grid-container2">
+  <div class="grid-item panel2_1_1">
+	<div w3-include-html="./sdotitle.html"></div>
+  </div>
+  <div class="grid-item panel2_2_1" id="leftHand">
+	<div w3-include-html="./left_hand_index.html"></div>
+  </div> <!-- Grid  panel2_2_1 -->
+
+<div class="grid-item cens-panel_spread_a">
+<h1 class='h1_style'>Census Data for Colorado</h1>
+<h2 class='h2_style'>Census Data for Colorado (2020)</h2>
 <hr>
-<div class='accordionWrapper'>
-<details>
-<summary style='background:#D3D3D3;'><b>Census Redistricting Data, 2020: Public Law 94-171 Data Release 8/12/2021</b></summary>
-<main>
+
+<button class='accordion'><h3 class='h3_style'>Census Demographic and Housing Characteristics Data, 2020: Data Release 5/25/2023</h3></button>
+<div class='panel'>
+<p style='color:black;'>
+The U.S. Census Bureau released the Demographic and Housing Characteristics (DHC) Data on May 25, 2023.  The State Demography Office is processing 
+these data tables and will post summary excel workbooks, data files, maps, and shapefiles in the next few weeks.
+</p>
+<h3 class='h3_style'>Census Error terms introduced by the applicaiton of Differential Privacy and the Disclosure Avoidance System (DAS)</h3>
+<p style='color:black;'>
+The 2020 DHC estimates are infused with random noise to prevent reidentification of individuals.  The process, known as differeintial privacy, introduces
+statistical error into all 2020 Census estimates at all levels of geography.  The impact of differeintial privacy is measured with two metrics:
+</p>
+<ul>
+<li><i>Mean absolute error (MAE):</i> MAE gives insight on accuracy, showing how close the published data point is to the enumerated count on average.</li> 
+<li><i>Mean error (ME):</i> ME gives insight on statistical bias. It shows whether the published data point tends to go higher or lower than the enumerated count and by how much.</li>
+</ul>
+<p style='color:black;'>
+The magnitude of these metrics vary by the size of a geographical unit.  For example, in a county with a total population size of less than 5,000 people, any population estimate
+has a MAE of 1.73, meaning that, if the count of women in that county is reported as 2,500 persons, the "true" count of women is between 2,498 and 2,502 persons.
+In the same sized county, the ME is 0.25, meaning that, the "true" value of the number of women is likely to be above the reported value. 
+</p>
+<p style='color:black;'>
+The full list of these error metrics for all geographies is reported in the <a href='https://www2.census.gov/programs-surveys/decennial/2020/data/demographic-and-housing-characteristics-file/2020-Census-Disclosure-Avoidance-System-Detailed-Summary-Metrics.xlsx'  title='2020 Census-Disclosure Avoidance System Detailed Summary Metrics'
+		aria-label='2020 Census-Disclosure Avoidance System Detailed Summary Metrics' target="_blank">2020 Census-Disclosure Avoidance System Detailed Summary Metrics</a>
+spreadsheet provided by the Census Bureau. 
+<br>
+The table shell listing, showing the contents of the tables in the Demographic Profile and the Demographic and Housing Characteristics datasets is avaiable from 
+<a href='https://www2.census.gov/programs-surveys/decennial/2020/program-management/data-table-guide-dhc-dp.xlsx'  title='2020 Demographic Profile and Demographic and Housing Characteristics Table Shells'
+		aria-label='2020 Demographic Profile and Demographic and Housing Characteristics Table Shells' target="_blank">2020 Demographic Profile and Demographic and Housing Characteristics Table Shells.</a>
+<br>
+See the <a href='https://www.census.gov/programs-surveys/decennial-census/decade/2020/planning-management/process/disclosure-avoidance/newsletters/2020-census-dhc-demographic-profile-released.html'  title='U.S. Census Bureau DHC Data Release Announcement'
+		aria-label='U.S. Census Bureau DHC Data Release Announcement' target="_blank">U.S. Census Bureau DHC Data Release Announcement</a>
+for more information.
+</p>
+<p style='color:black;'>
+<h4 class='h4_style'>DHC Materials from the Census Bureau:</h4>
+<ul>
+	<li><a href='https://www.census.gov/newsroom/press-releases/2023/2020-census-demographic-profile-and-dhc.html'  title='2020 Census Demographic and Housing Characteristics Press Release'
+		aria-label='2020 Census Demographic and Housing Characteristics Press Release' target='_blank'>2020 Census Demographic and Housing Characteristics Press Release</a></li>
+	<li><a href='https://www.census.gov/data/tables/2023/dec/2020-census-demographic-profile.html'  title='2020 Census Demographic Profile Page. Questions? Click on the "Contact Us" link to contact a SDO Demographer.'
+		aria-label='2020 Census Demographic Profile Page. Questions? Click on the "Contact Us" link to contact a SDO Demographer.' target="_blank">2020 Demographic Profile Page</a></li>
+	<li><a href ='https://mtgis-portal.geo.census.gov/arcgis/apps/MapSeries/index.html?appid=2566121a73de463995ed2b2fd7ff6eb7'  title='Interactive Map of Census 2020 Demographic Profile Explorer. Questions? Click on the "Contact Us" link to contact a SDO Demographer.'
+		aria-label='Interactive Map of Census 2020 Demographic Profile Explorer. Questions? Click on the "Contact Us" link to contact a SDO Demographer.' target="_blank">Census 2020 Demographic Profile Interactive Map</a></li>
+	<li><a href='https://www.census.gov/library/visualizations/interactive/how-has-our-nations-population-changed.html'  title='2020 Census Interactive Age Pyramids. Questions? Click on the "Contact Us" link to contact a SDO Demographer.'
+		aria-label='2020 Census Interactive Age Pyramids. Questions? Click on the "Contact Us" link to contact a SDO Demographer.' target="_blank">2020 Census Interactive Age Pyramids</a></li>
+	<li><a href='https://www.census.gov/library/visualizations/interactive/exploring-age-groups-in-the-2020-census.html'  title='2020 Census Interactive Maps by Age Group. Questions? Click on the "Contact Us" link to contact a SDO Demographer.'
+		aria-label='2020 Census Interactive Maps by Age Group. Questions? Click on the "Contact Us" link to contact a SDO Demographer.' target="_blank">2020 Census Interactive Maps by Age Group</a></li>
+	<li><a href='https://www.census.gov/programs-surveys/decennial-census/decade/2020/planning-management/process/disclosure-avoidance/newsletters/2020-census-dhc-demographic-profile-released.html'  title='U.S. Census Bureau DHC Data Release Announcement'
+		aria-label='U.S. Census Bureau DHC Data Release Announcement' target="_blank">U.S. Census Bureau DHC Data Release Announcement</a></li>
+	<li><a href='https://www2.census.gov/programs-surveys/decennial/2020/program-management/data-table-guide-dhc-dp.xlsx'  title='2020 Demographic Profile and Demographic and Housing Characteristics Table Shells'
+		aria-label='2020 Demographic Profile and Demographic and Housing Characteristics Table Shells' target="_blank">2020 Demographic Profile and Demographic and Housing Characteristics Table Shells</a></li>
+	<li><a href='https://www2.census.gov/programs-surveys/decennial/2020/data/demographic-and-housing-characteristics-file/2020-Census-Disclosure-Avoidance-System-Detailed-Summary-Metrics.xlsx'  title='2020 Census-Disclosure Avoidance System Detailed Summary Metrics'
+		aria-label='2020 Census-Disclosure Avoidance System Detailed Summary Metrics' target="_blank">2020 Census-Disclosure Avoidance System Detailed Summary Metrics</a></li>
+	<li><a href='https://data.census.gov/table?g=040XX00US08&d=DEC+Demographic+Profile'  title='Link to Census Colorado Demographic Profile data'
+		aria-label='Link to Census Colorado Demographic Profile data' target='_blank'>Link to Census Colorado Demographic Profile data (data.census.gov)</a></li>
+</ul>
+</p>
+</div> <!-- panel -->
+<button class='accordion'><h3 class='h3_style'>Census Redistricting Data, 2020: Public Law 94-171 Data Release 8/12/2021</h3></button>
+<div class='panel'>
 <p style='color:black;'>
 A collection of static data tables, shapefiles, and other resources for Colorado Regions, Counties, Municipalities, and Census Designated Places. 
 The Public Law 94-171 data is intended to inform the state and local redistricting process. The data set provides tabulations by race and ethnicity, by voting age 
@@ -22,44 +106,41 @@ These tables are compiled by the Colorado State Demography Office. Additional ta
 Please visit this page frequently to get the latest tables.
 </p>
 <div w3-include-html="./census_2020.html"></div>
-</main>
-</details>
-</div> <!-- accordion wrapper -->
-
+</div>  <!--panel -->
 </div> <!-- section -->
-<div class="grid-item sect-spread_4">
-<h3>Census Data for Colorado (2010, 2000 and earlier)</h3>
+<div class="grid-item cens-panel_spread_b">
+<h2 class='h2_style'>Census Data for Colorado (2010, 2000 and earlier)</h2>
 <hr>
-<div class='accordionWrapper'>
-<details>
-<summary style='background:#D3D3D3;'><b>2010 Census</b></summary>
-<main>
+<button class='accordion'><h3 class='h3_style'>2010 Census</h3></button>
+<div class='panel'>
 <div w3-include-html="./census_2010.html"></div>
-</main>
-</details>
-</div> <!-- accordion wrapper -->
-<div class='accordionWrapper'>
-<details>
-<summary style='background:#D3D3D3;'><b>2000 Census</b></summary>
-<main>
+</div> 
+<button class='accordion'><h3 class='h3_style'>2000 Census</h3></button>
+<div class='panel'>
 <div w3-include-html="./census_2000.html"></div>
-</main>
-</details>
-</div> <!-- accordion wrapper -->
-<div class='accordionWrapper'>
-<details>
-<summary style='background:#D3D3D3;'><b>Historical Census data</b></summary>
-<main>
+</div> 
+<button class='accordion'><h3 class='h3_style'>Historical Census data</h3></button>
+<div class='panel'>
 <ul>
-  	<li><a class='accordion-link' href="https://www.nhgis.org/" title="IPUMS National Historical GIS">IPUMS National Historical GIS</a></li>
-    <li><a class='accordion-link' href='https://coloradodemography.github.io/population/data/historical_census' title='Application providing total population for Colorado Counties and Municipalities for 1870 to 2010.' >Historical Census Data Lookup, 1870-2010</a></li>
+  	<li><a class='accordion-link' href="https://www.nhgis.org/"  title="IPUMS National Historical GIS"
+		aria-label="IPUMS National Historical GIS">IPUMS National Historical GIS</a></li>
+    <li><a class='accordion-link' href='https://coloradodemography.github.io/population/data/historical_census'  title='Application providing total population for Colorado Counties and Municipalities for 1870 to 2010.' 
+		aria-label='Application providing total population for Colorado Counties and Municipalities for 1870 to 2010.' >Historical Census Data Lookup, 1870-2010</a></li>
   </ul>
-</main>
-</details>
-</div> <!-- accordion wrapper -->
+</div> 
 </div> <!-- section -->
-</div> <!-- container -->
+<div class="grid-item panel2_4_2">
+		<div w3-include-html="./bodycontent1.html"></div>
+</div>
+	<div class="grid-item panel2_4_4">
+		<div w3-include-html="./bodycontent2.html"></div>
+</div>
+<div class="grid-item panel2_4_6">
+	<div w3-include-html="./bodycontent3.html"></div>
+</div>
+</div> <!--container -->
 <script>
+    accordionFun();
 	includeHTML(); 
 </script>
 </body>
