@@ -7,40 +7,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" http-equiv="content-type" content="text/html; charset=utf-8">
 <!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
 <!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
-<
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" crossorigin="anonymous">
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <!-- SDO CSS -->
 <link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
 <!-- adding d3.js  for data manipulation-->
- <script src="https://d3js.org/d3.v6.min.js"></script>
-<script type="text/javascript" src="../js/saveSvgAsPng.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <!-- Adding Plotly.js for  charting -->
-<script src="https://cdn.plot.ly/plotly-2.2.0.min.js" charset="utf-8"></script>
+
 <!-- Adding jquery and datatables for table production -->
-<script
-  src="https://code.jquery.com/jquery-3.6.0.min.js"
-  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
-  crossorigin="anonymous">
-</script>
+<script src="https://code.jquery.com/jquery-3.7.0.js" integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM=" crossorigin="anonymous"></script>
+ <script src="https://cdn.plot.ly/plotly-2.24.1.min.js" charset="utf-8"></script>
+<<!-- Datatables -->
+<link href="https://cdn.datatables.net/v/dt/jszip-3.10.1/dt-1.13.5/b-2.4.1/b-colvis-2.4.1/b-html5-2.4.1/b-print-2.4.1/datatables.min.css" rel="stylesheet"/>
  
-<!-- Datatables -->
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jq-3.6.0/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-html5-2.2.3/sc-2.0.6/sp-2.0.1/sl-1.4.0/datatables.min.css"/>
- 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.5/pdfmake.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/vfs_fonts.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/v/dt/jq-3.6.0/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-html5-2.2.3/sc-2.0.6/sp-2.0.1/sl-1.4.0/datatables.min.js"></script> 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/v/dt/jszip-3.10.1/dt-1.13.5/b-2.4.1/b-colvis-2.4.1/b-html5-2.4.1/b-print-2.4.1/datatables.min.js"></script>
 
-
-	
-<!-- SDO functions -->
-<script type="text/javascript" src="../js/funct.js"></script>
-<script type="text/javascript" src="../js/profile.js"></script>
-<script type="text/javascript" src="../js/lookup.js"></script>
+<!-- SDO suport functions, genSYA, insertHTML, -->
+<script src="../js/funct.js"></script>
+<script src="../js/profile.js"></script>
+<script src="../js/lookup.js"></script>
 <!-- GoogleAnalytics Script -->
 <script defer src="../js/googleAnalytics.js"></script>
-
-
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W27DQ8VRCX"></script>
 </head>
 <body>
 <div>
@@ -57,11 +47,11 @@
 	<div w3-include-html="../html/left_hand_index.html"></div>
   </div> <!-- Grid  panel2_2_1 -->
   <div class="grid-item app-panel_2_2">
-  <b>Race and Hispanic Origin by Age Estimates - County</b>
+  <h1 class='h1_style'>Race and Hispanic Origin by Age Estimates - County</h1>
   <p>
   <a href="../lookups/region_sya_race_lookup.html" target='_blank'>Need Regional and State Data?</a>
   </p>
-   <br>INSTRUCTIONS:
+   <h2 class='h2_style'>INSTRUCTIONS:</h2>
    <p class="lookup_p">
    This application creates custom tables for SDO county-level estimates by race, Hispanic Origin, age and sex.
    </p>
@@ -90,16 +80,16 @@
    <table style="border-collapse:collapse; border:none;">
    <tr>
 	<td class="lookup_cell">
-		<p class="entry_text" id="county-lbl">Select one or more Counties:</p> 
+		<label class="entry_text" for="county-dropdown" id="county-lbl" alt="Select one or more counties">Select one or more counties:</label> 
 	</td>
 	<td class="lookup_cell">
-		<p class="entry_text" id="year-lbl">Select Year:</p>
+		<label class="entry_text" for="year-dropdown" id="year-lbl" alt="Select one or more years">Select one or more years:</label>
 	</td>
 	<td class="lookup_cell">
-		<p class="entry_text" id="race-lbl">Select one or more race caregories:</p>
+		<label class="entry_text" for="race-dropdown" id="race-lbl" alt="Select one or more race caregories">Select one or more race caregories:</label>
 	</td>
 	<td class="lookup_cell">
-		<p class="entry_text" id="ethnicity-lbl">Select one or more Hispanic Origin categories:</p>
+		<label class="entry_text" for="ethnicity-dropdown" id="ethnicity-lbl" alt="Select one or more Hispanic Origin categories">Select one or more Hispanic Origin categories:</label>
 	</td>
 	</tr>
 	<tr>
@@ -131,13 +121,13 @@
 	<table style="border-collapse: collapse; border: none;">
 	<tr>
 	<td class="lookup_cell">
-	   <p class="entry_text" id='age-lbl'>Select one or more ages:</p>
+	   <label class="entry_text" for="age-dropdown" id="age-lbl" alt="Select one or more ages">Select one or more ages:</label>
 	</td>
 	<td class="lookup_cell">
-	   <p class="entry_text" id='sex-lbl'>Display results by sex:</p>
+	   <label class="entry_text" for="sex-dropdown" id="sex-lbl" alt="Diaplay results by sex">Display results by sex:</label>
 	</td>
 	<td class="lookup_cell">
-	   <p class="entry_text" id='group-lbl'>Select 0 or more variables to summarize by (leave blank for a detailed summary):</p
+	   <label class="entry_text" for="group-dropdown" id='group-lbl' alt="Specify Groups">Select 0 or more variables to summarize by (leave blank for a detailed summary):</p
 	</td>
 	<td class="lookup_cell">
 	</td>

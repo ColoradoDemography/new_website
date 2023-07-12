@@ -1,9 +1,9 @@
-<!-- Region COC Lookup Page A Bickford 6/2021 -->
+<!-- County COC Lookup Page A Bickford 6/2021 -->
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title> State and Regional Births, Deaths & Migration Lookup</title>
+<title> County Births, Deaths & Migration Lookup</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" http-equiv="content-type" content="text/html; charset=utf-8">
 <!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
 <!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
@@ -48,13 +48,13 @@
 	<div w3-include-html="../html/left_hand_index.html"></div>
   </div> <!-- Grid  panel2_2_1 -->
   <div class="grid-item app-panel_2_2">
-  <h1 class='h1_style'>State and Regional Births, Deaths & Migration Lookup</h1>
+  <h1 class='h1_style'>County Births, Deaths & Migration Lookup</h1>
   <p>
-  <a href="../lookups/county_coc_lookup.html" target='_blank'>Need County Data?</a>
+  <a href="../lookups/region_coc_lookup.html" target='_blank'>Need State/Regional Data?</a>
   </p>
    <h2 class='h2_style'>INSTRUCTIONS:</h2>
    <p class="lookup_p">
-   This application creates custom tables for SDO Regional estimates for births, deaths and net migration.
+   This application creates custom tables for SDO County estimates for births, deaths and net migration.
    </p>
   <p class="lookup_p">
    A spreadsheet with detailed information for births, deaths, and net migration is available on the 
@@ -63,20 +63,20 @@
    <table style="border-collapse:collapse; border:none;">
    <tr>
 	<td class="lookup_cell">
-		<label class="entry_text" for="region-dropdown" id="region-lbl" alt="Select one or more Regions">Select one or more Regions:</label> 
+		<label class="entry_text" for="county-dropdown" id="region-lbl" alt="Select one or more Counties">Select one or more Counties:</label> 
 	</td>
 	<td class="lookup_cell">
 		<label class="entry_text" for="year-dropdown" id="year-lbl" alt="Select one or more years">Select one or more years:</label>
 	</td>
 	<td class="lookup_cell">
-		<label class="entry_text" for="group-dropdown" id="group-lbl" alt="Select one or more years">Select one or more years:</label>
+		<label class="entry_text" for="group-dropdown" id="group-lbl" alt="Select Summary Groups">Select Summary Groups:</label>
 	</td>
 	<td class="lookup_cell">
 	</td>
 	</tr>
 	<tr>
 	<td class="lookup_cell"> 
-	 <select class="region-dropdown" id="region-dropdown" size="6" multiple></select>
+	 <select class="county-dropdown" id="county-dropdown" size="6" multiple></select>
 	 </td>
 	<td class="lookup_cell">
     <select class="year-dropdown" id="year-dropdown" style='width:100px;' size="5" multiple></select>
@@ -85,7 +85,7 @@
     <select class="group-dropdown" id="group-dropdown" size="3">
 	    <option value='0'>No Grouping</option>
         <option value='1'>Group by Year</option>
-        <option value='2'>Group by Region</option>
+        <option value='2'>Group by County</option>
 	</select>
     </td>
 	<td class="lookup_cell">
@@ -104,7 +104,7 @@
 
  includeHTML();
 
- popDropdown('region','region-dropdown','lookup');
+ popDropdown('county','county-dropdown','lookup');
  popRaceYrdd("year-dropdown",1970,2050);  //Change this range to match data
  
 //Button Event
@@ -117,13 +117,9 @@
  var outputmsg = "";
  document.getElementById('tbl_output').innerHTML = "";
 
-	    var fipsdd = document.getElementById('region-dropdown');
-		var selectedreg = getSelectValues(fipsdd);
-		selectedfips = [];
-		selectedreg.forEach(d => {
-			var tmpcty = regionCOL(+d);
-		    selectedfips.push(tmpcty[0].fips)
-		})
+	    var fipsdd = document.getElementById('county-dropdown');
+		var selectedfips = getSelectValues(fipsdd);
+
 		if(selectedfips.length == 0){
 		    outputmsg = outputmsg +  "  >Please select one or more regions.";
 			complete = false;
@@ -137,8 +133,6 @@
 			complete = false;
 		}
 
-		
-		
 		var groupdd = document.getElementById('group-dropdown');
 		var selectedgroup = groupdd.value;
 		if(selectedgroup == ""){
@@ -148,7 +142,7 @@
 		}
 
 		if(complete){
-		     genCOCReg(selectedreg, selectedfips,selectedyr,selectedgroup);
+		     genCOCCty(selectedfips,selectedyr,selectedgroup);
 			 } else {
 			 window.alert(outputmsg);
 			 }
