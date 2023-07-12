@@ -499,7 +499,7 @@ $(tabObj).DataTable({
 } //genRaceTabReg
 
 
-//genCOCReg creares the county race data call and produces table
+//genCOCReg creares the state regional COC table 
 function genCOCReg(region, loc,year_arr,group) {
 	const fmt_comma = d3.format(",");
 
@@ -594,11 +594,11 @@ var reg_data2 = reg_data.sort(function(a, b){ return d3.ascending(a['region_num'
 	for(i = 0; i < reg_data2.length; i++){
 		var el1 = "<td>" + reg_data2[i].name + "</td>"
 		var el2 = "<td>" + reg_data2[i].year + "</td>"
-		var el3 = "<td>" + fmt_comma(reg_data2[i].population) + "</td>"
-		var el4 = "<td>" + fmt_comma(reg_data2[i].change) + "</td>"
-		var el5 = "<td>" + fmt_comma(reg_data2[i].births) + "</td>"
-		var el6 = "<td>" + fmt_comma(reg_data2[i].deaths) + "</td>"
-		var el7 = "<td>" + fmt_comma(reg_data2[i].netmig) + "</td>"
+		var el3 = "<td>" + fixNEG(reg_data2[i].population,"num") + "</td>"
+		var el4 = "<td>" + fixNEG(reg_data2[i].change,"num") + "</td>"
+		var el5 = "<td>" + fixNEG(reg_data2[i].births,"num") + "</td>"
+		var el6 = "<td>" + fixNEG(reg_data2[i].deaths,"num") + "</td>"
+		var el7 = "<td>" + fixNEG(reg_data2[i].netmig,"num") + "</td>"
 
 	   var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + el5 + el6 + el7 + "</tr>";
 	   out_tab = out_tab + tmp_row;
@@ -607,7 +607,7 @@ var reg_data2 = reg_data.sort(function(a, b){ return d3.ascending(a['region_num'
 
 //Output table
 	var tabDivOut = document.getElementById("tbl_output");
-	var tabName = "COCTab";
+	var tabName = "cocTab";
 //Clear div
 tabDivOut.innerHTML = "";
 
@@ -624,3 +624,108 @@ $(tabObj).DataTable({
  });
 }) //data
 } //genCOCReg
+
+//genCOCCty creares the county COC Table
+function genCOCCty(loc,year_arr,group) {
+	const fmt_comma = d3.format(",");
+
+	//build urlstr
+   var fips_arr2 = [];
+	for(j = 0; j < loc.length; j++){
+		fips_arr2.push(parseInt(loc[j]));
+     };
+   
+	var fips_list  = fips_arr2.join(",")
+	var year_list = year_arr.join(",")
+	
+	var urlstr = "https://gis.dola.colorado.gov/lookups/components?county=" + fips_list + "&year=" + year_list + "&group=" + group +";"
+		
+d3.json(urlstr).then(function(data){
+     
+    // sum up values by region and year
+	var columnsToSum = ['estimate', 'births','deaths','netmig', 'change']
+
+var cty_data = [];
+
+	   //Rollups based on group value
+	switch(group) {
+		case "opt0":
+		for (i = 0; i < data.length; i++) {
+		   cty_data.push({ 'countyfips' : data[i].countyfips,
+			            'name' : countyName(data[i].countyfips), 
+						'year' : data[i].year,
+						'population' : data[i].estimate, 
+						'births' : data[i].births, 
+						'deaths' : data[i].deaths, 
+						'netmig' : data[i].netmig, 
+						'change' : data[i].change});
+		};
+		break;
+		case "opt1":
+		var binroll =  d3.rollup(data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year);
+		for (let [key, value] of binroll) {
+		   cty_data.push({'countyfips' : '',
+			            'name' : '', 
+						'year' : key,
+						'population' : value.estimate, 
+						'births' : value.births, 
+						'deaths' : value.deaths, 
+						'netmig' : value.netmig, 
+						'change' : value.change});
+		};
+		break;
+		case "opt2":
+		var binroll =  d3.rollup(data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.countyfips);
+		for (let [key, value] of binroll) {
+		   cty_data.push({'countyfips' : key,
+						 'name' : countyName(key), 
+						'year' : '',
+						'population' : value.estimate, 
+						'births' : value.births, 
+						'deaths' : value.deaths, 
+						'netmig' : value.netmig, 
+						'change' : value.change});
+		};
+		break;
+} //Switch
+
+var cty_data2 = cty_data.sort(function(a, b){ return d3.ascending(a['countyfips'], b['countyfips']); })
+
+	// Generate Table
+	var out_tab = "<thead><tr><th>countyfips</th><th>County Name</th><th>Year</th><th>Population</th><th>Change</th><th>Births</th><th>Deaths</th><th>Net Migration</th></tr></thead>";
+	out_tab = out_tab + "<tbody>"
+
+	for(i = 0; i < cty_data2.length; i++){
+		var el0 = "<td>" + cty_data2[i].countyfips + "</td>"
+		var el1 = "<td>" + cty_data2[i].name + "</td>"
+		var el2 = "<td>" + cty_data2[i].year + "</td>"
+		var el3 = "<td>" + fixNEG(cty_data2[i].population,"num") + "</td>"
+		var el4 = "<td>" + fixNEG(cty_data2[i].change,"num") + "</td>"
+		var el5 = "<td>" + fixNEG(cty_data2[i].births,"num") + "</td>"
+		var el6 = "<td>" + fixNEG(cty_data2[i].deaths,"num") + "</td>"
+		var el7 = "<td>" + fixNEG(cty_data2[i].netmig,"num") + "</td>"
+
+	   var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + el6 + el7 + "</tr>";
+	   out_tab = out_tab + tmp_row;
+	}
+	out_tab = out_tab + "</tbody>"
+
+//Output table
+	var tabDivOut = document.getElementById("tbl_output");
+	var tabName = "cocTab";
+//Clear div
+tabDivOut.innerHTML = "";
+
+var tabObj = "#" + tabName;
+$(tabDivOut).append("<table id="+ tabName + " class='DTTable' width='90%'></table>");
+$(tabObj).append(out_tab); //this has to be a html table
+
+
+$(tabObj).DataTable({
+  dom: 'Bfrtip',
+        buttons: [
+            'csv'
+        ]
+ });
+}) //data
+} //genCOCcty
