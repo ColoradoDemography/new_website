@@ -1,5 +1,23 @@
 //Support functions for lookup scripts  A. Bickford 7/2022
 
+//Join function from http://learnjsdata.com/combine_data.html
+
+function joinFUNCT(lookupTable, mainTable, lookupKey, mainKey, select) {
+    var l = lookupTable.length,
+        m = mainTable.length,
+        lookupIndex = [],
+        output = [];
+    for (var i = 0; i < l; i++) { // loop through l items
+        var row = lookupTable[i];
+        lookupIndex[row[lookupKey]] = row; // create an index for lookup table
+    }
+    for (var j = 0; j < m; j++) { // loop through m items
+        var y = mainTable[j];
+        var x = lookupIndex[y[mainKey]]; // get corresponding row from lookupTable
+        output.push(select(y, x)); // select only the columns you need
+    }
+    return output;
+};
 
 //getSelectValues Works with muluple selection boxes from Stack Overflow https://stackoverflow.com/questions/5866169/how-to-get-all-selected-values-of-a-multiple-select-box
 function getSelectValues(select) {
@@ -60,7 +78,8 @@ function genRaceTabCty(loc,year_arr, race_arr,eth_arr,age_arr,sex_list,group) {
 	if(sex_list == "S"){
 		var urlstr = "https://gis.dola.colorado.gov/lookups/county_sya_race_estimates_current?age="+ age_list + "&county="+ fips_list +"&year="+ year_list +"&race=" + race_list+ "&ethnicity="+eth_list+"&group=opt0";
     } else {
-		var urlstr = "https://gis.dola.colorado.gov/lookups/county_sya_race_estimates_current?age="+ age_list + "&county="+ fips_list +"&year="+ year_list +"&race=" + race_list+ "&ethnicity="+eth_list+"&sex="+sex_list+"&group=opt0";
+		var sexl = sex_list.toLowerCase()
+		var urlstr = "https://gis.dola.colorado.gov/lookups/county_sya_race_estimates_current?age="+ age_list + "&county="+ fips_list +"&year="+ year_list +"&race=" + race_list+ "&ethnicity="+eth_list+"&sex="+sexl+"&group=opt0";
 	}
 
 d3.json(urlstr).then(function(data){
@@ -83,7 +102,6 @@ d3.json(urlstr).then(function(data){
 	  var filtData = data.filter(b => (b.county_fips == i));
 	  var cty_tmp = [];
 
-debugger;
     //Rollups based on group value
 	switch(group) {
 		case "opt0":
@@ -276,7 +294,8 @@ function genRaceTabReg(region, loc,year_arr, race_arr,eth_arr,age_arr,sex_list,g
 	if(sex_list == "S"){
 		var urlstr = "https://gis.dola.colorado.gov/lookups/county_sya_race_estimates_current?age="+ age_list + "&county="+ fips_list +"&year="+ year_list +"&race=" + race_list+ "&ethnicity="+eth_list+"&group=opt0";
     } else {
-		var urlstr = "https://gis.dola.colorado.gov/lookups/county_sya_race_estimates_current?age="+ age_list + "&county="+ fips_list +"&year="+ year_list +"&race=" + race_list+ "&ethnicity="+eth_list+"&sex="+sex_list+"&group=opt0";
+		var sexl = sex_list.toLowerCase()
+		var urlstr = "https://gis.dola.colorado.gov/lookups/county_sya_race_estimates_current?age="+ age_list + "&county="+ fips_list +"&year="+ year_list +"&race=" + race_list+ "&ethnicity="+eth_list+"&sex="+sexl+"&group=opt0";
 	}
 
 d3.json(urlstr).then(function(data){
@@ -478,3 +497,130 @@ $(tabObj).DataTable({
  });
 })
 } //genRaceTabReg
+
+
+//genCOCReg creares the county race data call and produces table
+function genCOCReg(region, loc,year_arr,group) {
+	const fmt_comma = d3.format(",");
+
+	//build urlstr
+   var fips_arr = [];
+   var fips_arr2 = [];
+   for(i = 0; i < loc.length; i++){
+	for(j = 0; j < loc[i].length; j++){
+		var regval = parseInt(region[i]);
+		var countyfips = parseInt(loc[i][j])
+		fips_arr.push({ countyfips, regval });
+		fips_arr2.push(parseInt(loc[i][j]));
+     };
+   };
+   
+	var fips_list  = fips_arr2.join(",")
+	var year_list = year_arr.join(",")
+	
+	var urlstr = "https://gis.dola.colorado.gov/lookups/components?county=" + fips_list + "&year=" + year_list + "&group=" + group +";"
+		
+d3.json(urlstr).then(function(data){
+     
+ var raw_data = join(fips_arr,data,"countyfips","countyfips",function(dat,col){
+		return{
+			regval : col.regval,
+			countyfips : col.countyfips,
+			year : dat.year,
+			estimate: dat.estimate,
+			births : dat.births,
+			deaths : dat.deaths,
+			netmig : dat.netmig,
+			change : dat.change
+		};
+	});
+
+    // sum up values by region and year
+	var columnsToSum = ['estimate', 'births','deaths','netmig', 'change']
+
+var reg_data = [];
+
+	   //Rollups based on group value
+	switch(group) {
+		case "opt0":
+		var binroll =  d3.rollup(raw_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.regval, d => d.year);
+		for (let [key, value] of binroll) {
+		for (let[key2, value2] of value) {
+		   reg_data.push({ 'region_num' : key,
+			            'name' : regionName(key), 
+						'year' : key2,
+						'population' : value2.estimate, 
+						'births' : value2.births, 
+						'deaths' : value2.deaths, 
+						'netmig' : value2.netmig, 
+						'change' : value2.change});
+		};
+		};
+		break;
+		case "opt1":
+		var binroll =  d3.rollup(raw_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year);
+		for (let [key, value] of binroll) {
+		   reg_data.push({'region_num' : '',
+			            'name' : '', 
+						'year' : key,
+						'population' : value.estimate, 
+						'births' : value.births, 
+						'deaths' : value.deaths, 
+						'netmig' : value.netmig, 
+						'change' : value.change});
+		};
+		break;
+		case "opt2":
+		var binroll =  d3.rollup(raw_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.regval);
+		for (let [key, value] of binroll) {
+		   reg_data.push({'region_num' : key,
+						 'name' : regionName(key), 
+						'year' : '',
+						'population' : value.estimate, 
+						'births' : value.births, 
+						'deaths' : value.deaths, 
+						'netmig' : value.netmig, 
+						'change' : value.change});
+		};
+		break;
+} //Switch
+
+var reg_data2 = reg_data.sort(function(a, b){ return d3.ascending(a['region_num'], b['region_num']); })
+
+	// Generate Table
+	var out_tab = "<thead><tr><th>Region Name</th><th>Year</th><th>Population</th><th>Change</th><th>Births</th><th>Deaths</th><th>Net Migration</th></tr></thead>";
+	out_tab = out_tab + "<tbody>"
+
+	for(i = 0; i < reg_data2.length; i++){
+		var el1 = "<td>" + reg_data2[i].name + "</td>"
+		var el2 = "<td>" + reg_data2[i].year + "</td>"
+		var el3 = "<td>" + fmt_comma(reg_data2[i].population) + "</td>"
+		var el4 = "<td>" + fmt_comma(reg_data2[i].change) + "</td>"
+		var el5 = "<td>" + fmt_comma(reg_data2[i].births) + "</td>"
+		var el6 = "<td>" + fmt_comma(reg_data2[i].deaths) + "</td>"
+		var el7 = "<td>" + fmt_comma(reg_data2[i].netmig) + "</td>"
+
+	   var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + el5 + el6 + el7 + "</tr>";
+	   out_tab = out_tab + tmp_row;
+	}
+	out_tab = out_tab + "</tbody>"
+
+//Output table
+	var tabDivOut = document.getElementById("tbl_output");
+	var tabName = "COCTab";
+//Clear div
+tabDivOut.innerHTML = "";
+
+var tabObj = "#" + tabName;
+$(tabDivOut).append("<table id="+ tabName + " class='DTTable' width='90%'></table>");
+$(tabObj).append(out_tab); //this has to be a html table
+
+
+$(tabObj).DataTable({
+  dom: 'Bfrtip',
+        buttons: [
+            'csv'
+        ]
+ });
+}) //data
+} //genCOCReg
