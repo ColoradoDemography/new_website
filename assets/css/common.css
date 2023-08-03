@@ -978,7 +978,21 @@ details main {
    grid-column: 2 / span 6;
    grid-row: 10;   
   }  
- 
+ /* Bottom Panels for app-panels 7/21/2023 */
+  .app-panel_4_2_b {  
+   grid-column: 2 / span 2;
+   grid-row: 4;   
+  }
+  
+   .app-panel_4_4_b {  
+   grid-column: 4 / span 2;
+   grid-row: 4;   
+  }
+  
+   .app-panel_4_6_b {  
+   grid-column: 6 / span 2;
+   grid-row: 4;   
+  }
    /* Age Animation Panel */
    .app-ageani {  
    grid-column: 2 / span 6;
@@ -1903,8 +1917,7 @@ li:hover>nava{
 }
 
 /*Panels for HB23-1253 7/21/2023*/
-
-.panel_3_2_HB {  
+ .panel_3_2_HB {  
    grid-column: 2 / span 2;
    grid-row: 3;
   }
