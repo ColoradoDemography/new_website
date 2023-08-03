@@ -1,4 +1,4 @@
-//Website functions fror State Demography Office
+//Website functions for State Demography Office webpage
 //A. Bickford 5/2021
 
 //list of lookup statements  https://github.com/ColoradoDemography/MS_Demog_Lookups/tree/master/doc

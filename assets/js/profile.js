@@ -162,6 +162,7 @@ function fixNEG(invalue,fmt){
  const fmt_pct = d3.format(".1%")
  const fmt_comma = d3.format(",");
  const fmt_dollar = d3.format("$,");
+ const fmt_decimal = d3.format(".2f")
 
     if(fmt == 'pct') {
   tmp_val = invalue/100;
@@ -170,13 +171,15 @@ function fixNEG(invalue,fmt){
  }
  if(tmp_val < 0) {
    tmp_val = tmp_val * -1;
-   if(fmt == 'pct') { fin_val = "-" + fmt_pct(tmp_val);};
-   if(fmt == 'num') { fin_val = "-" + fmt_comma(tmp_val);};
-   if(fmt == 'cur') { fin_val = "-" + fmt_dollar(tmp_val);};
+   if(fmt == 'pct') { fin_val = tmp_val === 9999999.99 ? " " : "-" + fmt_pct(tmp_val);};
+   if(fmt == 'num') { fin_val = tmp_val === 999999999 ? " " :"-" + fmt_comma(tmp_val);};
+   if(fmt == 'cur') { fin_val = tmp_val === 999999999 ? " " : "-" + fmt_dollar(tmp_val);};
+   if(fmt == 'dec') { fin_val = tmp_val === 999999999 ? " " :"-" + fmt_decimal(tmp_val);};
  } else {
-   if(fmt == 'pct') { fin_val = fmt_pct(tmp_val);};
-   if(fmt == 'num') { fin_val = fmt_comma(tmp_val);};
-   if(fmt == 'cur') { fin_val = fmt_dollar(tmp_val);};
+   if(fmt == 'pct') { fin_val = tmp_val === 9999999.99 ? " " : fmt_pct(tmp_val);};
+   if(fmt == 'num') { fin_val = tmp_val === 999999999 ? " " : fmt_comma(tmp_val);};
+   if(fmt == 'cur') { fin_val = tmp_val === 999999999 ? " " : fmt_dollar(tmp_val);};
+   if(fmt == 'dec') { fin_val = tmp_val === 999999999 ? " " : fmt_decimal(tmp_val);};
     }
 
    return(fin_val);
