@@ -1286,7 +1286,7 @@ if(groupval == "opt0"){
 
 var yrstr = yrval.join(",")
 
-var urlstr = "https://gis.dola.colorado.gov/lookups/countymuni?"
+var urlstr = "https://gis.dola.colorado.gov/lookups/munipophousing?"
 
 // A promise for unincorporated areas (county and muni)
 // A promise for County call
@@ -1421,7 +1421,6 @@ $(tabObj).DataTable({
 	
 }) //Data
 } //genCtyMuni
-
 
 //genHHCty  County Household Projections
 //  https://gis.dola.colorado.gov/lookups/household?county=1,3&year=2010&age=1,2&household=1,2,3&group=opt8
@@ -2964,7 +2963,6 @@ for(i = 0; i < reg_data.length; i++){
 }
 out_tab = out_tab + "</tbody>"
 
-
 //Output table
 	var tabDivOut = document.getElementById("tbl_output");
 	var tabName = "lfpTab";
@@ -2985,14 +2983,15 @@ $(tabObj).DataTable({
  });  //d3.json
 } //LFP region
 
+//Single Year of Age
 //genAgeGroup builds list items for SYA functions
-function genAgeGroup(group){
+function genAgeGroup(group,type){
 	var outcell = document.getElementById('ageselect')
 	outcell.innerHTML = "";
 	var tabdiv = document.createElement('div');
 	var tabtxt = document.createElement('p');
 	tabtxt.className = 'entry_text';
-	if(group == "customage"){
+	if(group == "custom"){
 		tabtxt.innerHTML = '<b>Designate up to 5 intervals between 0 and 100:</b><br>';
 		var outitem = document.createElement("table");
 		for(i = 0; i < 5; i++){
@@ -3028,7 +3027,7 @@ function genAgeGroup(group){
 	tabdiv.appendChild(tabtxt)
 	tabdiv.appendChild(outitem)
 	}
-	if(group == "sya"){
+	if(group == "single"){
 		tabtxt.innerHTML = '<b>Select one or more ages:</b><br>';
 		var outdiv = document.createElement("div")
 		var br = document.createElement("br");
@@ -3043,12 +3042,18 @@ function genAgeGroup(group){
 			el.value = i;
 			outitem.appendChild(el);
 		}
+	if(type == "county"){
 		var grparr = [{'id' : 'NoGrp', 'txt' : 'No Grouping', 'optval' : 'opt0'},
 		{'id' : 'yrGrp', 'txt' : 'Group by Year', 'optval' : 'opt1'},
 		{'id' : 'ctyGrp', 'txt' : 'Group by County and Year', 'optval' : 'opt2'},
 		{'id' : 'ageGrp', 'txt' : 'Group by Age and Year', 'optval' : 'opt3'}]
+     } else {
+		var grparr = [{'id' : 'NoGrp', 'txt' : 'No Grouping', 'optval' : 'opt0'},
+		{'id' : 'yrGrp', 'txt' : 'Group by Year', 'optval' : 'opt1'},
+		{'id' : 'ctyGrp', 'txt' : 'Group by Region and Year', 'optval' : 'opt2'},
+		{'id' : 'ageGrp', 'txt' : 'Group by Age and Year', 'optval' : 'opt3'}]
+	 }
 	for(i = 0; i < grparr.length; i++){
-		debugger;
 		var radioInput = document.createElement('input');
 		var radioLabel = document.createElement('label')
 		radioInput.type = "radio";
@@ -3066,137 +3071,317 @@ function genAgeGroup(group){
 	tabdiv.appendChild(outdiv)
 	}
 
-	outcell.appendChild(tabdiv)
+if(group == "custom" || group == "single"){
+		outcell.appendChild(tabdiv)
+		if(group == "single") {
+		  nogrp = document.getElementById('NoGrp');
+		  nogrp.checked = true;
+		}
+}  else {
+		outcell.innerHTML = "";
+}
 	} //genAgeGroup
 
+//customSYA codes custom age range value based on age_arr
+function customSYA(dataval, dataarr) {
+var age_str = "";
+   for(i = 0; i < dataarr.length;i++){
+	   if(+dataval >= dataarr[i].age_start && +dataval <= dataarr[i].age_end){
+		   age_str = dataarr[i].age_str;
+		   break;
+	   }
+   }
+	return(age_str)
+}
+
+//sumSYA summarizes data based on agespec and group value
+function sumSYA(in_data,spec,grp, type){
+	var out_data = [];
+	var columnsToSum = ["male", "female","total"]
+	switch(spec){
+	case "custom" :
+	if(type == "county"){
+		var binroll =  d3.rollup(in_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.countyfips, d => d.year, d => d.age);
+		for (let [key, value] of binroll) {
+		for (let [key1, value1] of value){
+		for (let [key2, value2] of value1){
+		   out_data.push({ 'countyfips' : key,
+			'countyname' : countyName(key),
+			'year' : key1,
+			'age' : key2,
+			'male' : value2.male,
+			'female' : value2.female,
+			'total' : value2.total
+		   })
+		};
+		};
+		};
+		} else {
+		var binroll =  d3.rollup(in_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.regval, d => d.year, d => d.age);
+		for (let [key, value] of binroll) {
+		for (let [key1, value1] of value){
+		for (let [key2, value2] of value1){
+		   out_data.push({ 'regval' : key,
+			'regionname' : regionName(key),
+			'year' : key1,
+			'age' : key2,
+			'male' : value2.male,
+			'female' : value2.female,
+			'total' : value2.total
+		   })
+		};
+		};
+		};
+		} //type
+		break
+	case "single" :
+		switch(grp) {
+		case "opt0" :
+		if(type == "county"){
+		  out_data = in_data;
+		} else {
+		var binroll =  d3.rollup(in_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.regval, d => d.year, d => d.age);
+		for (let [key, value] of binroll) {
+		for (let [key1, value1] of value){
+		for (let [key2, value2] of value1){
+		   out_data.push({ 'regval' : key,
+			'regionname' : regionName(key),
+			'year' : key1,
+			'age' : key2,
+			'male' : value2.male,
+			'female' : value2.female,
+			'total' : value2.total
+		   })
+		};
+		};
+		};
+		} //type
+		  break;
+		case "opt1" :
+		var binroll =  d3.rollup(in_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year);
+		for (let [key, value] of binroll) {
+			out_data.push({ 'year' : key,
+			'male' : value.male,
+			'female' : value.female,
+			'total' : value.total
+		   })
+		};
+		break;
+		case "opt2" :
+		if(type == "county"){
+		var binroll =  d3.rollup(in_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.countyfips, d => d.year);
+		for (let [key, value] of binroll) {
+		for (let [key1, value1] of value){
+		   out_data.push({ 'countyfips' : key,
+			'countyname' : countyName(key),
+			'year' : key1,
+			'male' : value1.male,
+			'female' : value1.female,
+			'total' : value1.total
+		   })
+		};
+		};
+		} else {
+		var binroll =  d3.rollup(in_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.regval, d => d.year);
+		for (let [key, value] of binroll) {
+		for (let [key1, value1] of value){
+		   out_data.push({ 'regval' : key,
+			'regionname' : regionName(key),
+			'year' : key1,
+			'male' : value1.male,
+			'female' : value1.female,
+			'total' : value1.total
+		   })
+		};
+		};
+		}
+		break;
+		case "opt3" :
+		var binroll =  d3.rollup(in_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year, d => d.age);
+		for (let [key, value] of binroll) {
+		for (let [key1, value1] of value){
+		   out_data.push({ 'year' : key,
+		    'age' : key1,
+			'male' : value1.male,
+			'female' : value1.female,
+			'total' : value1.total
+		   })
+		};
+		};
+		break;
+		}
+	break;
+	default : //Only for regions
+		var binroll =  d3.rollup(in_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.regval, d => d.year, d => d.age);
+		for (let [key, value] of binroll) {
+		for (let [key1, value1] of value){
+		for (let [key2, value2] of value1){
+		   out_data.push({ 'regval' : key,
+			'regionname' : regionName(key),
+			'year' : key1,
+			'age' : key2,
+			'male' : value2.male,
+			'female' : value2.female,
+			'total' : value2.total
+		   })
+		};
+		};
+		};
+	} //spec switch
+
+	return(out_data)
+} //sumSYA
+
 //genSYACty  County SYA function
-	function genSYACty(loc,year_arr,group,agespec, age_arr,yeardata) {
+function genSYACty(loc,year_arr,group,agespec, age_arr,yeardata) {
 
 	//build urlstr
    var fips_arr2 = [];
 	for(j = 0; j < loc.length; j++){
 		fips_arr2.push(parseInt(loc[j]));
      };
-   
-	var fips_list  = fips_arr2.join(",")
-	var year_list = year_arr.join(",")
+
 	//List of ages
-    	var age_arr2 = [];
+    var age_arr2 = [];
     switch(agespec){
-	case "customage" :
+	case "custom" :
 		var minage = Math.min(...age_arr)
 		var maxage = Math.max(...age_arr)
 	    for(i = minage; i <= maxage; i++){
 			age_arr2.push(i)
 		}
+		age_range = []
+		for (var i = 0; i < age_arr.length; i += 2) {
+			age_range.push({'age_start' : age_arr[i], 'age_end' : age_arr[i+1], "age_str" : age_arr[i] + " to " +age_arr[i+1]})
+		}
 		break;
-	case "sya" :
+	case "single" :
 	   age_arr2 = age_arr;
 	   break;
-	default : 
-	for(i = 0; i <= 100; i++){
-		age_arr2.push(i)
 	}
-   break;
-	}
+
+	var fips_list  = fips_arr2.join(",")
+	var year_list = year_arr.join(",")
 	var age_list = age_arr2.join(",")
 	
-	var urlstr = "https://gis.dola.colorado.gov/lookups/sya?age=" + age_list + "&county=" + fips_list + "&year=" + year_list + "&choice=single;"
-	debugger
-	console.log(urlstr)
+	if(agespec == "custom" || agespec == "single") {
+	     var urlstr = "https://gis.dola.colorado.gov/lookups/sya?age=" + age_list + "&county=" + fips_list + "&year=" + year_list + "&choice=single"
+	} else {
+	    var urlstr = "https://gis.dola.colorado.gov/lookups/sya?county=" + fips_list + "&year=" + year_list + "&choice="+agespec
+	}
 
 d3.json(urlstr).then(function(data){
-	debugger;
-	console.log(data)
-	
+
      var raw_data = []
-	 data.forEach( i => {
+	 data.forEach(i => {
 		 raw_data.push({"countyfips" : i.countyfips,
-						"countyname" : i.county,
+						"countyname" : countyName(i.countyfips),
 						"year" : i.year,
-						"age" : i.age,
-						"population" : +i.totalpopulation,
+						"age" : agespec == "custom" ? customSYA(i.age,age_range) : i.age,
+						"male" : +i.malepopulation,
+						"female" : +i.femalepopulation,
+						"total" : +i.totalpopulation,
 						"datatype" : i.datatype
 		 })
 	 })
-	debugger;
-	console.log(raw_data)
-/*
-    // sum up values by region and year
-	var columnsToSum = ['estimate', 'births','deaths','netmig', 'change']
-
-var cty_data = [];
-
-	   //Rollups based on group value
-	switch(group) {
-		case "opt0":
-		for (i = 0; i < data.length; i++) {
-		   cty_data.push({ 'countyfips' : data[i].countyfips,
-			            'name' : countyName(data[i].countyfips), 
-						'year' : data[i].year,
-						'population' : data[i].estimate, 
-						'births' : data[i].births, 
-						'deaths' : data[i].deaths, 
-						'netmig' : data[i].netmig, 
-						'change' : data[i].change});
-		};
-		break;
-		case "opt1":
-		var binroll =  d3.rollup(data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year);
-		for (let [key, value] of binroll) {
-		   cty_data.push({'countyfips' : '',
-			            'name' : '', 
-						'year' : key,
-						'population' : value.estimate, 
-						'births' : value.births, 
-						'deaths' : value.deaths, 
-						'netmig' : value.netmig, 
-						'change' : value.change});
-		};
-		break;
-		case "opt2":
-		var binroll =  d3.rollup(data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.countyfips);
-		for (let [key, value] of binroll) {
-		   cty_data.push({'countyfips' : key,
-						 'name' : countyName(key), 
-						'year' : '',
-						'population' : value.estimate, 
-						'births' : value.births, 
-						'deaths' : value.deaths, 
-						'netmig' : value.netmig, 
-						'change' : value.change});
-		};
-		break;
-} //Switch
-
-var cty_data2 = cty_data.sort(function(a, b){ return d3.ascending(a['countyfips'], b['countyfips']); })
+	
+	 if(agespec == "custom") {
+		 raw_data = raw_data.filter(d => d.age != "")
+	 }
+	
+	if(agespec == "custom" || agespec == "single") {
+		var tab_data = sumSYA(raw_data,agespec,group,"county")
+	} else {
+		var tab_data = raw_data;
+	}
 
 	// Generate Table
-	var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>Population</th><th>Change</th><th>Births</th><th>Deaths</th><th>Net Migration</th><th>Data Type</th></tr></thead>";
+	if(agespec == "single"){
+	  switch(group){
+		case "opt0" :
+			var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>Age</th><th>Male Population</th><th>Female Population</th><th>Total Population</th><th>Data Type</th></tr></thead>";
+			break;
+		case "opt1":
+			 var out_tab = "<thead><tr><th>Year</th><th>Male Population</th><th>Female Population</th><th>Total Population</th><th>Data Type</th></tr></thead>";
+             break;
+		case "opt2" :
+			var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>Male Population</th><th>Female Population</th><th>Total Population</th><th>Data Type</th></tr></thead>";
+			break;
+		case "opt3" :
+			var out_tab = "<thead><tr>><th>Year</th><th>Age</th><th>Male Population</th><th>Female Population</th><th>Total Population</th><th>Data Type</th></tr></thead>";
+			break;
+	  }
+	} else {
+	 var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>Age</th><th>Male Population</th><th>Female Population</th><th>Total Population</th><th>Data Type</th></tr></thead>";
+	}
+
 	out_tab = out_tab + "<tbody>"
 
-	for(i = 0; i < cty_data2.length; i++){
-		var el0 = "<td>" + cty_data2[i].countyfips + "</td>"
-		var el1 = "<td>" + cty_data2[i].name + "</td>"
-		var el2 = "<td>" + cty_data2[i].year + "</td>"
-		var el3 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].population,"num") + "</td>"
-		var el4 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].change,"num") + "</td>"
-		var el5 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].births,"num") + "</td>"
-		var el6 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].deaths,"num") + "</td>"
-		var el7 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].netmig,"num") + "</td>"
-//Selecting value of data type
+	for(i = 0; i < tab_data.length; i++){
+		//Selecting value of data type
 
-		var filtData = yeardata.filter(b => cty_data2[i].year == b.year);
-		var el8 = "<td>" + filtData[0].datatype + "</td>"
+		var filtData = yeardata.filter(b => tab_data[i].year == b.year);
+		
+	if(agespec == "single"){
+	  switch(group){
+		case "opt0" :
+			var el0 = "<td>" + tab_data[i].countyfips + "</td>"
+			var el1 = "<td>" + tab_data[i].countyname + "</td>"
+			var el2 = "<td>" + tab_data[i].year + "</td>"
+			var el3 = "<td>" + tab_data[i].age + "</td>"
+			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
+			var el5 = "<td style='text-align: right'>" + fixNEG(tab_data[i].female,"num") + "</td>"
+			var el6 = "<td style='text-align: right'>" + fixNEG(tab_data[i].total,"num") + "</td>"
+			var el7 = "<td>" + filtData[0].datatype + "</td>"
+			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + el6 + el7  + "</tr>";
+			break;
+		case "opt1":
+			var el0 = "<td>" + tab_data[i].year + "</td>"
+			var el1 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
+			var el2 = "<td style='text-align: right'>" + fixNEG(tab_data[i].female,"num") + "</td>"
+			var el3 = "<td style='text-align: right'>" + fixNEG(tab_data[i].total,"num") + "</td>"
+			var el4 = "<td>" + filtData[0].datatype + "</td>"
+			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + "</tr>";
+			break;
+		case "opt2" :
+			var el0 = "<td>" + tab_data[i].countyfips + "</td>"
+			var el1 = "<td>" + tab_data[i].countyname + "</td>"
+			var el2 = "<td>" + tab_data[i].year + "</td>"
+			var el3 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
+			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].female,"num") + "</td>"
+			var el5 = "<td style='text-align: right'>" + fixNEG(tab_data[i].total,"num") + "</td>"
+			var el6 = "<td>" + filtData[0].datatype + "</td>"
+			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + el6 + "</tr>";
+			break;
+		case "opt3" :
+			var el0 = "<td>" + tab_data[i].year + "</td>"
+			var el1 = "<td>" + tab_data[i].age + "</td>"
+			var el2 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
+			var el3 = "<td style='text-align: right'>" + fixNEG(tab_data[i].female,"num") + "</td>"
+			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].total,"num") + "</td>"
+			var el5 = "<td>" + filtData[0].datatype + "</td>"
+			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + "</tr>";
+			break;
+	  }
+	} else {
+			var el0 = "<td>" + tab_data[i].countyfips + "</td>"
+			var el1 = "<td>" + tab_data[i].countyname + "</td>"
+			var el2 = "<td>" + tab_data[i].year + "</td>"
+			var el3 = "<td>" + tab_data[i].age + "</td>"
+			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
+			var el5 = "<td style='text-align: right'>" + fixNEG(tab_data[i].female,"num") + "</td>"
+			var el6 = "<td style='text-align: right'>" + fixNEG(tab_data[i].total,"num") + "</td>"
+			var el7 = "<td>" + filtData[0].datatype + "</td>"
+			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + el6 + el7  + "</tr>";
+	}
 
-	   var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + el6 + el7 + el8 + "</tr>";
 	   out_tab = out_tab + tmp_row;
 	}
 	out_tab = out_tab + "</tbody>"
 
 //Output table
 	var tabDivOut = document.getElementById("tbl_output");
-	var tabName = "cocTab";
+	var tabName = "syaTab";
 //Clear div
 tabDivOut.innerHTML = "";
 
@@ -3211,7 +3396,284 @@ $(tabObj).DataTable({
             'csv'
         ]
  });
-*/
+
 }) //data
 
 } //genSYACty
+
+//genSYAReg Region SYA function
+function genSYAReg(region,loc,year_arr,group,agespec, age_arr,yeardata) {
+
+	//build urlstr
+   var fips_arr = [];
+   var fips_arr2 = [];
+   for(i = 0; i < loc.length; i++){
+	for(j = 0; j < loc[i].length; j++){
+		var regval = parseInt(region[i]);
+		var countyfips = parseInt(loc[i][j])
+		fips_arr.push({ countyfips, regval });
+		fips_arr2.push(countyfips);
+     };
+   };
+   
+	//List of ages
+    var age_arr2 = [];
+    switch(agespec){
+	case "custom" :
+		var minage = Math.min(...age_arr)
+		var maxage = Math.max(...age_arr)
+	    for(i = minage; i <= maxage; i++){
+			age_arr2.push(i)
+		}
+		age_range = []
+		for (var i = 0; i < age_arr.length; i += 2) {
+			age_range.push({'age_start' : age_arr[i], 'age_end' : age_arr[i+1], "age_str" : age_arr[i] + " to " +age_arr[i+1]})
+		}
+		break;
+	case "single" :
+	   age_arr2 = age_arr;
+	   break;
+	}
+
+	var fips_list  = fips_arr2.join(",")
+	var year_list = year_arr.join(",")
+	var age_list = age_arr2.join(",")
+	
+	if(agespec == "custom" || agespec == "single") {
+	     var urlstr = "https://gis.dola.colorado.gov/lookups/sya?age=" + age_list + "&county=" + fips_list + "&year=" + year_list + "&choice=single"
+	} else {
+	    var urlstr = "https://gis.dola.colorado.gov/lookups/sya?county=" + fips_list + "&year=" + year_list + "&choice="+agespec
+	}
+
+d3.json(urlstr).then(function(data){
+	
+
+     var raw_data = []
+	  var raw_data = joinFUNCT(fips_arr,data,"countyfips","countyfips",function(dat,col){
+		return{
+			"regval" : col.regval,
+			"countyfips" : col.countyfips,
+			"year" : dat.year,
+			"age" : agespec == "custom" ? customSYA(dat.age,age_range) : dat.age,
+			"male" : +dat.malepopulation,
+			"female" : +dat.femalepopulation,
+			"total" : +dat.totalpopulation,
+			"datatype" : dat.datatype
+		};
+	});
+
+	 if(agespec == "custom") {
+		 raw_data = raw_data.filter(d => d.age != "")
+	 }
+	
+		var tab_data = sumSYA(raw_data,agespec,group,"region")
+	
+
+	// Generate Table
+	if(agespec == "single"){
+	  switch(group){
+		case "opt0" :
+			var out_tab = "<thead><tr><th>Region Number</th><th>Region Name</th><th>Year</th><th>Age</th><th>Male Population</th><th>Female Population</th><th>Total Population</th><th>Data Type</th></tr></thead>";
+			break;
+		case "opt1":
+			 var out_tab = "<thead><tr><th>Year</th><th>Male Population</th><th>Female Population</th><th>Total Population</th><th>Data Type</th></tr></thead>";
+             break;
+		case "opt2" :
+			var out_tab = "<thead><tr><th>Region Number</th><th>Region Name</th><th>Year</th><th>Male Population</th><th>Female Population</th><th>Total Population</th><th>Data Type</th></tr></thead>";
+			break;
+		case "opt3" :
+			var out_tab = "<thead><tr>><th>Year</th><th>Age</th><th>Male Population</th><th>Female Population</th><th>Total Population</th><th>Data Type</th></tr></thead>";
+			break;
+	  }
+	} else {
+	 var out_tab = "<thead><tr><th>Region Number</th><th>Region Name</th><th>Year</th><th>Age</th><th>Male Population</th><th>Female Population</th><th>Total Population</th><th>Data Type</th></tr></thead>";
+	}
+
+	out_tab = out_tab + "<tbody>"
+
+	for(i = 0; i < tab_data.length; i++){
+		//Selecting value of data type
+
+		var filtData = yeardata.filter(b => tab_data[i].year == b.year);
+		
+	if(agespec == "single"){
+	  switch(group){
+		case "opt0" :
+			var el0 = "<td>" + tab_data[i].regval + "</td>"
+			var el1 = "<td>" + tab_data[i].regionname + "</td>"
+			var el2 = "<td>" + tab_data[i].year + "</td>"
+			var el3 = "<td>" + tab_data[i].age + "</td>"
+			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
+			var el5 = "<td style='text-align: right'>" + fixNEG(tab_data[i].female,"num") + "</td>"
+			var el6 = "<td style='text-align: right'>" + fixNEG(tab_data[i].total,"num") + "</td>"
+			var el7 = "<td>" + filtData[0].datatype + "</td>"
+			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + el6 + el7  + "</tr>";
+			break;
+		case "opt1":
+			var el0 = "<td>" + tab_data[i].year + "</td>"
+			var el1 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
+			var el2 = "<td style='text-align: right'>" + fixNEG(tab_data[i].female,"num") + "</td>"
+			var el3 = "<td style='text-align: right'>" + fixNEG(tab_data[i].total,"num") + "</td>"
+			var el4 = "<td>" + filtData[0].datatype + "</td>"
+			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + "</tr>";
+			break;
+		case "opt2" :
+			var el0 = "<td>" + tab_data[i].regval + "</td>"
+			var el1 = "<td>" + tab_data[i].regionname + "</td>"
+			var el2 = "<td>" + tab_data[i].year + "</td>"
+			var el3 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
+			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].female,"num") + "</td>"
+			var el5 = "<td style='text-align: right'>" + fixNEG(tab_data[i].total,"num") + "</td>"
+			var el6 = "<td>" + filtData[0].datatype + "</td>"
+			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + el6 + "</tr>";
+			break;
+		case "opt3" :
+			var el0 = "<td>" + tab_data[i].year + "</td>"
+			var el1 = "<td>" + tab_data[i].age + "</td>"
+			var el2 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
+			var el3 = "<td style='text-align: right'>" + fixNEG(tab_data[i].female,"num") + "</td>"
+			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].total,"num") + "</td>"
+			var el5 = "<td>" + filtData[0].datatype + "</td>"
+			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + "</tr>";
+			break;
+	  }
+	} else {
+			var el0 = "<td>" + tab_data[i].regval + "</td>"
+			var el1 = "<td>" + tab_data[i].regionname + "</td>"
+			var el2 = "<td>" + tab_data[i].year + "</td>"
+			var el3 = "<td>" + tab_data[i].age + "</td>"
+			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
+			var el5 = "<td style='text-align: right'>" + fixNEG(tab_data[i].female,"num") + "</td>"
+			var el6 = "<td style='text-align: right'>" + fixNEG(tab_data[i].total,"num") + "</td>"
+			var el7 = "<td>" + filtData[0].datatype + "</td>"
+			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + el6 + el7  + "</tr>";
+	}
+
+	   out_tab = out_tab + tmp_row;
+	}
+	out_tab = out_tab + "</tbody>"
+
+//Output table
+	var tabDivOut = document.getElementById("tbl_output");
+	var tabName = "syaTab";
+//Clear div
+tabDivOut.innerHTML = "";
+
+var tabObj = "#" + tabName;
+$(tabDivOut).append("<table id="+ tabName + " class='DTTable' width='90%'></table>");
+$(tabObj).append(out_tab); //this has to be a html table
+
+
+$(tabObj).DataTable({
+  dom: 'Bfrtip',
+        buttons: [
+            'csv'
+        ]
+ });
+
+}) //data
+
+} //genSYAReg
+
+//genHistoricalCensus outputs table for County and Municipal Population Timeseries
+function genHistoricalCensus(ctyval,munival,yrval) {
+//Creating url String
+
+var yrstr = yrval.join(",")
+
+var urlstr = "https://gis.dola.colorado.gov/lookups/historicalcensus?"
+
+// A promise for County call
+// A promise for muni call
+
+var ctyarr = []
+var muniarr = []
+
+
+var cty_url = "";
+var muni_url = "";
+
+//County
+if(ctyval.length > 0){
+  ctyval.forEach(i => {
+	  var ctyNM = countyName(parseInt(i))
+	  ctyNM = ctyNM.replace(" County","")
+	  ctyarr.push(ctyNM + "_C");
+  })
+}
+
+
+//muni
+if(munival.length > 0){
+   munival.forEach(i => {
+	   var muniNM = muniName(parseInt(i)) + "_M"
+		muniarr.push(muniNM);
+  })
+}  
+debugger;
+var geostr = "geo="
+if(ctyarr.length > 0){
+	var ctystr = ctyarr.join(",");
+	geostr = geostr + ctystr
+}
+if(muniarr.length > 0){
+	var munistr = muniarr.join(",");
+	geostr = geostr + ctystr + "," + munistr
+}
+
+var censStr = urlstr + geostr + "&year=" + yrstr
+
+debugger
+console.log(censStr)
+
+d3.json(censStr).then(function(data){
+
+	var out_data = [];
+	for(i = 0; i < data.length; i++){
+			out_data.push({
+				"countyfips" : data[i].area_type == "C" ? ctyNum(data[i].area_name + " County") : "",
+				"placefips" : data[i].area_type == "M" ? muniNum(data[i].area_name) : "",
+				"geoname" : data[i].area_type == "C" ? data[i].area_name + " County" : data[i].area_name,
+				"year" : data[i].population_year,
+				"totalpopulation" :  parseInt(data[i].total_population)
+		})
+	}
+
+var sort_data = out_data.sort(function(a, b){ return d3.ascending(a['year'], b['year']); })
+  .sort(function(a, b){ return d3.ascending(a['countyfips'], b['countyfips']); })
+  .sort(function(a, b){ return d3.ascending(a['placefips'], b['placefips']); });
+  
+// Generate Table
+	var out_tab = "<thead><tr><th>County FIPS</th><th>Place FIPS</th><th>Name</th><th>Year</th><th>Total Population</th></tr></thead>><tbody>";
+	for(i = 0; i < sort_data.length; i++){
+       var tmp_row  = "<tr><td>" + sort_data[i]["countyfips"] + "</td>";
+	       tmp_row = tmp_row + "<td>" + sort_data[i]["placefips"] + "</td>";
+	       tmp_row = tmp_row + "<td>" + sort_data[i]["geoname"] + "</td>";
+		   tmp_row = tmp_row + "<td>" + sort_data[i]["year"] + "</td>";
+    	   tmp_row = tmp_row + "<td style='text-align: right'>" + fixNEG(sort_data[i]["totalpopulation"],"num") + "</td>";
+	       tmp_row = tmp_row + "</tr>";
+	       out_tab = out_tab + tmp_row;
+	}
+	out_tab = out_tab + "</tbody>"
+
+//Output table
+	var tabDivOut = document.getElementById("tbl_output");
+	var tabName = "censTab";
+//Clear div
+tabDivOut.innerHTML = "";
+
+var tabObj = "#" + tabName;
+$(tabDivOut).append("<table id="+ tabName + " class='DTTable' width='90%'></table>");
+$(tabObj).append(out_tab); //this has to be a html table
+
+
+$(tabObj).DataTable({
+	"ordering": false,
+  dom: 'Bfrtip',
+        buttons: [
+            'csv'
+        ]
+ });	
+	
+}) //Data
+} //genHistoricalCensus
