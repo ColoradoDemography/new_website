@@ -1926,4 +1926,18 @@ li:hover>nava{
    grid-column: 4;
    grid-row: 3;
   } 
+  
+/* Lookup table widths 8/7/2023*/
+.lookup_cll {
+	border: none; 
+	border-collapse:collapse; 
+	width: 20%;
+	vertical-align: top;
+	text-align: left;
+}
+
+.lookup_tab {
+	border-collapse:collapse; 
+	border:none;
+}
  
