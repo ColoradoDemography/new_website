@@ -115,7 +115,7 @@ tr.spaceUnder>td {
   padding-bottom : 0px;
 
 }
-td {
+td { border : 1px;
 	padding-right : 0px;
 	border-collapse : separate;
 }
@@ -1933,4 +1933,5 @@ li:hover>nava{
 	border-collapse:collapse; 
 	border:none;
 }
+.lookup_tab td { border : none }
  
