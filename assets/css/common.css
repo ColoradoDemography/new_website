@@ -96,7 +96,6 @@ table {
 	table-layout : auto;
     border-collapse: collapse;
     width: 100%;
-border: 1px solid gray;
 }
 
 thead {
@@ -117,13 +116,9 @@ tr.spaceUnder>td {
 
 }
 td {
-	border: 1px solid black;
 	padding-right : 0px;
 	border-collapse : separate;
 }
-tbody tr:nth-child(even){background-color: white}
-tbody tr:nth-child(odd){background-color: white}
-
 
 // profiletab
 /*
@@ -328,8 +323,6 @@ mainlist {
 	  font-family: "Trebuchet MS, Museo Slab; helvetica, lucida sans, tahoma, verdana", sans-serif;
 	  }
 
-			  
-				  
 /* Map button Styles */
 /* Style for icon images */
 .map-thumbnail {
@@ -365,7 +358,7 @@ a :hover {
 	font-family: "Trebuchet MS, Museo Slab; helvetica, lucida sans, tahoma, verdana", sans-serif;
 	  pointer-events: none;
 }
-/* Button Styles AB 6/2/2021
+/* Button Styles AB 6/2/2021 */
 /* Accordion Style the sidenav links and the dropdown button */
 .accordionWrapper{
 	padding:0px;
