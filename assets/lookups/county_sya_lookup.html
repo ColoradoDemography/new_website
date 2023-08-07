@@ -60,42 +60,42 @@
    A spreadsheet with detailed information for population by age is available on the 
    <a href='https://demography.dola.colorado.gov/assets/html/population_spreadsheets.html' target='_blank'>SDO Population Spreadsheets</a> page.
   </p>
-   <table style="border-collapse:collapse; border:none;">
+      <table class='lookup_tab' cellspacing="0" cellpadding="0">
    <tr>
-	<td class="lookup_cell">
+	<td class="look_cll">
 		<label class="entry_text" for="county-dropdown" id="county-lbl" alt="Select one or more Counties">Select one or more Counties:</label> 
 	</td>
-	<td class="lookup_cell">
+	<td class="look_cll">
 		<label class="entry_text" for="year-dropdown" id="year-lbl" alt="Select one or more years">Select one or more years:</label>
 	</td>
-	<td class="lookup_cell">
-		<label class="entry_text" for="group-dropdown" id="group-lbl" alt="Select Summary Groups">Select Age Groups:</label>
+	<td class="look_cll">
+		<label class="entry_text" for="age-grouping" id="age-lbl" alt="Select Summary Groups">Select Age Groups:</label>
 	</td>
-	<td class="lookup_cell">
+	<td class="look_cll">
 	</td>
-	<td class="lookup_cell">
+	<td class="look_cll">
 	</td>
 	</tr>
 	<tr>
-	<td class="lookup_cell"> 
+	<td class="look_cll"> 
 	 <select class="county-dropdown" id="county-dropdown" size="6" multiple></select>
 	 </td>
-	<td class="lookup_cell">
+	<td class="look_cll">
     <select class="year-dropdown" id="year-dropdown" style='width:100px;' size="6" multiple></select>
     </td>
-		<td class="lookup_cell">
-		<input type="radio" id="age5" name="age_grouping" value="age5" checked />
+	<td class="look_cll">
+		<input type="radio" id="age5" name="age_grouping" value="5yr" onclick="genAgeGroup(this.value,'county')" checked />
 		<label for="age5">Five Year Intervals (0-4,5-9,10-14,etc.)</label><br>
-		<input type="radio" id="census" name="age_grouping" value="censusage" />
+		<input type="radio" id="census" name="age_grouping" value="census" onclick="genAgeGroup(this.value,'county')"/>
 		<label for="census">Census Age Categories</label><br>
-		<input type="radio" id="customage" name="age_grouping" value="customage" onclick="genAgeGroup(this.value)"/>
+		<input type="radio" id="customage" name="age_grouping" value="custom" onclick="genAgeGroup(this.value,'county')"/>
 		<label for="customage">Custom Age Intervals</label><br>
-		<input type="radio" id="sya" name="age_grouping" value="sya" onclick="genAgeGroup(this.value)"/>
+		<input type="radio" id="sya" name="age_grouping" value="single" onclick="genAgeGroup(this.value,'county')"/>
 		<label for="sya">Custom Single Year Selections</label><br>
     </td>
-	<td class="lookup_cell" id='ageselect'>
+	<td class="look_cll" id='ageselect'>
 	</td>
-	<td class="lookup_cell">
+	<td class="look_cll">
 		<button class='databutton' id='gentable'>Generate Table</button><br><br>
 		<button class='databutton' id='cleartable'>Reset Selections</button><br>
 	</td>
@@ -159,7 +159,7 @@ d3.json(urlstr).then(function(yeardata){
 		var age_range = [];
 		var age_group = document.querySelector('input[name="age_grouping"]:checked').value;
 		switch(age_group) {
-		case "customage":
+		case "custom":
    			for(i = 0;i < 5;i++){
 			   var box_val1 = "agestart" + i;
 			   var box_val2 = "ageend" + i;
@@ -200,9 +200,13 @@ d3.json(urlstr).then(function(yeardata){
 		  }
 		}
 		break;
-		case "sya" :
+		case "single" :
 		  var agesel = document.getElementById("agesel")
-		  age_range = getSelectValues(agesel)
+		  age_range = getSelectValues(agesel)	  
+		   if(age_range.length == 0){
+		      	outputmsg = outputmsg +  " > Please select a range of ages.\n";
+				complete = false;
+		  }
 		  selectedgroup = document.querySelector('input[name="age_summary"]:checked').value;
 		break;
 		}

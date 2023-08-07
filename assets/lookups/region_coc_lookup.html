@@ -54,41 +54,46 @@
   </p>
    <h2 class='h2_style'>INSTRUCTIONS:</h2>
    <p class="lookup_p">
-   This application creates custom tables for SDO Regional estimates for births, deaths and net migration.
+   This application creates custom tables for SDO State and Regional estimates for births, deaths and net migration.
    </p>
   <p class="lookup_p">
    A spreadsheet with detailed information for births, deaths, and net migration is available on the 
-   <a href='https://demography.dola.colorado.gov/assets/html/population.html' target='_blank'>SDO Population Spreadsheets</a> page.
+   <a href='https://demography.dola.colorado.gov/assets/html/coc_spreadsheets.html' target='_blank'>SDO Births, Deaths, and Migration Spreadsheets</a> page.
   </p>
-   <table style="border-collapse:collapse; border:none;">
+      <table class='lookup_tab' cellspacing="0" cellpadding="0">
    <tr>
-	<td class="lookup_cell">
+	<td class="look_cll">
 		<label class="entry_text" for="region-dropdown" id="region-lbl" alt="Select one or more Regions">Select one or more Regions:</label> 
 	</td>
-	<td class="lookup_cell">
+	<td class="look_cll">
 		<label class="entry_text" for="year-dropdown" id="year-lbl" alt="Select one or more years">Select one or more years:</label>
 	</td>
-	<td class="lookup_cell">
+	<td class="look_cll">
 		<label class="entry_text" for="group-dropdown" id="group-lbl" alt="Select one or more years">Select one or more years:</label>
 	</td>
-	<td class="lookup_cell">
+	<td class="look_cll">
+	</td>
+	<td class="look_cll">
 	</td>
 	</tr>
 	<tr>
-	<td class="lookup_cell"> 
+	<td class="look_cll"> 
 	 <select class="region-dropdown" id="region-dropdown" size="6" multiple></select>
 	 </td>
-	<td class="lookup_cell">
+	<td class="look_cll">
     <select class="year-dropdown" id="year-dropdown" style='width:100px;' size="5" multiple></select>
     </td>
-		<td class="lookup_cell">
-    <select class="group-dropdown" id="group-dropdown" size="3">
-	    <option value='0'>No Grouping</option>
-        <option value='1'>Group by Year</option>
-        <option value='2'>Group by Region</option>
-	</select>
+		<td class="look_cll">
+		<input type="radio" id="noGrp" name="sum_grouping" value="opt0" checked />
+		<label for="noGrp">No Grouping</label><br>
+		<input type="radio" id="yrgrp" name="sum_grouping" value="opt1"/>
+		<label for="census">Group by Year</label><br>
+		<input type="radio" id="reggrp" name="sum_grouping" value="opt2"/>
+		<label for="reggrp">Group by Region</label><br>
     </td>
-	<td class="lookup_cell">
+	<td class="look_cll">
+	</td>
+	<td class="look_cll">
 		<button class='databutton' id='gentable'>Generate Table</button><br><br>
 		<button class='databutton' id='cleartable'>Reset Selections</button><br>
 	</td>
@@ -99,13 +104,24 @@
   <div class="grid-item app-panel_3_2">
 	 <div id="tbl_output"></div>
   </div> 
+  <div class="grid-item app-panel_4_2_b">
+			<div w3-include-html="../html/bodycontent1.html"></div>
+	 </div>
+	<div class="grid-item app-panel_4_4_b">
+			<div w3-include-html="../html/bodycontent2.html"></div>
+    </div>
+	<div class="grid-item app-panel_4_6_b">
+			<div w3-include-html="../html/bodycontent3.html"></div>
+	</div>
   </div>  <!-- End of Grid Container -->
  <script> 
 
  includeHTML();
+var urlstr = "https://gis.dola.colorado.gov/lookups/componentYRS";
+d3.json(urlstr).then(function(yeardata){
 
  popDropdown('region','region-dropdown','lookup');
- popRaceYrdd("year-dropdown",1970,2050);  //Change this range to match data
+ popYrdd("year-dropdown",yeardata);  //Change this range to match data
  
 //Button Event
  document.getElementById('gentable').addEventListener("click", chkInputs)
@@ -125,7 +141,7 @@
 		    selectedfips.push(tmpcty[0].fips)
 		})
 		if(selectedfips.length == 0){
-		    outputmsg = outputmsg +  "  >Please select one or more regions.";
+		    outputmsg = outputmsg +  "  >Please select one or more regions.\n";
 			complete = false;
 		}
 		
@@ -133,27 +149,20 @@
 		var selectedyr = getSelectValues(yrdd);
 
 		if(selectedyr.length == 0){
-		    outputmsg = outputmsg +  "  >Please select one or more years.";
+		    outputmsg = outputmsg +  "  >Please select one or more years.\n";
 			complete = false;
 		}
 
 		
-		
-		var groupdd = document.getElementById('group-dropdown');
-		var selectedgroup = groupdd.value;
-		if(selectedgroup == ""){
-		   selectedgroup = "opt0";
-		} else {
-		   selectedgroup = "opt" + selectedgroup;
-		}
+		selectedgroup = document.querySelector('input[name="sum_summary"]:checked').value;
 
 		if(complete){
-		     genCOCReg(selectedreg, selectedfips,selectedyr,selectedgroup);
+		     genCOCReg(selectedreg, selectedfips,selectedyr,selectedgroup,yeardata);
 			 } else {
 			 window.alert(outputmsg);
 			 }
 	 };  //chkInputs
-	 
+}) //d3.json
 function clearInputs() {
    document.getElementById('tbl_output').innerHTML = "";
    var elements = document.getElementsByTagName('select');

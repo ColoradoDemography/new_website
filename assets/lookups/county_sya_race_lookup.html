@@ -75,31 +75,33 @@
   </p>
   <p class="lookup_p">
    A spreadsheet with detailed information by race, Hispanic Origin, age and sex for 2010-2020 is available on the 
-   <a href='https://demography.dola.colorado.gov/assets/html/population.html' target='_blank'>SDO Population Spreadsheets</a> page.
+   <a href='https://demography.dola.colorado.gov/assets/html/population_spreadsheets.html' target='_blank'>SDO Population Spreadsheets</a> page.
   </p>
-   <table style="border-collapse:collapse; border:none;">
+      <table class='lookup_tab' cellspacing="0" cellpadding="0">
    <tr>
-	<td class="lookup_cell">
+	<td class="look_cll">
 		<label class="entry_text" for="county-dropdown" id="county-lbl" alt="Select one or more counties">Select one or more counties:</label> 
 	</td>
-	<td class="lookup_cell">
+	<td class="look_cll">
 		<label class="entry_text" for="year-dropdown" id="year-lbl" alt="Select one or more years">Select one or more years:</label>
 	</td>
-	<td class="lookup_cell">
+	<td class="look_cll">
 		<label class="entry_text" for="race-dropdown" id="race-lbl" alt="Select one or more race caregories">Select one or more race caregories:</label>
 	</td>
-	<td class="lookup_cell">
+	<td class="look_cll">
 		<label class="entry_text" for="ethnicity-dropdown" id="ethnicity-lbl" alt="Select one or more Hispanic Origin categories">Select one or more Hispanic Origin categories:</label>
+	</td>
+	<td class="look_cll">
 	</td>
 	</tr>
 	<tr>
-	<td class="lookup_cell"> 
+	<td class="look_cll"> 
 	 <select class="county-dropdown" id="county-dropdown" size="6" multiple></select>
 	 </td>
-	<td class="lookup_cell">
+	<td class="look_cll">
     <select class="year-dropdown" id="year-dropdown" style='width:100px;' size="6" multiple></select>
     </td>
-	<td class="lookup_cell">
+	<td class="look_cll">
      <select class="race-dropdown" id="race-dropdown" size="6" multiple>
 		<option value="1">White alone</option>
 			<option value="2">Black or African American alone</option>
@@ -109,36 +111,35 @@
 			<option value="6">Two or More Races</option>
 	 </select>
     </td>
-	<td class="lookup_cell">
+	<td class="look_cll">
     <select class="ethnicity-dropdown" id="ethnicity-dropdown" size="2" multiple>
 		<option value="1">Hispanic/Latino Origin</option>
 		<option value ="2">Not of Hispanic/Latino Origin</option>
 	</select>
     </td>
+	<td class="look_cll">
+	</td>
 	</tr>
-	</table>
-	<hr>
-	<table style="border-collapse: collapse; border: none;">
 	<tr>
-	<td class="lookup_cell">
+	<td class="look_cll">
 	   <label class="entry_text" for="age-dropdown" id="age-lbl" alt="Select one or more ages">Select one or more ages:</label>
 	</td>
-	<td class="lookup_cell">
+	<td class="look_cll">
 	   <label class="entry_text" for="sex-dropdown" id="sex-lbl" alt="Diaplay results by sex">Display results by sex:</label>
 	</td>
-	<td class="lookup_cell">
+	<td class="look_cll">
 	   <label class="entry_text" for="group-dropdown" id='group-lbl' alt="Specify Groups">Select 0 or more variables to summarize by (leave blank for a detailed summary):</p
 	</td>
-	<td class="lookup_cell">
+	<td class="look_cll">
 	</td>
 	<p></p>
-	<td class="lookup_cell"></td>
+	<td class="look_cll"></td>
 	</tr>
 	<tr>
-		<td class="lookup_cell">
+	<td class="look_cll">
     <select class="age-dropdown" id="age-dropdown" style='width:100px;' size="4" multiple></select>
     </td>
-	<td class="lookup_cell">
+	<td class="look_cll">
     <select class="sex-dropdown" id="sex-dropdown" size="4">
 		<option value="S">Sum Male and Female</option>
 		<option value="B">List Male and Female Separately</option>
@@ -146,7 +147,7 @@
 		<option value="F">Female Only</option>
 	</select>
     </td>
-	<td class="lookup_cell">
+	<td class="look_cll">
    <select class="group-dropdown" id="group-dropdown" size="4">
 	    <option value='0'>No Grouping</option>
         <option value='1'>County</option>
@@ -166,7 +167,9 @@
 		<option value='0'>County, Year, Age, Rece, Hispanic Origin</option>
 	</select>
     </td>
-	<td class="lookup_cell">
+	<td class="look_cll">
+	</td>
+	<td class="look_cll">
 		<button class='databutton' id='gentable'>Generate Table</button><br><br>
 		<button class='databutton' id='cleartable'>Reset Selections</button><br>
 	</td>
@@ -177,13 +180,25 @@
   <div class="grid-item app-panel_3_2">
 	 <div id="tbl_output"></div>
   </div> 
+  <div class="grid-item app-panel_4_2_b">
+			<div w3-include-html="../html/bodycontent1.html"></div>
+	 </div>
+	<div class="grid-item app-panel_4_4_b">
+			<div w3-include-html="../html/bodycontent2.html"></div>
+    </div>
+	<div class="grid-item app-panel_4_6_b">
+			<div w3-include-html="../html/bodycontent3.html"></div>
+	</div>
   </div>  <!-- End of Grid Container -->
  <script> 
 
  includeHTML();
-
+var urlstr = "https://gis.dola.colorado.gov/lookups/componentYRS";
+d3.json(urlstr).then(function(yeardata){
+ var yeardata2 = yeardata.filter(d => d.year >= 2020 && d.datatype == 'Estimate');
  popDropdown('county','county-dropdown','lookup');
- popRaceYrdd("year-dropdown",2020,2021);  //Change this range to match data
+
+ popYrdd("year-dropdown",yeardata2);  //Change this range to match data
  popAgeYrdd("age-dropdown",0,85);  //Change this range to match data
 
 //Button Event
@@ -257,6 +272,7 @@
 			 }
 	 };  //chkInputs
 	 
+}); //d3.json
 function clearInputs() {
    document.getElementById('tbl_output').innerHTML = "";
    var elements = document.getElementsByTagName('select');

@@ -1,9 +1,9 @@
-<!-- County COC Lookup Page A Bickford 6/2021 -->
+<!-- County Population Profile Lookup Page A Bickford 6/2021 -->
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title> County Births, Deaths & Migration Lookup</title>
+<title>County Population and Housing Data Lookup</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" http-equiv="content-type" content="text/html; charset=utf-8">
 <!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
 <!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
@@ -48,30 +48,31 @@
 	<div w3-include-html="../html/left_hand_index.html"></div>
   </div> <!-- Grid  panel2_2_1 -->
   <div class="grid-item app-panel_2_2">
-  <h1 class='h1_style'>County Births, Deaths & Migration Lookup</h1>
+  <h1 class='h1_style'>County Population and Housing Data Lookup</h1>
   <p>
-  <a href="../lookups/region_coc_lookup.html" target='_blank'>Need State/Regional Data?</a>
+  <a href="../lookups/region_pop_lookup.html" target='_blank'>Need State/Regional Data?</a>
   </p>
    <h2 class='h2_style'>INSTRUCTIONS:</h2>
    <p class="lookup_p">
-   This application creates custom tables for SDO County estimates for births, deaths and net migration.
+   This application creates custom tables for SDO County estimates for total population, births, deaths, net migration, and general housing charcteristics.
    </p>
   <p class="lookup_p">
-   A spreadsheet with detailed information for births, deaths, and net migration is available on the 
-   <a href='https://demography.dola.colorado.gov/assets/html/coc_spreadsheets.html' target='_blank'>SDO Births, Deaths, and Migration Spreadsheets</a> page.
+   A spreadsheet with detailed information for counties is available on the 
+   <a href='https://demography.dola.colorado.gov/assets/html/population_spreadsheets.html' target='_blank'>SDO Population Spreadsheets</a> page.
   </p>
-   <table class='lookup_tab' cellspacing="0" cellpadding="0">
+      <table class='lookup_tab' cellspacing="0" cellpadding="0">
    <tr>
 	<td class="look_cll">
-		<label class="entry_text" for="county-dropdown" id="county-lbl" alt="Select one or more Counties">Select one or more Counties:</label> 
+		<label class="entry_text" for="county-dropdown" id="region-lbl" alt="Select one or more Counties">Select one or more Counties:</label> 
 	</td>
 	<td class="look_cll">
 		<label class="entry_text" for="year-dropdown" id="year-lbl" alt="Select one or more years">Select one or more years:</label>
 	</td>
 	<td class="look_cll">
-		<label class="entry_text" for="group-dropdown" id="group-lbl" alt="Select Summary Groups">Select Summary Groups:</label>
+		<label class="entry_text" for="var-dropdown" id="var-lbl" alt="Select one or more variables">Select one or more variables:</label>
 	</td>
 	<td class="look_cll">
+		<label class="entry_text" for="group-dropdown" id="group-lbl" alt="Select Summary Groups">Select Summary Groups:</label>
 	</td>
 	<td class="look_cll">
 	</td>
@@ -81,18 +82,33 @@
 	 <select class="county-dropdown" id="county-dropdown" size="6" multiple></select>
 	 </td>
 	<td class="look_cll">
-    <select class="year-dropdown" id="year-dropdown" style='width:100px;' size="5" multiple></select>
-    </td>
-		<td class="look_cll">
-		<input type="radio" id="noGrp" name="sum_grouping" value="opt0" checked />
-		<label for="noGrp">No Grouping</label><br>
-		<input type="radio" id="yrgrp" name="sum_grouping" value="opt1"/>
-		<label for="census">Group by Year</label><br>
-		<input type="radio" id="ctygrp" name="sum_grouping" value="opt2"/>
-		<label for="ctygrp">Group by Region</label><br>    
+    <select class="year-dropdown" id="year-dropdown" style='width:100px;' size="6" multiple></select>
     </td>
 	<td class="look_cll">
-	</td>
+    <select class="var-dropdown" id="var-dropdown" size="6" multiple>
+		<option value='0'>Total Population</option>
+		<option value='1'>Births</option>
+		<option value='2'>Deaths</option>
+		<option value='3'>Natural Increase</option>
+		<option value='4'>Net Migration</option>
+		<option value='5'>Census Building Permits</option>
+		<option value='6'>Group Quarters Population</option>
+		<option value='7'>Household Population</option>
+		<option value='8'>Households</option>
+		<option value='9'>Household Size</option>
+		<option value='10'>Total Housing Units</option>
+		<option value='11'>Vacancy Rate</option>
+		<option value='12'>Vacant Housing Units</option>
+	</select>
+    </td>
+	<td class="look_cll">
+		<input type="radio" id="nogrp" name="sum_grouping" value="opt0" checked/>
+		<label for="nogrp">No Grouping</label><br>
+		<input type="radio" id="yrgrp" name="sum_grouping" value="opt1"/>
+		<label for="yrgrp">Group by Year</label><br>
+		<input type="radio" id="ctygrp" name="sum_grouping" value="opt2"/>
+		<label for="ctygrp">Group by County</label><br>
+    </td>
 	<td class="look_cll">
 		<button class='databutton' id='gentable'>Generate Table</button><br><br>
 		<button class='databutton' id='cleartable'>Reset Selections</button><br>
@@ -104,7 +120,7 @@
   <div class="grid-item app-panel_3_2">
 	 <div id="tbl_output"></div>
   </div> 
- <div class="grid-item app-panel_4_2_b">
+  <div class="grid-item app-panel_4_2_b">
 			<div w3-include-html="../html/bodycontent1.html"></div>
 	 </div>
 	<div class="grid-item app-panel_4_4_b">
@@ -117,11 +133,12 @@
  <script> 
 
  includeHTML();
-// Extract Yange or years
 var urlstr = "https://gis.dola.colorado.gov/lookups/componentYRS";
 d3.json(urlstr).then(function(yeardata){
+ var yeardata2 = yeardata.filter(d => d.year >= 1985 && d.datatype == "Estimate");
+ popDropdown('county','county-dropdown','lookup')
 
- popDropdown('county','county-dropdown','lookup');
+ var yeardata = genYR(1985,2021);
  popYrdd("year-dropdown",yeardata);  //Change this range to match data
  
 //Button Event
@@ -138,7 +155,7 @@ d3.json(urlstr).then(function(yeardata){
 		var selectedfips = getSelectValues(fipsdd);
 
 		if(selectedfips.length == 0){
-		    outputmsg = outputmsg +  " > Please select one or more counties.\n";
+		    outputmsg = outputmsg +  "  Please select one or more regions.\n";
 			complete = false;
 		}
 		
@@ -149,17 +166,22 @@ d3.json(urlstr).then(function(yeardata){
 		    outputmsg = outputmsg +  " > Please select one or more years.\n";
 			complete = false;
 		}
-
-	selectedgroup = document.querySelector('input[name="sum_grouping"]:checked').value;
+        var vardd = document.getElementById('var-dropdown');
+		var selectedvars = getSelectValues(vardd);
+		
+		if(selectedvars == ""){
+		  selectedvars = [0,1,2,3,4,5,6,7,8,9,10,11,12]
+		}
+		
+		 selectedgroup = document.querySelector('input[name="sum_grouping"]:checked').value;
 
 		if(complete){
-		     genCOCCty(selectedfips,selectedyr,selectedgroup,yeardata);
+		     genPOPCty(selectedfips,selectedvars,selectedyr,selectedgroup);
 			 } else {
 			 window.alert(outputmsg);
 			 }
 	 };  //chkInputs
-})  //D3_json
-
+}); //d3.json
 function clearInputs() {
    document.getElementById('tbl_output').innerHTML = "";
    var elements = document.getElementsByTagName('select');

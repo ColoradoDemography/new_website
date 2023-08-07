@@ -1,9 +1,9 @@
-<!-- County COC Lookup Page A Bickford 6/2021 -->
+<!-- State and Region Single Year of Age Lookup Page A Bickford 6/2021 -->
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title> County Births, Deaths & Migration Lookup</title>
+<title> State and Regional Single Year of Age Lookup</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" http-equiv="content-type" content="text/html; charset=utf-8">
 <!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
 <!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
@@ -48,28 +48,28 @@
 	<div w3-include-html="../html/left_hand_index.html"></div>
   </div> <!-- Grid  panel2_2_1 -->
   <div class="grid-item app-panel_2_2">
-  <h1 class='h1_style'>County Births, Deaths & Migration Lookup</h1>
+  <h1 class='h1_style'>State and Regional Single Year of Age Lookup</h1>
   <p>
-  <a href="../lookups/region_coc_lookup.html" target='_blank'>Need State/Regional Data?</a>
+  <a href="../lookups/county_sya_lookup.html" target='_blank'>Need County Data?</a>
   </p>
    <h2 class='h2_style'>INSTRUCTIONS:</h2>
    <p class="lookup_p">
-   This application creates custom tables for SDO County estimates for births, deaths and net migration.
+   This application creates custom tables for SDO State and Regional estimates by age
    </p>
   <p class="lookup_p">
-   A spreadsheet with detailed information for births, deaths, and net migration is available on the 
-   <a href='https://demography.dola.colorado.gov/assets/html/coc_spreadsheets.html' target='_blank'>SDO Births, Deaths, and Migration Spreadsheets</a> page.
+   A spreadsheet with detailed information for population by age is available on the 
+   <a href='https://demography.dola.colorado.gov/assets/html/population_spreadsheets.html' target='_blank'>SDO Population Spreadsheets</a> page.
   </p>
-   <table class='lookup_tab' cellspacing="0" cellpadding="0">
+      <table class='lookup_tab' cellspacing="0" cellpadding="0">
    <tr>
 	<td class="look_cll">
-		<label class="entry_text" for="county-dropdown" id="county-lbl" alt="Select one or more Counties">Select one or more Counties:</label> 
+		<label class="entry_text" for="region-dropdown" id="region-lbl" alt="Select one or more Counties">Select one or more Counties:</label> 
 	</td>
 	<td class="look_cll">
 		<label class="entry_text" for="year-dropdown" id="year-lbl" alt="Select one or more years">Select one or more years:</label>
 	</td>
 	<td class="look_cll">
-		<label class="entry_text" for="group-dropdown" id="group-lbl" alt="Select Summary Groups">Select Summary Groups:</label>
+		<label class="entry_text" for="group-dropdown" id="group-lbl" alt="Select Summary Groups">Select Age Groups:</label>
 	</td>
 	<td class="look_cll">
 	</td>
@@ -78,20 +78,22 @@
 	</tr>
 	<tr>
 	<td class="look_cll"> 
-	 <select class="county-dropdown" id="county-dropdown" size="6" multiple></select>
+	 <select class="region-dropdown" id="region-dropdown" size="6" multiple></select>
 	 </td>
 	<td class="look_cll">
-    <select class="year-dropdown" id="year-dropdown" style='width:100px;' size="5" multiple></select>
+    <select class="year-dropdown" id="year-dropdown" style='width:100px;' size="6" multiple></select>
     </td>
 		<td class="look_cll">
-		<input type="radio" id="noGrp" name="sum_grouping" value="opt0" checked />
-		<label for="noGrp">No Grouping</label><br>
-		<input type="radio" id="yrgrp" name="sum_grouping" value="opt1"/>
-		<label for="census">Group by Year</label><br>
-		<input type="radio" id="ctygrp" name="sum_grouping" value="opt2"/>
-		<label for="ctygrp">Group by Region</label><br>    
+		<input type="radio" id="age5" name="age_grouping" value="5yr" onclick="genAgeGroup(this.value,'region')" checked />
+		<label for="age5">Five Year Intervals (0-4,5-9,10-14,etc.)</label><br>
+		<input type="radio" id="census" name="age_grouping" value="census" onclick="genAgeGroup(this.value,'region')"/>
+		<label for="census">Census Age Categories</label><br>
+		<input type="radio" id="customage" name="age_grouping" value="custom" onclick="genAgeGroup(this.value,'region')"/>
+		<label for="customage">Custom Age Intervals</label><br>
+		<input type="radio" id="sya" name="age_grouping" value="single" onclick="genAgeGroup(this.value,'region')"/>
+		<label for="sya">Custom Single Year Selections</label><br>
     </td>
-	<td class="look_cll">
+	<td class="look_cll" id='ageselect'>
 	</td>
 	<td class="look_cll">
 		<button class='databutton' id='gentable'>Generate Table</button><br><br>
@@ -121,8 +123,9 @@
 var urlstr = "https://gis.dola.colorado.gov/lookups/componentYRS";
 d3.json(urlstr).then(function(yeardata){
 
- popDropdown('county','county-dropdown','lookup');
- popYrdd("year-dropdown",yeardata);  //Change this range to match data
+ popDropdown('region','region-dropdown','lookup');
+ var yeardata2 = yeardata.filter(i => i.year >= 1990)
+ popYrdd("year-dropdown",yeardata2);  //Change this range to match data
  
 //Button Event
  document.getElementById('gentable').addEventListener("click", chkInputs)
@@ -134,11 +137,15 @@ d3.json(urlstr).then(function(yeardata){
  var outputmsg = "";
  document.getElementById('tbl_output').innerHTML = "";
 
-	    var fipsdd = document.getElementById('county-dropdown');
-		var selectedfips = getSelectValues(fipsdd);
-
+	    var fipsdd = document.getElementById('region-dropdown');
+		var selectedreg = getSelectValues(fipsdd);
+		selectedfips = [];
+		selectedreg.forEach(d => {
+			var tmpcty = regionCOL(+d);
+		    selectedfips.push(tmpcty[0].fips)
+		})
 		if(selectedfips.length == 0){
-		    outputmsg = outputmsg +  " > Please select one or more counties.\n";
+		    outputmsg = outputmsg +  " > Please select one or more regions.\n";
 			complete = false;
 		}
 		
@@ -149,11 +156,67 @@ d3.json(urlstr).then(function(yeardata){
 		    outputmsg = outputmsg +  " > Please select one or more years.\n";
 			complete = false;
 		}
+		
+//Age selection
+        var selectedgroup = "";
 
-	selectedgroup = document.querySelector('input[name="sum_grouping"]:checked').value;
+		var age_range = [];
+		var age_group = document.querySelector('input[name="age_grouping"]:checked').value;
+		switch(age_group) {
+		case "custom":
+   			for(i = 0;i < 5;i++){
+			   var box_val1 = "agestart" + i;
+			   var box_val2 = "ageend" + i;
+			   var startval = 0;
+			   var endval = 0;
+			   if(!(document.getElementById(box_val1).value == "")) {
+			        startval = document.getElementById(box_val1).value
+					if(isNaN(startval)) {
+					 outputmsg = outputmsg +  " > One of the age entries is not numeric.  Please check the inputs.\n";
+					 complete = false;
+				    } else {
+			   	      age_range.push(+startval)
+					}
+				}
+			   if(!(document.getElementById(box_val2).value == "")) {
+			        endval = document.getElementById(box_val2).value
+					if(isNaN(endval)) {
+					 outputmsg = outputmsg +  " > One of the age entries is not numeric.  Please check the inputs.\n";
+					 complete = false;
+				    } else {
+			   	      age_range.push(+endval)
+					}
+			   }
+			   if(+startval > +endval){
+				outputmsg = outputmsg +  " > One of the age ranges is incorrect.  Please check the inputs.\n";
+				complete = false;
+				}  
+			}
+		//Checking if length is not even
+		if(age_range.length % 2 != 0){
+		   	outputmsg = outputmsg +  " > Please provide pairs of age values.\n";
+			complete = false;
+		}
+		for(j = 1; j < age_range.length; j++){
+		   if(age_range[j-1] >= age_range[j]){
+		      	outputmsg = outputmsg +  " > One of the age ranges is out of order.  Please check the inputs.\n";
+				complete = false;
+		  }
+		}
+		break;
+		case "single" :
+		  var agesel = document.getElementById("agesel")
+		  age_range = getSelectValues(agesel)	  
+		   if(age_range.length == 0){
+		      	outputmsg = outputmsg +  " > Please select a range of ages.\n";
+				complete = false;
+		  }
+		  selectedgroup = document.querySelector('input[name="age_summary"]:checked').value;
+		break;
+		}
 
 		if(complete){
-		     genCOCCty(selectedfips,selectedyr,selectedgroup,yeardata);
+		     genSYAReg(selectedreg, selectedfips,selectedyr,selectedgroup,age_group, age_range, yeardata2);
 			 } else {
 			 window.alert(outputmsg);
 			 }
