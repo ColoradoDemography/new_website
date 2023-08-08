@@ -267,14 +267,15 @@ d3.json(urlstr).then(function(yeardata){
 		} else {
 		   selectedgroup = "opt" + selectedgroup;
 		}
-}); //d3.json
+
 		if(complete){
 		     genRaceTabReg(selectedreg, selectedfips,selectedyr, selectedrace,selectedeth,selectedage,selectedsex,selectedgroup);
 			 } else {
 			 window.alert(outputmsg);
 			 }
 	 };  //chkInputs
-	 
+}); //d3.json
+	
 function clearInputs() {
    document.getElementById('tbl_output').innerHTML = "";
    var elements = document.getElementsByTagName('select');
