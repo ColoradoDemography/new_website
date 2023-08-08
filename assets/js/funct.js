@@ -3582,7 +3582,7 @@ for(i = 0; i < ages.length; i++) {
 //Generate Table
 d3.select('#PopTab').html("");
 $("#PopTab" ).append( "<h2 class='h2_style'>Population Estimates by Age</h2>" );
-$("#PopTab").append( "<a href='https://gis.dola.colorado.gov/population/data/sya-county/' target='_blank'>Single Year of Age Lookup</a>" );
+$("#PopTab").append( "<a href='../lookups/county_sya_lookup.html' target='_blank'>Single Year of Age Lookup</a>" );
 $("#PopTab").append("<p></p>");
 
 var tblcolumns2 = ['Ages','Number, '+ prevyear,'Number, '+ yrvalue,'2030 Forecast'];
@@ -3685,7 +3685,7 @@ for(i = 2; i <= 4; i++){
 //Generate Table
 d3.select('#COCTab').html("");
 $("#COCTab").append( "<h2 class='h2_style'>Births, Deaths, and Migration</h2>");
-$("#COCTab").append("<a href='https://gis.dola.colorado.gov/births-deaths-migration/data/components-change/#components-of-change' target='_blank'>Components of Change Lookup</a>");
+$("#COCTab").append("<a href='../lookups/county_coc_lookup.html' target='_blank'>Components of Change Lookup</a>");
 $("#COCTab").append("<p></p>");
 
 
@@ -3845,7 +3845,7 @@ for(i = 0; i < raceth.length; i++) {
 //Generate Table
 d3.select('#RaceTab').html("");
 $("#RaceTab" ).append( "<h2 class='h2_style'>Race/Ethnicity</h2>" );
-$("#RaceTab").append("<a href='https://demography.dola.colorado.gov/assets/lookups/county_sya_race_lookup.html' target='_blank'>Race/Ethnicity by Single Year of Age</a>");
+$("#RaceTab").append("<a href='../lookups/county_sya_race_lookup.html' target='_blank'>Race/Ethnicity by Single Year of Age</a>");
 $("#RaceTab").append("<p></p>");
 
 	 
