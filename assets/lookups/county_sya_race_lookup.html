@@ -70,11 +70,11 @@
    2020 Census responses differed from the questions and processing of the 2010 Census responses and should be considered a break in the series.
   </p>
    <p class="lookup_p">
-   A data lookup application for Race, Hispanic Origin, age and sex for 2010-2020 is available
-   <a href='https://coloradodemography.github.io/population/data/race-estimate/#county-race-by-age-estimates' target='_blank'>here.</a>
+   A data lookup application for Race, Hispanic Origin, age and sex for 2010 to 2020 series is available
+   <a href='../lookup/county_sya_race_lookup_10.html' target='_blank'>here.</a>
   </p>
   <p class="lookup_p">
-   A spreadsheet with detailed information by race, Hispanic Origin, age and sex for 2010-2020 is available on the 
+    Spreadsheets with detailed information by race, Hispanic Origin, age and sex for the 2010 to 2020 series and the 2020 to present year seriies are available on the 
    <a href='https://demography.dola.colorado.gov/assets/html/population_spreadsheets.html' target='_blank'>SDO Population Spreadsheets</a> page.
   </p>
       <table class='lookup_tab' cellspacing="0" cellpadding="0">
@@ -214,7 +214,7 @@ d3.json(urlstr).then(function(yeardata){
 		var selectedfips = getSelectValues(fipsdd);
 
 		if(selectedfips.length == 0){
-		    outputmsg = outputmsg +  "  >Please select one or more counties.";
+		    outputmsg = outputmsg +  " > Please select one or more counties.\n";
 			complete = false;
 		}
 		
@@ -222,7 +222,7 @@ d3.json(urlstr).then(function(yeardata){
 		var selectedyr = getSelectValues(yrdd);
 
 		if(selectedyr.length == 0){
-		    outputmsg = outputmsg +  "  >Please select one or more years.";
+		    outputmsg = outputmsg +  " > Please select one or more years.\n";
 			complete = false;
 		}
 
@@ -234,7 +234,7 @@ d3.json(urlstr).then(function(yeardata){
 		
 		
 		if(selectedeth.length == 0 && selectedrace.length == 0){
-		    outputmsg = outputmsg + "  >Please select one or more race and ethnicity groups.";
+		    outputmsg = outputmsg + " > Please select one or more race and ethnicity groups.\n";
 			complete = false;
 		}
 		if(selectedeth.length != 0 && selectedrace.length == 0){
@@ -247,7 +247,7 @@ d3.json(urlstr).then(function(yeardata){
 		var agedd = document.getElementById('age-dropdown');
 		var selectedage = getSelectValues(agedd);
 		if(selectedage.length == 0){
-		    outputmsg = outputmsg + "  >Please select one or more age groups.";
+		    outputmsg = outputmsg + " > Please select one or more age groups.\n";
 			complete = false;
 		}
 
