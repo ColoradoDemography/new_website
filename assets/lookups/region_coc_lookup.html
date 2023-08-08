@@ -154,7 +154,7 @@ d3.json(urlstr).then(function(yeardata){
 		}
 
 		
-		selectedgroup = document.querySelector('input[name="sum_summary"]:checked').value;
+		selectedgroup = document.querySelector('input[name="sum_grouping"]:checked').value;
 
 		if(complete){
 		     genCOCReg(selectedreg, selectedfips,selectedyr,selectedgroup,yeardata);
