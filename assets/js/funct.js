@@ -4546,7 +4546,7 @@ for(i = 1; i < housing_fint.length; i++){
 //Generate Table
 d3.select('#HousTab').html("");
 $("#HousTab" ).append( "<h2 class='h2_style'>Housing Characteristics, "+yrvalue+"</h2>" );
-$("#HousTab").append("<a href='https://gis.dola.colorado.gov/population/data/county-data-lookup/' target='_blank'>County Profile Lookup</a>" );
+$("#HousTab").append("<a href='../lookups/county_pop_lookup.html' target='_blank'>County Population and Housing Lookup</a>" );
 $("#HousTab").append("<p></p>");
 
 var tblcolumns2 = ['Housing Type', 'Number', 'Change from ' + prevyear];
