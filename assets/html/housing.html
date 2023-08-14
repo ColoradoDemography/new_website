@@ -45,25 +45,25 @@
   </div> <!-- Grid  panel2_2_1 -->
   
  <div class="grid-item app-panel_2_span">
- <h1 class='h1_style'>SDO Housing & Household Resource Page</h1>
+<h1 class='h1_style'>SDO Housing & Household Resource Page</h1>
 <h2 class='h2_style'>Housing Unit estimates are produced annually by the State Demography Office</h2>
 
 <p>
 You can access  visualizations, spreadsheets, data lookup applications, and external links by clicking on the buttons below.
 </p>
 <button class="summarybtn" onClick="location.href = './gis_applications.html#housing'"><h3 class='h3_style'>Housing Visualizations and Maps</h3></button>
-<details>
-	<summary><h3 class='h3_style'>Housing Spreadsheets: Download housing data for all geographies</h3></summary>
-		<div w3-include-html="./housing_spreadsheets.html"></div>
-</details>
-<details>
-	<summary><h3 class='h3_style'>Housing Data Lookup Applications: Download housing data for specific geographies</h3></summary>
+<button class="accordion"><h3 class='h3_style'>Housing Spreadsheets: Download population data for all geographies</h3></button>
+<div class="panel">
+	<div w3-include-html="./housing_spreadsheets.html"></div>
+</div>
+<button class="accordion"><h3 class='h3_style'>Housing Data Lookup Applications: Data Lookup Applications: Download population data for specific geographies</h3></button>
+<div class="panel">
 		<div w3-include-html="./housing_lookup.html"></div>
-</details>
-<details>
-	<summary><h3 class='h3_style'>External Links for Housing and Household data</h3></summary>
+</div>
+<button class="accordion"><h3 class='h3_style'>External Links for Housing and Household data</h3></button>
+<div class="panel">
 		<div w3-include-html="./housing_links.html"></div>
-</details>
+</div>
 </div> <!-- app -->
 
  <div class="grid-item panel2_4_2">
