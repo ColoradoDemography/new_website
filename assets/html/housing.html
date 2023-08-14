@@ -44,19 +44,20 @@
 	<div w3-include-html="./left_hand_index.html"></div>
   </div> <!-- Grid  panel2_2_1 -->
   
- <div class="grid-item app-panel_2_span">
+<div class="grid-item app-panel_2_span">
 <h1 class='h1_style'>SDO Housing & Household Resource Page</h1>
 <h2 class='h2_style'>Housing Unit estimates are produced annually by the State Demography Office</h2>
 
 <p>
 You can access  visualizations, spreadsheets, data lookup applications, and external links by clicking on the buttons below.
 </p>
+
 <button class="summarybtn" onClick="location.href = './gis_applications.html#housing'"><h3 class='h3_style'>Housing Visualizations and Maps</h3></button>
-<button class="accordion"><h3 class='h3_style'>Housing Spreadsheets: Download population data for all geographies</h3></button>
+<button class="accordion"><h3 class='h3_style'>Housing Spreadsheets: Download housing data for all geographies</h3></button>
 <div class="panel">
 	<div w3-include-html="./housing_spreadsheets.html"></div>
 </div>
-<button class="accordion"><h3 class='h3_style'>Housing Data Lookup Applications: Data Lookup Applications: Download population data for specific geographies</h3></button>
+<button class="accordion"><h3 class='h3_style'>Housing Data Lookup Applications: Download housing data for specific geographies</h3></button>
 <div class="panel">
 		<div w3-include-html="./housing_lookup.html"></div>
 </div>
@@ -66,7 +67,7 @@ You can access  visualizations, spreadsheets, data lookup applications, and exte
 </div>
 </div> <!-- app -->
 
- <div class="grid-item panel2_4_2">
+<div class="grid-item panel2_4_2">
 		<div w3-include-html="./bodycontent1.html"></div>
 </div>
 	<div class="grid-item panel2_4_4">
@@ -81,6 +82,7 @@ You can access  visualizations, spreadsheets, data lookup applications, and exte
 <script>
 
 //Setting HTML include and Accordion
+accordionFun();
 includeHTML(); 
 
 </script>
