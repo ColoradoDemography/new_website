@@ -1849,6 +1849,8 @@ li:hover>nava{
   color: #0806a2;
   border-color: black;
   font-size : 11pt;
+  font-weight: bold;
+  color : black;
   display: block;
   cursor: pointer;
   padding: .5em .5em .5em .7em;
@@ -1857,31 +1859,31 @@ li:hover>nava{
  
  /*New Header sizes and Colors 6/28/2023 */
 .h1_style  {
-  font-size : 24px;
+  font-size : 150%; /* 18px */
   color : #003b49;
 }
 .h2_style  {
-  font-size : 20px;
+  font-size : 133%, /* 16px */
   color : #003b49;
 }
 
 .h3_style  {
-  font-size : 16px;
+  font-size : 116%; /* 14px */
   color : #003b49;
 }
 
 .h4_style  {
-  font-size : 12px;
+  font-size : 100%; /* 12px */
   color : #003b49;
 }
 
 .h5_style  {
-  font-size : 16px;
+  font-size : 75%; /* 8px */
   color : #003b49;
 }
 
 .h6_style  {
-  font-size : 14px;
+  font-size : 60%;  /* 12px */
   color : #003b49;
 }
 /* New Accordion Structure 7/6/2023 */
