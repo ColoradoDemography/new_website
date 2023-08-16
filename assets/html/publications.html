@@ -54,23 +54,28 @@
 <li>Press Releases</li>
 <li>Annual Summit Materials</li>
 </ul>
+<button class="accordion"><h2 class='h2_style'>Aging in Colorado Part 1: Why is Colorado Aging So Quickly? 9/20/2016</h2></button>
+<p></p>
+<div class="panel">
+	<div w3-include-html="../crosstabs/aging_20160921.html"></div>
+</div>
 <details>
-	<summary><a href='crosstabs.html' target='_blank'><h3 class='h3_style'>Crosstabs: A closer look at the Economics & Demographics of Colorado</h3></a></summary>
+	<button class="accordion" onclick="window.location.href='crosstabs.html';"><h3 class='h3_style'>Crosstabs: A closer look at the Economics & Demographics of Colorado</h3></summary>
 </details>
 <details>
-	<summary><a href='reports.html' target='_blank'><h3 class='h3_style'>Reports</h3></a></summary>
+	<button class="accordion" onclick="window.location.href='reports.html';"><h3 class='h3_style'>Reports</h3></summary>
 </details>
 <details>
-	<summary><a href='presentations.html' target='_blank'><h3 class='h3_style'>Presentations</h3></a></summary>
+	<button class="accordion" onclick="window.location.href='presentations.html';"><h3 class='h3_style'>Presentations</h3></summary>
 </details>
 <details>
-	<summary><a href='webinars.html'target='_blank'><h3 class='h3_style'>SDO Webinars and Training  Materials</h3></a></summary>
+	<button class="accordion" onclick="window.location.href='webinars.html';"><h3 class='h3_style'>SDO Webinars and Training  Materials</h3></summary>
 </details>
 <details>
-	<summary><a href='pressreleases.html' target='_blank'><h3 class='h3_style'>Press Releases</h3></a></summary>
+	<button class="accordion"  onclick="window.location.href='pressreleases.html';"><h3 class='h3_style'>Press Releases</h3></summary>
 </details>   
 <details>
-	<summary><a href='summit.html' target='_blank'><h3 class='h3_style'>State Demography Summit Materials</h3></a></summary>
+	<button class="accordion" onclick="window.location.href='summit.html';"><h3 class='h3_style'>State Demography Summit Materials</h3></summary>
  </details>
  </div> <!-- app -->
 
@@ -89,6 +94,7 @@
 <script>
 
 //Setting HTML include and Accordion
+accordionFun()
 includeHTML(); 
 
 </script>
