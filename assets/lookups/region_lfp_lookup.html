@@ -35,7 +35,7 @@
 </head>
 <body>
 <div>
-<a href="https://cdola.colorado.gov/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt="Department of Local Affairs Homepage"></a>
+<a href='https://cdola.colorado.gov/'><img class="logoSDO" src="../img/SDO-1600x400.jpg"  alt='Department of Local Affairs Homepage' aria-label='Department of Local Affairs Homepage'></a>
 </div>
 <div w3-include-html="../html/navheader.html"></div>
 
@@ -63,32 +63,32 @@
       <table class='lookup_tab' cellspacing="0" cellpadding="0">
    <tr>
 	<td class="look_cll">
-		<label class="entry_text" for="region-dropdown" id="county-lbl" alt="Select one or more Counties">Select one or more Counties:</label> 
+		<label class="entry_text" for="region-dropdown" id="county-lbl"  alt='Select one or more Regions' aria-label='Select one or more Regions'>Select one or more Regions:</label> 
 	</td>
 	<td class="look_cll">
-		<label class="entry_text" for="year-dropdown" id="year-lbl" alt="Select one or more years">Select one or more years:</label>
+		<label class="entry_text" for="year-dropdown" id="year-lbl"  alt='Select one or more years' aria-label='Select one or more years'>Select one or more years:</label>
 	</td>
 	<td class="look_cll">
-			<label class="entry_text" for="age-dropdown" id="age-lbl" alt="Select one or more years">Select one or more age groups:</label>
+			<label class="entry_text" for="age-dropdown" id="age-lbl"  alt='Select one or more years' aria-label='Select one or more years'>Select one or more age groups:</label>
 	</td>
 	<td class="look_cll">
-		<label class="entry_text" for="sum-dropdown" id="sum-lbl" alt="Select one or more years">Select zero or more variables to summarize by:</label>
+		<label class="entry_text" for="sum-dropdown" id="sum-lbl"  alt='Select one or more years' aria-label='Select one or more years'>Select zero or more variables to summarize by:</label>
 	</td>
 	<td class="look_cll">
-		<label class="entry_text" for="group-dropdown" id="group-lbl" alt="Select one or more years">Select grouping by sex:</label>
+		<label class="entry_text" for="group-dropdown" id="group-lbl"  alt='Select one or more years' aria-label='Select one or more years'>Select grouping by sex:</label>
 	</td>
 	<td class="look_cll">
 	</td>
 	</tr>
 	<tr>
 	<td class="look_cll"> 
-	 <select class="region-dropdown" id="region-dropdown" size="7" multiple></select>
+	 <select class="region-dropdown" id="region-dropdown" size="7" multiple role='listbox'></select>
 	 </td>
 	<td class="look_cll">
-    <select class="year-dropdown" id="year-dropdown" style='width:100px;' size="7" multiple></select>
+    <select class="year-dropdown" id="year-dropdown" style='width:100px;' size="7" multiple role='listbox'></select>
     </td>
 	<td class="look_cll">
-    <select class="age-dropdown" id="age-dropdown" style='width:100px;' size="7" multiple>
+    <select class="age-dropdown" id="age-dropdown" style='width:100px;' size="7" multiple role='listbox'>
 		<option value='a'>Age 16 to 19</option>
 		<option value='b'>Age 20 to 24</option>
 		<option value='c'>Age 25 to 34</option>
@@ -98,7 +98,7 @@
 		<option value='g'>Age 65+</option>
 	</select>
 	<td class="look_cll">
-    <select class="sum-dropdown" id="sum-dropdown" style='width:100px;' size="3" multiple>
+    <select class="sum-dropdown" id="sum-dropdown" style='width:100px;' size="3" multiple role='listbox'>
 		<option value='1'>Year</option>
 		<option value='2'>Region</option>
 		<option value='3'>Age Group</option>

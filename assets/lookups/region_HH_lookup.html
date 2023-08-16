@@ -35,7 +35,7 @@
 </head>
 <body>
 <div>
-<a href="https://cdola.colorado.gov/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt="Department of Local Affairs Homepage"></a>
+<a href='https://cdola.colorado.gov/'><img class="logoSDO" src="../img/SDO-1600x400.jpg"  alt='Department of Local Affairs Homepage' aria-label='Department of Local Affairs Homepage'></a>
 </div>
 <div w3-include-html="../html/navheader.html"></div>
 
@@ -63,32 +63,32 @@
       <table class='lookup_tab' cellspacing="0" cellpadding="0">
    <tr>
 	<td class="look_cll">
-		<label class="entry_text" for="region-dropdown" id="region-lbl" alt="Select one or more Counties">Select one or more Regions:</label> 
+		<label class="entry_text" for="region-dropdown" id="region-lbl"  alt='Select one or more Regions' aria-label='Select one or more Regions'>Select one or more Regions:</label> 
 	</td>
 	<td class="look_cll">
-		<label class="entry_text" for="year-dropdown" id="year-lbl" alt="Select one or more years">Select one or more years:</label>
+		<label class="entry_text" for="year-dropdown" id="year-lbl"  alt='Select one or more years' aria-label='Select one or more years'>Select one or more years:</label>
 	</td>
 	<td class="look_cll">
-		<label class="entry_text" for="age-dropdown" id="age-lbl" alt="Select one or more Age Groups">Select one or more Age Groups:</label>
+		<label class="entry_text" for="age-dropdown" id="age-lbl"  alt='Select one or more Age Groups' aria-label='Select one or more Age Groups'>Select one or more Age Groups:</label>
 	</td>
 	<td class="look_cll">
-		<label class="entry_text" for="hhold-dropdown" id="hhold-lbl" alt="Select one or more Household Types">Select one or more Household Types:</label>
+		<label class="entry_text" for="hhold-dropdown" id="hhold-lbl"  alt='Select one or more Household Types' aria-label='Select one or more Household Types'>Select one or more Household Types:</label>
 	</td>
 	<td class="look_cll">
-		<label class="entry_text" for="group-dropdown" id="group-lbl" alt="Select zero or more variables to summarize by">Select zero or more varialbles to summarize by:</label>
+		<label class="entry_text" for="group-dropdown" id="group-lbl"  alt='Select zero or more variables to summarize by' aria-label='Select zero or more variables to summarize by'>Select zero or more varialbles to summarize by:</label>
 	</td>
 	<td class="look_cll">
 	</td>
 	</tr>
 	<tr>
 	<td class="look_cll"> 
-	 <select class="region-dropdown" id="region-dropdown" size="6" multiple></select>
+	 <select class="region-dropdown" id="region-dropdown" size="6" multiple role='listbox'></select>
 	 </td>
 	<td class="look_cll">
-    <select class="year-dropdown" id="year-dropdown" style='width:100px;' size="5" multiple></select>
+    <select class="year-dropdown" id="year-dropdown" style='width:100px;' size="5" multiple role='listbox'></select>
     </td>
 	<td class="look_cll">
-    <select class="age-dropdown" id="age-dropdown" size="5" multiple>
+    <select class="age-dropdown" id="age-dropdown" size="5" multiple role='listbox'>
 	    <option value='0'>Total</option>
 	    <option value='1'>Age 18 to 24</option>
         <option value='2'>Age 25 to 44</option>
@@ -97,7 +97,7 @@
 	</select>
     </td>
 	<td class="look_cll">
-    <select class="hhold-dropdown" id="hhold-dropdown" style='width:250px;' size="5" multiple>
+    <select class="hhold-dropdown" id="hhold-dropdown" style='width:250px;' size="5" multiple role='listbox'>
 	    <option value='0'>All Households</option>
 	    <option value='1'>One adult with no children</option>
         <option value='2'>One adult with children</option>

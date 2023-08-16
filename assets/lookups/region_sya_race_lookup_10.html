@@ -34,7 +34,7 @@
 </head>
 <body>
 <div>
-<a href="https://cdola.colorado.gov/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt="Department of Local Affairs Homepage"></a>
+<a href='https://cdola.colorado.gov/'><img class="logoSDO" src="../img/SDO-1600x400.jpg"  alt='Department of Local Affairs Homepage' aria-label='Department of Local Affairs Homepage'></a>
 </div>
 <div w3-include-html="../html/navheader.html"></div>
 
@@ -80,27 +80,27 @@
       <table class='lookup_tab' cellspacing="0" cellpadding="0">
    <tr>
 	<td class="look_cll">
-		<label class="entry_text" for="region-dropdown" id="region-lbl" alt="Select one or more Regions">Select one or more Regions:</label> 
+		<label class="entry_text" for="region-dropdown" id="region-lbl"  alt='Select one or more Regions' aria-label='Select one or more Regions'>Select one or more Regions:</label> 
 	</td>
 	<td class="look_cll">
-		<label class="entry_text" for="year-dropdown" id="year-lbl" alt="Select one or more years">Select one or more years:</label>
+		<label class="entry_text" for="year-dropdown" id="year-lbl"  alt='Select one or more years' aria-label='Select one or more years'>Select one or more years:</label>
 	</td>
 	<td class="look_cll">
-		<label class="entry_text" for="race-dropdown" id="race-lbl" alt="Select one or more race caregories">Select one or more race caregories:</label>
+		<label class="entry_text" for="race-dropdown" id="race-lbl"  alt='Select one or more race caregories' aria-label='Select one or more race caregories'>Select one or more race caregories:</label>
 	</td>
 	<td class="look_cll">
-		<label class="entry_text" for="ethnicity-dropdown" id="ethnicity-lbl" alt="Select one or more Hispanic Origin categories">Select one or more Hispanic Origin categories:</label>
+		<label class="entry_text" for="ethnicity-dropdown" id="ethnicity-lbl"  alt='Select one or more Hispanic Origin categories' aria-label='Select one or more Hispanic Origin categories'>Select one or more Hispanic Origin categories:</label>
 	</td>
 	</tr>
 	<tr>
 	<td class="look_cll"> 
-	 <select class="region-dropdown" id="region-dropdown" size="6" multiple></select>
+	 <select class="region-dropdown" id="region-dropdown" size="6" multiple role='listbox'></select>
 	 </td>
 	<td class="look_cll">
-    <select class="year-dropdown" id="year-dropdown" style='width:100px;' size="6" multiple></select>
+    <select class="year-dropdown" id="year-dropdown" style='width:100px;' size="6" multiple role='listbox'></select>
     </td>
 	<td class="look_cll">
-       <select class="race-dropdown" id="race-dropdown" size="4" multiple>
+       <select class="race-dropdown" id="race-dropdown" size="4" multiple role='listbox'>
 		<option value="1">White</option>
 		<option value="2">Asian/Pacific islander</option>
 		<option value="3">American Indian/Alaska Native</option>
@@ -108,7 +108,7 @@
 	 </select>
     </td>
 	<td class="look_cll">
-    <select class="ethnicity-dropdown" id="ethnicity-dropdown" size="2" multiple>
+    <select class="ethnicity-dropdown" id="ethnicity-dropdown" size="2" multiple role='listbox'>
 		<option value="1">Hispanic/Latino Origin</option>
 		<option value ="2">Not of Hispanic/Latino Origin</option>
 	</select>
@@ -116,13 +116,13 @@
 	</tr>
 	<tr>
 	<td class="look_cll">
-	   <label class="entry_text" for="age-dropdown" id="age-lbl" alt="Select one or more ages">Select one or more ages:</label>
+	   <label class="entry_text" for="age-dropdown" id="age-lbl"  alt='Select one or more ages' aria-label='Select one or more ages'>Select one or more ages:</label>
 	</td>
 	<td class="look_cll">
-	   <label class="entry_text" for="Sex-dropdown" id="sex-lbl" alt="Display results by sex">Display results by sex:</label>
+	   <label class="entry_text" for="Sex-dropdown" id="sex-lbl"  alt='Display results by sex' aria-label='Display results by sex'>Display results by sex:</label>
 	</td>
 	<td class="look_cll">
-	   <label class="entry_text" for="group-dropdown" id="group-lbl" alt="Select Groups">Select 0 or more variables to summarize by (leave blank for a detailed summary):</label>
+	   <label class="entry_text" for="group-dropdown" id="group-lbl"  alt='Select Groups' aria-label='Select Groups'>Select 0 or more variables to summarize by (leave blank for a detailed summary):</label>
 	</td>
 	<td class="look_cll">
 	</td>
@@ -131,10 +131,10 @@
 	</tr>
 	<tr>
 		<td class="look_cll">
-    <select class="age-dropdown" id="age-dropdown" style='width:100px;' size="4" multiple></select>
+    <select class="age-dropdown" id="age-dropdown" style='width:100px;' size="4" multiple role='listbox'></select>
     </td>
 	<td class="look_cll">
-    <select class="sex-dropdown" id="sex-dropdown" size="4">
+    <select class="sex-dropdown" id="sex-dropdown" size="4" role='listbox'>
 		<option value="S">Sum Male and Female</option>
 		<option value="B">List Male and Female Separately</option>
 		<option value="M">Male Only</option>
@@ -142,7 +142,7 @@
 	</select>
     </td>
 	<td class="look_cll">
-    <select class="group-dropdown" id="group-dropdown" size="4">
+    <select class="group-dropdown" id="group-dropdown" size="4" role='listbox'>
 	    <option value='0'>No Grouping</option>
         <option value='1'>Region</option>
         <option value='2'>Year</option>
