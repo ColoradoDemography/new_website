@@ -1169,13 +1169,14 @@ var cty_data2 = cty_data.sort(function(a, b){ return d3.ascending(a['countyfips'
 
 	for(i = 0; i < cty_data2.length; i++){
 	if(outType == "COC"){
-		var el1 = "<td>" + cty_data2[i].name + "</td>"
-		var el2 = "<td>" + cty_data2[i].year + "</td>"
-		var el3 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].population,"num") + "</td>"
-		var el4 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].change,"num") + "</td>"
-		var el5 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].births,"num") + "</td>"
-		var el6 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].deaths,"num") + "</td>"
-		var el7 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].netmig,"num") + "</td>"
+		var el1 = "<td>" + cty_data2[i].countyfips + "</td>"
+		var el2 = "<td>" + cty_data2[i].name + "</td>"
+		var el3 = "<td>" + cty_data2[i].year + "</td>"
+		var el4 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].population,"num") + "</td>"
+		var el5 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].change,"num") + "</td>"
+		var el6 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].births,"num") + "</td>"
+		var el7 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].deaths,"num") + "</td>"
+		var el8 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].netmig,"num") + "</td>"
 	//Selecting value of data type
 
 		var filtData = yeardata.filter(b => cty_data2[i].year == b.year);
@@ -1183,9 +1184,10 @@ var cty_data2 = cty_data.sort(function(a, b){ return d3.ascending(a['countyfips'
 
 	   var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + el5 + el6 + el7 + el8 + "</tr>";
 	} else {
-		var el1 = "<td>" + cty_data2[i].name + "</td>"
-		var el2 = "<td>" + cty_data2[i].year + "</td>"
-		var el3 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].population,"num") + "</td>"
+		var el1 = "<td>" + cty_data2[i].countyfips + "</td>"
+		var el2 = "<td>" + cty_data2[i].name + "</td>"
+		var el3 = "<td>" + cty_data2[i].year + "</td>"
+		var el4 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].population,"num") + "</td>"
 	//Selecting value of data type
 
 		var filtData = yeardata.filter(b => cty_data2[i].year == b.year);
