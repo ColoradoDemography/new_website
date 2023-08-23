@@ -1036,6 +1036,9 @@ var reg_data = [];
 
 var reg_data2 = reg_data.sort(function(a, b){ return d3.ascending(a['region_num'], b['region_num']); })
 
+debugger
+console.log(reg_data2);
+
 	// Generate Table
 	if(outType == "COC"){
 		var out_tab = "<thead><tr><th>Region Name</th><th>Year</th><th>Population</th><th>Change</th><th>Births</th><th>Deaths</th><th>Net Migration</th><th>Data Type</th></tr></thead>";
@@ -1054,9 +1057,12 @@ var reg_data2 = reg_data.sort(function(a, b){ return d3.ascending(a['region_num'
 		var el6 = "<td style='text-align: right'>" + fixNEG(reg_data2[i].deaths,"num") + "</td>"
 		var el7 = "<td style='text-align: right'>" + fixNEG(reg_data2[i].netmig,"num") + "</td>"
 	//Selecting value of data type
-
-		var filtData = yeardata.filter(b => reg_data2[i].year == b.year);
-		var el8 = "<td>" + filtData[0].datatype + "</td>"
+	 if(group == "opt2") {
+			var el8 = "<td></td>"
+	 } else {
+			var filtData = yeardata.filter(b => reg_data2[i].year == b.year);
+			var el8 = "<td>" + filtData[0].datatype + "</td>"
+	 }
 
 	   var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + el5 + el6 + el7 + el8 + "</tr>";
 	} else {
@@ -1064,11 +1070,13 @@ var reg_data2 = reg_data.sort(function(a, b){ return d3.ascending(a['region_num'
 		var el2 = "<td>" + reg_data2[i].year + "</td>"
 		var el3 = "<td style='text-align: right'>" + fixNEG(reg_data2[i].population,"num") + "</td>"
 	//Selecting value of data type
-
-		var filtData = yeardata.filter(b => reg_data2[i].year == b.year);
-		var el4 = "<td>" + filtData[0].datatype + "</td>"
-
-	   var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + "</tr>";
+	   	 if(group == "opt2") {
+			var el4 = "<td></td>"
+	 } else {
+			var filtData = yeardata.filter(b => reg_data2[i].year == b.year);
+			var el4 = "<td>" + filtData[0].datatype + "</td>"
+	 }
+	  var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + "</tr>";
 	}
    out_tab = out_tab + tmp_row;
 	}
@@ -1178,9 +1186,12 @@ var cty_data2 = cty_data.sort(function(a, b){ return d3.ascending(a['countyfips'
 		var el7 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].deaths,"num") + "</td>"
 		var el8 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].netmig,"num") + "</td>"
 	//Selecting value of data type
-
+	 if(group == "opt2") {
+			var el9 = "<td></td>"
+	 } else {
 		var filtData = yeardata.filter(b => cty_data2[i].year == b.year);
 		var el9 = "<td>" + filtData[0].datatype + "</td>"
+	 }
 
 	   var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + el5 + el6 + el7 + el8 + el9 + "</tr>";
 	} else {
@@ -1189,10 +1200,12 @@ var cty_data2 = cty_data.sort(function(a, b){ return d3.ascending(a['countyfips'
 		var el3 = "<td>" + cty_data2[i].year + "</td>"
 		var el4 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].population,"num") + "</td>"
 	//Selecting value of data type
-
-		var filtData = yeardata.filter(b => cty_data2[i].year == b.year);
-		var el5 = "<td>" + filtData[0].datatype + "</td>"
-
+	 if(group == "opt2") {
+			var el5 = "<td></td>"
+	 } else {
+			var filtData = yeardata.filter(b => cty_data2[i].year == b.year);
+			var el5 = "<td>" + filtData[0].datatype + "</td>"
+	 }
 	   var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + el5 + "</tr>";
 	}
 	out_tab = out_tab + tmp_row;
