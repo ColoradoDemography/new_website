@@ -1,9 +1,9 @@
-<!-- County Labor Force Participation Lookup Lookup Page A Bickford 6/2021 -->
+<!-- County Population Profile Lookup Page A Bickford 6/2021 -->
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title> County Labor Force Participation Lookup</title>
+<title>County Net Migration by Age Data Lookup</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" http-equiv="content-type" content="text/html; charset=utf-8">
 <!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
 <!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
@@ -48,73 +48,41 @@
 	<div w3-include-html="../html/left_hand_index.html"></div>
   </div> <!-- Grid  panel2_2_1 -->
   <div class="grid-item app-panel_2_2">
-  <h1 class='h1_style'>County Labor Force Participation Lookup</h1>
+  <h1 class='h1_style'>State and Regional Net Migration by Age Data Lookup</h1>
   <p>
-  <a href="../lookups/region_lfp_lookup.html" target='_blank'>Need State/Regional Data?</a>
+  <a href="../lookups/region_netmig_lookup.html" target='_blank'>Need State/Regional Data?</a>
   </p>
    <h2 class='h2_style'>INSTRUCTIONS:</h2>
    <p class="lookup_p">
-   This application creates custom tables for SDO County estimates of labor force participation by county, age and sex.
+   This application creates custom tables for SDO State and Regional estimates for Net Migration by 5-year age groups from 1970-1980 to 2010-2020.
    </p>
   <p class="lookup_p">
-   A spreadsheet with detailed economic and jobs estimates is available on the 
-   <a href='https://demography.dola.colorado.gov/assets/html/economy.html' target='_blank'>SDO Economy and Jobs Spreadsheets</a> page.
+   A spreadsheet with detailed information for the state and regions is available on the 
+   <a href='https://demography.dola.colorado.gov/assets/html/population.html' target='_blank'>SDO Population Spreadsheets</a> page.
   </p>
       <table class='lookup_tab' cellspacing="0" cellpadding="0">
    <tr>
 	<td class="look_cll">
-		<label class="entry_text" for="county-dropdown" id="county-lbl"  alt='Select one or more Counties' aria-label='Select one or more Counties'>Select one or more Counties:</label> 
+		<label class="entry_text" for="region-dropdown" id="region-lbl"  alt='Select one or more State and Regions' aria-label='Select one or more State and Regions'>Select one or more State and Regions:</label> 
 	</td>
 	<td class="look_cll">
-		<label class="entry_text" for="year-dropdown" id="year-lbl"  alt='Select one or more years' aria-label='Select one or more years'>Select one or more years:</label>
-	</td>
-	<td class="look_cll">
-			<label class="entry_text" for="age-dropdown" id="age-lbl"  alt='Select one or more years' aria-label='Select one or more years'>Select one or more age groups:</label>
-	</td>
-	<td class="look_cll">
-		<label class="entry_text" for="sum-dropdown" id="sum-lbl"  alt='Select one or more years' aria-label='Select one or more years'>Select zero or more variables to summarize by:</label>
-	</td>
-	<td class="look_cll">
-		<label class="entry_text" for="group-dropdown" id="group-lbl"  alt='Select one or more years' aria-label='Select one or more years'>Select grouping by sex:</label>
+			<label class="entry_text" for="year-dropdown" id="year-lbl"  alt='Select one or more Time Periods' aria-label='Select one or more Time Periods'>Select one or more Time Periods:</label> 
 	</td>
 	<td class="look_cll">
 	</td>
 	</tr>
 	<tr>
 	<td class="look_cll"> 
-	 <select class="county-dropdown" id="county-dropdown" size="7" multiple role='listbox'></select>
+	 <select class="region-dropdown" id="region-dropdown" size="5" multiple role='listbox'></select>
 	 </td>
 	<td class="look_cll">
-    <select class="year-dropdown" id="year-dropdown" style='width:100px;' size="7" multiple role='listbox'></select>
-    </td>
-	<td class="look_cll">
-    <select class="age-dropdown" id="age-dropdown" style='width:100px;' size="7" multiple role='listbox'>
-		<option value='a'>Age 16 to 19</option>
-		<option value='b'>Age 20 to 24</option>
-		<option value='c'>Age 25 to 34</option>
-		<option value='d'>Age 35 to 44</option>
-		<option value='e'>Age 45 to 54</option>
-		<option value='f'>Age 55 to 64</option>
-		<option value='g'>Age 65+</option>
-	</select>
-	<td class="look_cll">
-    <select class="sum-dropdown" id="sum-dropdown" style='width:100px;' size="3" multiple role='listbox'>
-		<option value='1'>Year</option>
-		<option value='2'>County</option>
-		<option value='3'>Age Group</option>
-	</select>
-    </td>
-	<td class="look_cll">
-	<div>
-		<input type="radio" id="sumsex" name="sex_grouping" value="S" checked />
-		<label for="sumsex">Sum Male and Female</label><br>
-		<input type="radio" id="male" name="sex_grouping" value="M" />
-		<label for="male">Male Only</label><br>
-		<input type="radio" id="female" name="sex_grouping" value="F" />
-		<label for="female">Female Only</label><br>
-		<input type="radio" id="listsex" name="sex_grouping" value="B" />
-		<label for="listsex">List Male and Female Separately</label><br>
-	</div>
+	<select class="year-dropdown" id="year-dropdown" size="5" multiple role='listbox'>
+		<option value = "1970">1970-1980</option>
+		<option value = "1980">1980-1990</option>
+		<option value = "1990">1990-2000</option>
+		<option value = "2000">2000-2010</option>
+		<option value = "2010">2010-2020</option>
+	 </select>
     </td>
 	<td class="look_cll">
 		<button class='databutton' id='gentable'>Generate Table</button><br><br>
@@ -127,7 +95,7 @@
   <div class="grid-item app-panel_3_2">
 	 <div id="tbl_output"></div>
   </div> 
- <div class="grid-item app-panel_4_2_b">
+  <div class="grid-item app-panel_4_2_b">
 			<div w3-include-html="../html/bodycontent1.html"></div>
 	 </div>
 	<div class="grid-item app-panel_4_4_b">
@@ -140,17 +108,12 @@
  <script> 
 
  includeHTML();
-// Extract Yange or years
 var urlstr = "https://gis.dola.colorado.gov/lookups/componentYRS";
 d3.json(urlstr).then(function(yeardata){
+ var yeardata2 = yeardata.filter(d => d.year >= 1985 && d.datatype == "Estimate");
+ popDropdown('region','region-dropdown','lookup')
 
- popDropdown('county','county-dropdown','lookup');
- 
- yeardata2 = yeardata.filter(i => i.year >= 2010 && i.year <= 2040);
- 
- popYrdd("year-dropdown",yeardata2);  //Change this range to match data
- 
-//Button Event
+ //Button Event
  document.getElementById('gentable').addEventListener("click", chkInputs)
  document.getElementById('cleartable').addEventListener("click", clearInputs)
  
@@ -160,66 +123,35 @@ d3.json(urlstr).then(function(yeardata){
  var outputmsg = "";
  document.getElementById('tbl_output').innerHTML = "";
 
-	    var fipsdd = document.getElementById('county-dropdown');
-		var selectedfips = getSelectValues(fipsdd);
-
+	    var fipsdd = document.getElementById('region-dropdown');
+		var selectedreg = getSelectValues(fipsdd);
+		selectedfips = [];
+		selectedreg.forEach(d => {
+			var tmpcty = regionCOL(+d);
+		    selectedfips.push(tmpcty[0].fips)
+		})
+		
 		if(selectedfips.length == 0){
-		    outputmsg = outputmsg +  "  >Please select one or more counties.\n";
+		    outputmsg = outputmsg +  " > Please select one or more regions.\n";
 			complete = false;
 		}
+		
 		
 		var yrdd = document.getElementById('year-dropdown');
 		var selectedyr = getSelectValues(yrdd);
 
 		if(selectedyr.length == 0){
-		    outputmsg = outputmsg +  "  >Please select one or more years.\n";
+		    outputmsg = outputmsg +  " > Please select one or more years.\n";
 			complete = false;
 		}
 
-		var agedd = document.getElementById('age-dropdown');
-		var selectedage = getSelectValues(agedd);
-
-		if(selectedage.length == 0){
-		    outputmsg = outputmsg +  "  >Please select one or more age groups.\n";
-			complete = false;
-		}
-		
-		var sumdd = document.getElementById('sum-dropdown');
-		var sum_val = "";
-		var selectedsum = getSelectValues(sumdd);
-		switch (selectedsum.length ){
-		   case 0 :
-		   sum_val = "opt0";
-		   break;
-		   case 1 : 
-		   sum_val = "opt" + selectedsum[0];
-		   break;
-		   case 2 :
-		   if(selectedsum[0] == "0" && selectedsum[1] == "1"){
-		       sum_val = "opt4"
-		   }
-		   if(selectedsum[0] == "0" && selectedsum[1] == "2"){
-		       sum_val = "opt5"
-		   }
-		   if(selectedsum[1] == "1" && selectedsum[2] == "2"){
-		       sum_val = "opt6"
-		   }
-		   break;
-		   case 3 :
-		   sum_val = "opt0";
-		   break;
-		}
-		
-		var sex_group = document.querySelector('input[name="sex_grouping"]:checked').value;
-		
 		if(complete){
-		     genLFPCty(selectedfips,selectedyr,selectedage,sum_val,sex_group);
+		     genNETMIGReg(selectedreg,selectedfips,selectedyr);
 			 } else {
 			 window.alert(outputmsg);
 			 }
 	 };  //chkInputs
-})  //D3_json
-
+}); //d3.json
 function clearInputs() {
    document.getElementById('tbl_output').innerHTML = "";
    var elements = document.getElementsByTagName('select');

@@ -119,7 +119,7 @@
  includeHTML();
 var urlstr = "https://gis.dola.colorado.gov/lookups/componentYRS";
 d3.json(urlstr).then(function(yeardata){
-
+ var outType = "COC"
  popDropdown('region','region-dropdown','lookup');
  popYrdd("year-dropdown",yeardata);  //Change this range to match data
  
@@ -157,7 +157,7 @@ d3.json(urlstr).then(function(yeardata){
 		selectedgroup = document.querySelector('input[name="sum_grouping"]:checked').value;
 
 		if(complete){
-		     genCOCReg(selectedreg, selectedfips,selectedyr,selectedgroup,yeardata);
+		     genCOCReg(selectedreg, selectedfips,selectedyr,selectedgroup,yeardata,outType);
 			 } else {
 			 window.alert(outputmsg);
 			 }
