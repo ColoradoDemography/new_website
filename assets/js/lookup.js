@@ -1180,9 +1180,9 @@ var cty_data2 = cty_data.sort(function(a, b){ return d3.ascending(a['countyfips'
 	//Selecting value of data type
 
 		var filtData = yeardata.filter(b => cty_data2[i].year == b.year);
-		var el8 = "<td>" + filtData[0].datatype + "</td>"
+		var el9 = "<td>" + filtData[0].datatype + "</td>"
 
-	   var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + el5 + el6 + el7 + el8 + "</tr>";
+	   var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + el5 + el6 + el7 + el8 + el9 + "</tr>";
 	} else {
 		var el1 = "<td>" + cty_data2[i].countyfips + "</td>"
 		var el2 = "<td>" + cty_data2[i].name + "</td>"
@@ -1191,9 +1191,9 @@ var cty_data2 = cty_data.sort(function(a, b){ return d3.ascending(a['countyfips'
 	//Selecting value of data type
 
 		var filtData = yeardata.filter(b => cty_data2[i].year == b.year);
-		var el4 = "<td>" + filtData[0].datatype + "</td>"
+		var el5 = "<td>" + filtData[0].datatype + "</td>"
 
-	   var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + "</tr>";
+	   var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + el5 + "</tr>";
 	}
 	out_tab = out_tab + tmp_row;
 	}
