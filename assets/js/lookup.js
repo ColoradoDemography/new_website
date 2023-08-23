@@ -20,7 +20,7 @@ function joinFUNCT(lookupTable, mainTable, lookupKey, mainKey, select) {
     return output;
 };
 
-//getSelectValues Works with muluple selection boxes from Stack Overflow https://stackoverflow.com/questions/5866169/how-to-get-all-selected-values-of-a-multiple-select-box
+//getSelectValues Works with multiple selection boxes from Stack Overflow https://stackoverflow.com/questions/5866169/how-to-get-all-selected-values-of-a-multiple-select-box
 function getSelectValues(select) {
   var result = [];
   var options = select && select.options;
@@ -243,11 +243,11 @@ cty_data = cty_data.concat(cty_tmp)
 	
 	
 	// Generate Table
-	var out_tab = "<thead><tr><th>County Name</th><th>County FIPS</th><th>Year</th><th>Age</th><th>Sex</th><th>Race</th><th>Ethnicity</th><th>Count</th></tr></thead>";
+	var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>Age</th><th>Sex</th><th>Race</th><th>Ethnicity</th><th>Count</th></tr></thead>";
 	out_tab = out_tab + "<tbody>"
 	for(i = 0; i < cty_data.length; i++){
-		var el1 = "<td>" + cty_data[i].name + "</td>"
-		var el2 = "<td>" + cty_data[i].county_fips + "</td>"
+		var el1 = "<td>" + cty_data[i].countyfips + "</td>"
+		var el2 = "<td>" + cty_data[i].name + "</td>"
 		var el3 = "<td>" + cty_data[i].year + "</td>"
 		var el4 = "<td>" + cty_data[i].age + "</td>"
 		if(sex_list == "S") {
@@ -291,6 +291,216 @@ $(tabObj).DataTable({
 })
 } //genRaceTabCty
 
+//genRaceTabCty10 creares the county race data call and produces table Race 2010 base categories
+function genRaceTabCty10(loc,year_arr, race_arr,eth_arr,age_arr,sex_list,group) {
+
+	//build urlstr
+	var fips_arr = [];
+	for(i = 0; i < loc.length; i++){ fips_arr.push(parseInt(loc[i]))}
+	var fips_list  = fips_arr.join(",")
+	var year_list = year_arr.join(",")
+	var race_list = race_arr.join(",")
+	var eth_list = eth_arr.join(",")
+	var age_list = age_arr.join(",")
+	if(sex_list == "S"){
+		var urlstr = "https://gis.dola.colorado.gov/lookups/sya-race-estimates?age="+ age_list + "&county="+ fips_list +"&year="+ year_list +"&race=" + race_list+ "&ethnicity="+eth_list+"&group=opt0";
+    } else {
+		var sexl = sex_list.toLowerCase()
+		var urlstr = "https://gis.dola.colorado.gov/lookups/sya-race-estimates?age="+ age_list + "&county="+ fips_list +"&year="+ year_list +"&race=" + race_list+ "&ethnicity="+eth_list+"&sex="+sexl+"&group=opt0";
+	}
+
+console.log(urlstr)
+d3.json(urlstr).then(function(data){
+
+
+    // Flesh out records -- for options ne 0
+	var fullkeys = ['county_fips', 'year','age','sex','race', 'ethnicity','count']
+
+	for(i = 0; i < data.length; i++){
+		for(j = 0; j < fullkeys.length; j ++) {
+		if(!(fullkeys[j] in data[i])){
+				data[i][fullkeys[j]] = "_";
+			}
+		}
+	}
+	var fips_list = [...new Set(data.map(d => d.county_fips))];
+	var cty_data = [];
+  	
+	fips_list.forEach( i => {
+	  var filtData = data.filter(b => (b.county_fips == i));
+	  var cty_tmp = [];
+
+    //Rollups based on group value
+	switch(group) {
+		case "opt0":
+		filtData.forEach(j =>{
+				cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : j.year, 'age' : j.age, 'sex' : j.sex, 'race' : j.race, 'ethnicity' : j.ethnicity, 'count' : Math.round(+j.count)});
+		});
+		break;
+		case "opt1":
+			var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count));
+			//Flatten Arrays for output
+			 cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : "", 'count' : Math.round(cty_sum)});
+		break;
+		case "opt2":
+			var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : "", 'count' : Math.round(value)});
+				}
+		break;
+		case "opt3":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.age);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : key, 'sex' : "", 'race' : "", 'ethnicity' : "", 'count' : Math.round(value)});
+				}
+		break;
+		case "opt4":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.race);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : "", 'sex' : "", 'race' : key, 'ethnicity' : "", 'count' : Math.round(value)});
+				}
+		break;
+		case "opt5":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.ethnicity);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : key, 'count' : Math.round(value)});
+				}
+		break;
+		case "opt6":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d=> d.race, d => d.ethnicity);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  
+			    for(let [key2,value2] of value){
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : "", 'sex' : "", 'race' : key, 'ethnicity' : key2, 'count' : Math.round(value2)});
+			}}
+		break;
+		case "opt7":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year, d => d.race);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  //Year
+			   for( let[key2, value2] of value){
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : "", 'sex' : "", 'race' : key2, 'ethnicity' : "", 'count' : Math.round(value2)});
+			}}
+		break;
+		case "opt8":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year, d => d.ethnicity);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  //Year
+			   for( let[key2, value2] of value){
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : key2, 'count' : Math.round(value2)});
+			}}
+		break;
+		case "opt9":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year, d => d.race, d => d.ethnicity);
+			//Flatten Arrays for output
+			var cty_tmp = [];
+			for (let [key, value] of cty_sum) {  //Year
+			   for( let[key2, value2] of value){
+				   for( let [key3, value3] of value2){
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : "", 'sex' : "", 'race' : key2, 'ethnicity' : key3, 'count' : Math.round(value3)});
+			}}}
+		break;
+		case "opt10":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count),  d => d.age, d => d.race);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  //Year
+			   for( let[key2, value2] of value){
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : key, 'sex' : "", 'race' : key2, 'ethnicity' : "", 'count' : Math.round(value2)});
+			}}
+		break;
+		case "opt11":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.age, d => d.ethnicity);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  //Year
+			   for( let[key2, value2] of value){
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : key, 'sex' : "", 'race' : "", 'ethnicity' : key2, 'count' : Math.round(value2)});
+			}}
+		break;
+		case "opt12":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.age, d => d.race, d => d.ethnicity);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  //Year
+			   for( let[key2, value2] of value){
+				   for( let [key3, value3] of value2){
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : key, 'sex' : "", 'race' : key2, 'ethnicity' : key3, 'count' : Math.round(value3)});
+			}}}
+		break;
+		case "opt13":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year, d => d.age, d => d.race);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  //Year
+			   for( let[key2, value2] of value){
+				   for( let [key3, value3] of value2){
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : key2, 'sex' : "", 'race' : key3, 'ethnicity' : "", 'count' : Math.round(value3)});
+			}}}
+		break;
+		case "opt14":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year, d => d.age, d => d.ethnicity);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  //Year
+			   for( let[key2, value2] of value){
+				   for( let [key3, value3] of value2){
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : key2, 'sex' : "", 'race' : "", 'ethnicity' : key3, 'count' : Math.round(value3)});
+			}}}
+		break;
+} //Switch
+
+cty_data = cty_data.concat(cty_tmp)
+	}) //forEach
+	
+	
+	// Generate Table
+	var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>Age</th><th>Sex</th><th>Race</th><th>Ethnicity</th><th>Count</th></tr></thead>";
+	out_tab = out_tab + "<tbody>"
+	for(i = 0; i < cty_data.length; i++){
+		var el1 = "<td>" + cty_data[i].countyfips + "</td>"
+		var el2 = "<td>" + cty_data[i].name + "</td>"
+		var el3 = "<td>" + cty_data[i].year + "</td>"
+		var el4 = "<td>" + cty_data[i].age + "</td>"
+		if(sex_list == "S") {
+			var el5 = "<td> </td>"
+		} else {
+		   if(cty_data[i].sex == "M"){
+			var el5 = "<td>Male</td>";
+		   }
+		   if(cty_data[i].sex == "F"){
+			var el5 =  "<td>Female</td>";
+		   }
+		}
+		var el6 =  "<td>" + cty_data[i].race + "</td>"
+		var el7 = "<td>" + cty_data[i].ethnicity + "</td>"
+		var el8 = "<td style='text-align: right'>" + fixNEG(parseInt(cty_data[i].count),"num") + "</td>"
+
+		var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + el5 + el6 + el7 + el8 + "</tr>";
+		var tmp_str = tmp_row.replaceAll("_","")
+
+	   out_tab = out_tab + tmp_str;
+	}
+	out_tab = out_tab + "</tbody>"
+
+//Output table
+	var tabDivOut = document.getElementById("tbl_output");
+	var tabName = "raceTab";
+//Clear div
+tabDivOut.innerHTML = "";
+
+var tabObj = "#" + tabName;
+$(tabDivOut).append("<table id="+ tabName + " class='DTTable' width='90%'></table>");
+$(tabObj).append(out_tab); //this has to be a html table
+
+
+$(tabObj).DataTable({
+  dom: 'Bfrtip',
+        buttons: [
+            'csv'
+        ]
+ });
+})
+} //genRaceTabCty10
 
 //genRaceTabReg creares the county race data call and produces table
 function genRaceTabReg(region, loc,year_arr, race_arr,eth_arr,age_arr,sex_list,group) {
@@ -515,9 +725,231 @@ $(tabObj).DataTable({
 })
 } //genRaceTabReg
 
+//genRaceTabReg10 creares the county race data call and produces table 2010 Base
+function genRaceTabReg10(region, loc,year_arr, race_arr,eth_arr,age_arr,sex_list,group) {
+	const fmt_comma = d3.format(",");
+	//build urlstr
+	var fips_arr = [];
+
+		loc.forEach(d => {
+			d.forEach(i => {
+			  fips_arr.push(parseInt(i));
+			})
+		})
+	var fips_list  = fips_arr.join(",")
+	var year_list = year_arr.join(",")
+	var race_list = race_arr.join(",")
+	var eth_list = eth_arr.join(",")
+	var age_list = age_arr.join(",");
+	if(sex_list == "S"){
+		var urlstr = "https://gis.dola.colorado.gov/lookups/sya-race-estimates?age="+ age_list + "&county="+ fips_list +"&year="+ year_list +"&race=" + race_list+ "&ethnicity="+eth_list+"&group=opt0";
+    } else {
+		var sexl = sex_list.toLowerCase()
+		var urlstr = "https://gis.dola.colorado.gov/lookups/sya-race-estimates?age="+ age_list + "&county="+ fips_list +"&year="+ year_list +"&race=" + race_list+ "&ethnicity="+eth_list+"&sex="+sexl+"&group=opt0";
+	}
+
+d3.json(urlstr).then(function(data){
+
+    // Flesh out records -- for options ne 0
+	var fullkeys = ['county_fips', 'year','age','sex','race', 'ethnicity','count']
+
+	for(i = 0; i < data.length; i++){
+		for(j = 0; j < fullkeys.length; j ++) {
+		if(!(fullkeys[j] in data[i])){
+				data[i][fullkeys[j]] = "_";
+			}
+		}
+	}
+	
+// Rolling up Region
+
+var reg_data = [];
+	region.forEach(i => {
+	   var selfips = [];
+       var tempReg = regionCOL(parseInt(i));
+	   tempReg[0].fips.forEach( a => selfips.push(parseInt(a)) )
+	   var filtData = data.filter(b => selfips.includes(b.county_fips));
+	   var reg_tmp = [];
+
+	   //Rollups based on group value
+	switch(group) {
+		case "opt0":
+			var reg_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year, d => d.age, d => d.sex, d => d.race, d => d.ethnicity);
+			//Flatten Arrays for output
+			for (let [key, value] of reg_sum) {  //Year
+				for(let [key2, value2] of value){ //age
+				  for(let [key3,value3] of value2) { //sex
+					 for(let [key4, value4] of value3) { //race
+					   for (let [key5, value5] of value4){  //ethncitiy
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : key, 'age' : key2, 'sex' : key3, 'race' : key4, 'ethnicity' : key5, 'count' : Math.round(value5)});
+				}}}}}
+		break;
+		case "opt1":
+			var reg_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count));
+			//Flatten Arrays for output
+			 reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : "", 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : "", 'count' : reg_sum});
+		break;
+		case "opt2":
+			var reg_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year);
+			//Flatten Arrays for output
+			for (let [key, value] of reg_sum) {  
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : key, 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : "", 'count' : Math.round(value)});
+				}
+		break;
+		case "opt3":
+		var reg_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.age);
+			//Flatten Arrays for output
+			for (let [key, value] of reg_sum) {  
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : "", 'age' : key, 'sex' : "", 'race' : "", 'ethnicity' : "", 'count' : Math.round(value)});
+				}
+		break;
+		case "opt4":
+		var reg_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.race);
+			//Flatten Arrays for output
+			for (let [key, value] of reg_sum) {  
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : "", 'age' : "", 'sex' : "", 'race' : key, 'ethnicity' : "", 'count' : Math.round(value)});
+				}
+		break;
+		case "opt5":
+		var reg_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.ethnicity);
+			//Flatten Arrays for output
+			for (let [key, value] of reg_sum) {  
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : "", 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : key, 'count' : Math.round(value)});
+				}
+		break;
+		case "opt6":
+		var reg_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d=> d.race, d => d.ethnicity);
+			//Flatten Arrays for output
+			for (let [key, value] of reg_sum) {  
+			    for(let [key2,value2] of value){
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : "", 'age' : "", 'sex' : "", 'race' : key, 'ethnicity' : key2, 'count' : Math.round(value2)});
+			}}
+		break;
+		case "opt7":
+		var reg_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year, d => d.race);
+			//Flatten Arrays for output
+			for (let [key, value] of reg_sum) {  //Year
+			   for( let[key2, value2] of value){
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : key, 'age' : "", 'sex' : "", 'race' : key2, 'ethnicity' : "", 'count' : Math.round(value2)});
+			}}
+		break;
+		case "opt8":
+		var reg_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year, d => d.ethnicity);
+			//Flatten Arrays for output
+			for (let [key, value] of reg_sum) {  //Year
+			   for( let[key2, value2] of value){
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : key, 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : key2, 'count' : Math.round(value2)});
+			}}
+		break;
+		case "opt9":
+		var reg_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year, d => d.race, d => d.ethnicity);
+			//Flatten Arrays for output
+			var reg_tmp = [];
+			for (let [key, value] of reg_sum) {  //Year
+			   for( let[key2, value2] of value){
+				   for( let [key3, value3] of value2){
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : key, 'age' : "", 'sex' : "", 'race' : key2, 'ethnicity' : key3, 'count' : Math.round(value3)});
+			}}}
+		break;
+		case "opt10":
+		var reg_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count),  d => d.age, d => d.race);
+			//Flatten Arrays for output
+			for (let [key, value] of reg_sum) {  //Year
+			   for( let[key2, value2] of value){
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : "", 'age' : key, 'sex' : "", 'race' : key2, 'ethnicity' : "", 'count' : Math.round(value2)});
+			}}
+		break;
+		case "opt11":
+		var reg_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.age, d => d.ethnicity);
+			//Flatten Arrays for output
+			for (let [key, value] of reg_sum) {  //Year
+			   for( let[key2, value2] of value){
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : "", 'age' : key, 'sex' : "", 'race' : "", 'ethnicity' : key2, 'count' : Math.round(value2)});
+			}}
+		break;
+		case "opt12":
+		var reg_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.age, d => d.race, d => d.ethnicity);
+			//Flatten Arrays for output
+			for (let [key, value] of reg_sum) {  //Year
+			   for( let[key2, value2] of value){
+				   for( let [key3, value3] of value2){
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : "", 'age' : key, 'sex' : "", 'race' : key2, 'ethnicity' : key3, 'count' : Math.round(value3)});
+			}}}
+		break;
+		case "opt13":
+		var reg_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year, d => d.age, d => d.race);
+			//Flatten Arrays for output
+			for (let [key, value] of reg_sum) {  //Year
+			   for( let[key2, value2] of value){
+				   for( let [key3, value3] of value2){
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : key, 'age' : key2, 'sex' : "", 'race' : key3, 'ethnicity' : "", 'count' : Math.round(value3)});
+			}}}
+		break;
+		case "opt14":
+		var reg_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year, d => d.age, d => d.ethnicity);
+			//Flatten Arrays for output
+			for (let [key, value] of reg_sum) {  //Year
+			   for( let[key2, value2] of value){
+				   for( let [key3, value3] of value2){
+					   reg_tmp.push({ 'name' : regionName(parseInt(i)), 'year' : key, 'age' : key2, 'sex' : "", 'race' : "", 'ethnicity' : key3, 'count' : Math.round(value3)});
+			}}}
+		break;
+} //Switch
+reg_data = reg_data.concat(reg_tmp)
+	}) //forEach
+
+
+	
+	// Generate Table
+	var out_tab = "<thead><tr><th>Region Name</th><th>Year</th><th>Age</th><th>Sex</th><th>Race</th><th>Ethnicity</th><th>Count</th></tr></thead>";
+	out_tab = out_tab + "<tbody>"
+	for(i = 0; i < reg_data.length; i++){
+		var el1 = "<td>" + reg_data[i].name + "</td>"
+		var el3 = "<td>" + reg_data[i].year + "</td>"
+		var el4 = "<td>" + reg_data[i].age + "</td>"
+		if(sex_list == "S") {
+			var el5 = "<td> </td>"
+		} else {
+		   if(reg_data[i].sex == "M"){
+			var el5 = "<td>Male</td>";
+		   }
+		   if(reg_data[i].sex == "F"){
+			var el5 =  "<td>Female</td>";
+		   }
+		}
+		var el6 =  "<td>" + reg_data[i].race + "</td>"
+		var el7 = "<td>" + reg_data[i].ethnicity + "</td>"
+		var el8 = "<td style='text-align: right'>" + fmt_comma(parseInt(reg_data[i].count)) + "</td>"
+
+		var tmp_row = "<tr>" + el1 + el3 + el4 + el5 + el6 + el7 + el8 + "</tr>";
+		var tmp_str = tmp_row.replaceAll("_","")
+
+	   out_tab = out_tab + tmp_str;
+	}
+	out_tab = out_tab + "</tbody>"
+
+//Output table
+	var tabDivOut = document.getElementById("tbl_output");
+	var tabName = "raceTab";
+//Clear div
+tabDivOut.innerHTML = "";
+
+var tabObj = "#" + tabName;
+$(tabDivOut).append("<table id="+ tabName + " class='DTTable' width='90%'></table>");
+$(tabObj).append(out_tab); //this has to be a html table
+
+
+$(tabObj).DataTable({
+  dom: 'Bfrtip',
+        buttons: [
+            'csv'
+        ]
+ });
+})
+} //genRaceTabReg10
 
 //genCOCReg creares the state regional COC table 
-function genCOCReg(region, loc,year_arr,group,yeardata) {
+function genCOCReg(region, loc,year_arr,group,yeardata,outType) {
 	const fmt_comma = d3.format(",");
 
 	//build urlstr
@@ -605,10 +1037,15 @@ var reg_data = [];
 var reg_data2 = reg_data.sort(function(a, b){ return d3.ascending(a['region_num'], b['region_num']); })
 
 	// Generate Table
-	var out_tab = "<thead><tr><th>Region Name</th><th>Year</th><th>Population</th><th>Change</th><th>Births</th><th>Deaths</th><th>Net Migration</th><th>Data Type</th></tr></thead>";
+	if(outType == "COC"){
+		var out_tab = "<thead><tr><th>Region Name</th><th>Year</th><th>Population</th><th>Change</th><th>Births</th><th>Deaths</th><th>Net Migration</th><th>Data Type</th></tr></thead>";
+	} else {
+		var out_tab = "<thead><tr><th>Region Name</th><th>Year</th><th>Population</th><th>Data Type</th></tr></thead>";
+	}
 	out_tab = out_tab + "<tbody>"
-
+  
 	for(i = 0; i < reg_data2.length; i++){
+	if(outType == "COC"){
 		var el1 = "<td>" + reg_data2[i].name + "</td>"
 		var el2 = "<td>" + reg_data2[i].year + "</td>"
 		var el3 = "<td style='text-align: right'>" + fixNEG(reg_data2[i].population,"num") + "</td>"
@@ -616,14 +1053,24 @@ var reg_data2 = reg_data.sort(function(a, b){ return d3.ascending(a['region_num'
 		var el5 = "<td style='text-align: right'>" + fixNEG(reg_data2[i].births,"num") + "</td>"
 		var el6 = "<td style='text-align: right'>" + fixNEG(reg_data2[i].deaths,"num") + "</td>"
 		var el7 = "<td style='text-align: right'>" + fixNEG(reg_data2[i].netmig,"num") + "</td>"
-//Selecting value of data type
+	//Selecting value of data type
 
 		var filtData = yeardata.filter(b => reg_data2[i].year == b.year);
 		var el8 = "<td>" + filtData[0].datatype + "</td>"
 
 	   var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + el5 + el6 + el7 + el8 + "</tr>";
+	} else {
+		var el1 = "<td>" + reg_data2[i].name + "</td>"
+		var el2 = "<td>" + reg_data2[i].year + "</td>"
+		var el3 = "<td style='text-align: right'>" + fixNEG(reg_data2[i].population,"num") + "</td>"
+	//Selecting value of data type
 
-	   out_tab = out_tab + tmp_row;
+		var filtData = yeardata.filter(b => reg_data2[i].year == b.year);
+		var el4 = "<td>" + filtData[0].datatype + "</td>"
+
+	   var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + "</tr>";
+	}
+   out_tab = out_tab + tmp_row;
 	}
 	out_tab = out_tab + "</tbody>"
 
@@ -648,7 +1095,7 @@ $(tabObj).DataTable({
 } //genCOCReg
 
 //genCOCCty creares the county COC Table
-function genCOCCty(loc,year_arr,group,yeardata) {
+function genCOCCty(loc,year_arr,group,yeardata,outType) {
 
 	//build urlstr
    var fips_arr2 = [];
@@ -713,11 +1160,15 @@ var cty_data = [];
 var cty_data2 = cty_data.sort(function(a, b){ return d3.ascending(a['countyfips'], b['countyfips']); })
 
 	// Generate Table
-	var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>Population</th><th>Change</th><th>Births</th><th>Deaths</th><th>Net Migration</th><th>Data Type</th></tr></thead>";
+	if(outType == "COC"){
+	   var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>Population</th><th>Change</th><th>Births</th><th>Deaths</th><th>Net Migration</th><th>Data Type</th></tr></thead>";
+	} else {
+		var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>Population</th><th>Data Type</th></tr></thead>";
+	}
 	out_tab = out_tab + "<tbody>"
 
 	for(i = 0; i < cty_data2.length; i++){
-		var el0 = "<td>" + cty_data2[i].countyfips + "</td>"
+	if(outType == "COC"){
 		var el1 = "<td>" + cty_data2[i].name + "</td>"
 		var el2 = "<td>" + cty_data2[i].year + "</td>"
 		var el3 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].population,"num") + "</td>"
@@ -725,15 +1176,27 @@ var cty_data2 = cty_data.sort(function(a, b){ return d3.ascending(a['countyfips'
 		var el5 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].births,"num") + "</td>"
 		var el6 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].deaths,"num") + "</td>"
 		var el7 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].netmig,"num") + "</td>"
-//Selecting value of data type
+	//Selecting value of data type
 
 		var filtData = yeardata.filter(b => cty_data2[i].year == b.year);
 		var el8 = "<td>" + filtData[0].datatype + "</td>"
 
-	   var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + el6 + el7 + el8 + "</tr>";
-	   out_tab = out_tab + tmp_row;
+	   var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + el5 + el6 + el7 + el8 + "</tr>";
+	} else {
+		var el1 = "<td>" + cty_data2[i].name + "</td>"
+		var el2 = "<td>" + cty_data2[i].year + "</td>"
+		var el3 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].population,"num") + "</td>"
+	//Selecting value of data type
+
+		var filtData = yeardata.filter(b => cty_data2[i].year == b.year);
+		var el4 = "<td>" + filtData[0].datatype + "</td>"
+
+	   var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + "</tr>";
+	}
+	out_tab = out_tab + tmp_row;
 	}
 	out_tab = out_tab + "</tbody>"
+
 
 //Output table
 	var tabDivOut = document.getElementById("tbl_output");
@@ -3445,6 +3908,7 @@ function genSYAReg(region,loc,year_arr,group,agespec, age_arr,yeardata) {
 	    var urlstr = "https://gis.dola.colorado.gov/lookups/sya?county=" + fips_list + "&year=" + year_list + "&choice="+agespec
 	}
 
+
 d3.json(urlstr).then(function(data){
 	
 
@@ -3602,7 +4066,6 @@ if(ctyval.length > 0){
   })
 }
 
-
 //muni
 if(munival.length > 0){
    munival.forEach(i => {
@@ -3610,7 +4073,7 @@ if(munival.length > 0){
 		muniarr.push(muniNM);
   })
 }  
-debugger;
+
 var geostr = "geo="
 if(ctyarr.length > 0){
 	var ctystr = ctyarr.join(",");
@@ -3623,8 +4086,6 @@ if(muniarr.length > 0){
 
 var censStr = urlstr + geostr + "&year=" + yrstr
 
-debugger
-console.log(censStr)
 
 d3.json(censStr).then(function(data){
 
@@ -3677,3 +4138,170 @@ $(tabObj).DataTable({
 	
 }) //Data
 } //genHistoricalCensus
+
+//function genNETMIGCty outputs Net Migration by Age for multiple counties
+function genNETMIGCty(loc,year_arr) {
+	//build urlstr
+   var fips_arr2 = [];
+	for(j = 0; j < loc.length; j++){
+		fips_arr2.push(parseInt(loc[j]));
+     };
+
+	
+	var urlstr = "https://storage.googleapis.com/co-publicdata/Colorado_Age_Migration_By_Decade.csv";
+
+
+d3.csv(urlstr).then(function(data){
+     var raw_data = []
+     var filtdata = data.filter(b => fips_arr2.includes(+b.countyfips) && year_arr.includes(b.year)) ;
+
+	 filtdata.forEach(i => {
+		 raw_data.push({"countyfips" : i.countyfips,
+						"countyname" : countyName(+i.countyfips),
+						"year" : i.year,
+						"age" :  i.age,
+						"population" : +i.population,
+						"netmigration" : +i.netmigration,
+						"migrationrate" : +i.migrationrate
+		 })
+	 })
+	
+var tab_data =  raw_data.sort(function(a, b){ return d3.ascending(a['age'], b['age']); })
+	                       .sort(function(a, b){ return d3.ascending(a['year'], b['year']); })
+	                       .sort(function(a, b){ return d3.ascending(a['countyfips'], b['countyfips']); });
+
+
+	 var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>Age</th><th>Population</th><th>Net Migration</th><th>Migration Rate</th></tr></thead>";
+	out_tab = out_tab + "<tbody>"
+
+	for(i = 0; i < tab_data.length; i++){
+			var el0 = "<td>" + tab_data[i].countyfips + "</td>"
+			var el1 = "<td>" + tab_data[i].countyname + "</td>"
+			var el2 = "<td>" + tab_data[i].year + "-" + (parseInt(tab_data[i].year) + 10).toString() + "</td>"
+			var el3 = "<td>" + tab_data[i].age + "</td>"
+			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].population,"num") + "</td>"
+			var el5 = "<td style='text-align: right'>" + fixNEG(tab_data[i].netmigration,"num") + "</td>"
+			var el6 = "<td style='text-align: right'>" + fixNEG(tab_data[i].migrationrate,"dec") + "</td>"
+			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + el6   + "</tr>";
+
+	   out_tab = out_tab + tmp_row;
+	}
+	out_tab = out_tab + "</tbody>"
+
+//Output table
+	var tabDivOut = document.getElementById("tbl_output");
+	var tabName = "netMigTab";
+//Clear div
+tabDivOut.innerHTML = "";
+
+var tabObj = "#" + tabName;
+$(tabDivOut).append("<table id="+ tabName + " class='DTTable' width='90%'></table>");
+$(tabObj).append(out_tab); //this has to be a html table
+
+
+$(tabObj).DataTable({
+  dom: 'Bfrtip',
+        buttons: [
+            'csv'
+        ]
+ });
+
+}) //data
+} //getNetMIGCty	
+
+
+//function genNETMIGReg outputs Net Migration by Age for regions
+function genNETMIGReg(region, loc,year_arr) {
+
+	//build urlstr
+   var fips_arr = [];
+   var fips_arr2 = [];
+   for(i = 0; i < loc.length; i++){
+	for(j = 0; j < loc[i].length; j++){
+		var regval = parseInt(region[i]);
+		var countyfips = parseInt(loc[i][j])
+		fips_arr.push({ countyfips, regval });
+		fips_arr2.push(countyfips);
+     };
+   };
+
+	
+	var urlstr = "https://storage.googleapis.com/co-publicdata/Colorado_Age_Migration_By_Decade.csv";
+
+
+d3.csv(urlstr).then(function(data){
+
+     var filtdata = data.filter(b => fips_arr2.includes(+b.countyfips) && year_arr.includes(b.year)) ;
+
+	 var raw_data = joinFUNCT(fips_arr,filtdata,"countyfips","countyfips",function(dat,col){
+		return{
+			"regionNum" : col.regval,
+			"countyfips" : col.countyfips,
+						"year" : dat.year,
+						"age" :  dat.age,
+						"population" : +dat.population,
+						"netmigration" : +dat.netmigration
+		};
+	});	
+
+//aggregating
+		var tmp_data = []
+		var columnsToSum = ['population', 'netmigration']
+		var binroll =  d3.rollup(raw_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.regionNum, d => d.year, d => d.age);
+		for (let [key, value] of binroll) {
+		for (let [key2, value2] of value) {
+		for (let [key3, value3] of value2) {
+		   tmp_data.push({'regionNum' : key,
+			            'regionName' : regionName(key), 
+						'year' : key2,
+						'age' : key3,
+						'population' : value3.population, 
+						'netmigration' : value3.netmigration, 
+						'migrationrate' : ((value3.netmigration/value3.population) * 100).toFixed(3) 
+						});
+		};
+		}
+		}
+
+var tab_data =  tmp_data.sort(function(a, b){ return d3.ascending(a['age'], b['age']); })
+	                       .sort(function(a, b){ return d3.ascending(a['year'], b['year']); })
+	                       .sort(function(a, b){ return d3.ascending(a['regionNum'], b['regionNum']); });
+
+
+	 var out_tab = "<thead><tr><th>Region Number</th><th>Region Name</th><th>Year</th><th>Age</th><th>Population</th><th>Net Migration</th><th>Migration Rate</th></tr></thead>";
+	out_tab = out_tab + "<tbody>"
+
+	for(i = 0; i < tab_data.length; i++){
+			var el0 = "<td>" + tab_data[i].regionNum + "</td>"
+			var el1 = "<td>" + tab_data[i].regionName + "</td>"
+			var el2 = "<td>" + tab_data[i].year + "-" + (parseInt(tab_data[i].year) + 10).toString() + "</td>"
+			var el3 = "<td>" + tab_data[i].age + "</td>"
+			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].population,"num") + "</td>"
+			var el5 = "<td style='text-align: right'>" + fixNEG(tab_data[i].netmigration,"num") + "</td>"
+			var el6 = "<td style='text-align: right'>" + fixNEG(tab_data[i].migrationrate,"dec") + "</td>"
+			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + el6   + "</tr>";
+
+	   out_tab = out_tab + tmp_row;
+	}
+	out_tab = out_tab + "</tbody>"
+
+//Output table
+	var tabDivOut = document.getElementById("tbl_output");
+	var tabName = "netMigTab";
+//Clear div
+tabDivOut.innerHTML = "";
+
+var tabObj = "#" + tabName;
+$(tabDivOut).append("<table id="+ tabName + " class='DTTable' width='90%'></table>");
+$(tabObj).append(out_tab); //this has to be a html table
+
+
+$(tabObj).DataTable({
+  dom: 'Bfrtip',
+        buttons: [
+            'csv'
+        ]
+ });
+
+}) //data
+} //getNetMIGReg

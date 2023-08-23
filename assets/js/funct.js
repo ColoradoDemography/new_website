@@ -6329,137 +6329,116 @@ multi_png.onclick = function() {
 //genNETMIGCOMP generates the Net Migration Comparison charts 
 //Uses data from NetMigrationByAgeComparison Must be updated after Census 2020 is available
 
-function genNETMIGCOMP(fips, ctyName, yrvalue) {
-	 const fmt_date = d3.timeFormat("%B %d, %Y");
-
-	var fipsNum = parseInt(fips);
+function genNETMIGCOMP(geotype, fips, yrvalue) {
+const fmt_date = d3.timeFormat("%B %d, %Y");
 
 //Reading Raw data
-var data_csv = "../data/NetMigrationByAgeComparison.csv";
+var data_csv = "https://storage.googleapis.com/co-publicdata/Colorado_Age_Migration_By_Decade.csv";
 d3.csv(data_csv).then(function(data){
-  var datafilt = data.filter(function(d) {return d.FIPS == fipsNum;});
-  var NetMigAge = [];
-  var NetMig9500 = [];
-  var NetMig0010 = [];
-  var NetMig1020 = [];
-  var Rate9500 = [];
-  var Rate0010 = [];
-  var Rate1020 = [];
+   if(geotype == "region"){
+		var selgeo = [];
+		var selgeo_fin = [];
+		fips.forEach(d => {
+			var tmpcty = regionCOL(+d);
+		    selgeo.push(tmpcty[0].fips)
+		})
+		for(i = 0; i < selgeo[0].length; i++) {
+			selgeo_fin.push(parseInt(selgeo[0][i]).toString())
+		}
+		var datafilt = data.filter(d=> selgeo_fin.includes(d.countyfips) && yrvalue.includes(d.year));
+        for(i = 0; i < datafilt.length; i++){
+		 datafilt[i].regionNum = +fips[0]
+		}
+		
+		var tmp_data = []
+		var columnsToSum = ['population', 'netmigration']
+		var binroll =  d3.rollup(datafilt, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.regionNum, d => d.year, d => d.age);
+		for (let [key, value] of binroll) {
+		for (let [key2, value2] of value) {
+		for (let [key3, value3] of value2) {
+		   tmp_data.push({'countyfips' : key,
+			            'county' : regionName(key), 
+						'year' : key2,
+						'age' : key3,
+						'population' : value3.population, 
+						'netmigration' : value3.netmigration, 
+						'migrationrate' : ((value3.netmigration/value3.population) * 100).toFixed(3) 
+						});
+		};
+		}
+		}
+		var datafilt = tmp_data;
+	} else {
+		var fipsNum = parseInt(fips).toString()
+		var datafilt = data.filter(d => d.countyfips == fipsNum && yrvalue.includes(d.year));
+	}
 
-  datafilt.forEach(function(obj) {
-	  NetMigAge.push(Number(obj.FiveYearAgeGroups));
-	  NetMig9500.push(Number(obj.NetMig9500));
-	  NetMig0010.push(Number(obj.NetMig0010));
-	  NetMig1020.push(Number(obj.NetMig1020));
-	  Rate9500.push(Number(obj.Rate9500) * 1000);
-	  Rate0010.push(Number(obj.Rate0010) * 1000);
-	  Rate1020.push(Number(obj.Rate1020) * 1000);
-  });
+   if(geotype == 'county'){
+	   for(i = 0; i < datafilt.length; i++){
+	   if(datafilt[i].county == "State Total"){
+		   datafilt[i].county = "Colorado";
+	   } else {
+		   datafilt[i].county = datafilt[i].county + " County"
+	   }
+   }
+   }
+   
+   var datasort = datafilt.sort(function(a, b){ return d3.ascending(a['age'], b['age']); })
+	                       .sort(function(a, b){ return d3.ascending(a['year'], b['year']); });
+
+	var outName = [...new Set(datasort.map((item) => item.county))];
+
+	
+  var yr_arr = [...new Set(datasort.map((item) => item.year))]; 
+  var NetMig_trace = [];
+  var Rate_trace = [];
   
-var NetMig9500_line = { 
-               x: NetMigAge,
-               y : NetMig9500,
-			   name : '1995 to 2000',
+  for(i = 0; i < yr_arr.length; i++){
+	  var yr_filt = datasort.filter(function(d) {return d.year == yr_arr[i];});
+	  var yr_title = yr_arr[i] + " to " + (parseInt(yr_arr[i]) + 10).toString();
+ 
+	  var age_arr = []
+	  var netmig = [];
+	  var migrate = [];
+	  for(j = 0; j < yr_filt.length; j++){
+		age_arr.push(yr_filt[j].age.replace("_", " to "))
+		netmig.push(+yr_filt[j].netmigration);
+		migrate.push(+yr_filt[j].migrationrate);
+	  }
+
+	  var ind_traceN = {
+               x: age_arr,
+               y : netmig,
+			   name : yr_title,
 			   mode : 'lines+markers', 
 			    marker: {
-                  color: 'blue',
 				  symbol: 'circle',
                   size: 8
                 },
 			   line : {
-					color: 'blue',
 					width : 3
 				}
 			};
+      NetMig_trace.push(ind_traceN)
 
-var NetMig0010_line = { 
-               x: NetMigAge,
-               y : NetMig0010,
-			   name : '2000 to 2010',
+	var ind_traceRT = {
+               x: age_arr,
+               y : migrate,
+			   name : yr_title,
 			   mode : 'lines+markers', 
 			    marker: {
-                  color: 'orange',
-				  symbol: 'square',
-                  size: 8
-                },
-			   line : {
-					color: 'orange',
-					width : 3
-				}
-			};
-
-var NetMig1020_line = { 
-               x: NetMigAge,
-               y : NetMig1020,
-			   name : '2010 to 2020',
-			   mode : 'lines+markers', 
-			    marker: {
-                  color: 'green',
-				  symbol: 'diamond',
-                  size: 8
-                },
-			   line : {
-					color: 'green',
-					dash : 'dash',
-					width : 3
-				}
-			};
-			
-var NetMig_trace = [NetMig9500_line, NetMig0010_line, NetMig1020_line];
-
-var Rate9500_line = { 
-               x: NetMigAge,
-               y : Rate9500,
-			   name : '1995 to 2000',
-			   mode : 'lines+markers', 
-			    marker: {
-                  color: 'blue',
 				  symbol: 'circle',
                   size: 8
                 },
 			   line : {
-					color: 'blue',
 					width : 3
 				}
 			};
-
-var Rate0010_line = { 
-               x: NetMigAge,
-               y : Rate0010,
-			   name : '2000 to 2010',
-			   mode : 'lines+markers', 
-			    marker: {
-                  color: 'orange',
-				  symbol: 'square',
-                  size: 8
-                },
-			   line : {
-					color: 'orange',
-					width : 3
-				}
-			};
-
-var Rate1020_line = { 
-               x: NetMigAge,
-               y : Rate1020,
-			   name : '2010 to 2020',
-			   mode : 'lines+markers', 
-			    marker: {
-                  color: 'green',
-				  symbol: 'diamond',
-                  size: 8
-                },
-			   line : {
-					color: 'green',
-					dash : 'dash',
-					width : 3
-				}
-			};
-			
-var Rate_trace = [Rate9500_line, Rate0010_line, Rate1020_line];
+      Rate_trace.push(ind_traceRT)
+  }
 
 var NetMig_layout = {
-		title: "Net Migration by Age -- Net Migrants " + ctyName,
+		title: "Net Migration by Age -- Net Migrants " + outName,
 		  autosize: false,
 		  width: 1000,
 		  height: 400, 
@@ -6486,11 +6465,22 @@ var NetMig_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
+		shapes: [{
+			type: 'line',
+			x0: 0,
+			y0: 0,
+			x1: 15,
+			y1: 0,
+			line: {
+				color: 'black',
+				width: 4,
+				dash: 'solid'
+		}}],
 			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
  
  var Rate_layout = {
-		title: "Net Migration by Age -- Rates " + ctyName,
+		title: "Net Migration by Age -- Rates " + outName,
 		  autosize: false,
 		  width: 1000,
 		  height: 400, 
@@ -6506,7 +6496,7 @@ var NetMig_layout = {
 			linewidth: 2
 		  },
 		  yaxis: {
-			  title : 'Net Migration Rate (per 1,000 Population)',
+			  title : 'Net Migration Rate (per 100 Population)',
 			  automargin : true,
 			showgrid: true,
 			showline: true,
