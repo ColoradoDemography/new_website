@@ -1832,13 +1832,22 @@ li:hover>nava{
 }
 
 /* Accessbility Styles 6/27/2023 */
-/* Skip Nav*/
-.skipnav a { position: absolute; left: -10000px; }
-.skipnav a:hover, .skipnav a:focus, .skipnav a:active { 
-    position: 
-	static; left: 0; 
-   }
-   
+/* Skip Nav  skip to contect link...*/
+.skip {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.skip:focus {
+  position: static;
+  width: auto;
+  height: auto;
+}
+
  /* New Nav button*/
  .sum_btn {
   overflow: hidden;
