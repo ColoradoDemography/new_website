@@ -6394,11 +6394,22 @@ d3.csv(data_csv).then(function(data){
    var datasort = datafilt.sort(function(a, b){ return d3.ascending(a['age'], b['age']); })
 	                       .sort(function(a, b){ return d3.ascending(a['year'], b['year']); });
 
-	var outNamea = [...new Set(datasort.map((item) => item.county))];
-	var outName = outNamea.toString().trim()
 
 	
   var yr_arr = [...new Set(datasort.map((item) => item.year))]; 
+  
+  	var outNamea = [...new Set(datasort.map((item) => item.county))];
+	var outName = outNamea.toString().trim()
+//Chart Title
+ if(yr_arr. length == 1) {
+	 var NetMigTitle = "Net Migration by Age -- Net Migrants " + outName + yr_arr[0] + " to " + (parseInt(yr_arr[0]) + 10).toString();
+	 var NetMigRateTitle = "Net Migration by Age -- Net Migration Rate " + outName + yr_arr[0] + " to " + (parseInt(yr_arr[0]) + 10).toString();
+ } else {
+	 var NetMigTitle = "Net Migration by Age -- Net Migrants " + outName;
+	 var NetMigRateTitle = "Net Migration by Age -- Net Migration Rate " + outName;
+ }
+ 
+//Chart Objects 
   var NetMig_trace = [];
   var Rate_trace = [];
   
@@ -6447,7 +6458,7 @@ d3.csv(data_csv).then(function(data){
   }
 
 var NetMig_layout = {
-		title: "Net Migration by Age -- Net Migrants " + outName,
+		title: NetMigTitle,
 		  autosize: false,
 		  width: 1000,
 		  height: 400, 
@@ -6489,7 +6500,7 @@ var NetMig_layout = {
 		};
  
  var Rate_layout = {
-		title: "Net Migration by Age -- Rates " + outName,
+		title: NetMigRateTitle,
 		  autosize: false,
 		  width: 1000,
 		  height: 400, 
