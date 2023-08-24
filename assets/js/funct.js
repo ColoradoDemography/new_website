@@ -6401,9 +6401,9 @@ d3.csv(data_csv).then(function(data){
   	var outNamea = [...new Set(datasort.map((item) => item.county))];
 	var outName = outNamea.toString().trim()
 //Chart Title
- if(yr_arr. length == 1) {
-	 var NetMigTitle = "Net Migration by Age -- Net Migrants " + outName + yr_arr[0] + " to " + (parseInt(yr_arr[0]) + 10).toString();
-	 var NetMigRateTitle = "Net Migration by Age -- Net Migration Rate " + outName + yr_arr[0] + " to " + (parseInt(yr_arr[0]) + 10).toString();
+ if(yr_arr.length == 1) {
+	 var NetMigTitle = "Net Migration by Age -- Net Migrants " + outName + " " + yr_arr[0] + " to " + (parseInt(yr_arr[0]) + 10).toString();
+	 var NetMigRateTitle = "Net Migration by Age -- Net Migration Rate " + outName + " " +yr_arr[0] + " to " + (parseInt(yr_arr[0]) + 10).toString();
  } else {
 	 var NetMigTitle = "Net Migration by Age -- Net Migrants " + outName;
 	 var NetMigRateTitle = "Net Migration by Age -- Net Migration Rate " + outName;
