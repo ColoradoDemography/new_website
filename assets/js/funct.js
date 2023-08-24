@@ -2089,7 +2089,7 @@ function genFilename(outname, type, ext, yr) {
 			var fileName = outname + " Components of Change." + ext;
 		break;
 		case 'netmig' :
-			var fileName = canme + " Net Migration by Age." + ext;
+			var fileName = outname + " Net Migration by Age." + ext;
 		break;
 		case 'age' :
 			var fileName = outname + " Age Categories." + ext;
@@ -2131,10 +2131,18 @@ function genFilename(outname, type, ext, yr) {
 			var fileName = canme + " Single Year of Age by Race Two or More Races NH " + yr + "." + ext;
 		break;
 		case 'netmign' :
-			var fileName =  outname + " Net Migration by Age." + ext
+		   if(ext == "csv"){
+			var fileName =  outname + " Net Migration by Age Data." + ext;
+		   } else {
+			var fileName =  outname + " Net Migration by Age Counts." + ext;
+		   }
 		break;
 		case 'netmigrrate' :
-			var fileName =  outname + "Net Migration by Age." + ext
+		   if(ext == "csv"){
+			var fileName =  outname + " Net Migration by Age Data." + ext;
+		   } else {
+			var fileName =  outname + " Net Migration by Age Rates." + ext;
+		   }
 		break;
 		case 'netmigwa' :
 			var fileName =  outname + " Net Migration by Year." + ext
@@ -6386,7 +6394,8 @@ d3.csv(data_csv).then(function(data){
    var datasort = datafilt.sort(function(a, b){ return d3.ascending(a['age'], b['age']); })
 	                       .sort(function(a, b){ return d3.ascending(a['year'], b['year']); });
 
-	var outName = [...new Set(datasort.map((item) => item.county))];
+	var outNamea = [...new Set(datasort.map((item) => item.county))];
+	var outName = outNamea.toString().trim()
 
 	
   var yr_arr = [...new Set(datasort.map((item) => item.year))]; 
@@ -6528,20 +6537,20 @@ Plotly.newPlot(NETMIGRATE, Rate_trace, Rate_layout,config);
 var netmign_csv = document.getElementById('netmign_csv');
 var netmign_png = document.getElementById('netmign_png');
 netmign_csv.onclick = function() {
-	  exportToCsv(ctyName, 'netmign', datafilt, 0);
+	  exportToCsv(outName, 'netmign', datasort, 0);
      }; 
 netmign_png.onclick = function() {
-	   exportToPng(ctyName, 'netmign', NETMIG, 0);
+	   exportToPng(outName, 'netmign', NETMIG, 0);
      };
 	 
 // Net Migration Rate
 var netmigrrate_csv = document.getElementById('netmigrrate_csv');
 var netmigrrate_png = document.getElementById('netmigrrate_png');
 netmigrrate_csv.onclick = function() {
-	  exportToCsv(ctyName, 'netmigrrate', datafilt, 0);
+	  exportToCsv(outName, 'netmigrrate', datasort, 0);
      }; 
 netmigrrate_png.onclick = function() {
-	   exportToPng(ctyName, 'netmigrrate', NETMIGRATE, 0);
+	   exportToPng(outName, 'netmigrrate', NETMIGRATE, 0);
      };
 	 
 
