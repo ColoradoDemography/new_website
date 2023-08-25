@@ -1,9 +1,10 @@
+<!-- State Demography Office Homepage 8/2023 A. Bickford -->
 <!DOCTYPE html>
-<!-- the legacy website https://coloradodemography.github.io/ -->
 <html lang="en">
 <head>
+
 <title>Colorado State Demography Office Home Page</title>
-<a href="#main" class="skip" tabindex='1'>Skip to main content</a>
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
 <!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
@@ -25,10 +26,13 @@
 <!-- GoogleAnalytics Script -->
 <script defer src="./assets/js/googleAnalytics.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-W27DQ8VRCX"></script>
+
+<a href="#main" class="skip">Skip to main content</a>
 </head>
 
 <body>
 <div>
+
 <a href="https://cdola.colorado.gov/"><img class="logoSDO" src="./assets/img/SDO-1600x400.jpg" alt="Colorado Department of Local Affairs State Demography Office"></a>
 </div>
 <p></p>
@@ -41,14 +45,14 @@
   </div>
   <div class="grid-item panel_2_1" id="leftHand">
 
-  <h1 calss="h1_style">Navigation Menu</h1>
+  <h1 id="main" class="h1_style" tabindex="-1">Navigation Menu</h1>
   <a class="sum_btn href="https://arcg.is/1uWC0q0" tabindex="1" title="Visualization of recent population trends in Colorado"><h2 class="h3_style">Colorado Population Trends: Story and Visualization</h2></a>
 	 <br>
 	<div w3-include-html="./assets/html/left_hand_index.html"></div>
   </div> <!-- Grid  panel_2_1 -->
 
   <div class="grid-item panel_2_2">
-  <a id="main" name="contenttarget" tabindex="-1"></a>
+  <a name="contenttarget"></a>
 	 <label for="county-dropdown" alt="Download population data for specific geographies">Select County:</label>
 	 <select class="county-dropdown" id="county-dropdown" alt="Download population data for specific geographies"></select>
  </div>
