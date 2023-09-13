@@ -32,7 +32,7 @@
 <!-- GoogleAnalytics Script -->
 <script defer src="../js/googleAnalytics.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-W27DQ8VRCX"></script>
-<a href="#mainx" class="skip" tabindex='1'>Skip to main content</a>
+<a href="#mainx" class="skip-main" tabindex='1'>Skip to main content</a>
 </head>
 <body>
 <div>
@@ -88,8 +88,8 @@
 	<td class="look_cll">
 	</td>
 	<td class="look_cll">
-		<button class='databutton' id='gentable'>Generate Table</button><br><br>
-		<button class='databutton' id='cleartable'>Reset Selections</button><br>
+		<button class='databutton' id='gentable' aria-label='Generate Data Table Button'>Generate Table</button><br><br>
+		<button class='databutton' id='cleartable' aria-label='Reset Table Selections Button'>Reset Selections</button><br>
 	</td>
 	</tr>
 	</table>
@@ -120,7 +120,7 @@ d3.json(urlstr).then(function(yeardata){
      yeardata2.push({"year" : i, "datatype" : "Estimate"})
 }
 
- popDropdown('county','county-dropdown','lookup');
+ popDropdown('county','county-dropdown','');
  popDropdown('municipality','muni-dropdown','lookup');
 
  popYrdd("year-dropdown",yeardata2);  //Change this range to match data

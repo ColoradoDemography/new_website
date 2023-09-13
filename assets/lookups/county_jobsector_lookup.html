@@ -1,9 +1,9 @@
-<!-- County Jobs by Sector (NAICS) Lookup Page A Bickford 6/2021 -->
+<!-- County Jobs by Sector Lookup Page A Bickford 6/2021 -->
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>County Jobs by Sector (NAICS) Lookup</title>
+<title>County Jobs by Sector Lookup</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" http-equiv="content-type" content="text/html; charset=utf-8">
 <!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
 <!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
@@ -32,7 +32,7 @@
 <!-- GoogleAnalytics Script -->
 <script defer src="../js/googleAnalytics.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-W27DQ8VRCX"></script>
-<a href="#mainx" class="skip" tabindex='1'>Skip to main content</a>
+<a href="#mainx" class="skip-main" tabindex='1'>Skip to main content</a>
 </head>
 <body>
 <div>
@@ -49,13 +49,13 @@
 	<div w3-include-html="../html/left_hand_index.html"></div>
   </div> <!-- Grid  panel2_2_1 -->
   <div class="grid-item app-panel_2_2">
-  <h1 class='h1_style' id='mainx'>County Jobs by Sector (NAICS) Data Lookup</h1>
+  <h1 class='h1_style' id='mainx'>County Jobs by Sector Data Lookup</h1>
   <p>
   <a href="../lookups/region_naics_lookup.html" target='_blank'>Need State/Regional Data?</a>
   </p>
    <h2 class='h2_style'>INSTRUCTIONS:</h2>
    <p class="lookup_p">
-   This application creates custom tables for SDO County Job estimates by NAICS category.
+   This application creates custom tables for SDO County Job estimates by sector.
    </p>
   <p class="lookup_p">
    A spreadsheet with detailed information for counties is available on the 
@@ -84,8 +84,8 @@
     <select class="year-dropdown" id="year-dropdown" style='width:100px;' size="6" multiple role='listbox'></select>
     </td>
 	<td class="lookup_cll">
-		<button class='databutton' id='gentable'>Generate Table</button><br><br>
-		<button class='databutton' id='cleartable'>Reset Selections</button><br>
+		<button class='databutton' id='gentable' aria-label='Generate Data Table Button'>Generate Table</button><br><br>
+		<button class='databutton' id='cleartable' aria-label='Reset Table Selections Button'>Reset Selections</button><br>
 	</td>
 	<td class="lookup_cll">
 	</td>
@@ -115,7 +115,11 @@
 var urlstr = "https://gis.dola.colorado.gov/lookups/componentYRS";
 d3.json(urlstr).then(function(yeardata){
  var yeardata2 = yeardata.filter(d => d.year >= 2001 && d.datatype == "Estimate");
- popDropdown('county','county-dropdown','lookup')
+ //Check for 2022 Estimate
+ if(Math.max(yeardata2.year) != 2022) {
+   yeardata2.push({year : 2022, datatype : "Estimate"})
+ }
+ popDropdown('county','county-dropdown','')
 
 
  popYrdd("year-dropdown",yeardata2);  //Change this range to match data
@@ -147,7 +151,7 @@ d3.json(urlstr).then(function(yeardata){
 		}
 
 		if(complete){
-		     genNAICSCty(selectedfips,selectedyr);
+		     genJOBSECTCty(selectedfips,selectedyr);
 			 } else {
 			 window.alert(outputmsg);
 			 }

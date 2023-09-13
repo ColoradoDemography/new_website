@@ -32,7 +32,7 @@
 <!-- GoogleAnalytics Script -->
 <script defer src="../js/googleAnalytics.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-W27DQ8VRCX"></script>
-<a href="#mainx" class="skip" tabindex='1'>Skip to main content</a>
+<a href="#mainx" class="skip-main" tabindex='1'>Skip to main content</a>
 </head>
 <body>
 <div>
@@ -59,9 +59,9 @@
    </p>
   <p class="lookup_p">
    A spreadsheet with detailed information for population by age is available on the 
-   <a href='https://demography.dola.colorado.gov/assets/html/population.html' target='_blank'>SDO Population Spreadsheets</a> page.
+   <a href='https://coloradodemography.github.io/new_website/assets/html/population.html' target='_blank'>SDO Population Spreadsheets</a> page.
   </p>
-      <table class='lookup_tab' cellspacing="0" cellpadding="0">
+      <table class='lookup_tab' id="input_tab" cellspacing="0" cellpadding="0">
    <tr>
 	<td class="look_cll">
 		<label class="entry_text" for="region-dropdown" id="region-lbl"  alt='Select one or more Regions' aria-label='Select one or more Regions'>Select one or more Regions:</label> 
@@ -97,8 +97,8 @@
 	<td class="look_cll" id='ageselect'>
 	</td>
 	<td class="look_cll">
-		<button class='databutton' id='gentable'>Generate Table</button><br><br>
-		<button class='databutton' id='cleartable'>Reset Selections</button><br>
+		<button class='databutton' id='gentable' aria-label='Generate Data Table Button'>Generate Table</button><br><br>
+		<button class='databutton' id='cleartable' aria-label='Reset Table Selections Button'>Reset Selections</button><br>
 	</td>
 	</tr>
 	</table>
@@ -166,6 +166,7 @@ d3.json(urlstr).then(function(yeardata){
 		switch(age_group) {
 		case "custom":
    			for(i = 0;i < 5;i++){
+				complete = true;
 			   var box_val1 = "agestart" + i;
 			   var box_val2 = "ageend" + i;
 			   var startval = 0;
@@ -192,18 +193,12 @@ d3.json(urlstr).then(function(yeardata){
 				outputmsg = outputmsg +  " > One of the age ranges is incorrect.  Please check the inputs.\n";
 				complete = false;
 				}  
-			}
-		//Checking if length is not even
-		if(age_range.length % 2 != 0){
-		   	outputmsg = outputmsg +  " > Please provide pairs of age values.\n";
-			complete = false;
+		if(complete) {
+		   if(!((+startval == 0) && (+endval == 0))){
+		      age_range.push([+startval, +endval]);
+		   }
 		}
-		for(j = 1; j < age_range.length; j++){
-		   if(age_range[j-1] >= age_range[j]){
-		      	outputmsg = outputmsg +  " > One of the age ranges is out of order.  Please check the inputs.\n";
-				complete = false;
-		  }
-		}
+		} //the loop
 		break;
 		case "single" :
 		  var agesel = document.getElementById("agesel")
@@ -226,10 +221,19 @@ d3.json(urlstr).then(function(yeardata){
 
 function clearInputs() {
    document.getElementById('tbl_output').innerHTML = "";
+    var table = document.getElementById("input_tab");
+    var secondRow = table.rows[1];
+    secondRow.deleteCell(3);
+
    var elements = document.getElementsByTagName('select');
 	for (var i = 0; i < elements.length; i++) {
 		elements[i].selectedIndex = -1;
 	}
+   var ele = document.getElementsByName("age_grouping");
+   for(var i=0;i<ele.length;i++) {
+    ele[i].checked = false;
+	}
+	ele[0].checked = true;
 }; //clearInputs
 
 

@@ -32,7 +32,7 @@
 <!-- GoogleAnalytics Script -->
 <script defer src="../js/googleAnalytics.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-W27DQ8VRCX"></script>
-<a href="#mainx" class="skip" tabindex='1'>Skip to main content</a>
+<a href="#mainx" class="skip-main" tabindex='1'>Skip to main content</a>
 </head>
 <body>
 <div>
@@ -59,9 +59,9 @@
    </p>
   <p class="lookup_p">
    A spreadsheet with detailed information for population by age is available on the 
-   <a href='https://demography.dola.colorado.gov/assets/html/population.html' target='_blank'>SDO Population Spreadsheets</a> page.
+   <a href='https://coloradodemography.github.io/new_website/assets/html/population.html' target='_blank'>SDO Population Spreadsheets</a> page.
   </p>
-      <table class='lookup_tab' cellspacing="0" cellpadding="0">
+      <table class='lookup_tab' id="input_tab" cellspacing="0" cellpadding="0">
    <tr>
 	<td class="look_cll">
 		<label class="entry_text" for="county-dropdown" id="county-lbl"  alt='Select one or more Counties' aria-label='Select one or more Counties'>Select one or more Counties:</label> 
@@ -97,8 +97,8 @@
 	<td class="look_cll" id='ageselect'>
 	</td>
 	<td class="look_cll">
-		<button class='databutton' id='gentable'>Generate Table</button><br><br>
-		<button class='databutton' id='cleartable'>Reset Selections</button><br>
+		<button class='databutton' id='gentable' aria-label='Generate Data Table Button'>Generate Table</button><br><br>
+		<button class='databutton' id='cleartable' aria-label='Reset Table Selections Button'>Reset Selections</button><br>
 	</td>
 	</tr>
 	</table>
@@ -124,7 +124,7 @@
 var urlstr = "https://gis.dola.colorado.gov/lookups/componentYRS";
 d3.json(urlstr).then(function(yeardata){
 
- popDropdown('county','county-dropdown','lookup');
+ popDropdown('county','county-dropdown','');
  var yeardata2 = yeardata.filter(i => i.year >= 1990)
  popYrdd("year-dropdown",yeardata2);  //Change this range to match data
  
@@ -158,10 +158,13 @@ d3.json(urlstr).then(function(yeardata){
         var selectedgroup = "";
 
 		var age_range = [];
+
+		
 		var age_group = document.querySelector('input[name="age_grouping"]:checked').value;
 		switch(age_group) {
 		case "custom":
    			for(i = 0;i < 5;i++){
+				complete = true;
 			   var box_val1 = "agestart" + i;
 			   var box_val2 = "ageend" + i;
 			   var startval = 0;
@@ -171,35 +174,25 @@ d3.json(urlstr).then(function(yeardata){
 					if(isNaN(startval)) {
 					 outputmsg = outputmsg +  " > One of the age entries is not numeric.  Please check the inputs.\n";
 					 complete = false;
-				    } else {
-			   	      age_range.push(+startval)
-					}
+				    }
 				}
 			   if(!(document.getElementById(box_val2).value == "")) {
 			        endval = document.getElementById(box_val2).value
 					if(isNaN(endval)) {
 					 outputmsg = outputmsg +  " > One of the age entries is not numeric.  Please check the inputs.\n";
 					 complete = false;
-				    } else {
-			   	      age_range.push(+endval)
-					}
+				    } 
 			   }
 			   if(+startval > +endval){
 				outputmsg = outputmsg +  " > One of the age ranges is incorrect.  Please check the inputs.\n";
 				complete = false;
 				}  
-			}
-		//Checking if length is not even
-		if(age_range.length % 2 != 0){
-		   	outputmsg = outputmsg +  " > Please provide pairs of age values.\n";
-			complete = false;
+		if(complete) {
+		   if(!((+startval == 0) && (+endval == 0))){
+		      age_range.push([+startval, +endval]);
+		   }
 		}
-		for(j = 1; j < age_range.length; j++){
-		   if(age_range[j-1] >= age_range[j]){
-		      	outputmsg = outputmsg +  " > One of the age ranges is out of order.  Please check the inputs.\n";
-				complete = false;
-		  }
-		}
+		} //the loop
 		break;
 		case "single" :
 		  var agesel = document.getElementById("agesel")
@@ -210,8 +203,8 @@ d3.json(urlstr).then(function(yeardata){
 		  }
 		  selectedgroup = document.querySelector('input[name="age_summary"]:checked').value;
 		break;
-		}
-
+		}  //switch 
+	 
 		if(complete){
 		     genSYACty(selectedfips,selectedyr,selectedgroup,age_group, age_range, yeardata2);
 			 } else {
@@ -222,10 +215,19 @@ d3.json(urlstr).then(function(yeardata){
 
 function clearInputs() {
    document.getElementById('tbl_output').innerHTML = "";
+    var table = document.getElementById("input_tab");
+    var secondRow = table.rows[1];
+    secondRow.deleteCell(3);
+
    var elements = document.getElementsByTagName('select');
 	for (var i = 0; i < elements.length; i++) {
 		elements[i].selectedIndex = -1;
 	}
+   var ele = document.getElementsByName("age_grouping");
+   for(var i=0;i<ele.length;i++) {
+    ele[i].checked = false;
+	}
+	ele[0].checked = true;
 }; //clearInputs
 
 
