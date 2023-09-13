@@ -1,8 +1,9 @@
 //Support functions for lookup scripts  A. Bickford 7/2022
 
-//Join function from http://learnjsdata.com/combine_data.html
+//cat Utility Functions for data lookups
 
 function joinFUNCT(lookupTable, mainTable, lookupKey, mainKey, select) {
+//Join function from http://learnjsdata.com/combine_data.html
 
     var l = lookupTable.length,
         m = mainTable.length,
@@ -19,9 +20,11 @@ function joinFUNCT(lookupTable, mainTable, lookupKey, mainKey, select) {
     }
     return output;
 };
+// joinFUNCT
 
-//getSelectValues Works with multiple selection boxes from Stack Overflow https://stackoverflow.com/questions/5866169/how-to-get-all-selected-values-of-a-multiple-select-box
 function getSelectValues(select) {
+//getSelectValues Works with multiple selection boxes from Stack Overflow https://stackoverflow.com/questions/5866169/how-to-get-all-selected-values-of-a-multiple-select-box
+
   var result = [];
   var options = select && select.options;
   var opt;
@@ -35,9 +38,11 @@ function getSelectValues(select) {
   }
   return result;
 }
+// getSelectValues
 
-//genYR Range Generates year range data
+
 function genYR(begYr, endYr){
+//genYR Range Generates year range data for lookup year dropdowns
 	outYr = [];
 	for(i = begYr; i <= endYr; i++){
 		outYr.push({"year" : i, 
@@ -45,9 +50,12 @@ function genYR(begYr, endYr){
 	}
 return(outYr);
 }
+// genYR
 
-//popYrdd populates year dropdown based on year data
+
 function popYrdd(ddid,yeardata){
+//popYrdd populates year dropdown based on year lookup dropdown
+
 var sel = document.getElementById(ddid);
 sel.innerHTML = "";
 		yeardata.forEach(j => {
@@ -56,16 +64,18 @@ sel.innerHTML = "";
 				el.style.color = "black";
 			    el.textContent = j.year;
 		    } else {
-			el.style.color = "red";
+			el.style.color = "#B90000";
 			el.textContent = j.year;
 		   }
 			el.value = j.year;
 			sel.appendChild(el);
 		})
-}  //popRaceYrdd
+}  
+// popYrdd
 
-//popAgeYrdd populates age dropdown based on input range
 function popAgeYrdd(ddid,minage,maxage){
+//popAgeYrdd populates age dropdown based on input range
+
 var sel = document.getElementById(ddid);
 sel.innerHTML = "";
 		for(var i = minage; i <= maxage; i++) {
@@ -78,11 +88,15 @@ sel.innerHTML = "";
 			el.value = i;
 			sel.appendChild(el);
 		}
-} //popAgeYrdd
+} 
+// popAgeYrdd
 
-//genRaceTabCty creares the county race data call and produces table
+//cat Race and Ethnicity Lookup application functions
+
 function genRaceTabCty(loc,year_arr, race_arr,eth_arr,age_arr,sex_list,group) {
-	const fmt_comma = d3.format(",");
+//genRaceTabCty creares the county race data call and produces table
+
+	
 
 	//build urlstr
 	var fips_arr = [];
@@ -246,218 +260,7 @@ cty_data = cty_data.concat(cty_tmp)
 	var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>Age</th><th>Sex</th><th>Race</th><th>Ethnicity</th><th>Count</th></tr></thead>";
 	out_tab = out_tab + "<tbody>"
 	for(i = 0; i < cty_data.length; i++){
-		var el1 = "<td>" + cty_data[i].countyfips + "</td>"
-		var el2 = "<td>" + cty_data[i].name + "</td>"
-		var el3 = "<td>" + cty_data[i].year + "</td>"
-		var el4 = "<td>" + cty_data[i].age + "</td>"
-		if(sex_list == "S") {
-			var el5 = "<td> </td>"
-		} else {
-		   if(cty_data[i].sex == "M"){
-			var el5 = "<td>Male</td>";
-		   }
-		   if(cty_data[i].sex == "F"){
-			var el5 =  "<td>Female</td>";
-		   }
-		}
-		var el6 =  "<td>" + cty_data[i].race + "</td>"
-		var el7 = "<td>" + cty_data[i].ethnicity + "</td>"
-		var el8 = "<td style='text-align: right'>" + fmt_comma(parseInt(cty_data[i].count)) + "</td>"
-
-		var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + el5 + el6 + el7 + el8 + "</tr>";
-		var tmp_str = tmp_row.replaceAll("_","")
-
-	   out_tab = out_tab + tmp_str;
-	}
-	out_tab = out_tab + "</tbody>"
-
-//Output table
-	var tabDivOut = document.getElementById("tbl_output");
-	var tabName = "raceTab";
-//Clear div
-tabDivOut.innerHTML = "";
-
-var tabObj = "#" + tabName;
-$(tabDivOut).append("<table id="+ tabName + " class='DTTable' width='90%'></table>");
-$(tabObj).append(out_tab); //this has to be a html table
-
-
-$(tabObj).DataTable({
-  dom: 'Bfrtip',
-        buttons: [
-            'csv'
-        ]
- });
-})
-} //genRaceTabCty
-
-//genRaceTabCty10 creares the county race data call and produces table Race 2010 base categories
-function genRaceTabCty10(loc,year_arr, race_arr,eth_arr,age_arr,sex_list,group) {
-
-	//build urlstr
-	var fips_arr = [];
-	for(i = 0; i < loc.length; i++){ fips_arr.push(parseInt(loc[i]))}
-	var fips_list  = fips_arr.join(",")
-	var year_list = year_arr.join(",")
-	var race_list = race_arr.join(",")
-	var eth_list = eth_arr.join(",")
-	var age_list = age_arr.join(",")
-	if(sex_list == "S"){
-		var urlstr = "https://gis.dola.colorado.gov/lookups/sya-race-estimates?age="+ age_list + "&county="+ fips_list +"&year="+ year_list +"&race=" + race_list+ "&ethnicity="+eth_list+"&group=opt0";
-    } else {
-		var sexl = sex_list.toLowerCase()
-		var urlstr = "https://gis.dola.colorado.gov/lookups/sya-race-estimates?age="+ age_list + "&county="+ fips_list +"&year="+ year_list +"&race=" + race_list+ "&ethnicity="+eth_list+"&sex="+sexl+"&group=opt0";
-	}
-
-console.log(urlstr)
-d3.json(urlstr).then(function(data){
-
-
-    // Flesh out records -- for options ne 0
-	var fullkeys = ['county_fips', 'year','age','sex','race', 'ethnicity','count']
-
-	for(i = 0; i < data.length; i++){
-		for(j = 0; j < fullkeys.length; j ++) {
-		if(!(fullkeys[j] in data[i])){
-				data[i][fullkeys[j]] = "_";
-			}
-		}
-	}
-	var fips_list = [...new Set(data.map(d => d.county_fips))];
-	var cty_data = [];
-  	
-	fips_list.forEach( i => {
-	  var filtData = data.filter(b => (b.county_fips == i));
-	  var cty_tmp = [];
-
-    //Rollups based on group value
-	switch(group) {
-		case "opt0":
-		filtData.forEach(j =>{
-				cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : j.year, 'age' : j.age, 'sex' : j.sex, 'race' : j.race, 'ethnicity' : j.ethnicity, 'count' : Math.round(+j.count)});
-		});
-		break;
-		case "opt1":
-			var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count));
-			//Flatten Arrays for output
-			 cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : "", 'count' : Math.round(cty_sum)});
-		break;
-		case "opt2":
-			var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year);
-			//Flatten Arrays for output
-			for (let [key, value] of cty_sum) {  
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : "", 'count' : Math.round(value)});
-				}
-		break;
-		case "opt3":
-		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.age);
-			//Flatten Arrays for output
-			for (let [key, value] of cty_sum) {  
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : key, 'sex' : "", 'race' : "", 'ethnicity' : "", 'count' : Math.round(value)});
-				}
-		break;
-		case "opt4":
-		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.race);
-			//Flatten Arrays for output
-			for (let [key, value] of cty_sum) {  
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : "", 'sex' : "", 'race' : key, 'ethnicity' : "", 'count' : Math.round(value)});
-				}
-		break;
-		case "opt5":
-		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.ethnicity);
-			//Flatten Arrays for output
-			for (let [key, value] of cty_sum) {  
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : key, 'count' : Math.round(value)});
-				}
-		break;
-		case "opt6":
-		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d=> d.race, d => d.ethnicity);
-			//Flatten Arrays for output
-			for (let [key, value] of cty_sum) {  
-			    for(let [key2,value2] of value){
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : "", 'sex' : "", 'race' : key, 'ethnicity' : key2, 'count' : Math.round(value2)});
-			}}
-		break;
-		case "opt7":
-		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year, d => d.race);
-			//Flatten Arrays for output
-			for (let [key, value] of cty_sum) {  //Year
-			   for( let[key2, value2] of value){
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : "", 'sex' : "", 'race' : key2, 'ethnicity' : "", 'count' : Math.round(value2)});
-			}}
-		break;
-		case "opt8":
-		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year, d => d.ethnicity);
-			//Flatten Arrays for output
-			for (let [key, value] of cty_sum) {  //Year
-			   for( let[key2, value2] of value){
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : key2, 'count' : Math.round(value2)});
-			}}
-		break;
-		case "opt9":
-		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year, d => d.race, d => d.ethnicity);
-			//Flatten Arrays for output
-			var cty_tmp = [];
-			for (let [key, value] of cty_sum) {  //Year
-			   for( let[key2, value2] of value){
-				   for( let [key3, value3] of value2){
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : "", 'sex' : "", 'race' : key2, 'ethnicity' : key3, 'count' : Math.round(value3)});
-			}}}
-		break;
-		case "opt10":
-		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count),  d => d.age, d => d.race);
-			//Flatten Arrays for output
-			for (let [key, value] of cty_sum) {  //Year
-			   for( let[key2, value2] of value){
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : key, 'sex' : "", 'race' : key2, 'ethnicity' : "", 'count' : Math.round(value2)});
-			}}
-		break;
-		case "opt11":
-		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.age, d => d.ethnicity);
-			//Flatten Arrays for output
-			for (let [key, value] of cty_sum) {  //Year
-			   for( let[key2, value2] of value){
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : key, 'sex' : "", 'race' : "", 'ethnicity' : key2, 'count' : Math.round(value2)});
-			}}
-		break;
-		case "opt12":
-		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.age, d => d.race, d => d.ethnicity);
-			//Flatten Arrays for output
-			for (let [key, value] of cty_sum) {  //Year
-			   for( let[key2, value2] of value){
-				   for( let [key3, value3] of value2){
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : key, 'sex' : "", 'race' : key2, 'ethnicity' : key3, 'count' : Math.round(value3)});
-			}}}
-		break;
-		case "opt13":
-		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year, d => d.age, d => d.race);
-			//Flatten Arrays for output
-			for (let [key, value] of cty_sum) {  //Year
-			   for( let[key2, value2] of value){
-				   for( let [key3, value3] of value2){
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : key2, 'sex' : "", 'race' : key3, 'ethnicity' : "", 'count' : Math.round(value3)});
-			}}}
-		break;
-		case "opt14":
-		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year, d => d.age, d => d.ethnicity);
-			//Flatten Arrays for output
-			for (let [key, value] of cty_sum) {  //Year
-			   for( let[key2, value2] of value){
-				   for( let [key3, value3] of value2){
-					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : key2, 'sex' : "", 'race' : "", 'ethnicity' : key3, 'count' : Math.round(value3)});
-			}}}
-		break;
-} //Switch
-
-cty_data = cty_data.concat(cty_tmp)
-	}) //forEach
-	
-	
-	// Generate Table
-	var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>Age</th><th>Sex</th><th>Race</th><th>Ethnicity</th><th>Count</th></tr></thead>";
-	out_tab = out_tab + "<tbody>"
-	for(i = 0; i < cty_data.length; i++){
-		var el1 = "<td>" + cty_data[i].countyfips + "</td>"
+		var el1 = "<td>" + cty_data[i].county_fips + "</td>"
 		var el2 = "<td>" + cty_data[i].name + "</td>"
 		var el3 = "<td>" + cty_data[i].year + "</td>"
 		var el4 = "<td>" + cty_data[i].age + "</td>"
@@ -500,11 +303,225 @@ $(tabObj).DataTable({
         ]
  });
 })
-} //genRaceTabCty10
+} 
+// genRaceTabCty
 
-//genRaceTabReg creares the county race data call and produces table
+function genRaceTabCty10(loc,year_arr, race_arr,eth_arr,age_arr,sex_list,group) {
+//genRaceTabCty10 creares the county race data call and produces table Race 2010 base categories
+
+	//build urlstr
+	var fips_arr = [];
+	for(i = 0; i < loc.length; i++){ fips_arr.push(parseInt(loc[i]))}
+	var fips_list  = fips_arr.join(",")
+	var year_list = year_arr.join(",")
+	var race_list = race_arr.join(",")
+	var eth_list = eth_arr.join(",")
+	var age_list = age_arr.join(",")
+	if(sex_list == "S"){
+		var urlstr = "https://gis.dola.colorado.gov/lookups/sya-race-estimates?age="+ age_list + "&county="+ fips_list +"&year="+ year_list +"&race=" + race_list+ "&ethnicity="+eth_list+"&group=opt0";
+    } else {
+		var sexl = sex_list.toLowerCase()
+		var urlstr = "https://gis.dola.colorado.gov/lookups/sya-race-estimates?age="+ age_list + "&county="+ fips_list +"&year="+ year_list +"&race=" + race_list+ "&ethnicity="+eth_list+"&sex="+sexl+"&group=opt0";
+	}
+
+d3.json(urlstr).then(function(data){
+
+
+    // Flesh out records -- for options ne 0
+	var fullkeys = ['county_fips', 'year','age','sex','race', 'ethnicity','count']
+
+	for(i = 0; i < data.length; i++){
+		for(j = 0; j < fullkeys.length; j ++) {
+		if(!(fullkeys[j] in data[i])){
+				data[i][fullkeys[j]] = "_";
+			}
+		}
+	}
+	var fips_list = [...new Set(data.map(d => d.county_fips))];
+	var cty_data = [];
+  	
+	fips_list.forEach( i => {
+	  var filtData = data.filter(b => (b.county_fips == i));
+	  var cty_tmp = [];
+
+    //Rollups based on group value
+	switch(group) {
+		case "opt0":
+		filtData.forEach(j =>{
+				cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : j.year, 'age' : j.age, 'sex' : j.sex, 'race' : j.race, 'ethnicity' : j.ethnicity, 'count' : Math.round(+j.count)});
+		});
+		break;
+		case "opt1":
+			var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count));
+			//Flatten Arrays for output
+			 cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : "", 'count' : Math.round(cty_sum)});
+		break;
+		case "opt2":
+			var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : "", 'count' : Math.round(value)});
+				}
+		break;
+		case "opt3":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.age);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : key, 'sex' : "", 'race' : "", 'ethnicity' : "", 'count' : Math.round(value)});
+				}
+		break;
+		case "opt4":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.race);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : "", 'sex' : "", 'race' : key, 'ethnicity' : "", 'count' : Math.round(value)});
+				}
+		break;
+		case "opt5":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.ethnicity);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : key, 'count' : Math.round(value)});
+				}
+		break;
+		case "opt6":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d=> d.race, d => d.ethnicity);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  
+			    for(let [key2,value2] of value){
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : "", 'sex' : "", 'race' : key, 'ethnicity' : key2, 'count' : Math.round(value2)});
+			}}
+		break;
+		case "opt7":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year, d => d.race);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  //Year
+			   for( let[key2, value2] of value){
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : "", 'sex' : "", 'race' : key2, 'ethnicity' : "", 'count' : Math.round(value2)});
+			}}
+		break;
+		case "opt8":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year, d => d.ethnicity);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  //Year
+			   for( let[key2, value2] of value){
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : "", 'sex' : "", 'race' : "", 'ethnicity' : key2, 'count' : Math.round(value2)});
+			}}
+		break;
+		case "opt9":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year, d => d.race, d => d.ethnicity);
+			//Flatten Arrays for output
+			var cty_tmp = [];
+			for (let [key, value] of cty_sum) {  //Year
+			   for( let[key2, value2] of value){
+				   for( let [key3, value3] of value2){
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : "", 'sex' : "", 'race' : key2, 'ethnicity' : key3, 'count' : Math.round(value3)});
+			}}}
+		break;
+		case "opt10":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count),  d => d.age, d => d.race);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  //Year
+			   for( let[key2, value2] of value){
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : key, 'sex' : "", 'race' : key2, 'ethnicity' : "", 'count' : Math.round(value2)});
+			}}
+		break;
+		case "opt11":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.age, d => d.ethnicity);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  //Year
+			   for( let[key2, value2] of value){
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : key, 'sex' : "", 'race' : "", 'ethnicity' : key2, 'count' : Math.round(value2)});
+			}}
+		break;
+		case "opt12":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.age, d => d.race, d => d.ethnicity);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  //Year
+			   for( let[key2, value2] of value){
+				   for( let [key3, value3] of value2){
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : "", 'age' : key, 'sex' : "", 'race' : key2, 'ethnicity' : key3, 'count' : Math.round(value3)});
+			}}}
+		break;
+		case "opt13":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year, d => d.age, d => d.race);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  //Year
+			   for( let[key2, value2] of value){
+				   for( let [key3, value3] of value2){
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : key2, 'sex' : "", 'race' : key3, 'ethnicity' : "", 'count' : Math.round(value3)});
+			}}}
+		break;
+		case "opt14":
+		var cty_sum = d3.rollup(filtData, v => d3.sum(v, d => +d.count), d => d.year, d => d.age, d => d.ethnicity);
+			//Flatten Arrays for output
+			for (let [key, value] of cty_sum) {  //Year
+			   for( let[key2, value2] of value){
+				   for( let [key3, value3] of value2){
+					   cty_tmp.push({ 'name' : countyName(parseInt(i)), 'county_fips' : i, 'year' : key, 'age' : key2, 'sex' : "", 'race' : "", 'ethnicity' : key3, 'count' : Math.round(value3)});
+			}}}
+		break;
+} //Switch
+
+cty_data = cty_data.concat(cty_tmp)
+	}) //forEach
+	
+
+	// Generate Table
+	var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>Age</th><th>Sex</th><th>Race</th><th>Ethnicity</th><th>Count</th></tr></thead>";
+	out_tab = out_tab + "<tbody>"
+	for(i = 0; i < cty_data.length; i++){
+		var el1 = "<td>" + cty_data[i].county_fips + "</td>"
+		var el2 = "<td>" + cty_data[i].name + "</td>"
+		var el3 = "<td>" + cty_data[i].year + "</td>"
+		var el4 = "<td>" + cty_data[i].age + "</td>"
+		if(sex_list == "S") {
+			var el5 = "<td> </td>"
+		} else {
+		   if(cty_data[i].sex == "M"){
+			var el5 = "<td>Male</td>";
+		   }
+		   if(cty_data[i].sex == "F"){
+			var el5 =  "<td>Female</td>";
+		   }
+		}
+		var el6 =  "<td>" + cty_data[i].race + "</td>"
+		var el7 = "<td>" + cty_data[i].ethnicity + "</td>"
+		var el8 = "<td style='text-align: right'>" + fixNEG(parseInt(cty_data[i].count),"num") + "</td>"
+
+		var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + el5 + el6 + el7 + el8 + "</tr>";
+		var tmp_str = tmp_row.replaceAll("_","")
+
+	   out_tab = out_tab + tmp_str;
+	}
+	out_tab = out_tab + "</tbody>"
+
+//Output table
+	var tabDivOut = document.getElementById("tbl_output");
+	var tabName = "raceTab";
+//Clear div
+tabDivOut.innerHTML = "";
+
+var tabObj = "#" + tabName;
+$(tabDivOut).append("<table id="+ tabName + " class='DTTable' width='90%'></table>");
+$(tabObj).append(out_tab); //this has to be a html table
+
+
+$(tabObj).DataTable({
+  dom: 'Bfrtip',
+        buttons: [
+            'csv'
+        ]
+ });
+})
+} 
+// genRaceTabCty10
+
+
 function genRaceTabReg(region, loc,year_arr, race_arr,eth_arr,age_arr,sex_list,group) {
-	const fmt_comma = d3.format(",");
+//genRaceTabReg creares the regional race data call and produces table
+	
+
 	//build urlstr
 	var fips_arr = [];
 
@@ -696,7 +713,7 @@ reg_data = reg_data.concat(reg_tmp)
 		}
 		var el6 =  "<td>" + reg_data[i].race + "</td>"
 		var el7 = "<td>" + reg_data[i].ethnicity + "</td>"
-		var el8 = "<td style='text-align: right'>" + fmt_comma(parseInt(reg_data[i].count)) + "</td>"
+		var el8 = "<td style='text-align: right'>" + fixNEG(parseInt(reg_data[i].count),"num") + "</td>"
 
 		var tmp_row = "<tr>" + el1 + el3 + el4 + el5 + el6 + el7 + el8 + "</tr>";
 		var tmp_str = tmp_row.replaceAll("_","")
@@ -723,11 +740,13 @@ $(tabObj).DataTable({
         ]
  });
 })
-} //genRaceTabReg
+} 
+// genRaceTabReg
 
-//genRaceTabReg10 creares the county race data call and produces table 2010 Base
+
 function genRaceTabReg10(region, loc,year_arr, race_arr,eth_arr,age_arr,sex_list,group) {
-	const fmt_comma = d3.format(",");
+//genRaceTabReg10 creares the county race data call and produces table 2010 Base
+	
 	//build urlstr
 	var fips_arr = [];
 
@@ -919,7 +938,7 @@ reg_data = reg_data.concat(reg_tmp)
 		}
 		var el6 =  "<td>" + reg_data[i].race + "</td>"
 		var el7 = "<td>" + reg_data[i].ethnicity + "</td>"
-		var el8 = "<td style='text-align: right'>" + fmt_comma(parseInt(reg_data[i].count)) + "</td>"
+		var el8 = "<td style='text-align: right'>" + fixNEG(parseInt(reg_data[i].count),"num") + "</td>"
 
 		var tmp_row = "<tr>" + el1 + el3 + el4 + el5 + el6 + el7 + el8 + "</tr>";
 		var tmp_str = tmp_row.replaceAll("_","")
@@ -946,11 +965,14 @@ $(tabObj).DataTable({
         ]
  });
 })
-} //genRaceTabReg10
+} 
+// genRaceTabReg10
 
-//genCOCReg creares the state regional COC table 
+
+//cat Components of Change Lookup Functions
+
 function genCOCReg(region, loc,year_arr,group,yeardata,outType) {
-	const fmt_comma = d3.format(",");
+//genCOCReg creares the state regional COC table 
 
 	//build urlstr
    var fips_arr = [];
@@ -1036,9 +1058,6 @@ var reg_data = [];
 
 var reg_data2 = reg_data.sort(function(a, b){ return d3.ascending(a['region_num'], b['region_num']); })
 
-debugger
-console.log(reg_data2);
-
 	// Generate Table
 	if(outType == "COC"){
 		var out_tab = "<thead><tr><th>Region Name</th><th>Year</th><th>Population</th><th>Change</th><th>Births</th><th>Deaths</th><th>Net Migration</th><th>Data Type</th></tr></thead>";
@@ -1100,10 +1119,12 @@ $(tabObj).DataTable({
         ]
  });
 }) //data
-} //genCOCReg
+} 
+// genCOCReg
 
-//genCOCCty creares the county COC Table
+
 function genCOCCty(loc,year_arr,group,yeardata,outType) {
+//genCOCCty creares the county COC Table
 
 	//build urlstr
    var fips_arr2 = [];
@@ -1231,11 +1252,13 @@ $(tabObj).DataTable({
         ]
  });
 }) //data
-} //genCOCcty
+} 
+// genCOCcty
 
-//genPOPMuni creares the Municipal Housing and Population Profile Table
+//cat Municipal Housing and Population Lookup Functions
+
 function genPOPMuni(loc,muni_arr,year_arr,var_arr,groupval) {
-	const fmt_comma = d3.format(",");
+//genPOPMuni creares the Municipal Housing and Population Profile Table
 	
     //build variable List
 	var varnames = ["totalpopulation","householdpopulation","groupquarterspopulation",
@@ -1405,11 +1428,13 @@ $(tabObj).DataTable({
         ]
  });
 }) //data
-} //genPOPmuni
+} 
+// genPOPmuni
 
-//genPOPCty creares the county Population Profile Table
+
 function genPOPCty(loc,var_arr,year_arr,group) {
-	const fmt_comma = d3.format(",");
+//genPOPCty creares the county Population Profile Table
+
     //build variable List
 	var varnames = ["totalpopulation", "births", "deaths", "naturalincrease", "netmigration", 
 	                "censusbuildingpermits", "groupquarterspopulation", "householdpopulation",
@@ -1560,11 +1585,13 @@ $(tabObj).DataTable({
         ]
  });
 }) //data
-} //genPOPcty
+} 
+// genPOPcty
 
-//genPOPReg creares the county Population Profile Table
+
 function genPOPReg(region, loc,var_arr,year_arr,group) {
-	const fmt_comma = d3.format(",");
+//genPOPReg creares the county Population Profile Table
+
     //build variable List
 	var varnames = ["totalpopulation", "births", "deaths", "naturalincrease", "netmigration", 
 	                "censusbuildingpermits", "groupquarterspopulation", "householdpopulation",
@@ -1750,10 +1777,14 @@ $(tabObj).DataTable({
         ]
  });
 }) //data
-} //genPOPreg
+} 
+// genPOPreg
 
-//genCtyMuni outputs table for County and Municipal Population Timeseries
+//cat County and Municipal Population Timeseries functions
+
 function genCtyMuni(ctyval,munival,yrval,groupval) {
+//genCtyMuni outputs table for County and Municipal Population Timeseries
+
 //Creating url String
 
 if(groupval == "opt0"){
@@ -1898,13 +1929,13 @@ $(tabObj).DataTable({
  });	
 	
 }) //Data
-} //genCtyMuni
+} 
+// genCtyMuni
 
-//genHHCty  County Household Projections
-//  https://gis.dola.colorado.gov/lookups/household?county=1,3&year=2010&age=1,2&household=1,2,3&group=opt8
+//cat Household Profuections support functions
 
-//support functions
 function hholdid(inval){
+//hholdid  County Household Projections Household Categories for genHHCty
 	 switch(inval){
 		 case 0:
 		 var outval = "All Households";
@@ -1924,8 +1955,11 @@ function hholdid(inval){
 	 }
 	return(outval)
 }
+// hholdid
 
 function ageid(inval){
+//ageid  County Age Projections Household Categories for genHHCty
+
 	 switch(inval){
 		 case 0:
 		 var outval = "Total";
@@ -1945,8 +1979,11 @@ function ageid(inval){
 	 }
 	return(outval)
 }
+// ageid
 
 function genHHTab(indata,yrdata,level){
+//genHHTab  County Household Projections Household Categories for genHHCty
+
 		out_data = [];
 
 	var key_arr = Object.keys(indata[0])
@@ -2021,8 +2058,11 @@ function genHHTab(indata,yrdata,level){
 
 return(out_tab)
 
-} //genHHTab
+} 
+// genHHTab
+
 function genHHCty(loc,yr_arr,age_arr,hh_arr,group_arr,yeardata) {
+//genHHCty Generates Household Projection table for Counties
 
 //determining groups variable
 
@@ -2110,9 +2150,12 @@ $(tabObj).DataTable({
 
 }) //data
 
-} //genHHCty
+} 
+// genHHCty
 
 function genHHReg(region,loc,yr_arr,age_arr,hh_arr,group_arr,yeardata) {
+//genHHReg Generates Household Projection table for Regions
+
 
 //determining groups variable
 
@@ -2334,11 +2377,13 @@ $(tabObj).DataTable({
 
 }) //data
 
-} //genHHReg
+} 
+// genHHReg
 
-//genNAICSCty creares the county Jobs by Sector Table
-function genNAICSCty(loc,year_arr) {
-	const fmt_comma = d3.format(",");
+//cat Jogs Lookup Functions
+
+function genJOBSECTCty(loc,year_arr) {
+//genJOBSECTCty creares the county Jobs by Sector Table
  
 	
 	//build urlstr
@@ -2373,7 +2418,7 @@ var cty_data2 = cty_data
 
 
 	// Generate Table
-	var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>NAICS Sector Code</th><th>NAICS Sector Name</th><th>Total Jobs</th></tr></thead><tbody>";
+	var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>Job Sector Code</th><th>Job Sector Name</th><th>Total Jobs</th></tr></thead><tbody>";
 	for(i = 0; i < cty_data2.length; i++){
 		var el0 = "<td>" + cty_data2[i].countyfips + "</td>"
 		var el1 = "<td>" + cty_data2[i].countyname + "</td>"
@@ -2405,14 +2450,13 @@ $(tabObj).DataTable({
         ]
 });
  });  //d3.json
-} //dataNAICScty
+} 
+// genJOBSECTCty
 
-//genNAICSReg creares the county Jobs by Sector Table
-function genNAICSReg(region, loc,year_arr) {
-	const fmt_comma = d3.format(",");
+
+function genJOBSECTReg(region, loc,year_arr) {
+//genJOBSECTReg creares the county Jobs by Sector Table
  
-	
-
 	//build urlstr
    var fips_arr = [];
    var fips_arr2 = [];
@@ -2462,8 +2506,6 @@ var raw_data = joinFUNCT(fips_arr,data,"countyfips","area_code",function(dat,col
 		};
 	});
 
-
-
     // sum up values by region, year and sector_id
 	var columnsToSum = ['total_jobs']
 
@@ -2482,7 +2524,6 @@ var reg_data = [];
 		};
 		};
 
-
 //Joining Sector Name
 var raw_data = joinFUNCT(uniq_sector,reg_data,"sector_id","sector_id",function(dat,col){
 		return{
@@ -2499,12 +2540,8 @@ var raw_data = joinFUNCT(uniq_sector,reg_data,"sector_id","sector_id",function(d
 var reg_data2 = raw_data
    		 .sort(function(a, b){ return d3.ascending(a['regval'], b['regval']); })
 
-		;
-
-
-
 	// Generate Table
-	var out_tab = "<thead><tr><th>Region Name</th><th>Year</th><th>NAICS Sector Code</th><th>NAICS Sector Name</th><th>Total Jobs</th></tr></thead><tbody>";
+	var out_tab = "<thead><tr><th>Region Name</th><th>Year</th><th>Job Sector Code</th><th>Job Sector Name</th><th>Total Jobs</th></tr></thead><tbody>";
 	for(i = 0; i < reg_data2.length; i++){
 		var el1 = "<td>" + reg_data2[i].regname + "</td>"
 		var el2 = "<td>" + reg_data2[i].year + "</td>"
@@ -2535,12 +2572,11 @@ $(tabObj).DataTable({
         ]
 });
  });  //d3.json
-} //dataNAICSreg
+} 
+// genJOBSECTreg
 
-//Base Industries County dropdown
-//popDropdown populaates drop down boxes
 function popBaseInd(level,ddid) {
-
+//Base Industries County dropdown
    
    //Counties
 var county = [ {'location' : 'Denver-Boulder MSA', 'fips' : '500'}, {'location'  :  'Alamosa County', 'fips' : '003'},
@@ -2653,11 +2689,12 @@ if(level == 'region' ) {
 			sel.appendChild(el);
 		}
 	}
-}; //end of popBaseInd	
+}; 
+// popBaseInd	
 
-
-//Base industry Labels
 function baseIndLabels(incat){
+//Base industry Labels Support Function for Base Industries Lookups
+	
 	out_arr = []
 	switch(incat){
 		 case 'employment' : out_arr.push({'variable' :  'Total Employment', 'row' : 21}); break;
@@ -2683,10 +2720,11 @@ function baseIndLabels(incat){
 	}
 	return out_arr;
 }
+// baseIndLabels
 
-//restructure baseind  converts wide dataset  to long
-//restructureACS data from wide to long 
+
 function rebaseind(inData, level){
+//restructure baseind  converts wide dataset  to long
 
  var newLabel = [];
  var outData = [];
@@ -2825,11 +2863,14 @@ inData.forEach(i => {
 }
 
 return(outData);
-} //rebaseind
+} 
+// rebaseind
 
 
-//County Base Industries lookup
+
 function genBaseIndCty(loc) {
+//County Base Industries lookup
+
 		//build urlstr
    var fips_arr2 = [];
 	for(j = 0; j < loc.length; j++){
@@ -2842,13 +2883,11 @@ function genBaseIndCty(loc) {
 
 		
 d3.json(urlstr).then(function(data){
-
- var cty_data = rebaseind(data)
+ var cty_data = rebaseind(data,"county")
 
 var cty_data2 = cty_data
         .sort(function(a, b){ return d3.ascending(a['row'], b['row']); })
-        .sort(function(a, b){ return d3.ascending(a['countyfips'], b['countyfips']); })
-		;
+        .sort(function(a, b){ return d3.ascending(a['fips'], b['fips']); });
 
 	// Generate Table
 	var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Industry Group</th><th>Employment</th><th>Employment % of Basic</th></tr></thead><tbody>";
@@ -2883,10 +2922,13 @@ $(tabObj).DataTable({
         ]
 });
  });  //d3.json
-} //base ind cty
+} 
+// genBaseIndCty
 
-//Regional Base Industries lookup
+
 function genBaseIndReg(region, loc) {
+//Regional Base Industries lookup
+
 		//build urlstr
    var fips_arr = [];
    var fips_arr2 = [];
@@ -2908,7 +2950,7 @@ d3.json(urlstr).then(function(data){
 	//Adding region number
 var raw_data = [];
 var k = 0
-for(i = 0 ; i < yeararr.length; i++){
+
 for(j = 0; j < fips_arr.length; j++){
   raw_data.push({
    ...fips_arr[j], 
@@ -2916,7 +2958,7 @@ for(j = 0; j < fips_arr.length; j++){
   });
  k++
 }
-}
+
     // sum up values by region, year and sector_id
 	var columnsToSum = ['employment', 'agri_emp', 'mining_emp', 'manuf_emp', 'govt_emp', 'regl_serv_emp',
 	                    'ib_emp', 'tourism_emp', 'direct_basic_emp','commuter_emp', 'other_hhd_emp',
@@ -2991,10 +3033,13 @@ $(tabObj).DataTable({
         ]
 });
  });  //d3.json
-} //base ind region
+} 
+// genBaseIndReg
 
-//County Jobs Forecast lookup
+
 function genJobsForeCty(loc, yeararr) {
+//County Jobs Forecast lookup
+
 	//build urlstr
    var fips_arr2 = [];
 	for(j = 0; j < loc.length; j++){
@@ -3005,22 +3050,84 @@ function genJobsForeCty(loc, yeararr) {
    	for(j = 0; j < yeararr.length; j++){
 		year_arr.push(yeararr[j]);
      };
-	var fips_list  = fips_arr2.join(",")
+	
+	if(loc.includes('130')){   //Check for Denver-Boulder MSA
+	    var ctyArr = [1, 5, 13, 14, 31, 35, 59]
+	    var fips_3 = fips_arr2;
+	    var indexval = fips_3.indexOf(130)
+		fips_3.splice(indexval,1)
+		for(i =0; i < ctyArr.length; i++){
+			fips_3.push(ctyArr[i])
+		}
+		var fips_list  = fips_3.join(",")
+	} else {
+		var fips_list  = fips_arr2.join(",")
+	}
+
 	var year_list  = year_arr.join(",")
 	 var urlstr = "https://gis.dola.colorado.gov/lookups/jobs-forecast?county="+ fips_list + "&year=" + year_list
 
 d3.json(urlstr).then(function(data){
+	
+//adjustment for Denver-Boulder MSA
+	if(loc.includes('130')){
+		var MSA_data = data.filter(i => ctyArr.includes(i.countyfips))
+		var nonMSA_data = data.filter(i => !ctyArr.includes(i.countyfips))
+        var nonMSA_data2 = []
+		for(i = 0; i < nonMSA_data.length; i++){
+			nonMSA_data2.push({
+				'countyfips' : nonMSA_data[i].countyfips,
+				'countyname' : countyName(nonMSA_data[i].countyfips),
+				'datatype' : nonMSA_data[i].datatype,
+				'population_year' : nonMSA_data[i].population_year,
+				'totaljobs' : +nonMSA_data[i].totaljobs})
+		}
+		
+		// sum up values by year
+	   var columnsToSum = ['totaljobs']
 
-var cty_data2 = data
+        var MSASum_data = [];
+
+		var binroll =  d3.rollup(MSA_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.population_year);
+		for (let [key, value] of binroll) {
+		   MSASum_data.push({ 'countyfips' : 1,
+		    'countyname' : 'Denver-Boulder MSA',
+			'datatype' : "FORECAST",
+			'population_year' : key,
+			'totaljobs' : value.totaljobs})
+		};
+		
+
+  var data = MSASum_data.concat(nonMSA_data2)
+  var cty_data2 = data
         .sort(function(a, b){ return d3.ascending(a['population_year'], b['population_year']); })
         .sort(function(a, b){ return d3.ascending(a['countyfips'], b['countyfips']); })
 		;
+
+	cty_data2.forEach( d => {
+		if(d.countyfips == 1) {d.countyfips = " "}
+	})
+	} else {
+	var data2 = []
+	for(i = 0; i < data.length; i++){
+			data2.push({
+				'countyfips' : data[i].countyfips,
+				'countyname' : countyName(data[i].countyfips),
+				'datatype' : data[i].datatype,
+				'population_year' : data[i].population_year,
+				'totaljobs' : +data[i].totaljobs})
+		}
+	  var cty_data2 = data2
+        .sort(function(a, b){ return d3.ascending(a['population_year'], b['population_year']); })
+        .sort(function(a, b){ return d3.ascending(a['countyfips'], b['countyfips']); })
+		;
+		}
 
 	// Generate Table
 	var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>Total Jobs</th><th>Data Type</th></tr></thead><tbody>";
 	for(i = 0; i < cty_data2.length; i++){
 		var el0 = "<td>" + cty_data2[i].countyfips + "</td>"
-		var el1 = "<td>" + countyName(cty_data2[i].countyfips) + "</td>"
+		var el1 = "<td>" + cty_data2[i].countyname + "</td>"
 		var el2 = "<td>" + cty_data2[i].population_year + "</td>"
 		var el3 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].totaljobs,"num") + "</td>"
 		var el4 = "<td>" + cty_data2[i].datatype + "</td>"
@@ -3047,10 +3154,13 @@ $(tabObj).DataTable({
         ]
 });
  });  //d3.json
-} //jobs forecast cty
+} 
+// genJobsForeCty
 
-//Regional Jobs Forecast lookup
+
 function genJobsForeReg(region, loc, yeararr) {
+//Regional Jobs Forecast lookup
+	
 	//build urlstr
 
    var fips_arr = [];
@@ -3087,7 +3197,7 @@ for(j = 0; j < fips_arr.length; j++){
 }
 }
 
-    // sum up values by region, year and sector_id
+// sum up values by region, year and sector_id
 	var columnsToSum = ['totaljobs']
 
 var reg_data = [];
@@ -3141,11 +3251,12 @@ $(tabObj).DataTable({
         ]
 });
  });  //d3.json
-} //jobs forecast reg
+} 
+// genJobsForeReg
 
 
-//County Laborforce Participation lookup
 function genLFPCty(loc, yeararr, agearr, group_val, sex_val) {
+//County Laborforce Participation lookup 
 
 	//build urlstr
    var fips_arr2 = [];
@@ -3282,10 +3393,11 @@ $(tabObj).DataTable({
         ]
 });
  });  //d3.json
-} //LFP cty
+} 
+// genLFPCty
 
-//Region Laborforce Participation lookup
 function genLFPReg(region,loc, yeararr, agearr, group_val, sex_val) {
+//Region Laborforce Participation lookup
 
 	//build urlstr
    var fips_arr = [];
@@ -3459,11 +3571,14 @@ $(tabObj).DataTable({
         ]
 });
  });  //d3.json
-} //LFP region
+} 
+// genLFPReg
 
-//Single Year of Age
-//genAgeGroup builds list items for SYA functions
+//cat Single Year of Age Lookup Functions
+
 function genAgeGroup(group,type){
+//Single Year of Age support functions: genAgeGroup builds list items for SYA functions
+
 	var outcell = document.getElementById('ageselect')
 	outcell.innerHTML = "";
 	var tabdiv = document.createElement('div');
@@ -3558,10 +3673,13 @@ if(group == "custom" || group == "single"){
 }  else {
 		outcell.innerHTML = "";
 }
-	} //genAgeGroup
+	} 
+// genAgeGroup
 
-//customSYA codes custom age range value based on age_arr
+
 function customSYA(dataval, dataarr) {
+//Single Year of Age support functions customSYA codes custom age range value based on age_arr
+
 var age_str = "";
    for(i = 0; i < dataarr.length;i++){
 	   if(+dataval >= dataarr[i].age_start && +dataval <= dataarr[i].age_end){
@@ -3579,35 +3697,31 @@ function sumSYA(in_data,spec,grp, type){
 	switch(spec){
 	case "custom" :
 	if(type == "county"){
-		var binroll =  d3.rollup(in_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.countyfips, d => d.year, d => d.age);
+		var binroll =  d3.rollup(in_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.countyfips, d => d.year);
 		for (let [key, value] of binroll) {
 		for (let [key1, value1] of value){
-		for (let [key2, value2] of value1){
 		   out_data.push({ 'countyfips' : key,
 			'countyname' : countyName(key),
 			'year' : key1,
-			'age' : key2,
-			'male' : value2.male,
-			'female' : value2.female,
-			'total' : value2.total
+			'age' : grp,
+			'male' : value1.male,
+			'female' : value1.female,
+			'total' : value1.total
 		   })
-		};
 		};
 		};
 		} else {
-		var binroll =  d3.rollup(in_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.regval, d => d.year, d => d.age);
+		var binroll =  d3.rollup(in_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.regval, d => d.year);
 		for (let [key, value] of binroll) {
 		for (let [key1, value1] of value){
-		for (let [key2, value2] of value1){
 		   out_data.push({ 'regval' : key,
 			'regionname' : regionName(key),
 			'year' : key1,
-			'age' : key2,
-			'male' : value2.male,
-			'female' : value2.female,
-			'total' : value2.total
+			'age' : grp,
+			'male' : value1.male,
+			'female' : value1.female,
+			'total' : value1.total
 		   })
-		};
 		};
 		};
 		} //type
@@ -3708,10 +3822,12 @@ function sumSYA(in_data,spec,grp, type){
 	} //spec switch
 
 	return(out_data)
-} //sumSYA
+} 
+// sumSYA
 
-//genSYACty  County SYA function
+
 function genSYACty(loc,year_arr,group,agespec, age_arr,yeardata) {
+//genSYACty  County SYA function
 
 	//build urlstr
    var fips_arr2 = [];
@@ -3719,18 +3835,14 @@ function genSYACty(loc,year_arr,group,agespec, age_arr,yeardata) {
 		fips_arr2.push(parseInt(loc[j]));
      };
 
+
 	//List of ages
     var age_arr2 = [];
     switch(agespec){
 	case "custom" :
-		var minage = Math.min(...age_arr)
-		var maxage = Math.max(...age_arr)
-	    for(i = minage; i <= maxage; i++){
-			age_arr2.push(i)
-		}
 		age_range = []
-		for (var i = 0; i < age_arr.length; i += 2) {
-			age_range.push({'age_start' : age_arr[i], 'age_end' : age_arr[i+1], "age_str" : age_arr[i] + " to " +age_arr[i+1]})
+		for (var i = 0; i < age_arr.length; i++) {
+			age_range.push({'age_start' : age_arr[i][0], 'age_end' : age_arr[i][1], "age_str" : age_arr[i][0] + " to " +age_arr[i][1]})
 		}
 		break;
 	case "single" :
@@ -3740,13 +3852,24 @@ function genSYACty(loc,year_arr,group,agespec, age_arr,yeardata) {
 
 	var fips_list  = fips_arr2.join(",")
 	var year_list = year_arr.join(",")
-	var age_list = age_arr2.join(",")
-	
-	if(agespec == "custom" || agespec == "single") {
+
+
+
+switch(agespec){
+	case "custom":
+	   var age_arr2 = []
+	   for(a = 0; a <= 100; a++) {age_arr2.push(a)}
+		var age_list = age_arr2.join(",")
+	    var urlstr = "https://gis.dola.colorado.gov/lookups/sya?age=" + age_list + "&county=" + fips_list + "&year=" + year_list + "&choice=single"		
+		break;
+	case "single":
+		 var age_list = age_arr2.join(",")
 	     var urlstr = "https://gis.dola.colorado.gov/lookups/sya?age=" + age_list + "&county=" + fips_list + "&year=" + year_list + "&choice=single"
-	} else {
-	    var urlstr = "https://gis.dola.colorado.gov/lookups/sya?county=" + fips_list + "&year=" + year_list + "&choice="+agespec
-	}
+	break;
+	default:
+	    var urlstr = "https://gis.dola.colorado.gov/lookups/sya?age=0,100&county=" + fips_list + "&year=" + year_list + "&choice="+agespec
+		break;
+	} //switch
 
 d3.json(urlstr).then(function(data){
 
@@ -3755,7 +3878,7 @@ d3.json(urlstr).then(function(data){
 		 raw_data.push({"countyfips" : i.countyfips,
 						"countyname" : countyName(i.countyfips),
 						"year" : i.year,
-						"age" : agespec == "custom" ? customSYA(i.age,age_range) : i.age,
+						"age" :  i.age,
 						"male" : +i.malepopulation,
 						"female" : +i.femalepopulation,
 						"total" : +i.totalpopulation,
@@ -3763,15 +3886,22 @@ d3.json(urlstr).then(function(data){
 		 })
 	 })
 	
-	 if(agespec == "custom") {
-		 raw_data = raw_data.filter(d => d.age != "")
-	 }
 	
-	if(agespec == "custom" || agespec == "single") {
+	switch(agespec){
+	 case "custom":
+		 var tab_data =[]
+		 for(j = 0; j < age_range.length; j++){
+			 var rng_data = raw_data.filter( d => ((d.age >= age_range[j].age_start)  && (d.age <= age_range[j].age_end)))
+			 var sum_data = sumSYA(rng_data,agespec,age_range[j].age_str,"county")
+			 tab_data = tab_data.concat(sum_data)
+		 }
+	 break;
+	case "single" :
 		var tab_data = sumSYA(raw_data,agespec,group,"county")
-	} else {
+	break;
+	default:
 		var tab_data = raw_data;
-	}
+	} //switch
 
 	// Generate Table
 	if(agespec == "single"){
@@ -3790,15 +3920,15 @@ d3.json(urlstr).then(function(data){
 			break;
 	  }
 	} else {
-	 var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>Age</th><th>Male Population</th><th>Female Population</th><th>Total Population</th><th>Data Type</th></tr></thead>";
+		var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>Age</th><th>Male Population</th><th>Female Population</th><th>Total Population</th><th>Data Type</th></tr></thead>";
 	}
 
 	out_tab = out_tab + "<tbody>"
 
 	for(i = 0; i < tab_data.length; i++){
 		//Selecting value of data type
-
 		var filtData = yeardata.filter(b => tab_data[i].year == b.year);
+
 		
 	if(agespec == "single"){
 	  switch(group){
@@ -3877,10 +4007,12 @@ $(tabObj).DataTable({
 
 }) //data
 
-} //genSYACty
+} 
+// genSYACty
 
-//genSYAReg Region SYA function
+
 function genSYAReg(region,loc,year_arr,group,agespec, age_arr,yeardata) {
+//genSYAReg Region SYA function
 
 	//build urlstr
    var fips_arr = [];
@@ -3894,18 +4026,14 @@ function genSYAReg(region,loc,year_arr,group,agespec, age_arr,yeardata) {
      };
    };
    
-	//List of ages
+   
+   	//List of ages
     var age_arr2 = [];
     switch(agespec){
 	case "custom" :
-		var minage = Math.min(...age_arr)
-		var maxage = Math.max(...age_arr)
-	    for(i = minage; i <= maxage; i++){
-			age_arr2.push(i)
-		}
 		age_range = []
-		for (var i = 0; i < age_arr.length; i += 2) {
-			age_range.push({'age_start' : age_arr[i], 'age_end' : age_arr[i+1], "age_str" : age_arr[i] + " to " +age_arr[i+1]})
+		for (var i = 0; i < age_arr.length; i++) {
+			age_range.push({'age_start' : age_arr[i][0], 'age_end' : age_arr[i][1], "age_str" : age_arr[i][0] + " to " +age_arr[i][1]})
 		}
 		break;
 	case "single" :
@@ -3915,14 +4043,24 @@ function genSYAReg(region,loc,year_arr,group,agespec, age_arr,yeardata) {
 
 	var fips_list  = fips_arr2.join(",")
 	var year_list = year_arr.join(",")
-	var age_list = age_arr2.join(",")
-	
-	if(agespec == "custom" || agespec == "single") {
-	     var urlstr = "https://gis.dola.colorado.gov/lookups/sya?age=" + age_list + "&county=" + fips_list + "&year=" + year_list + "&choice=single"
-	} else {
-	    var urlstr = "https://gis.dola.colorado.gov/lookups/sya?county=" + fips_list + "&year=" + year_list + "&choice="+agespec
-	}
 
+
+
+switch(agespec){
+	case "custom":
+	   var age_arr2 = []
+	   for(a = 0; a <= 100; a++) {age_arr2.push(a)}
+		var age_list = age_arr2.join(",")
+	    var urlstr = "https://gis.dola.colorado.gov/lookups/sya?age=" + age_list + "&county=" + fips_list + "&year=" + year_list + "&choice=single"		
+		break;
+	case "single":
+		 var age_list = age_arr2.join(",")
+	     var urlstr = "https://gis.dola.colorado.gov/lookups/sya?age=" + age_list + "&county=" + fips_list + "&year=" + year_list + "&choice=single"
+	break;
+	default:
+	    var urlstr = "https://gis.dola.colorado.gov/lookups/sya?age=0,100&county=" + fips_list + "&year=" + year_list + "&choice="+agespec
+		break;
+	} //switch
 
 d3.json(urlstr).then(function(data){
 	
@@ -3933,7 +4071,7 @@ d3.json(urlstr).then(function(data){
 			"regval" : col.regval,
 			"countyfips" : col.countyfips,
 			"year" : dat.year,
-			"age" : agespec == "custom" ? customSYA(dat.age,age_range) : dat.age,
+			"age" :  dat.age,
 			"male" : +dat.malepopulation,
 			"female" : +dat.femalepopulation,
 			"total" : +dat.totalpopulation,
@@ -3941,12 +4079,22 @@ d3.json(urlstr).then(function(data){
 		};
 	});
 
-	 if(agespec == "custom") {
-		 raw_data = raw_data.filter(d => d.age != "")
-	 }
-	
+	switch(agespec){
+	 case "custom":
+		 var tab_data =[]
+		 for(j = 0; j < age_range.length; j++){
+			 var rng_data = raw_data.filter( d => ((d.age >= age_range[j].age_start)  && (d.age <= age_range[j].age_end)))
+			 var sum_data = sumSYA(rng_data,agespec,age_range[j].age_str,"region")
+			 tab_data = tab_data.concat(sum_data)
+		 }
+	 break;
+	case "single" :
 		var tab_data = sumSYA(raw_data,agespec,group,"region")
-	
+	break;
+	default:
+		var tab_data = raw_data;
+	} //switch
+
 
 	// Generate Table
 	if(agespec == "single"){
@@ -3965,7 +4113,7 @@ d3.json(urlstr).then(function(data){
 			break;
 	  }
 	} else {
-	 var out_tab = "<thead><tr><th>Region Number</th><th>Region Name</th><th>Year</th><th>Age</th><th>Male Population</th><th>Female Population</th><th>Total Population</th><th>Data Type</th></tr></thead>";
+	    var out_tab = "<thead><tr><th>Region Number</th><th>Region Name</th><th>Year</th><th>Age</th><th>Male Population</th><th>Female Population</th><th>Total Population</th><th>Data Type</th></tr></thead>";
 	}
 
 	out_tab = out_tab + "<tbody>"
@@ -3979,7 +4127,7 @@ d3.json(urlstr).then(function(data){
 	  switch(group){
 		case "opt0" :
 			var el0 = "<td>" + tab_data[i].regval + "</td>"
-			var el1 = "<td>" + tab_data[i].regionname + "</td>"
+			var el1 = "<td>" + regionName(tab_data[i].regval) + "</td>"
 			var el2 = "<td>" + tab_data[i].year + "</td>"
 			var el3 = "<td>" + tab_data[i].age + "</td>"
 			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
@@ -3998,7 +4146,7 @@ d3.json(urlstr).then(function(data){
 			break;
 		case "opt2" :
 			var el0 = "<td>" + tab_data[i].regval + "</td>"
-			var el1 = "<td>" + tab_data[i].regionname + "</td>"
+			var el1 = "<td>" + regionName(tab_data[i].regval) + "</td>"
 			var el2 = "<td>" + tab_data[i].year + "</td>"
 			var el3 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
 			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].female,"num") + "</td>"
@@ -4018,7 +4166,7 @@ d3.json(urlstr).then(function(data){
 	  }
 	} else {
 			var el0 = "<td>" + tab_data[i].regval + "</td>"
-			var el1 = "<td>" + tab_data[i].regionname + "</td>"
+			var el1 = "<td>" + regionName(tab_data[i].regval) + "</td>"
 			var el2 = "<td>" + tab_data[i].year + "</td>"
 			var el3 = "<td>" + tab_data[i].age + "</td>"
 			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
@@ -4052,10 +4200,14 @@ $(tabObj).DataTable({
 
 }) //data
 
-} //genSYAReg
+} 
+// genSYAReg
 
-//genHistoricalCensus outputs table for County and Municipal Population Timeseries
+//cat Historical Census Lookup 
+
 function genHistoricalCensus(ctyval,munival,yrval) {
+//genHistoricalCensus outputs table for County and Municipal Population Timeseries
+
 //Creating url String
 
 var yrstr = yrval.join(",")
@@ -4152,10 +4304,14 @@ $(tabObj).DataTable({
  });	
 	
 }) //Data
-} //genHistoricalCensus
+} 
+// genHistoricalCensus
 
-//function genNETMIGCty outputs Net Migration by Age for multiple counties
+//cat Net Migration Lookup Functions
+
 function genNETMIGCty(loc,year_arr) {
+// genNETMIGCty outputs Net Migration by Age for multiple counties
+
 	//build urlstr
    var fips_arr2 = [];
 	for(j = 0; j < loc.length; j++){
@@ -4222,11 +4378,11 @@ $(tabObj).DataTable({
  });
 
 }) //data
-} //getNetMIGCty	
+} 
+// genNetMIGCty	
 
-
-//function genNETMIGReg outputs Net Migration by Age for regions
 function genNETMIGReg(region, loc,year_arr) {
+// genNETMIGReg outputs Net Migration by Age for regions
 
 	//build urlstr
    var fips_arr = [];
@@ -4242,7 +4398,6 @@ function genNETMIGReg(region, loc,year_arr) {
 
 	
 	var urlstr = "https://storage.googleapis.com/co-publicdata/Colorado_Age_Migration_By_Decade.csv";
-
 
 d3.csv(urlstr).then(function(data){
 
@@ -4319,4 +4474,5 @@ $(tabObj).DataTable({
  });
 
 }) //data
-} //getNetMIGReg
+} 
+// genNetMIGReg
