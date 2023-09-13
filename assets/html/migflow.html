@@ -28,11 +28,11 @@
 <!-- GoogleAnalytics Script -->
 <script defer src="../js/googleAnalytics.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-W27DQ8VRCX"></script>
-<a href="#mainx" class="skip" tabindex='1'>Skip to main content</a>
+<a href="#mainx" class="skip-main" tabindex='1'>Skip to main content</a>
 </head>
 <body>
 <div>
-<a href="https://cdola.colorado.gov/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt="Department of Local Affairs Homepage"></a>
+<a href="https://coloradodemography.github.io/new_website/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt='State Demography Office Homepage'></a>
 </div>
 <div>
 <div w3-include-html="./navheader.html"></div>
@@ -78,10 +78,10 @@
    <table style="border-collapse: collapse; border : none;">
    <tr>
 	<td style="border : none; width: 34%;">
-	 <p class="entry_text">Select Geography:</p> 
+	 <p class="entry_text" for='county-dropdown'>Select Geography:</p> 
 	 </td>
 	 <td style="border : none; width: 33%;">
-	 <p class="entry_text">Select Year:</p> 
+	 <p class="entry_text" for='year-dropdown'>Select Year:</p> 
 	 </td>
 	 </td>
 	 <td style="border : none; width: 33%"><td>
@@ -98,7 +98,7 @@
 	</table>
   <div class="grid-item app-panel_3_2">
       <div class="dropdown AClass">
-		  <button class="dropbtn"  id="estimate"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+		  <button class="dropbtn"  id="netmig" aria-label='Net Migration Download Button'><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
 		  <div class="dropdown-content">
 		  	<ul class='dd-list'>
 			<li><a href='#' id='net_csv'>Download Data (CSV)</a></li>
@@ -111,7 +111,7 @@
   </div>
   <div class="grid-item app-panel_4_2">
 	<div class="dropdown AClass">
-		<button class="dropbtn" id="forecast"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+		<button class="dropbtn" id="inmig" aria-label='In Migration Download Button' ><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
 	<div class="dropdown-content">
 	    <ul class='dd-list'>
 		<li><a href="#" id='in_csv'>Download Data (CSV)</a></li>
@@ -124,7 +124,7 @@
   </div>
   <div class="grid-item app-panel_5_2">
   	<div class="dropdown AClass">
-		<button class="dropbtn" id="coc"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+		<button class="dropbtn" id="outmig" aria-label='Out Migration Download Button'><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
 	<div class="dropdown-content">
 		<ul class='dd-list'>
 		<li><a href="#" id='out_csv'>Download Data (CSV)</a></li>

@@ -1,0 +1,150 @@
+<!-- SDO Website Updates Page A Bickford 5/2021 -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>SDO Website Updates</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
+<!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<!-- SDO CSS -->
+<link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
+<!-- adding d3.js  for data manipulation-->
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<!-- Adding Plotly.js for  charting -->
+
+<!-- Adding jquery and datatables for table production -->
+<script src="https://code.jquery.com/jquery-3.7.0.js" integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM=" crossorigin="anonymous"></script>
+ <script src="https://cdn.plot.ly/plotly-2.24.1.min.js" charset="utf-8"></script>
+<!-- Datatables -->
+<link href="https://cdn.datatables.net/v/dt/dt-1.13.5/b-2.4.1/datatables.min.css" rel="stylesheet"/>
+<script src="https://cdn.datatables.net/v/dt/dt-1.13.5/b-2.4.1/datatables.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+
+<!-- SDO suport functions, genSYA, insertHTML, -->
+<script src="../js/funct.js"></script>
+<script type="text/javascript" src="../js/lookup.js"></script>
+<!-- GoogleAnalytics Script -->
+<script defer src="../js/googleAnalytics.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W27DQ8VRCX"></script>
+<a href="#mainx" class="skip-main" tabindex='1'>Skip to main content</a>
+</head>
+<body>
+<div>
+<a href="https://coloradodemography.github.io/new_website/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt='State Demography Office Homepage'></a>
+</div>
+<div w3-include-html="./navheader.html"></div>
+<!-- First Grid, linked images -->
+<div class="grid-container2">
+  <div class="grid-item panel2_1_1">
+	<div w3-include-html="./sdotitle.html"></div>
+  </div>
+  <div class="grid-item panel2_2_1" id="leftHand">
+	<div w3-include-html="./left_hand_index.html"></div>
+  </div> <!-- Grid  panel2_2_1 -->
+  
+<div class="grid-item app-panel_2_span">
+<h1 class='h1_style' id='mainx'>SDO Website Updates 9/1/2023</h1>
+<h2 class='h2_style'>Accessibility updates</h2>
+<p>
+The SDO Website has been updated to implement the accessibility standards specified in House Bill 21-1110.  This law directs all State of Colorado meet the Web Content Accessibility Guidelines (WCAG) standards by June 2024.  
+</p>
+<p>
+The typography of the SDO webpage has been modified to improve page legibility.  The header structure of each page has been enhanced to improve page navigation.  Under the hood improvements have been made to facilitate screen readers and other accessibility hardware.
+</p>
+<p>
+Each page has been modified to provide a "Skip to main content" link.  Press the tab key after a page has loaded to reveal a link to the main content of the page.
+</p>
+<p>
+Additional changes coming to the website include revisions to SDO reports and documents to make them more accessible to users utilizing assistive technology, such as a screen reader or a Braille keyboard
+</p>
+<h2 class='h2_style'>Revised Data Lookup Applications</h2>
+<p>
+The SDO website features a set of data lookup applications for each major section of the website, Population, Births, Deaths and Migration, 
+Economy and Jobs, and Housing.  These applications provide users with the ability to generate and download customized data tables. 
+The lookup applications have been updated to match the layout of the current website and provide more functionality.   
+The on-screen tables use "Data Tables," an open-source table library that allows for sorting and pagination.  
+These applications allow data file customization and data downloads.
+</p>
+<h2 class='h2_style'>Revised Net Migration Dashboards and Lookup Applications</h2>
+<p>
+SDO has updated several applications showing net migration data:
+<ul>
+<li>The <a href="https://coloradodemography.github.io/new_website/assets/html/netmigcomp.html" target="_blank" 
+     text= "Net Migration by Age Dashboard" aria-label="Net Migration by Age Dashboard">Net Migration by Age Dashboard</a>
+	 has been updated to include Decennial Census data from 1970 to 2020.  County and Regional data lookup applications providing Net Migration data by Age
+	 have also been added to the "Birth, Deaths & Migration" lookups page. </li>
+<li>The <a href="https://gis.dola.colorado.gov/AgeMigrationMap/" target="_blank" 
+     text= "Migration by Age Map" aria-label="Migration by Age Map">Migration by Age Map</a> 
+	 displays county net-migration data by 5-year age group the 1970's to 2010's. This application uses data from the 
+	 <a href="https://netmigration.wisc.edu/" target="_blank" text="Net Migration Patterns for US Counties Dashboard"
+	 aria-label="Net Migration Patterns for US Counties Dashboard">Net Migration Patterns for US Counties Dashboard</a> maintained by the  Applied Population Lab at the University of Wisconsin-Madison</li>
+<li> The <a href="https://gis.dola.colorado.gov/State_Migration/" target="_blank" 
+     text= "Colorado State to State Migration Map" aria-label="Colorado State to State Migration Map">Colorado State to State Migration Map</a> is a new State-to State migration map that 
+	 combines migration data from the American Community Survey and migration data provided by the Internal Revenue Service</li>
+<li> The <a href="https://coloradodemography.github.io/new_website/assets/html/demodashboard.html" target="_blank" 
+     text= "Regional and County Demographic Dashboard" aria-label="Regional and County Demographic Dashboard">Regional and County Demographic Dashboard</a> net migration panel
+	 has been updated to provide county net-migration data by 5-year age group the 1970's to 2010's.</li>
+</ul>
+</p>
+<h2 class='h2_style'>Updated Job Estimate Applications</h2>
+<p>
+Several Job estimate applications and spreadsheets have been updated to add 2022 data:
+
+<ul>
+<li>Applications</li>
+<ul>
+<li><a href="https://gis.dola.colorado.gov/Jobs_by_sector_chart/" target="_blank" text="SDO Jobs by Sector Analysis Chart" 
+	aria-label="SDO Jobs by Sector Analysis Chart">SDO Jobs by Sector Analysis Chart</a></li>
+<li><a href="https://gis.dola.colorado.gov/CO_BaseIndustries_Bar/" target="_blank" text="Jobs Base Industries Analysis" 
+	aria-label="Jobs Base Industries Analysis">Jobs Base Industries Analysis</a></li>
+<li><a href="https://gis.dola.colorado.gov/Job_Sector_County/" target="_blank" text="Jobs by Sector Map" 
+	aria-label="Jobs by Sector Map">Jobs by Sector Map</a></li>
+</ul>
+<li>Lookup Applications</li>
+<ul>
+<li>Jobs by Sector Lookup Applications for <a href="https://coloradodemography.github.io/new_website/assets/lookups/region_jobsector_lookup.html" target="_blank" 
+    text="Regions" aria-label="Regions">Regions</a> and <a href="https://coloradodemography.github.io/new_website/assets/lookups/county_jobsector_lookup.html" target="_blank" 
+    text="Counties" aria-label="Counties">Counties</a></li>
+Jobs by Base Industry Lookup Applications for <a href="https://coloradodemography.github.io/new_website/assets/lookups/region_baseind_lookup.html" target="_blank" 
+    text="Regions" aria-label="Regions">Regions</a> and <a href="https://coloradodemography.github.io/new_website/assets/lookups/county_baseind_lookup.html" target="_blank" 
+    text="Counties" aria-label="Counties">Counties</a></li>
+</ul>
+<li> Spreadsheets</li>
+<ul>
+</li>Number of Jobs by Base Industry Category by Region, Current Year</li>
+<li>Jobs by Sector by County, 2001 to Current Year</li>
+</ul>
+</ul>
+
+<p>
+Updates to SDO's 2022 Population Estimate, Population Forecast, and Jobs Forecast data series will be published at the State Demography Summit on November 3, 2023.  
+Updates to American Community Survey data will be completed in January 2024.  See the 2022-2023 <a class="accordion-link" href="https://drive.google.com/uc?export=download&id=1V77ND4VmL94VrndUd_TKINJxg05hb5bJ"   title="Data Release Schedule"
+	aria-label="Data Release Schedule">Data Release Schedule</a> for more details. 
+</p>
+</div> <!-- app -->
+
+ <div class="grid-item panel2_4_2">
+		<div w3-include-html="./bodycontent1.html"></div>
+</div>
+	<div class="grid-item panel2_4_4">
+		<div w3-include-html="./bodycontent2.html"></div>
+</div>
+<div class="grid-item panel2_4_6">
+	<div w3-include-html="./bodycontent3.html"></div>
+</div>
+</div>  <!-- End of Grid -->
+
+
+<script>
+
+//Setting HTML include and Accordion
+accordionFun();
+includeHTML(); 
+
+</script>
+
+</body>
+</html> 

@@ -28,11 +28,11 @@
 <!-- GoogleAnalytics Script -->
 <script defer src="../js/googleAnalytics.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-W27DQ8VRCX"></script>
-<a href="#mainx" class="skip" tabindex='1'>Skip to main content</a>
+<a href="#mainx" class="skip-main" tabindex='1'>Skip to main content</a>
 </head>
 <body>
 <div>
-<a href="https://cdola.colorado.gov/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt="Department of Local Affairs Homepage"></a>
+<a href="https://coloradodemography.github.io/new_website/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt='State Demography Office Homepage'></a>
 </div>
 	<div w3-include-html="./navheader.html"></div>
 <!-- First Grid, linked images -->
@@ -54,16 +54,16 @@
    <br><br>
    <b><i>This data visualization can only be viewed on a tablet or desktop.</i></b>
    <br><br>
- 	 <label for="county-dropdown"><b>Select County:</b></label>
+ 	 <label for="county-dropdown" for='county-dropdown'><b>Select County:</b></label>
 	 <select class="county-dropdown" id="county-dropdown"></select>
   </div>
   <div class="grid-item app-panel_3_2">
       <div class="dropdown AClass">
-		  <button class="dropbtn"  id="births"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+		  <button class="dropbtn"  id="births" aria-label='Long Term Births Download Button'><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
 		  <div class="dropdown-content">
 			<a href="#" id='birth_csv'>Download Data (CSV)</a>
 			<a href='#' id='birth_png'>Download Image (PNG)</a>
-		<a href='https://coloradodemography.github.io/births-deaths-migration/data/components-change/#components-of-change' id='birth_src'><u>Data Source:</u>County Births, Deaths, and Migration Lookup</a>
+		<a href='../lookups/county_coc_lookup.html' id='birth_src' target='_blank'><u>Data Source:</u>County Births, Deaths, and Migration Lookup</a>
 
 		  </div>
 	  </div>
@@ -71,22 +71,22 @@
   </div>
   <div class="grid-item app-panel_4_2">
 	<div class="dropdown AClass">
-		<button class="dropbtn" id="death"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+		<button class="dropbtn" id="death" aria-label='Long Term Deaths Download Button'><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
 	<div class="dropdown-content">
 		<a href="#" id='death_csv'>Download Data (CSV)</a>
 		<a href='#' id='death_png'>Download Image (PNG)</a>
-		<a href='https://coloradodemography.github.io/births-deaths-migration/data/components-change/#components-of-change' id='death_src'><u>Data Source:</u>County Births, Deaths, and Migration Lookup</a>
+		<a href='../lookups/county_coc_lookup.html' id='death_src' target='_blank'><u>Data Source:</u>County Births, Deaths, and Migration Lookup</a>
 	 </div>
 	</div>
     <div id="death_output"></div>
   </div>
   <div class="grid-item app-panel_5_2">
   	<div class="dropdown AClass">
-		<button class="dropbtn" id="netmig"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+		<button class="dropbtn" id="netmig" aria-label='Long Term Net Migration Download Button><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
 	<div class="dropdown-content">
 		<a href="#" id='netmig_csv'>Download Data (CSV)</a>
 		<a href='#' id='netmig_png'>Download Image (PNG)</a>
-		<a href='https://coloradodemography.github.io/births-deaths-migration/data/components-change/#components-of-change' id='netmig_src'><u>Data Source:</u>County Births, Deaths, and Migration Lookup</a>
+		<a href='../lookups/county_coc_lookup.html' id='netmig_src' target='_blank'><u>Data Source:</u>County Births, Deaths, and Migration Lookup</a>
 	 </div>
 	</div>
     <div id="netmig_output"></div>

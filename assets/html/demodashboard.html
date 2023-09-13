@@ -27,11 +27,11 @@
 <!-- GoogleAnalytics Script -->
 <script defer src="../js/googleAnalytics.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-W27DQ8VRCX"></script>
-<a href="#mainx" class="skip" tabindex='1'>Skip to main content</a>
+<a href="#mainx" class="skip-main" tabindex='1'>Skip to main content</a>
 </head>
 <body>
 <div>
-<a href="https://cdola.colorado.gov/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt="Department of Local Affairs Homepage"></a>
+<a href="https://coloradodemography.github.io/new_website/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt='State Demography Office Homepage'></a>
 </div>
 <div>
 <div w3-include-html="./navheader.html"></div>
@@ -58,13 +58,13 @@
    <table style="border-collapse: collapse; border : none;">
    <tr>
  	<td style="border : none; width: 25%;">
-	<p class="entry_text">Select Geography Type:</p>
+	<p class="entry_text" for='geo-dropdown'>Select Geography Type:</p>
 	</td>
 	<td style="border : none; width: 37%;">
-	 <p class="entry_text">Select Geography:</p> 
+	 <p class="entry_text" for='location-dropdown'>Select Geography:</p> 
 	 </td>
 	 <td style="border : none; width: 37%;">
-    <p class="entry_text" id="county-lbl">Select County in Region:</p>
+    <p class="entry_text" id="county-lbl" for='county-dropdown'>Select County in Region:</p>
 	</td>
 	</tr>
 	<tr>
@@ -83,82 +83,83 @@
 	</tr>
 	</table>
   <div class="grid-item app-panel_3_2">
-  <h2 class='h2_style'>Population Estimates</h2>
+  <h3 class='h3_style'>Population Estimates</h3>
       <div class="dropdown AClass">
-		  <button class="dropbtn"  id="estimate"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+		  <button class="dropbtn"  id="estimate" aria-label='Population Estimate Download Button'><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
 		  <div class="dropdown-content">
 		  	<ul class='dd-list'>
 			<li><a href='#' id='est_csv'>Download Data (CSV)</a></li>
 			<li><a href='#' id='est_png'>Download Image (PNG)</a></li>
-			<li><a href='https://coloradodemography.github.io/population/data/county-data-lookup/' id='est_src'>County Total Population Lookup</a></li>
+			<li><a href='../lookups/county_totpop_lookup.html' id='est_src' target='_blank'>Total Population Lookup</a></li>
 			</ul>
 		  </div>
 	  </div>
 	 <div id="est_output"></div>
   </div>
   <div class="grid-item app-panel_4_2">
-  <h2 class='h2_style'>Population Forecasts and Projections</h2>
+  <h3 class='h3_style'>Population Forecasts and Projections</h3>
 	<div class="dropdown AClass">
-		<button class="dropbtn" id="forecast"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+		<button class="dropbtn" id="forecast" aria-label='Population Forecast Download Button'><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
 	<div class="dropdown-content">
 	    <ul class='dd-list'>
 		<li><a href="#" id='forec_csv'>Download Data (CSV)</a></li>
 		<li><a href='#' id='forec_png'>Download Image (PNG)</a></li>
-		<li><a href='https://coloradodemography.github.io/population/data/sya-county/' id='fore_src'>County Single Year of Age Lookup</a></li>
+		<li><a href='../lookups/county_totpop_lookup.html' id='fore_src' target='_blank'>Total Population Lookup</a></li>
 		</ul>
 	 </div>
 	</div>
     <div id="forec_output"></div>
   </div>
   <div class="grid-item app-panel_5_2">
-  <h2 class='h2_style'>BIrths, Deaths & Net Migration</h2>
+  <h2 class='h3_style'>Births, Deaths and Net Migration</h3>
   	<div class="dropdown AClass">
-		<button class="dropbtn" id="coc"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+		<button class="dropbtn" id="coc" aria-label='Births, Deaths and Migration Download Button'><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
 	<div class="dropdown-content">
 		<ul class='dd-list'>
 		<li><a href="#" id='coc_csv'>Download Data (CSV)</a></li>
 		<li><a href='#' id='coc_png'>Download Image (PNG)</a></li>
-        <li><a href='https://coloradodemography.github.io/births-deaths-migration/data/components-change/#components-of-change' id='coc_src'>County Births, Deaths, and Migration Lookup</a></li>
+        <li><a href='../lookups/county_coc_lookup.html' id='coc_src'target='_blank'>Births, Deaths, and Migration Lookup</a></li>
 		</ul>
 	 </div>
 	</div>
     <div id="coc_output"></div>
   </div>
   <div class="grid-item app-panel_6_2">
-  <h2 class='h2_style'>Net Migration by Age</h2>
+  <h3 class='h3_style'>Net Migration by Age</h3>
     <div class="dropdown AClass">
-		<button class="dropbtn" id="migr"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+		<button class="dropbtn" id="migr" aria-label='net Migration by Age Download Button'><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
 	<div class="dropdown-content">
 		<ul class='dd-list'>
 		<li><a href="#" id='mig_csv'>Download Data (CSV)</a></li>
 		<li><a href='#' id='mig_png'>Download Image (PNG)</a></li>
+       <li><a href='../lookups/county_netmig_lookup.html' id='migr_src' target='_blank'>Net Migration by Age Lookup</a></li>
 	    </ul>
 	 </div>
 	</div>
 	<div id="mig_output"></div>
   </div>
   <div class="grid-item app-panel_7_2">
-  <h2 class='h2_style'>Population by Age Group</h2>
+  <h3 class='h3_style'>Population by Age Group</h3>
     <div class="dropdown AClass">
-		<button class="dropbtn" id="age"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button> 
+		<button class="dropbtn" id="age" aria-label='Population By Age Group Download Button'><i class="fas fas fa-download fa-2x" style='color: black;'></i></button> 
 	<div class="dropdown-content">
 	    <ul class='dd-list'>
 		<li><a href="#" id='age_csv'>Download Data (CSV)</a></li>
 		<li><a href='#' id='age_png'>Download Image (PNG)</a></li>
-		<li><a href='https://coloradodemography.github.io/population/data/sya-county/' id='age_src'>County Single Year of Age Lookup</a></li>
+		<li><a href='../lookups/county_sya_lookup.html' id='age_src' target='_blank'>Single Year of Age Lookup</a></li>
 		</ul>
 	 </div>
 	</div>
     <div id="ageest_output"></div>
-  <h2 class='h2_style'>Population Change by Age Group</h2>
+  <h3 class='h3_style'>Population Change by Age Group</h3>
   <div class="grid-item app-panel_8_2">
       <div class="dropdown AClass">
-		<button class="dropbtn" id="popchng"><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+		<button class="dropbtn" id="popchng" aria-label='Population Change by Age Group Download Button'><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
 	  <div class="dropdown-content">
 	  	<ul class='dd-list'>
 		<li><a href="#" id='popchng_csv'>Download Data (CSV)</a></li>
 		<li><a href='#' id='popchng_png'>Download Image (PNG)</a></li>
-        <li><a href='https://coloradodemography.github.io/population/data/sya-county/' id='popchng_src'>County Single Year of Age Lookup</a></li>
+        <li><a href='../lookups/county_sya_lookup.html' id='popchng_src' target='_blank'>Single Year of Age Lookup</a></li>
 		</ul>
 	 </div>
 	</div>
@@ -202,7 +203,34 @@ var selectedunit = d3.select("#unit-dropdown").property('value');
 
 genDEMO("county", "000", selectedunit,"Colorado", yrvalue);
 d3.select("#geo-dropdown").on("change", function(d,i) {
+debugger
       var selectedGeo = d3.select("#geo-dropdown").property('value');
+	  // update link
+	  var estlink = document.getElementById('est_src');
+	  var forelink = document.getElementById('fore_src');
+	  var coclink = document.getElementById('coc_src');
+	  var miglink = document.getElementById('migr_src');
+	  var agelink = document.getElementById('age_src');
+	  var popchnglink = document.getElementById('popchng_src');
+	  
+	  switch(selectedGeo){
+	  case "region" :
+			estlink.setAttribute("href","../lookups/region_totpop_lookup.html");
+			forelink.setAttribute("href","../lookups/region_totpop_lookup.html"); 
+			coclink.setAttribute("href","../lookups/region_coc_lookup.html");
+			miglink.setAttribute("href","../lookups/region_netmig_lookup.html");
+			agelink.setAttribute("href","../lookups/region_sya_lookup.html");
+			popchnglink.setAttribute("href","../lookups/region_sya_lookup.html");
+		   break;
+	  case "county" :
+			estlink.setAttribute("href","../lookups/county_totpop_lookup.html");
+			forelink.setAttribute("href","../lookups/county_totpop_lookup.html"); 
+			coclink.setAttribute("href","../lookups/county_coc_lookup.html");
+			miglink.setAttribute("href","../lookups/county_netmig_lookup.html");
+			agelink.setAttribute("href","../lookups/county_sya_lookup.html");
+			popchnglink.setAttribute("href","../lookups/county_sya_lookup.html");
+		   break;
+	}
 	  popDropdown(selectedGeo,'location-dropdown','');
 	  var selectedfips = d3.select("#location-dropdown").property('value');
 	  var selectedregion = d3.select("#location-dropdown option:checked").text();
