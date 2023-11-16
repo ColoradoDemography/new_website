@@ -111,10 +111,12 @@ function transpose(data) {
 }; 
 // transpose
 
-function annot(annTxt) {
+function annot(annTxt,ypos) {
 //annot  Chart annotation Places chart source citation on Plotly Charts
 
 	const fmt_date = d3.timeFormat("%B %d, %Y");
+		ypos = -0.23;
+	
 	var  outAnnot = {text :  annTxt +'  Print Date: ' +  fmt_date(new Date) , 
                 font: {
     size : 9,
@@ -123,7 +125,7 @@ function annot(annTxt) {
       xref : 'paper', 
       x : 0, 
       yref : 'paper', 
-      y : -0.35, 
+      y : ypos, 
       align : 'left', 
       showarrow : false};
 	  
@@ -132,7 +134,7 @@ return(outAnnot);
 // annot
 
 function muni_county(muni){
-//muni_county provides county designation for municiplaities (based oased on largest population for multi-county munis
+//muni_county provides county designation for municipalities (based on largest population for multi-county munis
 var cty_n;
 if(muni == '00760'){cty_n = '071'};
 if(muni == '00925'){cty_n = '121'};
@@ -766,6 +768,7 @@ function countyName(cty){
 	if(cty == 121){name = 'Washington County'};
 	if(cty == 123){name = 'Weld County'};
 	if(cty == 125){name = 'Yuma County'};
+	if(cty == 500){name = 'Denver-Boulder Metro Area'}
 return name;
 }; 
 // countyName
@@ -1601,7 +1604,7 @@ return name;
 
 
 function popDropdown(level,ddid,callpg) {
-//popDropdown populaates drop down boxes based on input geography Type
+//popDropdown populates drop down boxes based on input geography Type
    
    //Counties
 var county = [  {'location':'Colorado', 'fips': '000'}, {'location':'Adams County', 'fips': '001'},
@@ -1639,22 +1642,24 @@ var county = [  {'location':'Colorado', 'fips': '000'}, {'location':'Adams Count
 				{'location':'Yuma County', 'fips': '125'}];
 
 if(callpg == "jobs"){
-	var county = [  {'location':'Colorado', 'fips': '000'}, {'location':'Denver-Boulder Metro Area', 'fips': '130'},
-                {'location':'Alamosa County', 'fips': '003'},
+	var county = [{'location':'Colorado', 'fips': '000'}, {'location':'Denver-Boulder Metro Area', 'fips': '500'},
+				{'location':'Adams County', 'fips': '001'},
+                {'location':'Alamosa County', 'fips': '003'},{'location':'Arapahoe County', 'fips': '005'},
 				{'location':'Archuleta County', 'fips': '007'},{'location':'Baca County', 'fips': '009'},
-				{'location':'Bent County', 'fips': '011'},
+				{'location':'Bent County', 'fips': '011'},{'location':'*Boulder County', 'fips': '013'},
+				{'location':'*Broomfield County', 'fips': '014'},
 				{'location':'Chaffee County', 'fips': '015'},
 				{'location':'Cheyenne County', 'fips': '017'},{'location':'Clear Creek County', 'fips': '019'},
 				{'location':'Conejos County', 'fips': '021'},{'location':'Costilla County', 'fips': '023'},
 				{'location':'Crowley County', 'fips': '025'},{'location':'Custer County', 'fips': '027'},
-				{'location':'Delta County', 'fips': '029'},
-				{'location':'Dolores County', 'fips': '033'},
+				{'location':'Delta County', 'fips': '029'},{'location':'Denver County', 'fips': '031'},
+				{'location':'Dolores County', 'fips': '033'},{'location':'Douglas County', 'fips': '035'},
 				{'location':'Eagle County', 'fips': '037'},{'location':'Elbert County', 'fips': '039'},
 				{'location':'El Paso County', 'fips': '041'},{'location':'Fremont County', 'fips': '043'},
 				{'location':'Garfield County', 'fips': '045'},{'location':'Gilpin County', 'fips': '047'},
 				{'location':'Grand County', 'fips': '049'},{'location':'Gunnison County', 'fips': '051'},
 				{'location':'Hinsdale County', 'fips': '053'},{'location':'Huerfano County', 'fips': '055'},
-				{'location':'Jackson County', 'fips': '057'},
+				{'location':'Jackson County', 'fips': '057'},{'location':'Jefferson County', 'fips': '059'},
 				{'location':'Kiowa County', 'fips': '061'},{'location':'Kit Carson County', 'fips': '063'},
 				{'location':'Lake County', 'fips': '065'},{'location':'La Plata County', 'fips': '067'},
 				{'location':'Larimer County', 'fips': '069'},{'location':'Las Animas County', 'fips': '071'},
@@ -2007,6 +2012,18 @@ if(level == 'region' || level == 'regioncomp') {
 	}
 	
     } else {
+	if(callpg == 'jobs'){
+		var sel = document.getElementById(ddid);
+		for(var i = 0; i < locarr.length; i++) {
+			var el = document.createElement("option");
+			el.textContent = locarr[i].location;
+			if(["001","005","013","014","031","035","059"].includes(locarr[i].fips)){
+				el.style.color = "red"
+			}
+			el.value = locarr[i].fips;
+			sel.appendChild(el);
+		}
+	} else {
 	if(callpg == 'lookup') {
 		locarr.shift()
 	}
@@ -2017,6 +2034,7 @@ if(level == 'region' || level == 'regioncomp') {
 			el.value = locarr[i].fips;
 			sel.appendChild(el);
 		}
+	}
 	}
 }; 
 // popDropdown	
@@ -2108,21 +2126,31 @@ if(regnum == 39) {fips.push({'fips' : ['001', '005', '013', '014', '031', '035',
 
 function restructureRace(inData) {
 //restructureRace restructures SDO race data 
-    var output = [];
-   var WH, HP, BL, AS, AM;
+   var output = [];
+   var WH, HP, BL, AS, NH, AM, MULTI;
    var ages = [... new Set(inData.map(tag => tag.age))];
 
     for(i = 0; i < ages.length; i++) {
 		var tmp = inData.filter(function(d) {return d.age == ages[i];});
 		for(j = 0; j < tmp.length; j++) {
-				  if( tmp[j].race_eth == "White NH") { WH = tmp[j].population};
+				  if( tmp[j].race_eth == "White alone NH") { WH = tmp[j].population};
 				  if( tmp[j].race_eth == "Hispanic") { HP = tmp[j].population};
-				  if( tmp[j].race_eth == "Black NH") { BL = tmp[j].population};
-				  if( tmp[j].race_eth == "Asian/Pacific Islander NH") {AS = tmp[j].population};
-				  if( tmp[j].race_eth == "American Indian NH") {AM = tmp[j].population};
+				  if( tmp[j].race_eth == "Black or African American alone NH") { BL = tmp[j].population};
+				  if( tmp[j].race_eth == "Asian alone NH") {AS = tmp[j].population};
+				  if( tmp[j].race_eth == "Native Hawaiian or Other Pacific Islander alone NH") {NH = tmp[j].population};
+				  if( tmp[j].race_eth == "American Indian and Alaska Native alone NH") {AM = tmp[j].population};
+		          if( tmp[j].race_eth == "Two or more NH") {MULTI = tmp[j].population};
 				}
-		output.push({ 'age' : tmp[0].age, "Hisapnic" : HP, "White NH" : WH, "Black NH" : BL, "Asian/Pacific Islander NH" : AS, "American Indian, NH" : AM});
+		output.push({"fips" : tmp[0].fips, "name" : tmp[0].name, "age" : tmp[0].age, 
+					"Hispanic" : HP, 
+					"White Alone NH" : WH, 
+					"Black Alone NH" : BL, 
+					"Asian Alone NH" : AS, 
+					"Native Hawaiian/Pacific Islander Alone NH": NH,
+					"American Indian, NH" : AM, 
+					"Two or More Races, NH": MULTI});
 		};
+
     return output;
 };
 // restructureRace
@@ -2175,7 +2203,7 @@ function genFilename(outname, type, ext, yr) {
 			var fileName = outname + " Age Pyramid." + ext;
 		break;
 		case 'popchng' :
-			var fileName = canem + " Population Change by Age Group." + ext;
+			var fileName = outname + " Population Change by Age Group." + ext;
 		break;
 		case 'line' :
 			var fileName = outname + " Single Year of Age by Race " + yr + "." + ext;
@@ -2198,8 +2226,8 @@ function genFilename(outname, type, ext, yr) {
 		case  'amind' :
 			var fileName = outname + " Single Year of Age by Race American Indian NH " + yr + "." + ext;
 		break;
-		case 'amind' :
-			var fileName = canme + " Single Year of Age by Race Two or More Races NH " + yr + "." + ext;
+		case 'multi' :
+			var fileName = outname + " Single Year of Age by Race Two or More Races NH " + yr + "." + ext;
 		break;
 		case 'netmign' :
 		   if(ext == "csv"){
@@ -2386,8 +2414,8 @@ function exportToPng(cname, type, graphDiv, yr){
 			});
 		} 
 		break;
-	  default : {
-	   Plotly.toImage(graphDiv, { format: 'png', width: 900, height: 400}).then(function (dataURL) {
+	  default : {  
+	   Plotly.toImage(graphDiv, { format: 'png', width: 1000, height: 500}).then(function (dataURL) {
         var a = document.createElement('a');
         a.href = dataURL;
         a.download = fn;
@@ -2750,13 +2778,15 @@ var tbl_arr = []
 var race_eth_sum = d3.sum(raceeth_est, d => d.population);
 var raceth = ['Hispanic', 'White alone NH', 'Black or African American alone NH',
 			'Asian alone NH', 'Native Hawaiian or Other Pacific Islander alone NH', 
-			'American Indian and Alaska Native alone NH', 'Two or more  NH'];
+			'American Indian and Alaska Native alone NH', 'Two or more NH'];
+			
 
 for(i = 0; i < raceth.length; i++) {
 	var filt = raceeth_fin.filter(function(d) {return d.race_eth == raceth[i]});
 	//tbl_arr.push({'race_eth' : raceth[i], 'percent' : fmt_pct(filt[0].population/race_eth_sum), 'curval' : fmt_comma(filt[0].population), 'forval' : fmt_comma(filt[1].population)});
-	tbl_arr.push({'race_eth' : raceth[i], 'percent' : fmt_pct(filt[0].population/race_eth_sum), 'curval' : fmt_comma(filt[0].population)});
+   tbl_arr.push({'race_eth' : raceth[i], 'percent' : fmt_pct(filt[0].population/race_eth_sum), 'curval' : fmt_comma(filt[0].population)});
   };
+
 
 //Generate Table
 d3.select('#RaceTab').html("");
@@ -4566,7 +4596,7 @@ function genHousing(fips, yrvalue) {
 var fips_list = parseInt(fips); 
    
 //extract year value 
- 
+  
   var prevyear = yrvalue - 1;
   var yr_list = prevyear + "," + yrvalue;
  
@@ -4575,39 +4605,38 @@ var fips_list = parseInt(fips);
  fips_list = "1,3,5,7,9,11,13,14,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49,51,53,55,57,59,61,63,65,67,69,71,73,75,77,79,81,83,85,87,89,91,93,95,97,99,101,103,105,107,109,111,113,115,117,119,121,123,125";
  } 
 //estimates urls
-urlstr = "https://gis.dola.colorado.gov/lookups/profile?county=" + fips_list + "&year=" + yr_list + "&vars=totalhousingunits,householdpopulation,groupquarterspopulation,households,censusbuildingpermits,vacanthousingunits";
+urlstr = "https://gis.dola.colorado.gov/lookups/profile?county=" + fips_list + "&year=" + yr_list + "&vars=totalhousingunits,householdpopulation,groupquarterspopulation,censusbuildingpermits,hhldpoptothuratio";
 
 var hous_tmp = [];
 d3.json(urlstr).then(function(data){
 
  data.forEach(function(obj) {
- hous_tmp.push({'year' : obj.year,  'county' : obj.county,
+ hous_tmp.push({'year' : obj.year,  
+     'county' : obj.county,
      'totalhousingunits' : parseInt(obj.totalhousingunits),
      'householdpopulation' : parseInt(obj.householdpopulation),
 	 'groupquarterspopulation' : parseInt(obj.groupquarterspopulation),
-	 'households' : parseInt(obj.households),
 	 'censusbuildingpermits' : parseInt(obj.censusbuildingpermits),
-	 'vacanthousingunits' : parseInt(obj.vacanthousingunits)});
+	 'hhldpoptothuratio' : parseInt(obj.hhldpoptothuratio)
+ });
  });
  
-var columnsToSum = ['totalhousingunits','householdpopulation','groupquarterspopulation', 'households', 'censusbuildingpermits', 'vacanthousingunits']
+var columnsToSum = ['totalhousingunits','householdpopulation','groupquarterspopulation', 'censusbuildingpermits']
  
-      //  Totals
+//  Totals
 var housing_temp = d3.rollup(hous_tmp,
                   v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year);
 
 var housing_fin = [];
 for (let [key, obj] of housing_temp) {
-	housing_fin.push( {'year' : key,  
+	housing_fin.push({'year' : key,  
                         'totalhousingunits' : obj.totalhousingunits,
                         'householdpopulation' : obj.householdpopulation,
 	                    'groupquarterspopulation' : obj.groupquarterspopulation,
-	                    'households' : obj.households,
-						'household_size' : obj.householdpopulation/obj.households,
 	                    'censusbuildingpermits' : obj.censusbuildingpermits,
-						'vacanthousingunits' : obj.vacanthousingunits});
- };
-
+						'hhldpoptothuratio' : obj.householdpopulation/obj.totalhousingunits
+ });
+};
 
 var housing_T = transpose(housing_fin);
 
@@ -4637,22 +4666,6 @@ for(i = 1; i < housing_fint.length; i++){
 	                                                     cVal = fmt_comma(currentVal);
 														 pctVal = fmt_pct((currentVal - prevVal)/prevVal);
 													   };
-	if(housing_fint[i][0][0].name == 'households') { out_name = "Households";
-	                                                     cVal = fmt_comma(currentVal);
-														 pctVal = fmt_pct((currentVal - prevVal)/prevVal);
-													   };
-	if(housing_fint[i][0][0].name == 'vacanthousingunits') { out_name = "Vacant Housing Units";
-	                                                     cVal = fmt_comma(currentVal);
-														 if(prevVal != 0) {
-														   pctVal = fmt_pct((currentVal - prevVal)/prevVal);
-														 } else {
-														   pctVal = " ";
-														 };
-													   };												   
-	if(housing_fint[i][0][0].name == 'household_size') { out_name = "Household Size";
-	                                                     cVal = fmt_dec(currentVal);
-														 pctVal = "";
-													   };
 	if(housing_fint[i][0][0].name == 'censusbuildingpermits') { out_name = "Annual Building Permits";
 	                                                     cVal = fmt_comma(currentVal);
 														 if(prevVal != 0) {
@@ -4660,12 +4673,17 @@ for(i = 1; i < housing_fint.length; i++){
 														 } else {
 														   pctVal = " ";
 														 };
-													   };
+	}
+	if(housing_fint[i][0][0].name == 'hhldpoptothuratio') { out_name = "Household to Population Ratio";
+	                                                     cVal = fmt_dec(currentVal);
+														 pctVal = " ";
+														 };
 
 	tbl_arr.push({ 'row_name' : out_name,
 	               'curval' : cVal, 
 	               'pct_chg' : pctVal});
 };
+
 
 //Generate Table
 d3.select('#HousTab').html("");
@@ -4726,7 +4744,7 @@ rows.append('td')
 //cat Demographic Dashboard Functions
 
 function estPlot(inData, app, level, plotdiv, bkmark, yrvalue, fips, ctyName){
-//Component Functions for Demograpic Dashboard : Estimates Plot
+//estPlot Component Functions for Demograpic Dashboard : Estimates Plot
     const fmt_date = d3.timeFormat("%B %d, %Y");
 
 var config = {responsive: true,
@@ -4767,7 +4785,7 @@ var est_layout = {
 		title: "Population Estimates 1985 to "+ yrvalue + ", " + ctyName,
 		  autosize: false,
 		  width: 1000,
-		  height: 400, 
+		  height: 500,
 		  xaxis: {
 			title : 'Year',
 			showgrid: true,
@@ -4775,7 +4793,7 @@ var est_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -4786,7 +4804,7 @@ var est_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			 tickformat: ','
@@ -4812,7 +4830,7 @@ est_png.onclick = function() {exportToPng(ctyName, 'estimate', ESTIMATE,0)};
 
 
 function forecastPlot(inData, app, level, plotdiv, bkmark, yrvalue,fips,ctyName) {
-//Component Functions for Demograpic Dashboard: Forecast Plot
+//forecastPlot Component Functions for Demograpic Dashboard: Forecast Plot
     const fmt_date = d3.timeFormat("%B %d, %Y");
 	const fmt_pct = d3.format(".0%");
 	const fmt_pct1 = d3.format(".1%");
@@ -4865,7 +4883,7 @@ var forec_layout = {
 		title: "Population Projections 2010 to 2050, " + ctyName ,
 		  autosize: false,
 		  width: 1000,
-		  height: 400,
+		  height: 500,
 		  xaxis: {
 			title : 'Year',
 			showgrid: true,
@@ -4873,7 +4891,7 @@ var forec_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -4884,7 +4902,7 @@ var forec_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			 tickformat: ','
@@ -4931,7 +4949,7 @@ if(app == 'profile'){
 
 
 function agePlot (inData, app, plotdiv,yrvalue,fips,ctyName) {
-//Component Functions for Demograpic Dashboard: Age Plot 
+//agePlot Component Functions for Demograpic Dashboard: Age Plot 
 	    const fmt_date = d3.timeFormat("%B %d, %Y");
 	const fmt_pct = d3.format(".0%");
 	const fmt_pct1 = d3.format(".1%");
@@ -5022,7 +5040,7 @@ var age_layout = {
 		title: "Population by Age Group " + yrvalue + ", " + ctyName,
 		  autosize: false,
 		  width: 1000,
-		  height: 400,
+		  height: 500,
 		  xaxis: {
 			title : 'Percentage',
 			showgrid: true,
@@ -5030,7 +5048,7 @@ var age_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			tickformat: ',.0%'
@@ -5042,7 +5060,7 @@ var age_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -5079,7 +5097,7 @@ age_png.onclick = function() {exportToPng(ctyName, 'age', AGEPLOT,0)};
 // agePlot
 
 function popchngPlot(inData, app, unit, plotdiv,yrvalue,fips,ctyName) {
-//Component Functions for Demograpic Dashboard: Population Change Plot 
+//popchngPlot Component Functions for Demograpic Dashboard: Population Change Plot 
 	const fmt_date = d3.timeFormat("%B %d, %Y");
 	const fmt_pct = d3.format(".0%");
 	const fmt_pct1 = d3.format(".1%");
@@ -5189,7 +5207,7 @@ var axis_spec = {
 	showline: true,
 	mirror: 'ticks',
 	gridcolor: '#e5e4e2',
-	gridwidth: 2,
+	gridwidth: 1,
 	linecolor: 'black',
 	linewidth: 2,
 	tickformat: ',.0%'
@@ -5220,7 +5238,7 @@ var axis_spec = {
 	showline: true,
 	mirror: 'ticks',
 	gridcolor: '#e5e4e2',
-	gridwidth: 2,
+	gridwidth: 1,
 	linecolor: 'black',
 	linewidth: 2,
 	tickformat: ','
@@ -5232,7 +5250,7 @@ var popchng_layout = {
 		title: "Projected Population Change by Age Group, " + yrvalue + " to "+ yr10 + ", " + ctyName,
 		  autosize: false,
 		  width: 1000,
-		  height: 400,
+		  height: 500,
 		  xaxis: axis_spec, 
 		  yaxis: { 
             autorange : 'reversed',
@@ -5241,7 +5259,7 @@ var popchng_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#e5e4e2',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -5291,7 +5309,7 @@ popchng_png.onclick = function() {exportToPng(ctyName, 'popchng', POPCHNG,0)};
 
 
 function netmigPlot(inData, app, plotdiv, fips, ctyName) {
-//Component Functions for Demograpic Dashboard: Net Migration by Age 
+//netmigPlot Component Functions for Demograpic Dashboard: Net Migration by Age 
 
 	const fmt_date = d3.timeFormat("%B %d, %Y");
 	const fmt_pct = d3.format(".0%");
@@ -5327,7 +5345,7 @@ var NetMig_layout = {
 		title: "Net Migration by Age -- Net Migrants 2010-2020 " + ctyName,
 		  autosize: false,
 		  width: 1000,
-		  height: 400, 
+		  height: 500,
 		  xaxis: {
 			title : 'Age',
 			showgrid: true,
@@ -5335,7 +5353,7 @@ var NetMig_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -5348,7 +5366,7 @@ var NetMig_layout = {
 			zerolinewidth: 4,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			 tickformat: ','
@@ -5368,7 +5386,7 @@ mig_png.onclick = function() {exportToPng(ctyName, 'netmig', NETMIG,0)};
 // netmigPlot
 
 function cocPlot(inData,app, level, plotdiv, bkmark,yrvalue,fips,ctyName) {
-//Component Functions for Demograpic Dashboard Components of Change Plot Bith Dashboard and Profile
+//cocPlot Component Functions for Demograpic Dashboard Components of Change Plot Bith Dashboard and Profile
 	const fmt_date = d3.timeFormat("%B %d, %Y");
 	const fmt_pct = d3.format(".0%");
 	const fmt_pct1 = d3.format(".1%");
@@ -5482,7 +5500,7 @@ var coc_layout = {
 		title: "Births, Deaths and Net Migration 1985 to " + yrvalue + ", " + ctyName,
 		  autosize: false,
 		  width: 1000,
-		  height: 400,
+		  height: 500,
 		  xaxis: {
 			title : 'Year',
 			showgrid: true,
@@ -5490,7 +5508,7 @@ var coc_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -5503,7 +5521,7 @@ var coc_layout = {
 			zerolinewidth: 4,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			 tickformat: ','
@@ -5744,7 +5762,6 @@ var prom = [d3.json(urlstr_hispest),d3.json(urlstr_nonhispest)];
 Promise.all(prom).then(function(data){
 	var hisp_est = [];
     var nonhisp_est = [];
-
 	
 if(fips == "000") {	
 	data[0].forEach(obj => {
@@ -5786,6 +5803,7 @@ var race_flat = hisp_flat.concat(nonhisp_flat).sort(function(a, b){ return d3.as
                 .sort(function(a, b){ return d3.ascending(a['age'], b['age']); })
 				.sort(function(a, b){ return d3.ascending(a['fips'], b['fips']); });
 
+
 if(geotype == 'region') {
 	var race_reg = d3.rollup(race_flat, v => d3.sum(v, d => d.population),  d => d.age, d=> d.race_eth);
 	var race_flat = [];
@@ -5799,7 +5817,6 @@ if(geotype == 'region') {
                 .sort(function(a, b){ return d3.ascending(a['age'], b['age']); })
 				.sort(function(a, b){ return d3.ascending(a['fips'], b['fips']); });
 };
-
 
 //Plotting 
 var config = {responsive: true,
@@ -5865,7 +5882,7 @@ for(i = 0; i < race_flat.length; i++){
 		age_line_arr_ai.push(race_flat[i].age);
 		pop_line_arr_ai.push(race_flat[i].population);
 	};
-	if(race_flat[i].race_eth == "Two or more  NH" && race_flat[i].age < 85){
+	if(race_flat[i].race_eth == "Two or more NH" && race_flat[i].age < 85){
 		age_line_arr_mu.push(race_flat[i].age);
 		pop_line_arr_mu.push(race_flat[i].population);
 	};
@@ -6009,7 +6026,7 @@ var line_layout = {
 		title: "Single Year of Age by Race/Ethnicity: " + ctyName + ", " + yrvalue,
 		  autosize: false,
 		  width: 1000,
-		  height: 400, 
+		  height: 500,
 		  xaxis: {
 			title : 'Age',
 			showgrid: true,
@@ -6017,7 +6034,7 @@ var line_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -6028,7 +6045,7 @@ var line_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			 tickformat: ','
@@ -6042,7 +6059,7 @@ var white_layout = {
 		title: "Single Year of Age by Race/Ethnicity: " + ctyName + ", " + yrvalue + " White, NH",
 		  autosize: false,
 		  width: 1000,
-		  height: 400, 
+		  height: 500,
 		  xaxis: {
 			title : 'Age',
 			showgrid: true,
@@ -6050,7 +6067,7 @@ var white_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -6061,7 +6078,7 @@ var white_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			 tickformat: ','
@@ -6075,7 +6092,7 @@ var hisp_layout = {
 		title: "Single Year of Age by Race/Ethnicity: " + ctyName + ", " + yrvalue + " Hispanic",
 		  autosize: false,
 		  width: 1000,
-		  height: 400, 
+		  height: 500,
 		  xaxis: {
 			title : 'Age',
 			showgrid: true,
@@ -6083,7 +6100,7 @@ var hisp_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -6094,7 +6111,7 @@ var hisp_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			 tickformat: ','
@@ -6108,7 +6125,7 @@ var black_layout = {
 		title: "Single Year of Age by Race/Ethnicity: " + ctyName + ", " + yrvalue + " Black or African American, NH",
 		  autosize: false,
 		  width: 1000,
-		  height: 400, 
+		  height: 500,
 		  xaxis: {
 			title : 'Age',
 			showgrid: true,
@@ -6116,7 +6133,7 @@ var black_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -6127,7 +6144,7 @@ var black_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			 tickformat: ','
@@ -6141,7 +6158,7 @@ var asian_layout = {
 		title: "Single Year of Age by Race/Ethnicity: " + ctyName + ", " + yrvalue + " Asian, NH",
 		  autosize: false,
 		  width: 1000,
-		  height: 400, 
+		  height: 500,
 		  xaxis: {
 			title : 'Age',
 			showgrid: true,
@@ -6149,7 +6166,7 @@ var asian_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -6160,7 +6177,7 @@ var asian_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			 tickformat: ','
@@ -6174,7 +6191,7 @@ var nhpi_layout = {
 		title: "Single Year of Age by Race/Ethnicity: " + ctyName + ", " + yrvalue + " Native Hawaiian or Other Pacific Islander, NH",
 		  autosize: false,
 		  width: 1000,
-		  height: 400, 
+		  height: 500,
 		  xaxis: {
 			title : 'Age',
 			showgrid: true,
@@ -6182,7 +6199,7 @@ var nhpi_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -6193,7 +6210,7 @@ var nhpi_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			 tickformat: ','
@@ -6207,7 +6224,7 @@ var amind_layout = {
 		title: "Single Year of Age by Race/Ethnicity: " + ctyName + ", " + yrvalue + " American Indian and Alaska Native, NH",
 		  autosize: false,
 		  width: 1000,
-		  height: 400, 
+		  height: 500,
 		  xaxis: {
 			title : 'Age',
 			showgrid: true,
@@ -6215,7 +6232,7 @@ var amind_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -6226,7 +6243,7 @@ var amind_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			 tickformat: ','
@@ -6240,7 +6257,7 @@ var multi_layout = {
 		title: "Single Year of Age by Race/Ethnicity: " + ctyName + ", " + yrvalue + " Two or More Races, NH",
 		  autosize: false,
 		  width: 1000,
-		  height: 400, 
+		  height: 500,
 		  xaxis: {
 			title : 'Age',
 			showgrid: true,
@@ -6248,7 +6265,7 @@ var multi_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -6259,7 +6276,7 @@ var multi_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			 tickformat: ','
@@ -6472,8 +6489,7 @@ if((yr_arr.length > 1) && (fips_Arr.length > 1)){
   var NetMig_trace = [];
   var Rate_trace = [];
 
-debugger
-console.log(datafilt)
+
 for(a = 0; a < fips_Arr.length; a++){
   for(i = 0; i < yr_arr.length; i++){
 	  var yr_filt = datafilt.filter(function(d) {return (parseInt(d.countyfips) == parseInt(fips_Arr[a])) && (d.year == yr_arr[i])});
@@ -6555,7 +6571,7 @@ var NetMig_layout = {
 		title: NetMigTitle,
 		  autosize: false,
 		  width: 1000,
-		  height: 400, 
+		  height: 500,
 		  xaxis: {
 			title : 'Age',
 			showgrid: true,
@@ -6563,7 +6579,7 @@ var NetMig_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -6574,7 +6590,7 @@ var NetMig_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			 tickformat: ','
@@ -6597,7 +6613,7 @@ var NetMig_layout = {
 		title: NetMigRateTitle,
 		  autosize: false,
 		  width: 1000,
-		  height: 400, 
+		  height: 500,
 		  xaxis: {
 			title : 'Age',
 			showgrid: true,
@@ -6605,7 +6621,7 @@ var NetMig_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -6616,7 +6632,7 @@ var NetMig_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			 tickformat:  '.2f'
@@ -6808,7 +6824,7 @@ var tot_layout = {
 		title: titStrTot,
 		  autosize: false,
 		  width: 1000,
-		  height: 400, 
+		  height: 500,
 		  xaxis: {
 			title : 'Year',
 			showgrid: true,
@@ -6816,7 +6832,7 @@ var tot_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -6827,7 +6843,7 @@ var tot_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			 tickformat: ','
@@ -6840,7 +6856,7 @@ var rate_layout = {
 		title: titStrRate,
 		  autosize: false,
 		  width: 1000,
-		  height: 400, 
+		  height: 500,
 		  xaxis: {
 			title : 'Year',
 			showgrid: true,
@@ -6848,7 +6864,7 @@ var rate_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -6859,7 +6875,7 @@ var rate_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			 tickformat:  '.2f'
@@ -7037,7 +7053,7 @@ var birth_layout = {
 		title: "Birth Estimate and Forecast " + ctyName,
 		  autosize: false,
 		  width: 1000,
-		  height: 400, 
+		  height: 500,
 		  xaxis: {
 			title : 'Year',
 			showgrid: true,
@@ -7045,7 +7061,7 @@ var birth_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -7056,7 +7072,7 @@ var birth_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			 tickformat: ','
@@ -7068,7 +7084,7 @@ var death_layout = {
 		title: "Death Estimate and Forecast " + ctyName,
 		  autosize: false,
 		  width: 1000,
-		  height: 400, 
+		  height: 500,
 		  xaxis: {
 			title : 'Year',
 			showgrid: true,
@@ -7076,7 +7092,7 @@ var death_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -7087,7 +7103,7 @@ var death_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			 tickformat: ','
@@ -7099,7 +7115,7 @@ var mig_layout = {
 		title: "Net Migration Estimate and Forecast " + ctyName,
 		  autosize: false,
 		  width: 1000,
-		  height: 400, 
+		  height: 500,
 		  xaxis: {
 			title : 'Year',
 			showgrid: true,
@@ -7107,7 +7123,7 @@ var mig_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -7118,7 +7134,7 @@ var mig_layout = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			 tickformat: ','
@@ -7383,7 +7399,7 @@ for(i = 0; i < hh_arr.length; i++){
 		title: tit_str,
 		  autosize: false,
 		  width: 1000,
-		  height: 400, 
+		  height: 500,
 		  xaxis: {
 			title : 'Year',
 			showgrid: true,
@@ -7391,7 +7407,7 @@ for(i = 0; i < hh_arr.length; i++){
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			type: 'date'
@@ -7403,7 +7419,7 @@ for(i = 0; i < hh_arr.length; i++){
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			tickformat: y_ticks
@@ -7430,7 +7446,7 @@ ch_layout.push(layout);
 		title: tit_str,
 		  autosize: false,
 		  width: 1000,
-		  height: 400, 
+		  height: 500,
 		  xaxis: {
 			title : 'Year',
 			showgrid: true,
@@ -7438,7 +7454,7 @@ ch_layout.push(layout);
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -7449,7 +7465,7 @@ ch_layout.push(layout);
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			tickformat: y_ticks
@@ -7785,7 +7801,7 @@ var config = {responsive: true,
 		title: tit_str0,
 		  autosize: false,
 		  width: 1000,
-		  height: 400, 
+		  height: 500,
 		  xaxis: {
 			title : 'Year',
 			range: [2009, yrvalue+1],
@@ -7794,7 +7810,7 @@ var config = {responsive: true,
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -7805,7 +7821,7 @@ var config = {responsive: true,
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			tickformat: ','
@@ -7817,7 +7833,7 @@ var layout1 = {
 		title: tit_str1,
 		  autosize: false,
 		  width: 1000,
-		  height: 400, 
+		  height: 500,
 		  xaxis: {
 			title : 'Year',
 			range: [2009, yrvalue+1],
@@ -7826,7 +7842,7 @@ var layout1 = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2
 		  },
@@ -7837,7 +7853,7 @@ var layout1 = {
 			showline: true,
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
-			gridwidth: 2,
+			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
 			tickformat: ','
@@ -7850,7 +7866,7 @@ var layout2 = {
 	title: tit_str2,
 	  autosize: false,
 	  width: 1000,
-	  height: 400, 
+	  height: 500,
 	  xaxis: {
 		title : 'Year',
 		range: [2009, yrvalue+1],
@@ -7859,7 +7875,7 @@ var layout2 = {
 		showline: true,
 		mirror: 'ticks',
 		gridcolor: '#bdbdbd',
-		gridwidth: 2,
+		gridwidth: 1,
 		linecolor: 'black',
 		linewidth: 2
 	  },
@@ -7870,7 +7886,7 @@ var layout2 = {
 		showline: true,
 		mirror: 'ticks',
 		gridcolor: '#bdbdbd',
-		gridwidth: 2,
+		gridwidth: 1,
 		linecolor: 'black',
 		linewidth: 2,
 		tickformat: ','

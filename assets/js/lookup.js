@@ -94,7 +94,7 @@ sel.innerHTML = "";
 //cat Race and Ethnicity Lookup application functions
 
 function genRaceTabCty(loc,year_arr, race_arr,eth_arr,age_arr,sex_list,group) {
-//genRaceTabCty creares the county race data call and produces table
+//genRaceTabCty creates the county race data call and produces table
 
 	
 
@@ -112,6 +112,7 @@ function genRaceTabCty(loc,year_arr, race_arr,eth_arr,age_arr,sex_list,group) {
 		var sexl = sex_list.toLowerCase()
 		var urlstr = "https://gis.dola.colorado.gov/lookups/county_sya_race_estimates_current?age="+ age_list + "&county="+ fips_list +"&year="+ year_list +"&race=" + race_list+ "&ethnicity="+eth_list+"&sex="+sexl+"&group=opt0";
 	}
+
 
 d3.json(urlstr).then(function(data){
 
@@ -276,7 +277,7 @@ cty_data = cty_data.concat(cty_tmp)
 		}
 		var el6 =  "<td>" + cty_data[i].race + "</td>"
 		var el7 = "<td>" + cty_data[i].ethnicity + "</td>"
-		var el8 = "<td style='text-align: right'>" + fixNEG(parseInt(cty_data[i].count),"num") + "</td>"
+		var el8 = "<td style='text-align: right'>" + fixNUMFMT(parseInt(cty_data[i].count),"num") + "</td>"
 
 		var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + el5 + el6 + el7 + el8 + "</tr>";
 		var tmp_str = tmp_row.replaceAll("_","")
@@ -307,7 +308,7 @@ $(tabObj).DataTable({
 // genRaceTabCty
 
 function genRaceTabCty10(loc,year_arr, race_arr,eth_arr,age_arr,sex_list,group) {
-//genRaceTabCty10 creares the county race data call and produces table Race 2010 base categories
+//genRaceTabCty10 creates the county race data call and produces table Race 2010 base categories
 
 	//build urlstr
 	var fips_arr = [];
@@ -487,7 +488,7 @@ cty_data = cty_data.concat(cty_tmp)
 		}
 		var el6 =  "<td>" + cty_data[i].race + "</td>"
 		var el7 = "<td>" + cty_data[i].ethnicity + "</td>"
-		var el8 = "<td style='text-align: right'>" + fixNEG(parseInt(cty_data[i].count),"num") + "</td>"
+		var el8 = "<td style='text-align: right'>" + fixNUMFMT(parseInt(cty_data[i].count),"num") + "</td>"
 
 		var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + el5 + el6 + el7 + el8 + "</tr>";
 		var tmp_str = tmp_row.replaceAll("_","")
@@ -519,7 +520,7 @@ $(tabObj).DataTable({
 
 
 function genRaceTabReg(region, loc,year_arr, race_arr,eth_arr,age_arr,sex_list,group) {
-//genRaceTabReg creares the regional race data call and produces table
+//genRaceTabReg creates the regional race data call and produces table
 	
 
 	//build urlstr
@@ -713,7 +714,7 @@ reg_data = reg_data.concat(reg_tmp)
 		}
 		var el6 =  "<td>" + reg_data[i].race + "</td>"
 		var el7 = "<td>" + reg_data[i].ethnicity + "</td>"
-		var el8 = "<td style='text-align: right'>" + fixNEG(parseInt(reg_data[i].count),"num") + "</td>"
+		var el8 = "<td style='text-align: right'>" + fixNUMFMT(parseInt(reg_data[i].count),"num") + "</td>"
 
 		var tmp_row = "<tr>" + el1 + el3 + el4 + el5 + el6 + el7 + el8 + "</tr>";
 		var tmp_str = tmp_row.replaceAll("_","")
@@ -745,7 +746,7 @@ $(tabObj).DataTable({
 
 
 function genRaceTabReg10(region, loc,year_arr, race_arr,eth_arr,age_arr,sex_list,group) {
-//genRaceTabReg10 creares the county race data call and produces table 2010 Base
+//genRaceTabReg10 creates the county race data call and produces table 2010 Base
 	
 	//build urlstr
 	var fips_arr = [];
@@ -766,6 +767,7 @@ function genRaceTabReg10(region, loc,year_arr, race_arr,eth_arr,age_arr,sex_list
 		var sexl = sex_list.toLowerCase()
 		var urlstr = "https://gis.dola.colorado.gov/lookups/sya-race-estimates?age="+ age_list + "&county="+ fips_list +"&year="+ year_list +"&race=" + race_list+ "&ethnicity="+eth_list+"&sex="+sexl+"&group=opt0";
 	}
+
 
 d3.json(urlstr).then(function(data){
 
@@ -938,7 +940,7 @@ reg_data = reg_data.concat(reg_tmp)
 		}
 		var el6 =  "<td>" + reg_data[i].race + "</td>"
 		var el7 = "<td>" + reg_data[i].ethnicity + "</td>"
-		var el8 = "<td style='text-align: right'>" + fixNEG(parseInt(reg_data[i].count),"num") + "</td>"
+		var el8 = "<td style='text-align: right'>" + fixNUMFMT(parseInt(reg_data[i].count),"num") + "</td>"
 
 		var tmp_row = "<tr>" + el1 + el3 + el4 + el5 + el6 + el7 + el8 + "</tr>";
 		var tmp_str = tmp_row.replaceAll("_","")
@@ -972,7 +974,7 @@ $(tabObj).DataTable({
 //cat Components of Change Lookup Functions
 
 function genCOCReg(region, loc,year_arr,group,yeardata,outType) {
-//genCOCReg creares the state regional COC table 
+//genCOCReg creates the state regional COC table 
 
 	//build urlstr
    var fips_arr = [];
@@ -1060,21 +1062,22 @@ var reg_data2 = reg_data.sort(function(a, b){ return d3.ascending(a['region_num'
 
 	// Generate Table
 	if(outType == "COC"){
-		var out_tab = "<thead><tr><th>Region Name</th><th>Year</th><th>Population</th><th>Change</th><th>Births</th><th>Deaths</th><th>Net Migration</th><th>Data Type</th></tr></thead>";
+		var out_tab = "<thead><tr><th>Region Number</th><th>Region Name</th><th>Year</th><th>Population</th><th>Change</th><th>Births</th><th>Deaths</th><th>Net Migration</th><th>Data Type</th></tr></thead>";
 	} else {
-		var out_tab = "<thead><tr><th>Region Name</th><th>Year</th><th>Population</th><th>Data Type</th></tr></thead>";
+		var out_tab = "<thead><tr><th>Region Number</th><th>Region Name</th><th>Year</th><th>Population</th><th>Data Type</th></tr></thead>";
 	}
 	out_tab = out_tab + "<tbody>"
   
 	for(i = 0; i < reg_data2.length; i++){
 	if(outType == "COC"){
+		var el0 = "<td>" + reg_data2[i].region_num + "</td>"
 		var el1 = "<td>" + reg_data2[i].name + "</td>"
 		var el2 = "<td>" + reg_data2[i].year + "</td>"
-		var el3 = "<td style='text-align: right'>" + fixNEG(reg_data2[i].population,"num") + "</td>"
-		var el4 = "<td style='text-align: right'>" + fixNEG(reg_data2[i].change,"num") + "</td>"
-		var el5 = "<td style='text-align: right'>" + fixNEG(reg_data2[i].births,"num") + "</td>"
-		var el6 = "<td style='text-align: right'>" + fixNEG(reg_data2[i].deaths,"num") + "</td>"
-		var el7 = "<td style='text-align: right'>" + fixNEG(reg_data2[i].netmig,"num") + "</td>"
+		var el3 = "<td style='text-align: right'>" + fixNUMFMT(reg_data2[i].population,"num") + "</td>"
+		var el4 = "<td style='text-align: right'>" + fixNUMFMT(reg_data2[i].change,"num") + "</td>"
+		var el5 = "<td style='text-align: right'>" + fixNUMFMT(reg_data2[i].births,"num") + "</td>"
+		var el6 = "<td style='text-align: right'>" + fixNUMFMT(reg_data2[i].deaths,"num") + "</td>"
+		var el7 = "<td style='text-align: right'>" + fixNUMFMT(reg_data2[i].netmig,"num") + "</td>"
 	//Selecting value of data type
 	 if(group == "opt2") {
 			var el8 = "<td></td>"
@@ -1083,11 +1086,12 @@ var reg_data2 = reg_data.sort(function(a, b){ return d3.ascending(a['region_num'
 			var el8 = "<td>" + filtData[0].datatype + "</td>"
 	 }
 
-	   var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + el5 + el6 + el7 + el8 + "</tr>";
+	   var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + el6 + el7 + el8 + "</tr>";
 	} else {
+		var el0 = "<td>" + reg_data2[i].region_num + "</td>"
 		var el1 = "<td>" + reg_data2[i].name + "</td>"
 		var el2 = "<td>" + reg_data2[i].year + "</td>"
-		var el3 = "<td style='text-align: right'>" + fixNEG(reg_data2[i].population,"num") + "</td>"
+		var el3 = "<td style='text-align: right'>" + fixNUMFMT(reg_data2[i].population,"num") + "</td>"
 	//Selecting value of data type
 	   	 if(group == "opt2") {
 			var el4 = "<td></td>"
@@ -1095,7 +1099,7 @@ var reg_data2 = reg_data.sort(function(a, b){ return d3.ascending(a['region_num'
 			var filtData = yeardata.filter(b => reg_data2[i].year == b.year);
 			var el4 = "<td>" + filtData[0].datatype + "</td>"
 	 }
-	  var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + "</tr>";
+	  var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + "</tr>";
 	}
    out_tab = out_tab + tmp_row;
 	}
@@ -1124,7 +1128,7 @@ $(tabObj).DataTable({
 
 
 function genCOCCty(loc,year_arr,group,yeardata,outType) {
-//genCOCCty creares the county COC Table
+//genCOCCty creates the county COC Table
 
 	//build urlstr
    var fips_arr2 = [];
@@ -1201,11 +1205,11 @@ var cty_data2 = cty_data.sort(function(a, b){ return d3.ascending(a['countyfips'
 		var el1 = "<td>" + cty_data2[i].countyfips + "</td>"
 		var el2 = "<td>" + cty_data2[i].name + "</td>"
 		var el3 = "<td>" + cty_data2[i].year + "</td>"
-		var el4 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].population,"num") + "</td>"
-		var el5 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].change,"num") + "</td>"
-		var el6 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].births,"num") + "</td>"
-		var el7 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].deaths,"num") + "</td>"
-		var el8 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].netmig,"num") + "</td>"
+		var el4 = "<td style='text-align: right'>" + fixNUMFMT(cty_data2[i].population,"num") + "</td>"
+		var el5 = "<td style='text-align: right'>" + fixNUMFMT(cty_data2[i].change,"num") + "</td>"
+		var el6 = "<td style='text-align: right'>" + fixNUMFMT(cty_data2[i].births,"num") + "</td>"
+		var el7 = "<td style='text-align: right'>" + fixNUMFMT(cty_data2[i].deaths,"num") + "</td>"
+		var el8 = "<td style='text-align: right'>" + fixNUMFMT(cty_data2[i].netmig,"num") + "</td>"
 	//Selecting value of data type
 	 if(group == "opt2") {
 			var el9 = "<td></td>"
@@ -1219,7 +1223,7 @@ var cty_data2 = cty_data.sort(function(a, b){ return d3.ascending(a['countyfips'
 		var el1 = "<td>" + cty_data2[i].countyfips + "</td>"
 		var el2 = "<td>" + cty_data2[i].name + "</td>"
 		var el3 = "<td>" + cty_data2[i].year + "</td>"
-		var el4 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].population,"num") + "</td>"
+		var el4 = "<td style='text-align: right'>" + fixNUMFMT(cty_data2[i].population,"num") + "</td>"
 	//Selecting value of data type
 	 if(group == "opt2") {
 			var el5 = "<td></td>"
@@ -1257,28 +1261,38 @@ $(tabObj).DataTable({
 
 //cat Municipal Housing and Population Lookup Functions
 
-function genPOPMuni(loc,muni_arr,year_arr,var_arr,groupval) {
-//genPOPMuni creares the Municipal Housing and Population Profile Table
+function genPOPMuni(loc,muni_arr,year_arr,var_arr,group_val) {
+//genPOPMuni creates the Municipal Housing and Population Profile Table
 	
     //build variable List
-	var varnames = ["totalpopulation","householdpopulation","groupquarterspopulation",
-					"totalhousingunits","occupiedhousingunits","vacanthousingunits"]
-	var headingnames = ["Total Population", "Household Population","Group Quarters Population", 
-					"Total Nousing Units", "Occupied Housing Units", "Vacant Housing Units"]
+	var varnames = ["totalpopulation","householdpopulation","groupquarterspopulation","householdsize","totalhousingunits","occupiedhousingunits",
+					"vacanthousingunits","vacancyrate","hhldpoptothuratio"]
+	var headingnames = ["Total Population","Household Population","Group Quarters Population",
+						"Household Size","Total Housing Units","Occupied Housing Units","Vacant Housing Units",
+						"Vacancy Rate","Household Population to Total Housing Units Ratio"]
     var varlist = [];
-	if(var_arr.length < 13){
+	if(var_arr.length < 9){
 	for(i = 0; i < var_arr.length; i++){
 		varlist.push(varnames[var_arr[i]]);
 	}
+		if(varlist.includes("hhldpoptothuratio")){
+			varlist.push("householdpopulation","totalhousingunits","hhldpoptothuratio")
+		}
+		if(varlist.includes("householdsize")){
+			varlist.push("householdpopulation", "occupiedhousingunits", "householdsize")
+		}
+		if(varlist.includes("vacancyrate")){
+			varlist.push( "totalhousingunits", "vacanthousingunits","vacancyrate")
+		}
+
+		var uniqCols = [...new Set(varlist)];
+		varlist = uniqCols
 	} else {
 		varlist = varnames;
 	}
 
-if(groupval == "opt0"){
-	var compressed = "no";
-} else {
-	var compressed = "yes"
-}
+
+
 
 var yeararr = [];
   year_arr.forEach(i => {
@@ -1317,15 +1331,18 @@ if(muni_arr.length > 0){
 }  
 
 var prom = [];
+var datatype = []
 if(ctyarr.length > 0){
 	var ctystr = ctyarr.join(",");
-	cty_url = urlstr + "countyfips="+ ctystr + "&" + "year=" + yrstr + "&stats=" + varlist + "&compressed="+compressed
+	cty_url = urlstr + "countyfips="+ ctystr + "&" + "year=" + yrstr + "&stats=" + varlist + "&compressed="+group_val
 	prom.push(d3.json(cty_url))
+	datatype.push({type : 'county'})
 }
 if(muniarr.length > 0){
 	var munistr = muniarr.join(",");
-	muni_url = urlstr + "placefips="+ munistr + "&" + "year=" + yrstr + "&stats=" + varlist + "&compressed="+compressed
+	muni_url = urlstr + "placefips="+ munistr + "&" + "year=" + yrstr + "&stats=" + varlist + "&compressed="+group_val
 	prom.push(d3.json(muni_url))
+	datatype.push({type : 'muni'})
 }
 
 if(unincorparr.length > 0) {
@@ -1335,20 +1352,76 @@ if(unincorparr.length > 0) {
 	 })
 	
 	 var unicorpctystr = un_cty.join(",")
-     unincorp_url = urlstr + "countyfips="+ unicorpctystr + "&" +"placefips=99990&"+ "year=" + yrstr + "&stats=" + varlist + "&compressed="+compressed
+     unincorp_url = urlstr + "countyfips="+ unicorpctystr + "&" +"placefips=99990&"+ "year=" + yrstr + "&stats=" + varlist + "&compressed="+group_val
 	 prom.push(d3.json(unincorp_url))
+	 datatype.push({type : 'unincorp'})
 }
 
 
 Promise.all(prom).then(function(data){
-	
-	var out_data = [];
-	for(i = 0; i < data.length; i++){
-		out_data = out_data.concat(data[i]);
-	}
-	
-//Remove Duplicates
 
+	//standardizing data
+	var out_data = [];
+   var recnum = 0;
+	for(a = 0; a < datatype.length;a++){
+		if(datatype[a].type == 'county'){
+
+			for(i = 0; i < data[a].length; i++){
+				out_data.push({'countyfips': data[a][i]['countyfips'],
+				               'countyname' : countyName(data[a][i]['countyfips']),
+				               'placefips' : group_val == "yes" ? "" : data[a][i]['placefips'],
+				               'placename' : group_val == "yes" ? "" : data[a][i]['municipalityname'],
+				               'year' : data[a][i]['year']
+				})
+				for(j = 0; j < varlist.length; j++){
+					out_data[recnum][varlist[j]] = data[a][i][varlist[j]]
+					if(group_val == "yes"){
+					if(varlist[j] == "householdsize"){
+						out_data[recnum]["householdsize"] = data[a][i]["householdpopulation"]/data[a][i]["occupiedhousingunits"];
+					}
+					if(varlist[j] == "vacancyrate"){
+						out_data[recnum]['vacancyrate'] = (data[a][i]['vacanthousingunits']/data[a][i]['totalhousingunits']) * 100;
+					}
+					if(varlist[j] =='hhldpoptothuratio') {
+						out_data[recnum]['hhldpoptothuratio'] = data[a][i]['householdpopulation']/data[a][i]['totalhousingunits']
+					}
+					} //group_val
+				} //j
+				recnum = recnum + 1;
+			} //i
+		} //county
+		if(datatype[a].type == 'muni'){
+			for(i = 0; i < data[a].length; i++){
+				out_data.push({'countyfips' : parseInt(muni_county(data[a][i]['placefips'])),
+				               'countyname' : countyName(parseInt(muni_county(data[a][i]['placefips']))),
+				               'placefips' : data[a][i]['placefips'],
+				               'placename' : data[a][i]['municipalityname'],
+				                'year' : data[a][i]['year']
+				})
+				for(j = 0; j < varlist.length; j++){
+					out_data[recnum][varlist[j]] = data[a][i][varlist[j]]
+				} //
+				recnum = recnum + 1;
+			} //i
+		} //muni
+		if(datatype[a].type == 'unincorp'){
+			for(i = 0; i < data[a].length; i++){
+				out_data.push({'countyfips' : data[a][i]['countyfips'],
+				               'countyname' : countyName(data[a][i]['countyfips']),
+				               'placefips' : data[a][i]['placefips'],
+				               'placename' : data[a][i]['municipalityname'],
+				               'year' : data[a][i]['year']
+				})
+				for(j = 0; j < varlist.length; j++){
+					out_data[recnum][varlist[j]] = data[a][i][varlist[j]]
+				} //
+				recnum = recnum + 1;
+			} //i
+		} //muni
+	} //datatype
+
+
+//Remove Duplicates
     keys = ['countyfips', 'placefips', 'year'],
     uniq_data = out_data.filter(
         (s => o => 
@@ -1359,21 +1432,25 @@ Promise.all(prom).then(function(data){
     );
 	
 
+
+
 //finalizing uniq_data
    var key_arr = Object.keys(uniq_data[0])
 	for(i = 0; i < uniq_data.length; i++){
 		uniq_data[i]['countyname'] = countyName(out_data[i]['countyfips']);
 		for(j = 0; j < key_arr.length; j++){
-		if(!['countyfips', 'placefips', 'year', 'municipalityname','countyname'].includes(key_arr[j])){
-			uniq_data[i][key_arr[j]] = parseInt(uniq_data[i][key_arr[j]])
+		if(!['countyfips', 'placefips', 'year', 'placename','countyname'].includes(key_arr[j])){
+			uniq_data[i][key_arr[j]] = +uniq_data[i][key_arr[j]]
 		}
 		}
 	}
 
-var sort_data = uniq_data.sort(function(a, b){ return d3.ascending(a['placefips'], b['placefips']); })
-  .sort(function(a, b){ return d3.ascending(a['countyfips'], b['countyfips']); })
-  .sort(function(a, b){ return d3.ascending(a['year'], b['year']); });
+
+var sort_data = uniq_data.sort(function(a, b){ return d3.ascending(a['year'], b['year']); })
+  .sort(function(a, b){ return d3.ascending(a['placefips'], b['placefips']); })
+  .sort(function(a, b){ return d3.ascending(a['countyfips'], b['countyfips']); });
   
+
 // Generate Table
 	var out_tab = "<thead><tr>";
 	if(sort_data[0]["countyfips"] != null){
@@ -1385,7 +1462,7 @@ var sort_data = uniq_data.sort(function(a, b){ return d3.ascending(a['placefips'
 	   out_tab = out_tab + "<th>Year</th>"
 	   
 	for(i = 0; i < varlist.length; i++){
-	     out_tab = out_tab + "<th>" + headingnames[i] + "</th>"
+	     out_tab = out_tab + "<th>" + headingnames[parseInt(var_arr[i])] + "</th>"
 	}
 	out_tab = out_tab + "</thead>"
 	out_tab = out_tab + "<tbody>"
@@ -1398,11 +1475,27 @@ var sort_data = uniq_data.sort(function(a, b){ return d3.ascending(a['placefips'
 	}
 	if(sort_data[0]["placefips"] != null){
 		tmp_row = tmp_row + "<td>" + sort_data[i]["placefips"] + "</td>";
-		tmp_row = tmp_row + "<td>" + sort_data[i]["municipalityname"] + "</td>";
+		tmp_row = tmp_row + "<td>" + sort_data[i]["placename"] + "</td>";
 	}
 	tmp_row = tmp_row + "<td>" + sort_data[i]["year"] + "</td>";
 	for(j = 0; j < varlist.length; j++){  
-            tmp_row = tmp_row + "<td style='text-align: right'>" + fixNEG(sort_data[i][varlist[j]],"num") + "</td>";
+	      if(sort_data[i]["year"]  >= 2020){
+			 if(isNaN(sort_data[i][varlist[j]]) || sort_data[i][varlist[j]] == 0){
+				tmp_row = tmp_row + "<td style='text-align: right'> </td>";
+			 } else {
+			  if(["householdsize","vacancyrate","hhldpoptothuratio"].includes(varlist[j])) {
+				tmp_row = tmp_row + "<td style='text-align: right'>" + fixNUMFMT(sort_data[i][varlist[j]],"dec") + "</td>";
+			  } else {
+				tmp_row = tmp_row + "<td style='text-align: right'>" + fixNUMFMT(sort_data[i][varlist[j]],"num") + "</td>";
+			  }
+			 }
+		  } else {
+			  if(["householdsize","vacancyrate","hhldpoptothuratio"].includes(varlist[j])) {
+				tmp_row = tmp_row + "<td style='text-align: right'>" + fixNUMFMT(sort_data[i][varlist[j]],"dec") + "</td>";
+			  } else {
+				tmp_row = tmp_row + "<td style='text-align: right'>" + fixNUMFMT(sort_data[i][varlist[j]],"num") + "</td>";
+			  }
+		  }
 		}
 	   tmp_row = tmp_row + "</tr>";
 	   out_tab = out_tab + tmp_row;
@@ -1433,15 +1526,15 @@ $(tabObj).DataTable({
 
 
 function genPOPCty(loc,var_arr,year_arr,group) {
-//genPOPCty creares the county Population Profile Table
+//genPOPCty creates the county Population Profile Table
 
     //build variable List
 	var varnames = ["totalpopulation", "births", "deaths", "naturalincrease", "netmigration", 
 	                "censusbuildingpermits", "groupquarterspopulation", "householdpopulation",
-					"households", "householdsize", "totalhousingunits", "vacancyrate","vacanthousingunits"]
+					"households", "householdsize", "hhldpoptothuratio","totalhousingunits", "vacancyrate","vacanthousingunits"]
 	var headingnames = ["Population", "Births", "Deaths", "Natural Increase", "Net Migration", 
 	                "Census Building Permits", "Group Quarters Population", "Household Population",
-					"Households", "Household Size", "Total Housing Units", "Vacancy Rate","Vacant Housing Units"]
+					"Households", "Household Size", "Household Population to Total Housing Units Ratio","Total Housing Units", "Vacancy Rate","Vacant Housing Units"]
     var varlist = [];
 	if(var_arr.length < 13){
 	for(i = 0; i < var_arr.length; i++){
@@ -1461,7 +1554,7 @@ function genPOPCty(loc,var_arr,year_arr,group) {
 	var year_list = year_arr.join(",")
 	var var_list = varlist.join(",")
 	
-	if(var_arr.length < 13){
+	if(var_arr.length < 14){
 				 var urlstr = "https://gis.dola.colorado.gov/lookups/profile?county=" + fips_list + "&year=" + year_list + "&vars=" + var_list
 	} else {
 	     var urlstr = "https://gis.dola.colorado.gov/lookups/profile?county=" + fips_list + "&year=" + year_list
@@ -1502,6 +1595,9 @@ var cty_data = [];
 			if(columnsToSum.includes('householdsize') && columnsToSum.includes('householdpopulation') && columnsToSum.includes('households')){
 				tmprow['householdsize'] = tmprow['householdpopulation']/tmprow['households']
 			}
+			if(columnsToSum.includes('hhldpoptothuratio') && columnsToSum.includes('householdpopulation') && columnsToSum.includes('totalhousingunits')){
+				tmprow['hhldpoptothuratio'] = tmprow['householdpopulation']/tmprow['totalhousingunits']
+			}
 			if(columnsToSum.includes('vacancyrate') && columnsToSum.includes('totalhousingunits') && columnsToSum.includes('vacanthousingunits')){
 				tmprow['vacancyrate'] = (tmprow['vacanthousingunits']/tmprow['totalhousingunits']) * 100;
 			}
@@ -1525,6 +1621,9 @@ var cty_data = [];
 			if(columnsToSum.includes('householdsize') && columnsToSum.includes('householdpopulation') && columnsToSum.includes('households')){
 				tmprow['householdsize'] = tmprow['householdpopulation']/tmprow['households']
 			}
+			if(columnsToSum.includes('hhldpoptothuratio') && columnsToSum.includes('householdpopulation') && columnsToSum.includes('totalhousingunits')){
+				tmprow['hhldpoptothuratio'] = tmprow['householdpopulation']/tmprow['totalhousingunits']
+			}
 			if(columnsToSum.includes('vacancyrate') && columnsToSum.includes('totalhousingunits') && columnsToSum.includes('vacanthousingunits')){
 				tmprow['vacancyrate'] = (tmprow['vacanthousingunits']/tmprow['totalhousingunits']) * 100;
 			}
@@ -1532,6 +1631,7 @@ var cty_data = [];
 		}
 		break;
 } //Switch
+
 
 var cty_data2 = cty_data.sort(function(a, b){ return d3.ascending(a['countyfips'], b['countyfips']); })
 
@@ -1550,16 +1650,34 @@ var cty_data2 = cty_data.sort(function(a, b){ return d3.ascending(a['countyfips'
 	out_tab = out_tab + "</thead>"
 	out_tab = out_tab + "<tbody>"
 
+
 	for(i = 0; i < cty_data2.length; i++){
     var tmp_row  = "<tr><td>" + cty_data2[i]["countyfips"] + "</td>";
 	tmp_row = tmp_row + "<td>" + cty_data2[i]["name"] + "</td>";
 	tmp_row = tmp_row + "<td>" + cty_data2[i]["year"] + "</td>";
 	for(j = 0; j < columnsToSum.length; j++){  //Fix this
-		if((columnsToSum[j] == 'vacancyrate') || (columnsToSum[j] == 'householdsize')){
-			tmp_row = tmp_row + "<td style='text-align: right'>" + fixNEG(cty_data2[i][columnsToSum[j]],"dec") + "</td>";
+		if((columnsToSum[j] == 'vacancyrate') || (columnsToSum[j] == 'householdsize') || (columnsToSum[j] == "hhldpoptothuratio")){
+			if(cty_data2[i]["year"] >= 2020){
+				if((cty_data2[i][columnsToSum[j]] === null) || (cty_data2[i][columnsToSum[j]] === "0")) {
+					var cellval = "";
+				} else {
+					var cellval = fixNUMFMT(cty_data2[i][columnsToSum[j]],"dec")
+			    }
+			} else {
+				var cellval = fixNUMFMT(cty_data2[i][columnsToSum[j]],"dec")
+			}
 		} else {
-            tmp_row = tmp_row + "<td style='text-align: right'>" + fixNEG(cty_data2[i][columnsToSum[j]],"num") + "</td>";
+			if(cty_data2[i]["year"] >= 2020){
+				if((cty_data2[i][columnsToSum[j]] === null) || (cty_data2[i][columnsToSum[j]] === "0")) {
+					var cellval = "";
+				} else {
+					var cellval = fixNUMFMT(cty_data2[i][columnsToSum[j]],"num")
+			    }
+			} else {
+				var cellval = fixNUMFMT(cty_data2[i][columnsToSum[j]],"num")
+			}
 		}
+		tmp_row = tmp_row + "<td style='text-align: right'>" + cellval + "</td>";
 	}
 	   tmp_row = tmp_row + "</tr>";
 	   out_tab = out_tab + tmp_row;
@@ -1590,17 +1708,18 @@ $(tabObj).DataTable({
 
 
 function genPOPReg(region, loc,var_arr,year_arr,group) {
-//genPOPReg creares the county Population Profile Table
+//genPOPReg creates the regional Population Profile Table
 
     //build variable List
 	var varnames = ["totalpopulation", "births", "deaths", "naturalincrease", "netmigration", 
 	                "censusbuildingpermits", "groupquarterspopulation", "householdpopulation",
-					"households", "householdsize", "totalhousingunits", "vacancyrate","vacanthousingunits"]
+					"households", "householdsize", "hhldpoptothuratio","totalhousingunits", "vacancyrate","vacanthousingunits"]
 	var headingnames = ["Population", "Births", "Deaths", "Natural Increase", "Net Migration", 
 	                "Census Building Permits", "Group Quarters Population", "Household Population",
-					"Households", "Household Size", "Total Housing Units", "Vacancy Rate","Vacant Housing Units"]
+					"Households", "Household Size", "Household Population to Total Housing Units Ratio","Total Housing Units", "Vacancy Rate","Vacant Housing Units"]
+
     var varlist = [];
-	if(var_arr.length < 13){
+	if(var_arr.length < 14){
 	for(i = 0; i < var_arr.length; i++){
 		varlist.push(varnames[var_arr[i]]);
 	}
@@ -1608,6 +1727,9 @@ function genPOPReg(region, loc,var_arr,year_arr,group) {
 		varlist = varnames;
 	}
 	
+
+
+
 	//build urlstr
 	var fips_arr = [];
 	var fips_arr2 = [];
@@ -1619,22 +1741,35 @@ function genPOPReg(region, loc,var_arr,year_arr,group) {
 		fips_arr2.push(countyfips);
      };
    };
- 
+ if(loc.length > 1){
+	 var tmp_list = [...new Set(fips_arr2)]
+	 var fips_list = tmp_list.join(",")
+ } else {
 	var fips_list  = fips_arr2.join(",")
+ }
 	var year_list = year_arr.join(",")
 	var var_list = varlist.join(",")
-	
-	if(var_arr.length < 13){
-				 var urlstr = "https://gis.dola.colorado.gov/lookups/profile?county=" + fips_list + "&year=" + year_list + "&vars=" + var_list
-	} else {
+
 	     var urlstr = "https://gis.dola.colorado.gov/lookups/profile?county=" + fips_list + "&year=" + year_list
-    }
 		
 d3.json(urlstr).then(function(data){
+// Special Calculations for single selections
+var columnsToSum = varlist;
+if(varlist.includes("hhldpoptothuratio")){
+		columnsToSum.push("householdpopulation","totalhousingunits","hhldpoptothuratio")
+}
+if(varlist.includes("householdsize")){
+		columnsToSum.push("householdpopulation", "households", "householdsize")
+}
+if(varlist.includes("vacancyrate")){
+		columnsToSum.push( "totalhousingunits", "vacanthousingunits","vacancyrate")
+}
 
-	 	var columnsToSum = varlist
-    // Adding Region Number to data
+var uniqCols = [...new Set(columnsToSum)];
+columnsToSum = uniqCols
 
+//Processing data based on the number of regions selected
+if(region.length == 1){
 var raw_data = [];
 var k = 0
 for(i = 0; i < year_arr.length; i++) {
@@ -1670,6 +1805,9 @@ var reg_data = [];
 			if(columnsToSum.includes('householdsize') && columnsToSum.includes('householdpopulation') && columnsToSum.includes('households')){
 				tmprow['householdsize'] = tmprow['householdpopulation']/tmprow['households']
 			}
+			if(columnsToSum.includes('hhldpoptothuratio') && columnsToSum.includes('householdpopulation') && columnsToSum.includes('totalhousingunits')){
+				tmprow['hhldpoptothuratio'] = tmprow['householdpopulation']/tmprow['totalhousingunits']
+			}
 			if(columnsToSum.includes('vacancyrate') && columnsToSum.includes('totalhousingunits') && columnsToSum.includes('vacanthousingunits')){
 				tmprow['vacancyrate'] = (tmprow['vacanthousingunits']/tmprow['totalhousingunits']) * 100;
 			}
@@ -1694,6 +1832,9 @@ var reg_data = [];
 			if(columnsToSum.includes('householdsize') && columnsToSum.includes('householdpopulation') && columnsToSum.includes('households')){
 				tmprow['householdsize'] = tmprow['householdpopulation']/tmprow['households']
 			}
+			if(columnsToSum.includes('hhldpoptothuratio') && columnsToSum.includes('householdpopulation') && columnsToSum.includes('totalhousingunits')){
+				tmprow['hhldpoptothuratio'] = tmprow['householdpopulation']/tmprow['totalhousingunits']
+			}
 			if(columnsToSum.includes('vacancyrate') && columnsToSum.includes('totalhousingunits') && columnsToSum.includes('vacanthousingunits')){
 				tmprow['vacancyrate'] = (tmprow['vacanthousingunits']/tmprow['totalhousingunits']) * 100;
 			}
@@ -1717,6 +1858,9 @@ var reg_data = [];
 			if(columnsToSum.includes('householdsize') && columnsToSum.includes('householdpopulation') && columnsToSum.includes('households')){
 				tmprow['householdsize'] = tmprow['householdpopulation']/tmprow['households']
 			}
+			if(columnsToSum.includes('hhldpoptothuratio') && columnsToSum.includes('householdpopulation') && columnsToSum.includes('totalhousingunits')){
+				tmprow['hhldpoptothuratio'] = tmprow['householdpopulation']/tmprow['totalhousingunits']
+			}
 			if(columnsToSum.includes('vacancyrate') && columnsToSum.includes('totalhousingunits') && columnsToSum.includes('vacanthousingunits')){
 				tmprow['vacancyrate'] = (tmprow['vacanthousingunits']/tmprow['totalhousingunits']) * 100;
 			}
@@ -1724,6 +1868,124 @@ var reg_data = [];
 		}
 		break;
 } //Switch
+} else {  //More than one region
+var reg_data = [];
+
+
+for(a = 0; a < region.length; a++){
+	var raw_data = [];
+	var reg_filt = fips_arr.filter(d => d.regval == +region[a]);
+	var sel_cty = []
+	reg_filt.forEach(i => {
+		sel_cty.push(i.countyfips)
+	})
+ 	var data_filt = data.filter(d => sel_cty.includes(d.countyfips))
+
+	//Assigning region value to raw_data
+	var k = 0;
+	for(y = 0; y < year_arr.length; y++) {
+	for(z = 0; z < reg_filt.length; z++){
+	  raw_data.push({
+	   ...reg_filt[z], 
+	   ...data_filt[k]
+	  });
+	 k++
+	}
+	}
+
+var tmp_data = [];
+
+	   //Rollups based on group value and selected variables
+	switch(group) {
+		case "opt0":
+		var tmp = [];
+		var binroll =  d3.rollup(raw_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.regval, d => d.year);
+		for (let [key, value] of binroll) {
+		for (let[key2, value2] of value) {
+         tmp.push({key, key2, value2});
+		};
+		};
+		for(i = 0; i < tmp.length; i ++){ 
+			var tmprow = [];
+			tmprow['regval'] = tmp[i].key;
+			tmprow['name'] = regionName(tmp[i].key);
+			tmprow['year'] = tmp[i].key2;
+			for(j = 0; j < columnsToSum.length; j++){
+			  tmprow[columnsToSum[j]] = tmp[i].value2[columnsToSum[j]];
+			}
+			if(columnsToSum.includes('householdsize') && columnsToSum.includes('householdpopulation') && columnsToSum.includes('households')){
+				tmprow['householdsize'] = tmprow['householdpopulation']/tmprow['households']
+			}
+			if(columnsToSum.includes('hhldpoptothuratio') && columnsToSum.includes('householdpopulation') && columnsToSum.includes('totalhousingunits')){
+				tmprow['hhldpoptothuratio'] = tmprow['householdpopulation']/tmprow['totalhousingunits']
+			}
+			if(columnsToSum.includes('vacancyrate') && columnsToSum.includes('totalhousingunits') && columnsToSum.includes('vacanthousingunits')){
+				tmprow['vacancyrate'] = (tmprow['vacanthousingunits']/tmprow['totalhousingunits']) * 100;
+			}
+			tmp_data.push(tmprow)
+		}
+		break;
+		case "opt1":
+		var tmp = [];
+		var binroll =  d3.rollup(raw_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year);
+		for (let [key, value] of binroll) {
+		   tmp.push({key, value});
+		};
+
+		for(i = 0; i < tmp.length; i ++){ 
+			var tmprow = [];
+			tmprow['regval'] = "";
+			tmprow['name'] = "";
+			tmprow['year'] = tmp[i].key;
+			for(j = 0; j < columnsToSum.length; j++){
+			  tmprow[columnsToSum[j]] = tmp[i].value[columnsToSum[j]];
+			}
+			if(columnsToSum.includes('householdsize') && columnsToSum.includes('householdpopulation') && columnsToSum.includes('households')){
+				tmprow['householdsize'] = tmprow['householdpopulation']/tmprow['households']
+			}
+			if(columnsToSum.includes('hhldpoptothuratio') && columnsToSum.includes('householdpopulation') && columnsToSum.includes('totalhousingunits')){
+				tmprow['hhldpoptothuratio'] = tmprow['householdpopulation']/tmprow['totalhousingunits']
+			}
+			if(columnsToSum.includes('vacancyrate') && columnsToSum.includes('totalhousingunits') && columnsToSum.includes('vacanthousingunits')){
+				tmprow['vacancyrate'] = (tmprow['vacanthousingunits']/tmprow['totalhousingunits']) * 100;
+			}
+			tmp_data.push(tmprow)
+		}
+		break;
+		case "opt2":
+		var tmp = [];
+		var binroll =  d3.rollup(raw_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.regval);
+		for (let [key, value] of binroll) {
+		   tmp.push({key, value});
+		};
+		for(i = 0; i < tmp.length; i ++){
+			var tmprow = [];
+			tmprow['regval'] = tmp[i].key;
+			tmprow['name'] = regionName(tmp[i].key);
+			tmprow['year'] = "";
+			for(j = 0; j < columnsToSum.length; j++){
+			  tmprow[columnsToSum[j]] = tmp[i].value[columnsToSum[j]];
+			}
+			if(columnsToSum.includes('householdsize') && columnsToSum.includes('householdpopulation') && columnsToSum.includes('households')){
+				tmprow['householdsize'] = tmprow['householdpopulation']/tmprow['households']
+			}
+			if(columnsToSum.includes('hhldpoptothuratio') && columnsToSum.includes('householdpopulation') && columnsToSum.includes('totalhousingunits')){
+				tmprow['hhldpoptothuratio'] = tmprow['householdpopulation']/tmprow['totalhousingunits']
+			}
+			if(columnsToSum.includes('vacancyrate') && columnsToSum.includes('totalhousingunits') && columnsToSum.includes('vacanthousingunits')){
+				tmprow['vacancyrate'] = (tmprow['vacanthousingunits']/tmprow['totalhousingunits']) * 100;
+			}
+			tmp_data.push(tmprow)
+		}
+		break;
+} //Switch
+
+reg_data.push(tmp_data)
+} //region i
+//Flatten
+var reg_dat = [].concat(...reg_data);
+var reg_data = reg_dat;
+} //Multiple regions
 
 var reg_data2 = reg_data.sort(function(a, b){ return d3.ascending(a['regval'], b['regval']); })
 
@@ -1746,17 +2008,33 @@ var reg_data2 = reg_data.sort(function(a, b){ return d3.ascending(a['regval'], b
     var tmp_row  = "<tr><td>" + reg_data2[i]["regval"] + "</td>";
 	tmp_row = tmp_row + "<td>" + reg_data2[i]["name"] + "</td>";
 	tmp_row = tmp_row + "<td>" + reg_data2[i]["year"] + "</td>";
-	for(j = 0; j < columnsToSum.length; j++){  
-		if((columnsToSum[j] == 'vacancyrate') || (columnsToSum[j] == 'householdsize')){
-			tmp_row = tmp_row + "<td style='text-align: right'>" + fixNEG(reg_data2[i][columnsToSum[j]],"dec") + "</td>";
+	for(j = 0; j < columnsToSum.length; j++){  //Fix this
+		if((columnsToSum[j] == 'vacancyrate') || (columnsToSum[j] == 'householdsize') || (columnsToSum[j] == "hhldpoptothuratio")){
+			if(reg_data2[i]["year"] >= 2020){
+				if((!isFinite(reg_data2[i][columnsToSum[j]])) || (reg_data2[i][columnsToSum[j]] === 0)) {
+					var cellval = "";
+				} else {
+					var cellval = fixNUMFMT(reg_data2[i][columnsToSum[j]],"dec")
+			    }
+			} else {
+				var cellval = fixNUMFMT(reg_data2[i][columnsToSum[j]],"dec")
+			}
 		} else {
-            tmp_row = tmp_row + "<td style='text-align: right'>" + fixNEG(reg_data2[i][columnsToSum[j]],"num") + "</td>";
+			if(reg_data2[i]["year"] >= 2020){
+				if((!isFinite(reg_data2[i][columnsToSum[j]])) || (reg_data2[i][columnsToSum[j]] === 0)) {
+					var cellval = "";
+				} else {
+					var cellval = fixNUMFMT(reg_data2[i][columnsToSum[j]],"num")
+			    }
+			} else {
+				var cellval = fixNUMFMT(reg_data2[i][columnsToSum[j]],"num")
+			}
 		}
+		tmp_row = tmp_row + "<td style='text-align: right'>" + cellval + "</td>";
 	}
 	   tmp_row = tmp_row + "</tr>";
 	   out_tab = out_tab + tmp_row;
 	}
-	out_tab = out_tab + "</tbody>"
 
 
 //Output table
@@ -1892,7 +2170,7 @@ if(compressed == "no"){
 	       tmp_row = tmp_row + "<td>" + sort_data[i]["countyname"] + "</td>";
 		   tmp_row = tmp_row + "<td>" + sort_data[i]["municipalityname"] + "</td>";
 		   tmp_row = tmp_row + "<td>" + sort_data[i]["year"] + "</td>";
-    	   tmp_row = tmp_row + "<td style='text-align: right'>" + fixNEG(sort_data[i]["totalpopulation"],"num") + "</td>";
+    	   tmp_row = tmp_row + "<td style='text-align: right'>" + fixNUMFMT(sort_data[i]["totalpopulation"],"num") + "</td>";
 	       tmp_row = tmp_row + "</tr>";
 	       out_tab = out_tab + tmp_row;
 	}
@@ -1903,7 +2181,7 @@ if(compressed == "no"){
        var tmp_row  = "<tr><td>" + sort_data[i]["countyfips"] + "</td>";
 	       tmp_row = tmp_row + "<td>" + sort_data[i]["countyname"] + "</td>";
 		   tmp_row = tmp_row + "<td>" + sort_data[i]["year"] + "</td>";
-    	   tmp_row = tmp_row + "<td style='text-align: right'>" + fixNEG(sort_data[i]["totalpopulation"],"num") + "</td>";
+    	   tmp_row = tmp_row + "<td style='text-align: right'>" + fixNUMFMT(sort_data[i]["totalpopulation"],"num") + "</td>";
 	       tmp_row = tmp_row + "</tr>";
 	       out_tab = out_tab + tmp_row;
 	}
@@ -1932,7 +2210,7 @@ $(tabObj).DataTable({
 } 
 // genCtyMuni
 
-//cat Household Profuections support functions
+//cat Household Projection support functions
 
 function hholdid(inval){
 //hholdid  County Household Projections Household Categories for genHHCty
@@ -1982,7 +2260,7 @@ function ageid(inval){
 // ageid
 
 function genHHTab(indata,yrdata,level){
-//genHHTab  County Household Projections Household Categories for genHHCty
+//genHHTab  County Household Projections Household Categories for genHHCty and genHHReg
 
 		out_data = [];
 
@@ -2041,7 +2319,7 @@ function genHHTab(indata,yrdata,level){
 				out_tab = out_tab + "<td>" +  ageid(i[key_arr[j]]) + "</td>";
 				break
 			case "total_households":
-				out_tab = out_tab + "<td style='text-align: right'>" +  fixNEG(Math.round(Number(i[key_arr[j]])),"num") + "</td>";
+				out_tab = out_tab + "<td style='text-align: right'>" +  fixNUMFMT(Math.round(Number(i[key_arr[j]])),"num") + "</td>";
 				break
 			} //Switch
 		} //for j
@@ -2109,7 +2387,8 @@ if(age_arr.length > 0){
 	var age_list = '0';
 }
 //households vars
-if(hh_arr == 0){
+
+if(hh_arr.length > 0){
 	var hh_arr2 = [];
 	for(i = 0; i < hh_arr.length; i++){ hh_arr2.push(parseInt(hh_arr[i]))}
 	var hh_list  = hh_arr2.join(",")
@@ -2122,13 +2401,9 @@ var urlstr = "https://gis.dola.colorado.gov/lookups/household?county=" + fips_li
 
 d3.json(urlstr).then(function(data){
 
-var out_data2 = data.sort(function(a, b){ return d3.ascending(a['countyfips'], b['countyfips']); })
-			.sort(function(a, b){ return d3.ascending(a['year'], b['year']); });
-			
-
 
 //Output table
-var out_tab = genHHTab(out_data2,yeardata,"county")
+var out_tab = genHHTab(data,yeardata,"county")
 
 //Output table
 	var tabDivOut = document.getElementById("tbl_output");
@@ -2156,7 +2431,6 @@ $(tabObj).DataTable({
 function genHHReg(region,loc,yr_arr,age_arr,hh_arr,group_arr,yeardata) {
 //genHHReg Generates Household Projection table for Regions
 
-
 //determining groups variable
 
 switch (group_arr.length){
@@ -2180,8 +2454,9 @@ switch (group_arr.length){
 	    group_val = "opt0";
 	default:
 	    group_val = "opt0";
-		break;
+	break;
 }
+var group_sel = "opt0";
 
 //year
 var yr_arr2 = [];
@@ -2219,22 +2494,38 @@ if(hh_arr.length > 0){
    var hh_list = '0';
 }
 //Url Str 
-var urlstr = "https://gis.dola.colorado.gov/lookups/household?county=" + fips_list + "&year="+year_list + "&age=" + age_list +"&household="+ hh_list+"&group="+group_val
-
+if(region == "000"){
+	var urlstr = "https://gis.dola.colorado.gov/lookups/household?county=0&year="+year_list + "&age=" + age_list +"&household="+ hh_list+"&group=" + group_sel
+} else {
+	var urlstr = "https://gis.dola.colorado.gov/lookups/household?county=" + fips_list + "&year="+year_list + "&age=" + age_list +"&household="+ hh_list+"&group=" + group_sel
+}
 
 d3.json(urlstr).then(function(data){
-	
+
+if(region == "000"){
 	var raw_data = [];
-var k = 0
-for( i = 0; i < yr_arr.length; i++) {
-for(j = 0; j < fips_arr.length; j++){
-  raw_data.push({
-   ...fips_arr[j], 
-   ...data[k]
-  });
- k++
+	data.forEach(d => {
+		raw_data.push({'regval' : 0,
+				'countyfips' : d.area_code,
+				'year' : d.year,
+				'household_type_id': d.household_type_id,
+				'age_group_id' : d.age_group_id,
+				'total_households' : parseInt(d.total_households)
+		})
+	})
+} else {
+var raw_data = joinFUNCT(fips_arr,data,"countyfips","area_code",function(dat,col){
+		return{
+			'regval' : col.regval,
+			'countyfips' : col.countyfips,
+			'year' : dat.year,
+			'household_type_id': dat.household_type_id,
+			'age_group_id' : dat.age_group_id,
+			'total_households' : parseInt(dat.total_households)
+		};
+	});
 }
-}
+
 
 //Rolling up data based on option level
 var reg_data = [];
@@ -2255,17 +2546,38 @@ var reg_data = [];
 		};
 		};
 		};
-		reg_data = reg_data.filter(d => d.total_households > 0)
 		break;
-	case "opt2" :
-		var binroll =  d3.rollup(raw_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])),  d => d.regval);
+	case "opt1" :
+		var binroll =  d3.rollup(raw_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])),  d => d.year);
 		for (let [key, value] of binroll) {
 		   reg_data.push({ 
-						'area_code' : key,
+						'year' : key,
 						'total_households' : value.total_households});
 		};
-		reg_data = reg_data.filter(d => d.total_households > 0)
-		break;
+	break;
+	case "opt2" :
+	var binroll =  d3.rollup(raw_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])),  d => d.regval);
+	for (let [key, value] of binroll) {
+	   reg_data.push({ 
+					'area_code' : key,
+					'total_households' : value.total_households});
+	};
+	break;
+	case "opt3" :
+	var binroll =  d3.rollup(raw_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])),  d => d.age_group_id);
+	for (let [key, value] of binroll) {
+	   reg_data.push({ 
+					'age_group_id' : key,
+					'total_households' : value.total_households});
+	};
+	case "opt4" :
+	var binroll =  d3.rollup(raw_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])),  d => d.household_type_id);
+	for (let [key, value] of binroll) {
+	   reg_data.push({ 
+					'household_type_id' : key,
+					'total_households' : value.total_households});
+	};
+	break;
 	case "opt5" :
 		var binroll =  d3.rollup(raw_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])),  d => d.regval, d => d.year);
 		for (let [key, value] of binroll) {
@@ -2276,8 +2588,29 @@ var reg_data = [];
 						'total_households' : value1.total_households});
 		};
 		};
-		reg_data = reg_data.filter(d => d.total_households > 0)
 		break;
+	case "opt6" :
+		var binroll =  d3.rollup(raw_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])),  d => d.year, d => d.age_group_id);
+		for (let [key, value] of binroll) {
+		for(let [key1,value1] of value) {
+		   reg_data.push({ 
+						'year' : key,
+						'age_group_id' : key1,
+						'total_households' : value1.total_households});
+		};
+		};
+	break;
+	case "opt7" :
+		var binroll =  d3.rollup(raw_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])),  d => d.year, d => d.household_type_id);
+		for (let [key, value] of binroll) {
+		for(let [key1,value1] of value) {
+		   reg_data.push({ 
+						'year' : key,
+						'household_type_id' : key1,
+						'total_households' : value1.total_households});
+		};
+		};
+	break;
 	case "opt8" :
 		var binroll =  d3.rollup(raw_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])),  d => d.regval, d => d.age_group_id);
 		for (let [key, value] of binroll) {
@@ -2288,8 +2621,7 @@ var reg_data = [];
 						'total_households' : value1.total_households});
 		};
 		};
-		reg_data = reg_data.filter(d => d.total_households > 0)
-		break;
+	break;
 	case "opt9" :
 		var binroll =  d3.rollup(raw_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])),  d => d.regval, d => d.household_type_id);
 		for (let [key, value] of binroll) {
@@ -2300,8 +2632,18 @@ var reg_data = [];
 						'total_households' : value1.total_households});
 		};
 		};
-		reg_data = reg_data.filter(d => d.total_households > 0)
 		break;
+	case "opt10" :
+		var binroll =  d3.rollup(raw_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])),  d => d.age_group_id, d => d.household_type_id);
+		for (let [key, value] of binroll) {
+		for(let [key1,value1] of value) {
+		   reg_data.push({ 
+		                'age_group_id' : key,
+						'household_type_id' : key1,
+						'total_households' : value1.total_households});
+		};
+		};
+	break;
 	case "opt11" :
 		var binroll =  d3.rollup(raw_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])),  d => d.regval, d => d.year, d => d.age_group_id);
 		for (let [key, value] of binroll) {
@@ -2315,7 +2657,6 @@ var reg_data = [];
 		};
 		};
 		};
-		reg_data = reg_data.filter(d => d.total_households > 0)
 		break;
 	case "opt12" :
 		var binroll =  d3.rollup(raw_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])),  d => d.regval, d => d.year, d => d.household_type_id);
@@ -2345,11 +2686,9 @@ var reg_data = [];
 		};
 		};
 		};
-		reg_data = reg_data.filter(d => d.total_households > 0)
 		break;
-	default :
-	    reg_data = data;
 	} //switch
+
 var out_data2 = reg_data.sort(function(a, b){ return d3.ascending(a['regval'], b['regval']); })
 			.sort(function(a, b){ return d3.ascending(a['year'], b['year']); });
 			
@@ -2380,10 +2719,10 @@ $(tabObj).DataTable({
 } 
 // genHHReg
 
-//cat Jogs Lookup Functions
+//cat Jobs Lookup Functions
 
 function genJOBSECTCty(loc,year_arr) {
-//genJOBSECTCty creares the county Jobs by Sector Table
+//genJOBSECTCty creates the county Jobs by Sector Table
  
 	
 	//build urlstr
@@ -2425,7 +2764,7 @@ var cty_data2 = cty_data
 		var el2 = "<td>" + cty_data2[i].population_year + "</td>"
 		var el3 = "<td>"+ cty_data2[i].sector_id + "</td>"
 		var el4 = "<td>"+ cty_data2[i].sector_name + "</td>"
-		var el5 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].total_jobs,"num") + "</td>"
+		var el5 = "<td style='text-align: right'>" + fixNUMFMT(cty_data2[i].total_jobs,"num") + "</td>"
 		
 	   var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + "</tr>";
 	   out_tab = out_tab + tmp_row;
@@ -2455,7 +2794,7 @@ $(tabObj).DataTable({
 
 
 function genJOBSECTReg(region, loc,year_arr) {
-//genJOBSECTReg creares the county Jobs by Sector Table
+//genJOBSECTReg creates the county Jobs by Sector Table
  
 	//build urlstr
    var fips_arr = [];
@@ -2547,7 +2886,7 @@ var reg_data2 = raw_data
 		var el2 = "<td>" + reg_data2[i].year + "</td>"
 		var el3 = "<td>"+ reg_data2[i].sector_id + "</td>"
 		var el4 = "<td>"+ reg_data2[i].sector_name + "</td>"
-		var el5 = "<td style='text-align: right'>" + fixNEG(reg_data2[i].total_jobs,"num") + "</td>"
+		var el5 = "<td style='text-align: right'>" + fixNUMFMT(reg_data2[i].total_jobs,"num") + "</td>"
 		
 	   var tmp_row = "<tr>" + el1 + el2 + el3 + el4 + el5 + "</tr>";
 	   out_tab = out_tab + tmp_row;
@@ -2892,8 +3231,8 @@ var cty_data2 = cty_data
 	// Generate Table
 	var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Industry Group</th><th>Employment</th><th>Employment % of Basic</th></tr></thead><tbody>";
 	for(i = 0; i < cty_data2.length; i++){
-		var pctval = cty_data2[i].variable == "FINAL ROW" ? fixNEG(cty_data2[i].total_pct,"dec") : fixNEG(cty_data2[i].total_pct,"pct");
-		var sumval = cty_data2[i].variable == "FINAL ROW" ? " " : fixNEG(cty_data2[i].total_employment,"num")
+		var pctval = cty_data2[i].variable == "FINAL ROW" ? fixNUMFMT(cty_data2[i].total_pct,"dec") : fixNUMFMT(cty_data2[i].total_pct,"pct");
+		var sumval = cty_data2[i].variable == "FINAL ROW" ? " " : fixNUMFMT(cty_data2[i].total_employment,"num")
 		var el0 = "<td>" + cty_data2[i].countyfips + "</td>"
 		var el1 = "<td>" + cty_data2[i].countyname + "</td>"
 		var el2 = "<td>" + cty_data2[i].category + "</td>"
@@ -3003,8 +3342,8 @@ var reg_data2 = reg_data_long
 	// Generate Table
 	var out_tab = "<thead><tr><th>Region Number</th><th>Region Name</th><th>Industry Group</th><th>Employment</th><th>Employment % of Basic</th></tr></thead><tbody>";
 	for(i = 0; i < reg_data2.length; i++){
-		var pctval = reg_data2[i].variable == "FINAL ROW" ? fixNEG(reg_data2[i].total_pct,"dec") : fixNEG(reg_data2[i].total_pct,"pct");
-		var sumval = reg_data2[i].variable == "FINAL ROW" ? " " : fixNEG(reg_data2[i].total_employment,"num")
+		var pctval = reg_data2[i].variable == "FINAL ROW" ? fixNUMFMT(reg_data2[i].total_pct,"dec") : fixNUMFMT(reg_data2[i].total_pct,"pct");
+		var sumval = reg_data2[i].variable == "FINAL ROW" ? " " : fixNUMFMT(reg_data2[i].total_employment,"num")
 		var el0 = "<td>" + reg_data2[i].regval + "</td>"
 		var el1 = "<td>" + reg_data2[i].regname + "</td>"
 		var el2 = "<td>" + reg_data2[i].category + "</td>"
@@ -3037,10 +3376,11 @@ $(tabObj).DataTable({
 // genBaseIndReg
 
 
-function genJobsForeCty(loc, yeararr) {
+function genJobsForeCty(loc, yeararr, typearr) {
 //County Jobs Forecast lookup
 
 	//build urlstr
+
    var fips_arr2 = [];
 	for(j = 0; j < loc.length; j++){
 		fips_arr2.push(parseInt(loc[j]));
@@ -3050,26 +3390,37 @@ function genJobsForeCty(loc, yeararr) {
    	for(j = 0; j < yeararr.length; j++){
 		year_arr.push(yeararr[j]);
      };
-	
-	if(loc.includes('130')){   //Check for Denver-Boulder MSA
-	    var ctyArr = [1, 5, 13, 14, 31, 35, 59]
-	    var fips_3 = fips_arr2;
-	    var indexval = fips_3.indexOf(130)
-		fips_3.splice(indexval,1)
-		for(i =0; i < ctyArr.length; i++){
-			fips_3.push(ctyArr[i])
-		}
-		var fips_list  = fips_3.join(",")
+
+//Checking for components of group
+	var ctyArr = [1, 5, 13, 14, 31, 35, 59]
+	var addgrp = false;
+    fips_arr2.forEach(d => {
+		 if(ctyArr.includes(d)){
+			 addgrp = true;
+		 }
+	})
+	if(addgrp){
+		fips_arr2.push(500)
+		var fips_uniq = [...new Set(fips_arr2)]
+		var fips_list  = fips_uniq.join(",")
+	}
+
+	if(loc.includes('500')){   //Check for Denver-Boulder MSA
+	    ctyArr.forEach(d => {
+			fips_arr2.push(d)
+		})
+	    var fips_uniq = [...new Set(fips_arr2)]
+		var fips_list  = fips_uniq.join(",")
 	} else {
 		var fips_list  = fips_arr2.join(",")
 	}
 
 	var year_list  = year_arr.join(",")
 	 var urlstr = "https://gis.dola.colorado.gov/lookups/jobs-forecast?county="+ fips_list + "&year=" + year_list
-
+	 
 d3.json(urlstr).then(function(data){
 	
-//adjustment for Denver-Boulder MSA
+/*adjustment for Denver-Boulder MSA
 	if(loc.includes('130')){
 		var MSA_data = data.filter(i => ctyArr.includes(i.countyfips))
 		var nonMSA_data = data.filter(i => !ctyArr.includes(i.countyfips))
@@ -3099,6 +3450,7 @@ d3.json(urlstr).then(function(data){
 		
 
   var data = MSASum_data.concat(nonMSA_data2)
+
   var cty_data2 = data
         .sort(function(a, b){ return d3.ascending(a['population_year'], b['population_year']); })
         .sort(function(a, b){ return d3.ascending(a['countyfips'], b['countyfips']); })
@@ -3108,6 +3460,7 @@ d3.json(urlstr).then(function(data){
 		if(d.countyfips == 1) {d.countyfips = " "}
 	})
 	} else {
+*/
 	var data2 = []
 	for(i = 0; i < data.length; i++){
 			data2.push({
@@ -3121,15 +3474,15 @@ d3.json(urlstr).then(function(data){
         .sort(function(a, b){ return d3.ascending(a['population_year'], b['population_year']); })
         .sort(function(a, b){ return d3.ascending(a['countyfips'], b['countyfips']); })
 		;
-		}
 
 	// Generate Table
 	var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>Total Jobs</th><th>Data Type</th></tr></thead><tbody>";
 	for(i = 0; i < cty_data2.length; i++){
+		var out_val = cty_data2[i].totaljobs == 0 ? " " : fixNUMFMT(Math.round(cty_data2[i].totaljobs),"num")
 		var el0 = "<td>" + cty_data2[i].countyfips + "</td>"
 		var el1 = "<td>" + cty_data2[i].countyname + "</td>"
 		var el2 = "<td>" + cty_data2[i].population_year + "</td>"
-		var el3 = "<td style='text-align: right'>" + fixNEG(cty_data2[i].totaljobs,"num") + "</td>"
+		var el3 = "<td style='text-align: right'>" + out_val + "</td>"
 		var el4 = "<td>" + cty_data2[i].datatype + "</td>"
 	   var tmp_row = "<tr>" + el0 + el1 + el2 + el3 +  el4 + "</tr>";
 	   out_tab = out_tab + tmp_row;
@@ -3226,7 +3579,7 @@ var reg_data2 = reg_data
 		var el0 = "<td>" + reg_data2[i].regval + "</td>"
 		var el1 = "<td>" + reg_data2[i].regname + "</td>"
 		var el2 = "<td>" + reg_data2[i].population_year + "</td>"
-		var el3 = "<td style='text-align: right'>" + fixNEG(reg_data2[i].totaljobs,"num") + "</td>"
+		var el3 = "<td style='text-align: right'>" + fixNUMFMT(reg_data2[i].totaljobs,"num") + "</td>"
 		var el4 = "<td>" + reg_data2[i].datatype + "</td>"
 	   var tmp_row = "<tr>" + el0 + el1 + el2 + el3 +  el4 + "</tr>";
 	   out_tab = out_tab + tmp_row;
@@ -3360,13 +3713,13 @@ for(i = 0; i < cty_data.length; i++){
 			   out_tab = out_tab + "<td>" + cty_data[i][j] + "</td>"
 			   break
 			case 'labor_force' :
-			   out_tab = out_tab + "<td style='text-align: right'>" + fixNEG(Math.round(cty_data[i][j]),"num") + "</td>"
+			   out_tab = out_tab + "<td style='text-align: right'>" + fixNUMFMT(Math.round(cty_data[i][j]),"num") + "</td>"
 			   break;
 			case 'lfp' :
-			   out_tab = out_tab + "<td style='text-align: right'>" + fixNEG(Math.round(cty_data[i][j]),"num") + "</td>"
+			   out_tab = out_tab + "<td style='text-align: right'>" + fixNUMFMT(Math.round(cty_data[i][j]),"num") + "</td>"
 			   break
 			case 'participation_rate' :
-			   out_tab = out_tab + "<td style='text-align: right'>" + fixNEG(cty_data[i][j],"dec") + "</td>"
+			   out_tab = out_tab + "<td style='text-align: right'>" + fixNUMFMT(cty_data[i][j],"dec") + "</td>"
 			   break
 		}
 	}); //tab_header
@@ -3538,14 +3891,14 @@ for(i = 0; i < reg_data.length; i++){
 			   }
 			   break
 			case 'laborforce' :
-			   out_tab = out_tab + "<td style='text-align: right'>" + fixNEG(Math.round(reg_data[i][j]),"num") + "</td>"
+			   out_tab = out_tab + "<td style='text-align: right'>" + fixNUMFMT(Math.round(reg_data[i][j]),"num") + "</td>"
 			   break;
 			case 'lfp' :
 			case 'cni_pop_16pl' :
-			   out_tab = out_tab + "<td style='text-align: right'>" + fixNEG(Math.round(reg_data[i][j]),"num") + "</td>"
+			   out_tab = out_tab + "<td style='text-align: right'>" + fixNUMFMT(Math.round(reg_data[i][j]),"num") + "</td>"
 			   break
 			case 'participation_rate' :
-			   out_tab = out_tab + "<td style='text-align: right'>" + fixNEG(reg_data[i][j],"dec") + "</td>"
+			   out_tab = out_tab + "<td style='text-align: right'>" + fixNUMFMT(reg_data[i][j],"dec") + "</td>"
 			   break
 		}
 	}); //tab_header
@@ -3937,17 +4290,17 @@ d3.json(urlstr).then(function(data){
 			var el1 = "<td>" + tab_data[i].countyname + "</td>"
 			var el2 = "<td>" + tab_data[i].year + "</td>"
 			var el3 = "<td>" + tab_data[i].age + "</td>"
-			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
-			var el5 = "<td style='text-align: right'>" + fixNEG(tab_data[i].female,"num") + "</td>"
-			var el6 = "<td style='text-align: right'>" + fixNEG(tab_data[i].total,"num") + "</td>"
+			var el4 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].male,"num") + "</td>"
+			var el5 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].female,"num") + "</td>"
+			var el6 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].total,"num") + "</td>"
 			var el7 = "<td>" + filtData[0].datatype + "</td>"
 			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + el6 + el7  + "</tr>";
 			break;
 		case "opt1":
 			var el0 = "<td>" + tab_data[i].year + "</td>"
-			var el1 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
-			var el2 = "<td style='text-align: right'>" + fixNEG(tab_data[i].female,"num") + "</td>"
-			var el3 = "<td style='text-align: right'>" + fixNEG(tab_data[i].total,"num") + "</td>"
+			var el1 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].male,"num") + "</td>"
+			var el2 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].female,"num") + "</td>"
+			var el3 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].total,"num") + "</td>"
 			var el4 = "<td>" + filtData[0].datatype + "</td>"
 			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + "</tr>";
 			break;
@@ -3955,18 +4308,18 @@ d3.json(urlstr).then(function(data){
 			var el0 = "<td>" + tab_data[i].countyfips + "</td>"
 			var el1 = "<td>" + tab_data[i].countyname + "</td>"
 			var el2 = "<td>" + tab_data[i].year + "</td>"
-			var el3 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
-			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].female,"num") + "</td>"
-			var el5 = "<td style='text-align: right'>" + fixNEG(tab_data[i].total,"num") + "</td>"
+			var el3 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].male,"num") + "</td>"
+			var el4 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].female,"num") + "</td>"
+			var el5 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].total,"num") + "</td>"
 			var el6 = "<td>" + filtData[0].datatype + "</td>"
 			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + el6 + "</tr>";
 			break;
 		case "opt3" :
 			var el0 = "<td>" + tab_data[i].year + "</td>"
 			var el1 = "<td>" + tab_data[i].age + "</td>"
-			var el2 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
-			var el3 = "<td style='text-align: right'>" + fixNEG(tab_data[i].female,"num") + "</td>"
-			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].total,"num") + "</td>"
+			var el2 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].male,"num") + "</td>"
+			var el3 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].female,"num") + "</td>"
+			var el4 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].total,"num") + "</td>"
 			var el5 = "<td>" + filtData[0].datatype + "</td>"
 			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + "</tr>";
 			break;
@@ -3976,9 +4329,9 @@ d3.json(urlstr).then(function(data){
 			var el1 = "<td>" + tab_data[i].countyname + "</td>"
 			var el2 = "<td>" + tab_data[i].year + "</td>"
 			var el3 = "<td>" + tab_data[i].age + "</td>"
-			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
-			var el5 = "<td style='text-align: right'>" + fixNEG(tab_data[i].female,"num") + "</td>"
-			var el6 = "<td style='text-align: right'>" + fixNEG(tab_data[i].total,"num") + "</td>"
+			var el4 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].male,"num") + "</td>"
+			var el5 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].female,"num") + "</td>"
+			var el6 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].total,"num") + "</td>"
 			var el7 = "<td>" + filtData[0].datatype + "</td>"
 			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + el6 + el7  + "</tr>";
 	}
@@ -4130,17 +4483,17 @@ d3.json(urlstr).then(function(data){
 			var el1 = "<td>" + regionName(tab_data[i].regval) + "</td>"
 			var el2 = "<td>" + tab_data[i].year + "</td>"
 			var el3 = "<td>" + tab_data[i].age + "</td>"
-			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
-			var el5 = "<td style='text-align: right'>" + fixNEG(tab_data[i].female,"num") + "</td>"
-			var el6 = "<td style='text-align: right'>" + fixNEG(tab_data[i].total,"num") + "</td>"
+			var el4 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].male,"num") + "</td>"
+			var el5 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].female,"num") + "</td>"
+			var el6 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].total,"num") + "</td>"
 			var el7 = "<td>" + filtData[0].datatype + "</td>"
 			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + el6 + el7  + "</tr>";
 			break;
 		case "opt1":
 			var el0 = "<td>" + tab_data[i].year + "</td>"
-			var el1 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
-			var el2 = "<td style='text-align: right'>" + fixNEG(tab_data[i].female,"num") + "</td>"
-			var el3 = "<td style='text-align: right'>" + fixNEG(tab_data[i].total,"num") + "</td>"
+			var el1 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].male,"num") + "</td>"
+			var el2 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].female,"num") + "</td>"
+			var el3 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].total,"num") + "</td>"
 			var el4 = "<td>" + filtData[0].datatype + "</td>"
 			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + "</tr>";
 			break;
@@ -4148,18 +4501,18 @@ d3.json(urlstr).then(function(data){
 			var el0 = "<td>" + tab_data[i].regval + "</td>"
 			var el1 = "<td>" + regionName(tab_data[i].regval) + "</td>"
 			var el2 = "<td>" + tab_data[i].year + "</td>"
-			var el3 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
-			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].female,"num") + "</td>"
-			var el5 = "<td style='text-align: right'>" + fixNEG(tab_data[i].total,"num") + "</td>"
+			var el3 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].male,"num") + "</td>"
+			var el4 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].female,"num") + "</td>"
+			var el5 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].total,"num") + "</td>"
 			var el6 = "<td>" + filtData[0].datatype + "</td>"
 			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + el6 + "</tr>";
 			break;
 		case "opt3" :
 			var el0 = "<td>" + tab_data[i].year + "</td>"
 			var el1 = "<td>" + tab_data[i].age + "</td>"
-			var el2 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
-			var el3 = "<td style='text-align: right'>" + fixNEG(tab_data[i].female,"num") + "</td>"
-			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].total,"num") + "</td>"
+			var el2 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].male,"num") + "</td>"
+			var el3 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].female,"num") + "</td>"
+			var el4 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].total,"num") + "</td>"
 			var el5 = "<td>" + filtData[0].datatype + "</td>"
 			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + "</tr>";
 			break;
@@ -4169,9 +4522,9 @@ d3.json(urlstr).then(function(data){
 			var el1 = "<td>" + regionName(tab_data[i].regval) + "</td>"
 			var el2 = "<td>" + tab_data[i].year + "</td>"
 			var el3 = "<td>" + tab_data[i].age + "</td>"
-			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].male,"num") + "</td>"
-			var el5 = "<td style='text-align: right'>" + fixNEG(tab_data[i].female,"num") + "</td>"
-			var el6 = "<td style='text-align: right'>" + fixNEG(tab_data[i].total,"num") + "</td>"
+			var el4 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].male,"num") + "</td>"
+			var el5 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].female,"num") + "</td>"
+			var el6 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].total,"num") + "</td>"
 			var el7 = "<td>" + filtData[0].datatype + "</td>"
 			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + el6 + el7  + "</tr>";
 	}
@@ -4208,6 +4561,8 @@ $(tabObj).DataTable({
 function genHistoricalCensus(ctyval,munival,yrval) {
 //genHistoricalCensus outputs table for County and Municipal Population Timeseries
 
+var cty_fmt = d3.format("03d");
+var muni_fmt = d3.format("05d");
 //Creating url String
 
 var yrstr = yrval.join(",")
@@ -4228,8 +4583,14 @@ var muni_url = "";
 if(ctyval.length > 0){
   ctyval.forEach(i => {
 	  var ctyNM = countyName(parseInt(i))
+	  if(ctyNM == "Colorado") {
+		  ctyNM = "COLORADO_C"
+	  } else {
 	  ctyNM = ctyNM.replace(" County","")
-	  ctyarr.push(ctyNM + "_C");
+	  ctyNM = ctyNM + "_C";
+	  }
+	  ctyarr.push(ctyNM);
+
   })
 }
 
@@ -4258,10 +4619,21 @@ d3.json(censStr).then(function(data){
 
 	var out_data = [];
 	for(i = 0; i < data.length; i++){
+		var ctyfips = "";
+		if(data[i].area_type == "C"){
+			if(data[i].area_name == "COLORADO") {
+				var modname = "Colorado"
+				var ctyfips = cty_fmt(ctyNum(modname))
+			} else {
+			  var modname = data[i].area_name + " County";
+			  var ctyfips = cty_fmt(ctyNum(modname))
+			}
+		}
+
 			out_data.push({
-				"countyfips" : data[i].area_type == "C" ? ctyNum(data[i].area_name + " County") : "",
-				"placefips" : data[i].area_type == "M" ? muniNum(data[i].area_name) : "",
-				"geoname" : data[i].area_type == "C" ? data[i].area_name + " County" : data[i].area_name,
+				"countyfips" : data[i].area_type == "C" ? ctyfips : "",
+				"placefips" : data[i].area_type == "M" ? muni_fmt(muniNum(data[i].area_name)) : "",
+				"geoname" : data[i].area_type == "C" ? modname : data[i].area_name,
 				"year" : data[i].population_year,
 				"totalpopulation" :  parseInt(data[i].total_population)
 		})
@@ -4272,13 +4644,13 @@ var sort_data = out_data.sort(function(a, b){ return d3.ascending(a['year'], b['
   .sort(function(a, b){ return d3.ascending(a['placefips'], b['placefips']); });
   
 // Generate Table
-	var out_tab = "<thead><tr><th>County FIPS</th><th>Place FIPS</th><th>Name</th><th>Year</th><th>Total Population</th></tr></thead>><tbody>";
+	var out_tab = "<thead><tr><th>County Fips</th><th>Place Fips</th><th>Name</th><th>Year</th><th>Total Population</th></tr></thead>><tbody>";
 	for(i = 0; i < sort_data.length; i++){
-       var tmp_row  = "<tr><td>" + sort_data[i]["countyfips"] + "</td>";
-	       tmp_row = tmp_row + "<td>" + sort_data[i]["placefips"] + "</td>";
+       var tmp_row = "<tr><td>"+ sort_data[i]["countyfips"] + "</td>";
+	   	   tmp_row = tmp_row + "<td>" + sort_data[i]["placefips"] + "</td>";
 	       tmp_row = tmp_row + "<td>" + sort_data[i]["geoname"] + "</td>";
 		   tmp_row = tmp_row + "<td>" + sort_data[i]["year"] + "</td>";
-    	   tmp_row = tmp_row + "<td style='text-align: right'>" + fixNEG(sort_data[i]["totalpopulation"],"num") + "</td>";
+    	   tmp_row = tmp_row + "<td style='text-align: right'>" + fixNUMFMT(sort_data[i]["totalpopulation"],"num") + "</td>";
 	       tmp_row = tmp_row + "</tr>";
 	       out_tab = out_tab + tmp_row;
 	}
@@ -4294,9 +4666,8 @@ var tabObj = "#" + tabName;
 $(tabDivOut).append("<table id="+ tabName + " class='DTTable' width='90%'></table>");
 $(tabObj).append(out_tab); //this has to be a html table
 
-
 $(tabObj).DataTable({
-	"ordering": false,
+	"ordering": true,
   dom: 'Bfrtip',
         buttons: [
             'csv'
@@ -4350,9 +4721,9 @@ var tab_data =  raw_data.sort(function(a, b){ return d3.ascending(a['age'], b['a
 			var el1 = "<td>" + tab_data[i].countyname + "</td>"
 			var el2 = "<td>" + tab_data[i].year + "-" + (parseInt(tab_data[i].year) + 10).toString() + "</td>"
 			var el3 = "<td>" + tab_data[i].age + "</td>"
-			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].population,"num") + "</td>"
-			var el5 = "<td style='text-align: right'>" + fixNEG(tab_data[i].netmigration,"num") + "</td>"
-			var el6 = "<td style='text-align: right'>" + fixNEG(tab_data[i].migrationrate,"dec") + "</td>"
+			var el4 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].population,"num") + "</td>"
+			var el5 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].netmigration,"num") + "</td>"
+			var el6 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].migrationrate,"dec") + "</td>"
 			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + el6   + "</tr>";
 
 	   out_tab = out_tab + tmp_row;
@@ -4446,9 +4817,9 @@ var tab_data =  tmp_data.sort(function(a, b){ return d3.ascending(a['age'], b['a
 			var el1 = "<td>" + tab_data[i].regionName + "</td>"
 			var el2 = "<td>" + tab_data[i].year + "-" + (parseInt(tab_data[i].year) + 10).toString() + "</td>"
 			var el3 = "<td>" + tab_data[i].age + "</td>"
-			var el4 = "<td style='text-align: right'>" + fixNEG(tab_data[i].population,"num") + "</td>"
-			var el5 = "<td style='text-align: right'>" + fixNEG(tab_data[i].netmigration,"num") + "</td>"
-			var el6 = "<td style='text-align: right'>" + fixNEG(tab_data[i].migrationrate,"dec") + "</td>"
+			var el4 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].population,"num") + "</td>"
+			var el5 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].netmigration,"num") + "</td>"
+			var el6 = "<td style='text-align: right'>" + fixNUMFMT(tab_data[i].migrationrate,"dec") + "</td>"
 			var tmp_row = "<tr>" + el0 + el1 + el2 + el3 + el4 + el5 + el6   + "</tr>";
 
 	   out_tab = out_tab + tmp_row;
