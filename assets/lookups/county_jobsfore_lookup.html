@@ -55,8 +55,9 @@
   </p>
    <h2 class='h2_style'>INSTRUCTIONS:</h2>
    <p class="lookup_p">
-   This application creates custom tables for SDO County forecast for jobs.<br>
-   Note: Job forecasts for individual counties in the 7 county Denver-Boulder MSA (Adams, Arapahoe, Boulder, Broomfield, Denver, Douglas, and Jefferson Counties) are not available.
+   This application creates custom tables for SDO County job estimates and forecasts.<br>
+   Note: Job forecasts for individual counties in the 7 county Denver-Boulder MSA (Adams, Arapahoe, Boulder, Broomfield, Denver, Douglas, and Jefferson Counties) are not available. 
+   The counties are included for  estimates only.
    </p>
   <p class="lookup_p">
    A spreadsheet with detailed information for jobs is available on the 
@@ -79,10 +80,14 @@
 	</tr>
 	<tr>
 	<td class="look_cll"> 
-	 <select class="county-dropdown" id="county-dropdown" size="6" multiple role='listbox'></select>
+	<select class="county-dropdown" id="county-dropdown" size="6" multiple role='listbox'>
+		<option></option>
+	</select>
 	 </td>
 	<td class="look_cll">
-    <select class="year-dropdown" id="year-dropdown" style='width:100px;' size="6" multiple role='listbox'></select>
+	<select class="year-dropdown" id="year-dropdown" style='width:100px;' size="6" multiple role='listbox'>
+		<option></option>
+	</select>
     </td>
 	<td class="look_cll">
 	</td>
@@ -118,7 +123,7 @@ d3.json(urlstr).then(function(yeardata){
 
  popDropdown('county','county-dropdown','jobs');
  
- yeardata2 = yeardata.filter(i => i.year >= 1990 && i.datatype == "Projection");
+ yeardata2 = yeardata.filter(i => i.year >= 1990);
  
  popYrdd("year-dropdown",yeardata2);  //Change this range to match data
  
@@ -142,14 +147,19 @@ d3.json(urlstr).then(function(yeardata){
 		
 		var yrdd = document.getElementById('year-dropdown');
 		var selectedyr = getSelectValues(yrdd);
-
+		var type_arr = []
+		selectedyr.forEach(d => {
+		    var selyr = yeardata2.filter(a => a.year == +d)
+            type_arr.push(selyr[0].datatype)
+			})
+		
 		if(selectedyr.length == 0){
 		    outputmsg = outputmsg +  "  >Please select one or more years.";
 			complete = false;
 		}
 
 		if(complete){
-		     genJobsForeCty(selectedfips,selectedyr);
+		     genJobsForeCty(selectedfips,selectedyr,type_arr);
 			 } else {
 			 window.alert(outputmsg);
 			 }
