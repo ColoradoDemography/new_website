@@ -3478,7 +3478,7 @@ d3.json(urlstr).then(function(data){
 	// Generate Table
 	var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>Total Jobs</th><th>Data Type</th></tr></thead><tbody>";
 	for(i = 0; i < cty_data2.length; i++){
-		var out_val = cty_data2[i].totaljobs == 0 ? " " : fixNUMFMT(Math.round(cty_data2[i].totaljobs),"num")
+		var out_val = cty_data2[i].totaljobs == 0 ? "See Denver-Boulder Metro Area Forecast" : fixNUMFMT(Math.round(cty_data2[i].totaljobs),"num")
 		var el0 = "<td>" + cty_data2[i].countyfips + "</td>"
 		var el1 = "<td>" + cty_data2[i].countyname + "</td>"
 		var el2 = "<td>" + cty_data2[i].population_year + "</td>"
