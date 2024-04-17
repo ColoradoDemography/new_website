@@ -2640,7 +2640,7 @@ if(level == "Municipality") {
 	  var row_offset = 22;
 	  } else {
 		 for(k = 0; k < row_topics.length;k++){
-			 unit_arr[k+row_offset][0] = "<td><a href='"+row_topics[k].URL_link+"' target='_blank' text='"+row_topics[k].title+"' aria-label ='"+row_topics[k].title+"'>"+row_topics[k].title+"</a></td>";
+			 unit_arr[k+row_offset][0] = "<td><a href='"+row_topics[k].URL_link+"' target='_blank' title='"+row_topics[k].title+"' aria-label ='"+row_topics[k].title+"'>"+row_topics[k].title+"</a></td>";
 		 }
 	  }
   } //i
@@ -2993,7 +2993,7 @@ var nRows = row_topics.length + 2;
 		if( i < 2){
 			row_tab.push("<th></th>");
 		} else {
-		 row_tab.push("<td><a href='" + row_topics[i-2].URL_link + "' target='_blank' text='"+ row_topics[i-2].title + "' aria-label ='"+ row_topics[i-2].title + "'>" + row_topics[i-2].title + "</a></td>");
+		 row_tab.push("<td><a href='" + row_topics[i-2].URL_link + "' target='_blank' title='"+ row_topics[i-2].title + "' aria-label ='"+ row_topics[i-2].title + "'>" + row_topics[i-2].title + "</a></td>");
 		}
 	}
 	
