@@ -49,8 +49,8 @@
 	<div w3-include-html="../html/left_hand_index.html"></div>
   </div> <!-- Grid  panel2_2_1 -->
   <div class="grid-item app-panel_2_2">
-  <h1 class='h1_style' id='mainx'>County and Municipal Population Timeseries Lookup</h1>
-   <h2 class='h2_style'>INSTRUCTIONS:</h2>
+  <h1 class='h1_style' id='mainx' title='County and Municipal Population Timeseries Lookup' aria-label='County and Municipal Population Timeseries Lookup'>County and Municipal Population Timeseries Lookup</h1>
+   <h2 class='h2_style' title='INSTRUCTIONS:' aria-label='INSTRUCTIONS:'>INSTRUCTIONS:</h2>
    <p class="lookup_p">
    This application creates custom population tables for SDO Counties and Munipalities, Unincoprporated areas, and Municipalities within Counties.
    </p>
@@ -77,7 +77,9 @@
 	</tr>
 	<tr>
 	<td class="look_cll"> 
-	 <select class="county-dropdown" id="county-dropdown" size="6" multiple role='listbox'></select>
+	<select class="county-dropdown" id="county-dropdown" size="6" multiple role='listbox'>
+		<option></option>
+	</select>
 	 </td>
 	<td class="look_cll">
     <select class="muni-dropdown" id="muni-dropdown" style='width:250px;' size="6" multiple role='listbox'>
@@ -122,7 +124,6 @@
 		<option value='11260'>Calhan</option>
 		<option value='11645'>Campo</option>
 		<option value='11810'>Canon City</option>
-		<option value='12030'>Carbonate</option>
 		<option value='12045'>Carbondale</option>
 		<option value='12387'>Castle Pines</option>
 		<option value='12415'>Castle Rock</option>
@@ -418,13 +419,15 @@
 	</select>
     </td>
 	<td class="look_cll">
-    <select class="year-dropdown" id="year-dropdown" style='width:100px;' size="6" multiple role='listbox'></select>
+	<select class="year-dropdown" id="year-dropdown" style='width:100px;' size="6" multiple role='listbox'>
+		<option></option>
+	</select>
     </td>
 	<td class="look_cll">
  		<input type="radio" id="nogrp" name="sum_grouping" value="opt0" checked/>
-		<label for="nogrp">Show Components</label><br>
+		<label for="nogrp">Show Municipalities by County</label><br>
 		<input type="radio" id="sumgrp" name="sum_grouping" value="opt1" checked/>
-		<label for="sumgrp">Sum Results</label><br>
+		<label for="sumgrp">Show Municipal Totals</label><br>
     </td>
 	<td class="look_cll">
 		<button class='databutton' id='gentable' aria-label='Generate Table'>Generate Table</button><br><br>

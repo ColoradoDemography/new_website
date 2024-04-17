@@ -49,10 +49,13 @@
 	<div w3-include-html="../html/left_hand_index.html"></div>
   </div> <!-- Grid  panel2_2_1 -->
   <div class="grid-item app-panel_2_2">
-  <h1 class='h1_style' id='mainx'>Municipal Housing and Population Timeseries Lookup</h1>
-   <h2 class='h2_style'>INSTRUCTIONS:</h2>
+  <h1 class='h1_style' id='mainx' title='Municipal Housing and Population Timeseries Lookup' aria-label='Municipal Housing and Population Timeseries Lookup'>Municipal Housing and Population Timeseries Lookup</h1>
+   <h2 class='h2_style' title='INSTRUCTIONS:' aria-label='INSTRUCTIONS:'>INSTRUCTIONS:</h2>
    <p class="lookup_p">
    This application creates custom housing and population tables for SDO Counties and Munipalities, Unincoprporated areas, and Municipalities within Counties.
+   </p>
+   <p class="lookup_p">
+   Statistics for Occupied and Vacant housing units are not avaialable from 2020 to the current estimate year due to changes in Census data reporting.
    </p>
   <p class="lookup_p">
    A spreadsheet with detailed information for counties is available on the 
@@ -80,7 +83,9 @@
 	</tr>
 	<tr>
 	<td class="look_cll"> 
-	 <select class="county-dropdown" id="county-dropdown" size="6" multiple role='listbox'></select>
+	<select class="county-dropdown" id="county-dropdown" size="6" multiple role='listbox'>
+		<option></option>
+	</select>
 	 </td>
 	<td class="look_cll">
     <select class="muni-dropdown" id="muni-dropdown" style='width:250px;' size="6" multiple role='listbox'>
@@ -125,7 +130,6 @@
 		<option value='11260'>Calhan</option>
 		<option value='11645'>Campo</option>
 		<option value='11810'>Canon City</option>
-		<option value='12030'>Carbonate</option>
 		<option value='12045'>Carbondale</option>
 		<option value='12387'>Castle Pines</option>
 		<option value='12415'>Castle Rock</option>
@@ -421,23 +425,28 @@
 	</select>
     </td>
 	<td class="look_cll">
-    <select class="year-dropdown" id="year-dropdown" style='width:100px;' size="6" multiple role='listbox'></select>
+	<select class="year-dropdown" id="year-dropdown" style='width:100px;' size="6" multiple role='listbox'>
+		<option></option>
+	</select>
     </td>
 	<td class="look_cll">
     <select class="var-dropdown" id="var-dropdown" size="6" multiple role='listbox'>
 		<option value='0'>Total Population</option>
 		<option value='1'>Household Population</option>
 		<option value='2'>Group Quarters Population</option>
-		<option value='3'>Total Housing Units</option>
-		<option value='4'>Occupied Housing Units</option>
-		<option value='5'>Vacant Housing Units</option>
+		<option value='3'>Household Size</option>
+		<option value='4'>Total Housing Units</option>
+		<option value='5'>Occupied Housing Units</option>
+		<option value='6'>Vacant Housing Units</option>
+		<option value='7'>Vacancy Rate</option>
+		<option value='8'>Household Population to Total Housing Units Ratio</option>
 	</select>
     </td>
 	<td class="look_cll">
-		<input type="radio" id="nogrp" name="sum_grouping" value="opt0" checked/>
-		<label for="nogrp">Show Components</label><br>
-		<input type="radio" id="sumgrp" name="sum_grouping" value="opt1" checked/>
-		<label for="sumgrp">Sum Results</label><br>
+		<input type="radio" id="nogrp" name="sum_grouping" value="no" checked>
+		<label for="nogrp">Show Municipalities by County</label><br>
+		<input type="radio" id="sumgrp" name="sum_grouping" value="yes">
+		<label for="sumgrp">Show Municipal Totals</label><br>
     </td>
 	<td class="look_cll">
 		<button class='databutton' id='gentable' aria-label='Generate Table'>Generate Table</button><br><br>
@@ -468,7 +477,7 @@
 var urlstr = "https://gis.dola.colorado.gov/lookups/componentYRS";
 d3.json(urlstr).then(function(yeardata){
  var yeardata2 = yeardata.filter(d => d.year >= 2010 && d.datatype == 'Estimate');
- popDropdown('county','county-dropdown','');
+ popDropdown('county','county-dropdown','profile');
 
  popYrdd("year-dropdown",yeardata2);  //Change this range to match data
  
@@ -489,6 +498,7 @@ d3.json(urlstr).then(function(yeardata){
 		var selectedmuni = getSelectValues(munidd);
 		
 
+
 		if((selectedfips.length == 0) && (selectedmuni.length == 0)){
 		    outputmsg = outputmsg +  " > Please select one or more Counties or Municipalities.\n";
 			complete = false;
@@ -506,12 +516,11 @@ d3.json(urlstr).then(function(yeardata){
 		var selectedvars = getSelectValues(vardd);
 		
 		if(selectedvars == ""){
-		  selectedvars = [0,1,2,3,4,5]
+		  selectedvars = [0,1,2,3,4,5,6,7,8]
 		}
 		
-
 		 selectedgroup = document.querySelector('input[name="sum_grouping"]:checked').value;
-
+debugger
 		if(complete){
 		     genPOPMuni(selectedfips,selectedmuni,selectedyr,selectedvars,selectedgroup);
 			 } else {
