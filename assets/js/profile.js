@@ -4617,7 +4617,7 @@ for(j = 0; j < tick_val.length; j++){
  
  var pyr_layout = {
  title: "Age by Sex, " + year_data[0] + '<br>' + ctyNames[i],
-   width: 600,
+   width: 400,
    height: 400, 
    barmode :'overlay',
    bargap : 0.0,
