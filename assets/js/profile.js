@@ -4617,8 +4617,8 @@ for(j = 0; j < tick_val.length; j++){
  
  var pyr_layout = {
  title: "Age by Sex, " + year_data[0] + '<br>' + ctyNames[i],
-   width: 400,
-   height: 400, 
+   width: 300,
+   height: 300, 
    barmode :'overlay',
    bargap : 0.0,
    xaxis: {
@@ -4633,8 +4633,8 @@ for(j = 0; j < tick_val.length; j++){
   gridwidth: 2,
   linecolor: 'black',
   linewidth: 2,
-  tickformat:  '.1%'
-   },
+  tickformat:  '.1%',
+    },
    yaxis: {
   title : 'Age Group',
   automargin : true,
@@ -4646,6 +4646,12 @@ for(j = 0; j < tick_val.length; j++){
   gridwidth: 2,
   linecolor: 'black',
   linewidth: 2,
+   },
+   legend : {
+	   orientation : 'h', 
+	   xanchor : "center", 
+	   x : 0, 
+	   y : 0
    },
   annotations : [
   {text :  'Men          Women' , 
