@@ -64,7 +64,8 @@ sel.innerHTML = "";
 				el.style.color = "black";
 			    el.textContent = j.year;
 		    } else {
-			el.style.color = "#B90000";
+			el.style.color = "#A51C30";
+			el.style.fontWeight = "bold";
 			el.textContent = j.year;
 		   }
 			el.value = j.year;
@@ -1058,7 +1059,8 @@ var reg_data = [];
 		break;
 } //Switch
 
-var reg_data2 = reg_data.sort(function(a, b){ return d3.ascending(a['region_num'], b['region_num']); })
+var reg_data2 = reg_data.sort(function(a, b){ return d3.ascending(a['year'], b['year']); })
+  .sort(function(a, b){ return d3.ascending(a['region_num'], b['region_num']); })
 
 	// Generate Table
 	if(outType == "COC"){
@@ -2073,7 +2075,7 @@ if(groupval == "opt0"){
 
 var yrstr = yrval.join(",")
 
-var urlstr = "https://gis.dola.colorado.gov/lookups/munipophousing?"
+var urlstr = "https://gis.dola.colorado.gov/lookups/countymuni?"
 
 // A promise for unincorporated areas (county and muni)
 // A promise for County call
@@ -2131,19 +2133,42 @@ if(unincorparr.length > 0) {
 }
 
 Promise.all(prom).then(function(data){
-	
 	var out_data = [];
 	for(i = 0; i < data.length; i++){
+		var indata = data[i];
+		var key_arr = Object.keys(indata[0])
+
+		if(key_arr[0] == "municipalityname"){
 		data[i].forEach(j => {
+			if(key_arr.includes('countyfips')){
+				var ctyName = countyName(j.countyfips)
+				var ctyFips = j.countyfips
+			} else {
+				var muni_num = muniNum(j.municipalityname).toString().padStart(5, "0")
+				var ctyFips = parseInt(muni_county(muni_num))
+				var ctyName = countyName(ctyFips)
+			}
 			out_data.push({
-				"countyfips" : j.countyfips,
+				"countyfips" : ctyFips,
 				"placefips" : j.placefips,
-				"countyname" : countyName(j.countyfips),
+				"countyname" : ctyName,
 				"municipalityname" : j.municipalityname,
 				"year" : j.year,
 				"totalpopulation" : parseInt(j.totalpopulation)				
 			})
-		})
+			})
+		} else {
+			data[i].forEach(j => {
+			  out_data.push({
+				"countyfips" : j.countyfips,
+				"placefips" : 0,
+				"countyname" : countyName(j.countyfips),
+				"municipalityname" : "",
+				"year" : j.year,
+				"totalpopulation" : parseInt(j.totalpopulation)				
+			})
+			})
+		}
 	}
 	
 //Remove Duplicates
@@ -2162,7 +2187,6 @@ var sort_data = uniq_data.sort(function(a, b){ return d3.ascending(a['placefips'
   .sort(function(a, b){ return d3.ascending(a['year'], b['year']); });
   
 // Generate Table
-if(compressed == "no"){
 	var out_tab = "<thead><tr><th>County FIPS</th><th>Place FIPS</th><th>County Name</th><th>Place Name</th><th>Year</th><th>Total Population</th></tr></thead>><tbody>";
 	for(i = 0; i < sort_data.length; i++){
        var tmp_row  = "<tr><td>" + sort_data[i]["countyfips"] + "</td>";
@@ -2175,18 +2199,6 @@ if(compressed == "no"){
 	       out_tab = out_tab + tmp_row;
 	}
 	out_tab = out_tab + "</tbody>"
-} else {
-	var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>Total Population</th></tr></thead>><tbody>";
-	for(i = 0; i < sort_data.length; i++){
-       var tmp_row  = "<tr><td>" + sort_data[i]["countyfips"] + "</td>";
-	       tmp_row = tmp_row + "<td>" + sort_data[i]["countyname"] + "</td>";
-		   tmp_row = tmp_row + "<td>" + sort_data[i]["year"] + "</td>";
-    	   tmp_row = tmp_row + "<td style='text-align: right'>" + fixNUMFMT(sort_data[i]["totalpopulation"],"num") + "</td>";
-	       tmp_row = tmp_row + "</tr>";
-	       out_tab = out_tab + tmp_row;
-	}
-	out_tab = out_tab + "</tbody>"
-}
 
 //Output table
 	var tabDivOut = document.getElementById("tbl_output");
@@ -3420,69 +3432,53 @@ function genJobsForeCty(loc, yeararr, typearr) {
 	 
 d3.json(urlstr).then(function(data){
 	
-/*adjustment for Denver-Boulder MSA
-	if(loc.includes('130')){
-		var MSA_data = data.filter(i => ctyArr.includes(i.countyfips))
-		var nonMSA_data = data.filter(i => !ctyArr.includes(i.countyfips))
-        var nonMSA_data2 = []
-		for(i = 0; i < nonMSA_data.length; i++){
-			nonMSA_data2.push({
-				'countyfips' : nonMSA_data[i].countyfips,
-				'countyname' : countyName(nonMSA_data[i].countyfips),
-				'datatype' : nonMSA_data[i].datatype,
-				'population_year' : nonMSA_data[i].population_year,
-				'totaljobs' : +nonMSA_data[i].totaljobs})
-		}
-		
-		// sum up values by year
-	   var columnsToSum = ['totaljobs']
 
-        var MSASum_data = [];
-
-		var binroll =  d3.rollup(MSA_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.population_year);
-		for (let [key, value] of binroll) {
-		   MSASum_data.push({ 'countyfips' : 1,
-		    'countyname' : 'Denver-Boulder MSA',
-			'datatype' : "FORECAST",
-			'population_year' : key,
-			'totaljobs' : value.totaljobs})
-		};
-		
-
-  var data = MSASum_data.concat(nonMSA_data2)
-
-  var cty_data2 = data
-        .sort(function(a, b){ return d3.ascending(a['population_year'], b['population_year']); })
-        .sort(function(a, b){ return d3.ascending(a['countyfips'], b['countyfips']); })
-		;
-
-	cty_data2.forEach( d => {
-		if(d.countyfips == 1) {d.countyfips = " "}
-	})
-	} else {
-*/
 	var data2 = []
 	for(i = 0; i < data.length; i++){
+		 if(data[i].countyfips < 500){
 			data2.push({
 				'countyfips' : data[i].countyfips,
 				'countyname' : countyName(data[i].countyfips),
 				'datatype' : data[i].datatype,
 				'population_year' : data[i].population_year,
 				'totaljobs' : +data[i].totaljobs})
+		 } else {
+			if(data[i].datatype == "FORECAST"){
+			data2.push({
+				'countyfips' : data[i].countyfips,
+				'countyname' : countyName(data[i].countyfips),
+				'datatype' : data[i].datatype,
+				'population_year' : data[i].population_year,
+				'totaljobs' : +data[i].totaljobs})
+			}
 		}
+	}
 	  var cty_data2 = data2
         .sort(function(a, b){ return d3.ascending(a['population_year'], b['population_year']); })
         .sort(function(a, b){ return d3.ascending(a['countyfips'], b['countyfips']); })
 		;
 
+
+// Fixing Broomfield
+ cty_data2.forEach(d => {
+	 if(d.totaljobs == 0){
+		 if(d.countyfips == 14 && d.population_year == 2001) {
+			d.totaljobsc = "NA"
+		 } else {
+		   d.totaljobsc = "See Denver-Foulder Metro Area Forecast"
+		 }
+	 } else {
+	  d.totaljobsc = fixNUMFMT(Math.round(d.totaljobs),"num")
+	 }
+ })
+ 
 	// Generate Table
 	var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>Total Jobs</th><th>Data Type</th></tr></thead><tbody>";
 	for(i = 0; i < cty_data2.length; i++){
-		var out_val = cty_data2[i].totaljobs == 0 ? "See Denver-Boulder Metro Area Forecast" : fixNUMFMT(Math.round(cty_data2[i].totaljobs),"num")
 		var el0 = "<td>" + cty_data2[i].countyfips + "</td>"
 		var el1 = "<td>" + cty_data2[i].countyname + "</td>"
 		var el2 = "<td>" + cty_data2[i].population_year + "</td>"
-		var el3 = "<td style='text-align: right'>" + out_val + "</td>"
+		var el3 = "<td style='text-align: right'>" + cty_data2[i].totaljobsc + "</td>"
 		var el4 = "<td>" + cty_data2[i].datatype + "</td>"
 	   var tmp_row = "<tr>" + el0 + el1 + el2 + el3 +  el4 + "</tr>";
 	   out_tab = out_tab + tmp_row;
@@ -3515,28 +3511,51 @@ function genJobsForeReg(region, loc, yeararr) {
 //Regional Jobs Forecast lookup
 	
 	//build urlstr
+	var year_arr = [];
 
-   var fips_arr = [];
-   var fips_arr2 = [];
-   for(i = 0; i < loc.length; i++){
-	for(j = 0; j < loc[i].length; j++){
-		var regval = parseInt(region[i]);
-		var countyfips = parseInt(loc[i][j])
-		fips_arr.push({ countyfips, regval });
-		fips_arr2.push(countyfips);
-     };
-   };
-   var year_arr = [];
-   	for(j = 0; j < yeararr.length; j++){
-		year_arr.push(yeararr[j]);
-     };
-	var fips_list  = fips_arr2.join(",")
-	var year_list  = year_arr.join(",")
+   if(parseInt(region) == 0){
+	   var fips_list = parseInt(region);
+	   	for(j = 0; j < yeararr.length; j++){
+			year_arr.push(yeararr[j]);
+		 };
+	   var year_list  = year_arr.join(",")
+   } else {   
+	   var fips_arr = [];
+	   var fips_arr2 = [];
+	   for(i = 0; i < loc.length; i++){
+		for(j = 0; j < loc[i].length; j++){
+			var regval = parseInt(region[i]);
+			var countyfips = parseInt(loc[i][j])
+			fips_arr.push({ countyfips, regval });
+			fips_arr2.push(countyfips);
+		 };
+	   };
+		for(j = 0; j < yeararr.length; j++){
+			year_arr.push(yeararr[j]);
+		 };
+		var fips_list  = fips_arr2.join(",")
+		var year_list  = year_arr.join(",")
+   }
 	 var urlstr = "https://gis.dola.colorado.gov/lookups/jobs-forecast?county="+ fips_list + "&year=" + year_list
+
 
 d3.json(urlstr).then(function(data){
 
 //Adding region number
+var reg_data = [];
+if(parseInt(region) == 0){
+	debugger
+	console.log(data)
+	data.forEach(i => {
+	    reg_data.push({
+			'regval' : i.countyfips,
+			'regname' : 'Colorado',
+			'datatype' : i.datatype,
+			'population_year' : i.population_year,
+			'totaljobs' : i.totaljobs
+		})
+	})
+} else {
 var raw_data = [];
 var k = 0
 
@@ -3553,8 +3572,6 @@ for(j = 0; j < fips_arr.length; j++){
 // sum up values by region, year and sector_id
 	var columnsToSum = ['totaljobs']
 
-var reg_data = [];
-
 		var binroll =  d3.rollup(raw_data, v => Object.fromEntries(columnsToSum.map(col => [col, d3.sum(v, d => +d[col])])), d => d.regval, d => d.datatype, d => d.population_year);
 		for (let [key, value] of binroll) {
 		for (let [key1, value1] of value){
@@ -3567,6 +3584,7 @@ var reg_data = [];
 		};
 		};
 		};
+}
 
 var reg_data2 = reg_data
         .sort(function(a, b){ return d3.ascending(a['population_year'], b['population_year']); })
@@ -3574,7 +3592,7 @@ var reg_data2 = reg_data
 		;
 
 	// Generate Table
-	var out_tab = "<thead><tr><th>County FIPS</th><th>County Name</th><th>Year</th><th>Total Jobs</th><th>Data Type</th></tr></thead><tbody>";
+	var out_tab = "<thead><tr><th>Region Number</th><th>Region Name</th><th>Year</th><th>Total Jobs</th><th>Data Type</th></tr></thead><tbody>";
 	for(i = 0; i < reg_data2.length; i++){
 		var el0 = "<td>" + reg_data2[i].regval + "</td>"
 		var el1 = "<td>" + reg_data2[i].regname + "</td>"

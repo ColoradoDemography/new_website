@@ -76,7 +76,7 @@ var outData = [];
         }
     }
 
-
+//HERE
 for(i = 0; i < inData.length; i++){
   var tmp2 = Object.keys(inMap[i]).
   filter((key) => selArr[0].includes(key)).
@@ -84,10 +84,10 @@ for(i = 0; i < inData.length; i++){
 
   for(j = 0; j < selArr[0].length;j++){
    if(selArr[1][j] == "comma"){
-   outData[i][j] = fixNUMPCT(Math.round(tmp2[selArr[0][j]]),"num");
+   outData[i][j] = fixNUMFMT(Math.round(tmp2[selArr[0][j]]),"num");
   }
    if(selArr[1][j] == "percent"){
-   outData[i][j] = fixNUMPCT(tmp2[selArr[0][j]],"pct");
+   outData[i][j] = fixNUMFMT(tmp2[selArr[0][j]],"pct");
   }
    if(selArr[1][j] == "dollar"){
    outData[i][j] = Math.round(tmp2[selArr[0][j]]) == 0 ? "" : fixNUMFMT(tmp2[selArr[0][j]],"cur");
@@ -168,32 +168,67 @@ function range(start, end, step) {
 }; 
 // range
 
+function extend (target) {
+    for(var i=1; i<arguments.length; ++i) {
+        var from = arguments[i];
+        if(typeof from !== 'object') continue;
+        for(var j in from) {
+            if(from.hasOwnProperty(j)) {
+                target[j] = typeof from[j]==='object'
+                ? extend({}, target[j], from[j])
+                : from[j];
+            }
+        }
+    }
+    return target;
+}
 
+function long_to_wide(inData, idVal, idName, keyVar, valVar, fmt){
+//long_to_wide creates a wide out put from long Data
+
+
+var outDat = [{"fips" : idVal, "name" : idName}];
+
+
+for(i = 0; i < keyVar.length; i++){
+	var nameVal = keyVar[i].toString()
+	if(fmt == "pct") {
+	  var outVal = fixNUMFMT(inData[i][valVar],"pct")
+	} else {
+	  var outVal = fixNUMFMT(inData[i][valVar],"num")
+   }
+	var tmp = [{[nameVal] : outVal}];
+
+	var merged = extend({}, outDat, tmp)
+	var outDat = merged
+}
+
+var tmpDat = Object.assign({}, ...function _flatten(o) { return [].concat(...Object.keys(o).map(k => typeof o[k] === 'object' ? _flatten(o[k]) : ({[k]: o[k]})))}(outDat));
+
+return tmpDat;
+}
 
 function fixNUMFMT(invalue,fmt){
 //fixNUMFMT fixes formatting issue for negative numbers in word tables  based on fmt type (pct, num, cur) returns formatted value 
 
  const fmt_pct = d3.format(".1%")
  const fmt_comma = d3.format(",");
- const fmt_dollar = d3.format("$,");
+ const fmt_dollar = d3.format("$,.0f");
  const fmt_decimal = d3.format(".2f")
 
-    if(fmt == 'pct') {
-  tmp_val = invalue/100;
- } else {
-     tmp_val = invalue;
- }
+var tmp_val = invalue;
+
  if(tmp_val < 0) {
    tmp_val = tmp_val * -1;
-   if(fmt == 'pct') { fin_val = tmp_val === 9999999.99 ? " " : "-" + fmt_pct(tmp_val);};
+   if(fmt == 'pct') { fin_val = tmp_val === 999999999 ? " " : "-" + fmt_pct(tmp_val);};
    if(fmt == 'num') { fin_val = tmp_val === 999999999 ? " " :"-" + fmt_comma(tmp_val);};
    if(fmt == 'cur') { fin_val = tmp_val === 999999999 ? " " : "-" + fmt_dollar(tmp_val);};
    if(fmt == 'dec') { fin_val = tmp_val === 999999999 ? " " :"-" + fmt_decimal(tmp_val);};
  } else {
-   if(fmt == 'pct') { fin_val = tmp_val === 9999999.99 ? " " : fmt_pct(tmp_val);};
-   if(fmt == 'num') { fin_val = tmp_val === 999999999 ? " " : fmt_comma(tmp_val);};
-   if(fmt == 'cur') { fin_val = tmp_val === 999999999 ? " " : fmt_dollar(tmp_val);};
-   if(fmt == 'dec') { fin_val = tmp_val === 999999999 ? " " : fmt_decimal(tmp_val);};
+   if(fmt == 'pct') { fin_val = tmp_val === 999999999 ? "-" : fmt_pct(tmp_val);};
+   if(fmt == 'num') { fin_val = tmp_val === 999999999 ? "-" : fmt_comma(tmp_val);};
+   if(fmt == 'cur') { fin_val = tmp_val === 999999999 ? "-" : fmt_dollar(tmp_val);};
+   if(fmt == 'dec') { fin_val = tmp_val === 999999999 ? "-" : fmt_decimal(tmp_val);};
     }
 
    return(fin_val);
@@ -1992,6 +2027,8 @@ var geonames = [...new Set(inData.map(d => d.name))];
 var yrvalues = [...new Set(inData.map(d => d.year))];
 var maxyear = Math.max(...yrvalues);
 
+
+
 var outDataPop = [];
 var outDataGr = [];
 
@@ -1999,7 +2036,7 @@ for(i = 0; i < geomap.length; i++) {
  var tmp_dat = inData.filter(d => d.fips == geomap[i]);
 
    outDataPop.push({'fips' : tmp_dat[0].fips, 'name' : tmp_dat[0].name, 'year' : tmp_dat[0].year, 'totalpopulation' : tmp_dat[0].totalpopulation});
-   outDataGr.push({'fips' : tmp_dat[0].fips, 'name' : tmp_dat[0].name, 'year' : tmp_dat[0].year, 'growthrate' : '-'});
+   outDataGr.push({'fips' : tmp_dat[0].fips, 'name' : tmp_dat[0].name, 'year' : tmp_dat[0].year, 'growthrate' : 999999999});
 
  for(j = 1; j < tmp_dat.length; j++) {
   if( tmp_dat[j].totalpopulation == 0 || tmp_dat[j-1].totalpopulation == 0) {
@@ -2011,96 +2048,49 @@ for(i = 0; i < geomap.length; i++) {
   }
   var tmp_pop = [];
   var tmp_gr = [];
-      tmp_pop.push({'fips' : tmp_dat[j].fips, 'name' : tmp_dat[j].name, 'year' : tmp_dat[j].year, 'totalpopulation' : tmp_dat[j].totalpopulation});
+   tmp_pop.push({'fips' : tmp_dat[j].fips, 'name' : tmp_dat[j].name, 'year' : tmp_dat[j].year, 'totalpopulation' : tmp_dat[j].totalpopulation});
    tmp_gr.push({'fips' : tmp_dat[j].fips, 'name' : tmp_dat[j].name, 'year' : tmp_dat[j].year, 'growthrate' : gr_rate});
- outDataPop = outDataPop.concat(tmp_pop);
- outDataGr = outDataGr.concat(tmp_gr);
+   outDataPop = outDataPop.concat(tmp_pop);
+   outDataGr = outDataGr.concat(tmp_gr);
      } //j
    } //i 
+   
+
+//Processing wide File
+var outDataPopWide = [];
+var outDataGrWide = [];
+
+for(a = 0; a < geomap.length; a++){
+	 var filtPop = outDataPop.filter(d => d.fips == geomap[a])
+	 var filtGr = outDataGr.filter(d => d.fips == geomap[a])
+	 var outPop = long_to_wide(filtPop, filtPop[0].fips, filtPop[0].name,yrvalues,"totalpopulation","num")
+	 var outGr = long_to_wide(filtGr, filtGr[0].fips, filtGr[0].name,yrvalues,"growthrate","pct")
+	 outDataPopWide = outDataPopWide.concat(outPop);
+	 outDataGrWide = outDataGrWide.concat(outGr);
+}
 
 
-//Restructure data based on fips code
-
-var places = [...new Set(outDataPop.map(d => d.fips))];
-var years = [...new Set(outDataPop.map(d => d.year))];
-var tab_data_Pop = [];
-var tab_data_Gr = [];
-
-for(x = 0; x < places.length;x++){
- var filtPop = outDataPop.filter(d => d.fips == places[x]);
- var filtGr = outDataGr.filter(d => d.fips == places[x]);
-
-
- var arrLen = filtPop.length + 1;
- var outarrPop = new Array(1).fill(new Array(arrLen));
- var outarrGr = new Array(1).fill(new Array(arrLen));
- outarrPop[0][0] = filtPop[0].name;
- outarrGr[0][0] = filtPop[0].name;
-
-
- for(z = 0; z < filtPop.length; z++){
-   var pos = z  + 1;
-
-   outarrPop[0][pos] = fixNUMFMT(filtPop[z].totalpopulation,"num") ;
-   outarrGr[0][pos] = fixNUMFMT(filtGr[z].growthrate);
- } //z
- tab_data_Pop = tab_data_Pop.concat(outarrPop);
- tab_data_Gr = tab_data_Gr.concat(outarrGr);
-
-} //x
-
-//Add keys to tab_data_Pop and tab_data_Gr
-
-var yrskeys = years;
-yrskeys.unshift('location');
-
-var tab_data_Popk = [];
-var tab_data_Grk = [];
-for(i = 0; i < tab_data_Pop.length; i++){
-		tab_data_Popk.push({
-			[yrskeys[0].toString()] : tab_data_Pop[i][0],
-			[yrskeys[1].toString()] : tab_data_Pop[i][1],
-			[yrskeys[2].toString()] : tab_data_Pop[i][2],
-			[yrskeys[3].toString()] : tab_data_Pop[i][3],
-			[yrskeys[4].toString()] : tab_data_Pop[i][4],
-			[yrskeys[5].toString()] : tab_data_Pop[i][5],
-			[yrskeys[6].toString()] : tab_data_Pop[i][6],
-			[yrskeys[7].toString()] : tab_data_Pop[i][7],
-			[yrskeys[8].toString()] : tab_data_Pop[i][8]
-			});
-		tab_data_Grk.push({
-			[yrskeys[0].toString()] : tab_data_Gr[i][0],
-			[yrskeys[1].toString()] : tab_data_Gr[i][1],
-			[yrskeys[2].toString()] : tab_data_Gr[i][2],
-			[yrskeys[3].toString()] : tab_data_Gr[i][3],
-			[yrskeys[4].toString()] : tab_data_Gr[i][4],
-			[yrskeys[5].toString()] : tab_data_Gr[i][5],
-			[yrskeys[6].toString()] : tab_data_Gr[i][6],
-			[yrskeys[7].toString()] : tab_data_Gr[i][7],
-			[yrskeys[8].toString()] : tab_data_Gr[i][8],
-			});
-	}
-
-if(level == "Region"){
-	var src_link = 'https://coloradodemography.github.io/population/data/regional-data-lookup/';
+ if(level == "Region"){
+	var src_link = 'https://demography.dola.colorado.gov/assets/lookups/region_totpop_lookup.html';
 }
 if(level == "County") {
-	var src_link = 'https://coloradodemography.github.io/population/data/county-data-lookup/'
+	var src_link = 'https://demography.dola.colorado.gov/assets/lookups/county_totpop_lookup.html'
 }
 if(level == "Municipality") {
-	var src_link = 'https://coloradodemography.github.io/population/data/county-muni-timeseries/'
+	var src_link = 'https://demography.dola.colorado.gov/assets/lookups/ctymuni_pop_lookup.html'
 }
 var row_labels = []
-for(i = 0; i < years.length;i++) {
- row_labels.push({'title' : years[i].toString() , 'URL_link' : src_link});
+
+for(i = 0; i < yrvalues.length;i++) {
+ row_labels.push({'title' : yrvalues[i].toString() , 'URL_link' : src_link});
 }
 
-var row_labels_pop = row_labels;
-var row_labels_gr = row_labels;
+//Buiding Table
 
 
-var tab_pop = genSubjTab(level, tab_data_Popk, bkMark.id,row_labels_pop,false);
-var tab_gr = genSubjTab(level,tab_data_Grk, bkMark.id, row_labels,false);
+var tab_pop = genSubjTab(level, outDataPopWide, bkMark.id,row_labels,false);
+var tab_gr = genSubjTab(level,outDataGrWide, bkMark.id, row_labels,false);
+
 
 //footer
 //Creating Footer
@@ -2181,7 +2171,6 @@ function genSubjTab(level,inData,section, row_topics,pctTab) {
 // section refers to the output section.  For section > 2, need to go through steps and format table.
 // for section <= 2, the table is already formatted and the tables have a different column layout
 
-
 //Fix for section 2
 if(section == 'popgr') {
 	if(row_topics[0].title == 'location'){
@@ -2196,10 +2185,9 @@ var nRows = row_topics.length + 2;
 		if( i < 2){
 			row_tab.push("<th></th>");
 		} else {
-		 row_tab.push("<td><a href='" + row_topics[i-2].URL_link + "' target='_blank'>" + row_topics[i-2].title + "</a></td>");
+		 row_tab.push("<td><a href='" + row_topics[i-2].URL_link + "' target='_blank' title = '" + row_topics[i-2].title + "' aria-label = '" + row_topics[i-2].title + "'>" + row_topics[i-2].title + "</a></td>");
 		}
 	}
-
 	
  //Creating the output objects
  var ntopics = row_tab.length ;
@@ -2255,14 +2243,17 @@ if(level == "Municipality") {
   //Filling in the row labels
   for(i = 0; i < npanels; i++){
    for(j = 0; j < ntopics;j++){
-	  out_count[i][j][0] = row_tab[j];
-if(pctTab){
+	if(pctTab){
 	  out_pct[i][j][0] = row_tab[j];
-}
+	} else {
+	  out_count[i][j][0] = row_tab[j];
+	}
    } //j
   } //i
  
   //Generate List of Keys
+
+  
   var tmp_data_keys = Object.keys(inData[0]);
   var tgtrow = 0
   
@@ -2295,7 +2286,7 @@ for(a = 0; a < npanels;a++) {// panels
 		 for(j = 0; j < tmp_data_keys.length; j++){
 				if(j >= 2 & j <= 5){
 					var val_est = tmp_data[i][tmp_data_keys[j]];
-					out_count[a][j][col_pos] = "<td align='right'>" + val_est + "</td>";
+					out_count[a][j][col_pos] = "<td align='right'>" + val_est.toString() + "</td>";
 					out_count[a][j][col_pos2] = "<td align='right'>" + " " + "</td>";
 					} 
 				if(j >= 6 & j <= 12) {
@@ -2329,16 +2320,20 @@ for(a = 0; a < npanels;a++) {// panels
   };
   tgtrow = tgtrow + 2
  //Populate the output tables
-
+  
  	var col_pos = 1
-	  for(i = 0; i < tmp_data.length;i++){  
+
+	
+	  for(i = 0; i < tmp_data.length;i++){  //data rows
 		 for(j = 0; j < tmp_data_keys.length; j++){
-			  if(tmp_data_keys[j] == 'location'){
+			  if(tmp_data_keys[j] == 'name'){
 				  	out_count[a][0][col_pos] = "<th align='center'>" + tmp_data[i][tmp_data_keys[j]] + "</th>";
 			        out_count[a][1][col_pos] = "<th align='center'>Estimate</th>";
 				} else {
-					var val_est = tmp_data[i][tmp_data_keys[j]]
-					out_count[a][j+2][col_pos] = "<td align='right'>" + val_est.toString() + "</td>";
+					if(tmp_data_keys[j] != "fips" && tmp_data_keys[j] != "name"){
+						var val_est = tmp_data[i][tmp_data_keys[j]]
+						out_count[a][j+2][col_pos] = "<td align='right'>" + val_est + "</td>";
+					}
 				} //else
 		 } //j
 	 col_pos = col_pos + 1;
@@ -2645,7 +2640,7 @@ if(level == "Municipality") {
 	  var row_offset = 22;
 	  } else {
 		 for(k = 0; k < row_topics.length;k++){
-			 unit_arr[k+row_offset][0] = "<td><a href='"+row_topics[k].URL_link+"' target='_blank'>"+row_topics[k].title+"</a></td>";
+			 unit_arr[k+row_offset][0] = "<td><a href='"+row_topics[k].URL_link+"' target='_blank' text='"+row_topics[k].title+"' aria-label ='"+row_topics[k].title+"'>"+row_topics[k].title+"</a></td>";
 		 }
 	  }
   } //i
@@ -2998,7 +2993,7 @@ var nRows = row_topics.length + 2;
 		if( i < 2){
 			row_tab.push("<th></th>");
 		} else {
-		 row_tab.push("<td><a href='" + row_topics[i-2].URL_link + "' target='_blank'>" + row_topics[i-2].title + "</a></td>");
+		 row_tab.push("<td><a href='" + row_topics[i-2].URL_link + "' target='_blank' text='"+ row_topics[i-2].title + "' aria-label ='"+ row_topics[i-2].title + "'>" + row_topics[i-2].title + "</a></td>");
 		}
 	}
 	
@@ -3193,8 +3188,8 @@ $(tabObj).DataTable({
        buttons: [
 		{ text : 'Word',    action: function ( e, dt, node, config ) { genplexTab(tab_data,labels,footArr,fileName,'word',tabTitle)} },
         { text : 'Excel',  action: function ( e, dt, node, config ) { genplexTab(tab_data,labels,footArr,fileName,'xlsx',tabTitle)} },
-        { text : 'CSV',    action: function ( e, dt, node, config ) { genplexTab(tab_data,labels,footArr,fileName,'csv',tabTitle)} },
-        { text : 'PDF',    action: function ( e, dt, node, config ) { genplexTab(tab_data,labels,footArr,fileName,'pdf',tabTitle)} }
+        { text : 'CSV',    action: function ( e, dt, node, config ) { genplexTab(tab_data,labels,footArr,fileName,'csv',tabTitle)} } //,
+ //       { text : 'PDF',    action: function ( e, dt, node, config ) { genplexTab(tab_data,labels,footArr,fileName,'pdf',tabTitle)} }
 		]  //buttons
  } );
 
@@ -4470,11 +4465,12 @@ var ctyNames = [...new Set(inData.map(d => d.name))];
 
 //assigning main div
 
+
  var outdiv = document.getElementById(ageDiv);
  outdiv.innerHTML = "";      
   var plotdiv = document.createElement('div');
    plotdiv.id = 'pyramid-container';
-   plotdiv.className = 'pyramid-continer';
+   plotdiv.className = 'pyramid-container';
   outdiv.appendChild(plotdiv);
   
 
@@ -4482,16 +4478,16 @@ var ctyNames = [...new Set(inData.map(d => d.name))];
  for(i= 0; i < fipsList.length; i++){
     //Creating plotdiv
   if(i < 3) {
-   var divID = "grid-item .pyramid_1_" + (i + 1);
+   var divID = "grid-item pyramid_1_" + (i + 1);
      } else {
   if(i < 6){
-  var divID = "grid-item .pyramid_2_" + (i + 1); 
+  var divID = "grid-item pyramid_2_" + (i + 1); 
   } else {
-   var divID = "grid-item .pyramid_3_" + (i + 1);
+   var divID = "grid-item pyramid_3_" + (i + 1);
   }
   };
    
-     var plot_grid = document.createElement('div');
+  var plot_grid = document.createElement('div');
   plot_grid.id = 'plotGrid'+i;
   plot_grid.className = divID;
   plotdiv.appendChild(plot_grid);
@@ -4501,10 +4497,12 @@ var ctyNames = [...new Set(inData.map(d => d.name))];
  'plot' : 'plotGrid'+i});
  } //i
  
+ 
 var outData = [];
  if(level == "Municipality"){
  var yrrange = (yrvalue - 4) + "-"+ yrvalue;
-  for(i = 0; i < fipsList.length; i++) {
+ 
+ for(i = 0; i < fipsList.length; i++) {
  var outPlot = plot_array[i].plot;
  var pltData = inData.filter(d => d.fips == fipsList[i]);
  var year0 = pltData.filter(d => d.year == year_data[0]);
@@ -5652,7 +5650,7 @@ function genplexTab(inData,hdrArr,ftrArr,fName,fmt,tabType) {
 // genplexTab
 
 //cat Main UI Functions
-function genProfile(lvl,fipsArr,valSec, names) {
+function genProfile(lvl,fipsArr,valSec, names, acsyr) {
 //genProfile is the main UI Generation function, calls each panel function
 var descript = "Colorado Demographic Profile "+ lvl + ": ";
  descript = descript + names[0];
@@ -5680,7 +5678,7 @@ d3.json(yrstr).then(function(yeardata){
     var maxest = yeardata.filter(function(d){return d.datatype == 'Estimate'});
  var yrsList = maxest.map(function(d){return d.year;});
     var curyear = d3.max(yrsList);
- var acsyr = 2021;  ///CHANGE THIS WHEN 2021 ACS is available
+
 
 //Triggering the first button  Expand these for each button...
 var firstbtn = valSec[0];
@@ -7045,16 +7043,6 @@ function genCommutingDiag(inData,outDivd,bkMark,level,fipsArr){
 	  target1.push(i+1)
 	  value1.push(chartData1[i].percent);
   }
- 
-  console.log(label1)
-  console.log(color1)
-  console.log(source1)
-  console.log(target1)
-  console.log(value1)
-  debugger
-   
-   //Building data Arrays
-   var label1 
 }  
 // genCommutingDiag
 
@@ -7244,7 +7232,6 @@ for(i = 0; i < DataTab.length;i++){
    {'title' : 'Households with other types of income', 'URL_link' : genCEDSCIUrl(level,'B19060',curYr,fipsArr), 'stpos' : 42, 'endpos' : 45}
       ];
 	  
-
 
 //Table Footer
 var tblfoot = [
@@ -7625,7 +7612,7 @@ function genSel1map(level, fipsArr,nameArr,outDiv,bkMarkArr){
 //genSel1map The first tab, map
 
  const fmt_date = d3.timeFormat("%B %d, %Y");
-    const fmt_yr = d3.format("00");
+ const fmt_yr = d3.format("00");
 
   
  const ctyList = ['Region', 'County', 'Regional Comparison', 'County Comparison'] 
@@ -7661,6 +7648,7 @@ if(fipsArr.includes(data[1][i].placefp)){
  centData.push({'placefp' : data[1][i].placefp, 'name' : data[1][i].namelsad, 'long' : +data[1][i].x, 'lat' :+data[1][i].y});
  };
 }
+
 
 //Appending the svg
 var div = d3.select(outDiv2).append("div").attr("class","tooltip").style("opacity",0);
@@ -7728,7 +7716,6 @@ if(ctyList.includes(level)) {
       .style("opacity", 0);     
             }); 
 };
-
 
 }); //end of Promise
  
@@ -8138,10 +8125,10 @@ var prevyr = yrlist[0];
 
 
 var row_labels = [
-       {'title': 'Population ('+curyr+')*', 'URL_link' : muniList.includes(level) ? 'https://coloradodemography.github.io/population/data/muni-pop-housing/' : 'https://coloradodemography.github.io/population/data/county-data-lookup/'},
-       {'title': 'Population Change (' + prevyr + ' to ' + curyr + ')*', 'URL_link' : muniList.includes(level) ? 'https://coloradodemography.github.io/population/data/muni-pop-housing/' : 'https://coloradodemography.github.io/population/data/county-data-lookup/'},
-       {'title': 'Percentage Change (' + prevyr + ' to ' + curyr + ')*', 'URL_link' : muniList.includes(level) ? 'https://coloradodemography.github.io/population/data/muni-pop-housing/' : 'https://coloradodemography.github.io/population/data/county-data-lookup/'},
-       {'title': 'Total Employment (' + curyr + ')*', 'URL_link': 'https://coloradodemography.github.io/economy-labor-force/data/jobs-by-sector/#jobs-by-sector-naics'},
+       {'title': 'Population ('+curyr+')*', 'URL_link' : muniList.includes(level) ? 'https://demography.dola.colorado.gov/assets/lookups/muni_pop_lookup.html' : 'https://demography.dola.colorado.gov/assets/lookups/county_totpop_lookup.html'},
+       {'title': 'Population Change (' + prevyr + ' to ' + curyr + ')*', 'URL_link' : muniList.includes(level) ? 'https://demography.dola.colorado.gov/assets/lookups/muni_pop_lookup.html' : 'https://demography.dola.colorado.gov/assets/lookups/county_totpop_lookup.html'},
+       {'title': 'Percentage Change (' + prevyr + ' to ' + curyr + ')*', 'URL_link' : muniList.includes(level) ? 'https://demography.dola.colorado.gov/assets/lookups/muni_pop_lookup.html' : 'https://demography.dola.colorado.gov/assets/lookups/county_totpop_lookup.html/'},
+       {'title': 'Total Employment (' + curyr + ')*', 'URL_link': 'https://demography.dola.colorado.gov/assets/lookups/county_jobsfore_lookup.html'},
        {'title': 'Median Household Income^', 'URL_link' :  genCEDSCIUrl(level,'B19013',acsYr,fipsACS)},
        {'title': 'Median Home Value^', 'URL_link' : genCEDSCIUrl(level,'B25077',acsYr,fipsACS)},
        {'title': 'Percentage of Population with incomes below poverty line.^', 'URL_link' : genCEDSCIUrl(level,'B17001',acsYr,fipsACS)},
@@ -8258,10 +8245,10 @@ function genSel2display(geotype, fipsArr, names, curyear, PRO_1, PRO_2, PRO_3, P
 //Regions
 if(regList.includes(geotype)){
 	//Generate Bookmark array
-var bkMarkArr = [{title : 'Population Growth Table', id : 'popgr', srctxt : "Population Growth Table", srclink : "https://coloradodemography.github.io/population/data/regional-data-lookup/"},
-		{title : 'Regional Population Estimates', id : 'popest', srctxt : "Regional Population Estimates", srclink : "https://coloradodemography.github.io/population/data/regional-data-lookup/"},
-		{title : 'Regional Population Forecasts', id : 'popfor', srctxt : "Regional Population Forecasts", srclink : "https://coloradodemography.github.io/population/data/sya-regions/"},
-		{title : 'Regional Components of Change',	id : 'popcoc', srctxt : "Regional Components of Change", srclink : "https://coloradodemography.github.io/births-deaths-migration/data/components-change-regions/"}
+var bkMarkArr = [{title : 'Population Growth Table', id : 'popgr', srctxt : "Population Growth Table", srclink : "https://demography.dola.colorado.gov/assets/lookups/region_totpop_lookup.html"},
+		{title : 'Regional Population Estimates', id : 'popest', srctxt : "Regional Population Estimates", srclink : "https://demography.dola.colorado.gov/assets/lookups/region_totpop_lookup.html"},
+		{title : 'Regional Population Forecasts', id : 'popfor', srctxt : "Regional Population Forecasts", srclink : "https://demography.dola.colorado.gov/assets/lookups/region_sya_lookup.html"},
+		{title : 'Regional Components of Change',	id : 'popcoc', srctxt : "Regional Components of Change", srclink : "https://demography.dola.colorado.gov/assets/lookups/region_coc_lookup.html"}
 	]
 
 insertBkmark(bkMarkArr);
@@ -8278,10 +8265,10 @@ insertBkmark(bkMarkArr);
 
 //Counties
 if(ctyList.includes(geotype)) {
-var bkMarkArr = [{title : 'Population Growth Table', id : 'popgr', srctxt : "County Population Estimates", srclink : "https://coloradodemography.github.io/population/data/county-data-lookup/"},
-		{title : 'County Population Estimates', id : 'popest', srctxt : "County Population Estimates", srclink : "https://coloradodemography.github.io/population/data/county-data-lookup/"},
-		{title : 'County Population Forecasts', id : 'popfor', srctxt : "County Population Forecasts", srclink : "https://coloradodemography.github.io/population/data/sya-county/#county-population-by-single-year-of-age"},
-		{title : 'County Components of Change',	id : 'popcoc', srctxt : "County Components of Change", srclink : "https://coloradodemography.github.io/births-deaths-migration/data/components-change/#components-of-change"}
+var bkMarkArr = [{title : 'Population Growth Table', id : 'popgr', srctxt : "County Population Estimates", srclink : "https://demography.dola.colorado.gov/assets/lookups/county_totpop_lookup.html"},
+		{title : 'County Population Estimates', id : 'popest', srctxt : "County Population Estimates", srclink : "https://demography.dola.colorado.gov/assets/lookups/county_totpop_lookup.html"},
+		{title : 'County Population Forecasts', id : 'popfor', srctxt : "County Population Forecasts", srclink : "https://demography.dola.colorado.gov/assets/lookups/county_sya_lookup.html"},
+		{title : 'County Components of Change',	id : 'popcoc', srctxt : "County Components of Change", srclink : "https://demography.dola.colorado.gov/assets/lookups/county_coc_lookup.html"}
 	]
 
 insertBkmark(bkMarkArr);	
@@ -8299,8 +8286,8 @@ insertBkmark(bkMarkArr);
 
 //Municipalities -- Only for the growth table  
 if(muniList.includes(geotype)){
-var bkMarkArr = [{title : 'Population Growth Table', id : 'popgr', srctxt : "Municipal Population Estimates", srclink : "https://coloradodemography.github.io/population/data/county-muni-timeseries/"},
-		{title : 'Municipal Population Estimates', id : 'popest', srctxt : "Municipal Population Estimates", srclink : "https://coloradodemography.github.io/population/data/county-muni-timeseries/"},
+var bkMarkArr = [{title : 'Population Growth Table', id : 'popgr', srctxt : "Municipal Population Estimates", srclink : "https://demography.dola.colorado.gov/assets/lookups/ctymuni_pop_lookup.html"},
+		{title : 'Municipal Population Estimates', id : 'popest', srctxt : "Municipal Population Estimates", srclink : "https://demography.dola.colorado.gov/assets/lookups/ctymuni_pop_lookup.html"},
 	]
 
 insertBkmark(bkMarkArr);	
@@ -9145,6 +9132,7 @@ var inc_data_pct = genACSPct(inc_data)
 var educ_data_pct = genACSPct(educ_data)
 var race_data_pct = genACSPct(race_data)
 
+
 //Table and Output production
 var bkMarkArr = [{title : 'Household Income Chart', id :'inc01', srctxt : "ACS Household Income Estimates",srclink : genCEDSCIUrl(geotype,"B19001",curyear, fipsArr)},
 	{title : 'Income Sources Table', id : 'inc02', srctxt : "ACS Household Income Estimates",srclink : genCEDSCIUrl(geotype,"B19001",curyear, fipsArr)},
@@ -9201,8 +9189,6 @@ if(ctyList.includes(geotype)) {
 	var fips_num = parseInt(fipsArr);
 	var fips_arr = fipsArr;
 }	
-
-
 
  if(muniList.includes(geotype)){
 	var fips_arr = muni_county(fipsArr)
@@ -9895,896 +9881,3 @@ genCommutingDiag(PlaceData,PRO_3.id,bkMarkArr[2],geotype,fipsArr);
  }  
 // genSel6Display
 
-//cat PDF Report production functions
-
-function genSel1tabPDF(level, fipsArr, nameArr, bkMark, outputPro, curYr, acsYr) {
-  const fmt_date = d3.timeFormat("%B %d, %Y");
-    const fmt_yr = d3.format("0000");
-
-
-/*
-Table Contents and Sources
- Current Year Population, SDO
- 10 year Population Change, SDO
- 10 year Percentage Change, SDO 
-Current Year Total Employment, SDO 
-Current ACS Median Household Income
-Current ACS Median Home Value
-Current ACS Percentage of Population with incomes below poverty line.
-Current ACS Percentage of Population born in Colorado
-*/
-
- const yrlist = [curYr - 10, curYr];
- 
- const regList = ['Region', 'Regional Comparison'];
- const ctyList = ['County', 'County Comparison'];
- const muniList = ['Municipality', 'Municipal Comparison'];
- 
-
-if(regList.includes(level)) {
-//Building fips Lists
-  for(i = 0; i < fipsArr.length; i++) {
-    var regNum = parseInt(fipsArr[i]);
-    var tmplist = regionCOL(regNum);
-    var fips_list =  tmplist[0].fips.map(function (x) { 
-     return parseInt(x, 10); 
-   });
-  }
-  
-//Generating Urls 
- var fipsACS = [];
-
- for(i = 0; i < fips_list.length; i++){
-   fipsACS.push(fips_list[i].toString().padStart(3,'0'));
-    };
-  //Population
-  var popST =  'https://gis.dola.colorado.gov/lookups/components_region?reg_num=0&year=' + yrlist;
-  var popCTY = 'https://gis.dola.colorado.gov/lookups/components?county=' + fips_list + '&year=' + yrlist;
-  //Jobs
-  var jobsST = 'https://gis.dola.colorado.gov/lookups/jobs?county=0&year='+ curYr +'&sector=0';
-  var jobsCTY = 'https://gis.dola.colorado.gov/lookups/jobs?county='+fips_list+'&year='+ curYr +'&sector=0';
-  
-
-  //median Income ACS  B19013  
-  var incST = genACSUrl("profile",acsYr,'B19013',1,1,'state',fipsACS)
-  var incCTY = genACSUrl("profile",acsYr,'B19013',1,1,level,fipsACS)
-    
-	
-  //median house value ACS B25077
-  var hvalST = genACSUrl("profile",acsYr,'B25077',1,1,'state',fipsACS)
-  var hvalCTY = genACSUrl("profile",acsYr,'B25077',1,1,level,fipsACS)
-  
-  //pct poverty ACS B17001
-  var povST = genACSUrl("profile",acsYr,'B17001',1,59,'state',fipsACS);
-  var povCTY = genACSUrl("profile",acsYr,'B17001',1,59,level,fipsACS);
-  
-  //pct native CO ACS B05002
-  var natST = genACSUrl("profile",acsYr,'B05002',1,27,'state',fipsACS);
-  var natCTY = genACSUrl("profile",acsYr,'B05002',1,27,level,fipsACS);
-
-  var prom = [d3.json(popST), d3.json(jobsST), d3.json(incST), d3.json(hvalST), d3.json(povST), d3.json(natST),
-			  d3.json(popCTY), d3.json(jobsCTY), d3.json(incCTY), d3.json(hvalCTY), d3.json(povCTY), d3.json(natCTY)
-     ];
- } //Region
- 
-if(ctyList.includes(level)) {
-    var fips_list = [];
- var fipsACS = [];
-  for(i = 0; i < fipsArr.length; i++) {
-    fips_list.push(parseInt(fipsArr[i]));
-    fipsACS.push(fipsArr[i]);
- }
- 
-  //Population
-  var popST =  'https://gis.dola.colorado.gov/lookups/components_region?reg_num=0&year=' + yrlist;
-  var popCTY = 'https://gis.dola.colorado.gov/lookups/components?county=' + fips_list + '&year=' + yrlist;
-  //Jobs
-  var jobsST = 'https://gis.dola.colorado.gov/lookups/jobs?county=0&year='+ acsYr +'&sector=0';
-  var jobsCTY = 'https://gis.dola.colorado.gov/lookups/jobs?county='+fips_list+'&year='+ acsYr +'&sector=0';
-  
-
-  //median Income ACS  B19013  
-  var incST = genACSUrl("profile",acsYr,'B19013',1,1,'state',fipsACS)
-  var incCTY = genACSUrl("profile",acsYr,'B19013',1,1,level,fipsACS)
-  
-  //median house value ACS B25077
-  var hvalST = genACSUrl("profile",acsYr,'B25077',1,1,'state',fipsACS)
-  var hvalCTY = genACSUrl("profile",acsYr,'B25077',1,1,level,fipsACS)
-  
-  //pct poverty ACS B17001
-  var povST = genACSUrl("profile",acsYr,'B17001',1,59,'state',fipsACS);
-  var povCTY = genACSUrl("profile",acsYr,'B17001',1,59,level,fipsACS);
-  
-  //pct native CO ACS B05002
-  var natST = genACSUrl("profile",acsYr,'B05002',1,27,'state',fipsACS);
-  var natCTY = genACSUrl("profile",acsYr,'B05002',1,27,level,fipsACS);
-
-
-   var prom = [d3.json(popST), d3.json(jobsST), d3.json(incST), d3.json(hvalST), d3.json(povST), d3.json(natST),
-			  d3.json(popCTY), d3.json(jobsCTY), d3.json(incCTY), d3.json(hvalCTY), d3.json(povCTY), d3.json(natCTY)
-     ];
-} //County
-
- if(muniList.includes(level)) {
-
-  var fips_list =[];
-  var muni_cty = [];
-   var muni_cty_acs = [];
-  var fipsACS = [];
-  for(i = 0; i < fipsArr.length; i++){
-   fips_list.push(parseInt(fipsArr[i]));
-   var ctyVal = muni_county(fipsArr[i]);
-   muni_cty.push(parseInt(ctyVal));
-   muni_cty_acs.push(ctyVal);
-   fipsACS.push(fipsArr[i]);
-  };
-  
-  var popST =  'https://gis.dola.colorado.gov/lookups/components_region?reg_num=0&year=' + yrlist;
-  var popCTY = 'https://gis.dola.colorado.gov/lookups/components?county=' + muni_cty + '&year=' + yrlist;
-  var popMUNI = 'https://gis.dola.colorado.gov/lookups/munipophousing?year=' + yrlist + '&placefips=' + fips_list + '&compressed=no';
-   
-  // Jobs
-  var jobsST = 'https://gis.dola.colorado.gov/lookups/jobs?county=0&year='+ acsYr +'&sector=0';
-  var jobsCTY = 'https://gis.dola.colorado.gov/lookups/jobs?county='+ muni_cty+'&year='+ acsYr +'&sector=0';
-  var jobsMUNI = 'https://gis.dola.colorado.gov/lookups/profilesql?table=estimates.muni_jobs_long&year='+ (acsYr - 1) + '&geo='+ fips_list;
- 
-
- //median Income ACS  b19013001
-  var incST = genACSUrl("profile",acsYr,'B19013',1,1,'state',fipsACS)
-  var incCTY = genACSUrl("profile",acsYr,'B19013',1,1,'county',muni_cty_acs);
-  var incMUNI = genACSUrl("profile",acsYr,'B19013',1,1,level,fipsACS);
-    
- //median house value ACS B25077
-  var hvalST = genACSUrl("profile",acsYr,'B25077',1,1,'state',fipsACS)
-  var hvalCTY = genACSUrl("profile",acsYr,'B25077',1,1,'county',muni_cty_acs)
-  var hvalMUNI = genACSUrl("profile",acsYr,'B25077',1,1,level,fipsACS)
-  
- //pct poverty ACS B17001
-  var povST = genACSUrl("profile",acsYr,'B17001',1,59,'state',fipsACS);
-  var povCTY = genACSUrl("profile",acsYr,'B17001',1,59,'county',muni_cty_acs);
-  var povMUNI = genACSUrl("profile",acsYr,'B17001',1,59,level,fipsACS);
-  
-  //pct native CO ACS B05002
-  var natST = genACSUrl("profile",acsYr,'B05002',1,27,'state',fipsACS);
-  var natCTY = genACSUrl("profile",acsYr,'B05002',1,27,'county',muni_cty_acs);
-  var natMUNI = genACSUrl("profile",acsYr,'B05002',1,27,level,fipsACS);
-
-   var prom = [d3.json(popST), d3.json(jobsST), d3.json(incST), d3.json(hvalST), d3.json(povST), d3.json(natST),
-              d3.json(popCTY), d3.json(jobsCTY), d3.json(incCTY), d3.json(hvalCTY), d3.json(povCTY), d3.json(natCTY),
-			  d3.json(popMUNI), d3.json(jobsMUNI), d3.json(incMUNI), d3.json(hvalMUNI), d3.json(povMUNI), d3.json(natMUNI)
-     ];
-  }  //Muni
-  
-
-Promise.all(prom).then(data =>{
- 
-   if(regList.includes(level)){
-    //Extracting State data records
-    var popSTdata = data[0];
-    var jobsSTdata = data[1];
-    var incSTdata = acsPrep(data[2]);
-    var hvalSTdata = acsPrep(data[3]);
-    var povSTdata = acsPrep(data[4]);
-    var natSTdata = acsPrep(data[5]);
- 	
-	var popCTYdata = data[6].sort(function(a, b){ return d3.ascending(a['year'], b['year']); }).sort(function(a, b){ return d3.ascending(a['countyfips'], b['countyfips']); });;
-    var jobsCTYdata = data[7].sort(function(a, b){ return d3.ascending(a['area_code'], b['area_code']); });
-    var incCTYdata = acsPrep(data[8]).sort(function(a, b){ return d3.ascending(a['GEO2'], b['GEO2']); });
-    var hvalCTYdata = acsPrep(data[9]).sort(function(a, b){ return d3.ascending(a['GEO2'], b['GEO2']); });
-    var povCTYdata = acsPrep(data[10]).sort(function(a, b){ return d3.ascending(a['GEO2'], b['GEO2']); });
-    var natCTYdata = acsPrep(data[11]).sort(function(a, b){ return d3.ascending(a['GEO2'], b['GEO2']); });
-     
-	//Generating data sets 
-   //Population Growth
-   var tabgrST = calcpopGR(popSTdata,fipsArr,'state',yrlist);
-   var tabgrREG = calcpopGR(popCTYdata,fipsArr,level,yrlist);
-   var tabgrFIN =  tabgrST.concat(tabgrREG);
-	
-
-   //Jobs
-   
-   var state_jobs = [];
-    state_jobs.push({'area_code' : jobsSTdata[0].area_code, 'name' : 'Colorado', 'population_year' : jobsSTdata[0].population_year, 'total_jobs' : +jobsSTdata[0].total_jobs});
-
-   var cty_jobs = [];
-
-    for(j = 0; j < jobsCTYdata.length; j++){
-     cty_jobs.push({'area_code' : jobsCTYdata[j].area_code, 'name' : countyName(jobsCTYdata[j].area_code), 'population_year' : jobsCTYdata[j].population_year, 'total_jobs' : +jobsCTYdata[j].total_jobs});
-    }; //J loop
- 
-    var reg_jobs = [];
-    var pop_year = cty_jobs[0].population_year;
-    var reg_val = -100 - parseInt(fipsArr[0])
-    var jobs_reg = d3.rollup(cty_jobs, v => d3.sum(v, d => d.total_jobs));
-    reg_jobs.push({'area_code' : reg_val, 'name' : nameArr[0], 'population_year' : pop_year, 'total_jobs' : jobs_reg});
-    
-	var jobsFIN = state_jobs.concat(reg_jobs, cty_jobs);
-	
-	//Median Income ACS
-   var state_income = [];
-   state_income.push({'fips' : incSTdata[0].GEO1, 'name' : incSTdata[0].NAME, 'est' : incSTdata[0].B19013_001E, 'moe' : incSTdata[0].B19013_001M});
-   var median_income1 = procMedian(incCTYdata,fipsArr,'B19013_001E','B19013_001M',nameArr);
-   var median_income = state_income.concat(median_income1);
-   
-
-   //Median House Value
-   var state_home = [];
-   state_home.push({'fips' : hvalSTdata[0].GEO1, 'name' : hvalSTdata[0].NAME, 'est' : hvalSTdata[0].B25077_001E, 'moe' : hvalSTdata[0].B25077_001M});
-   var median_home1 = procMedian(hvalCTYdata,fipsArr,'B25077_001E','B25077_001M',nameArr);
-   var median_home = state_home.concat(median_home1);
-
-
-   //pct poverty
-   var pov_state = procPCT(povSTdata,0,'B17001','state',nameArr);
-   var pov_reg = procPCT(povCTYdata,fipsArr,'B17001',level,nameArr);
-   var poverty = pov_state.concat(pov_reg);
-   
-   //pct native
-   var coNat_state = procPCT(natSTdata,0,'B05002','state',nameArr);
-   var coNat_reg = procPCT(natCTYdata,fipsArr,'B05002',level,nameArr);
-   var coNative = coNat_state.concat(coNat_reg);
-   }; //level = region
-
-if(ctyList.includes(level)){
-    var popSTdata = data[0];
-    var jobsSTdata = data[1];
-    var incSTdata = acsPrep(data[2]);
-    var hvalSTdata = acsPrep(data[3]);
-    var povSTdata = acsPrep(data[4]);
-    var natSTdata = acsPrep(data[5]);
-    
-	var popCTYdata = data[6];
-    var jobsCTYdata = data[7];
-    var incCTYdata = acsPrep(data[8]);
-    var hvalCTYdata = acsPrep(data[9]);
-    var povCTYdata = acsPrep(data[10]);
-    var natCTYdata = acsPrep(data[11]);
-	 
-
-   //Population Growth 
-   var tabgrST = calcpopGR(popSTdata,fips_list,'state',yrlist);
-   var tabgrCTY = calcpopGR(popCTYdata,fips_list,level,yrlist);
-   var tabgrFIN =  tabgrCTY.concat(tabgrST);
-   
-   //Jobs
-  var state_jobs = [];
-    state_jobs.push({'area_code' : jobsSTdata[0].area_code, 'name' : 'Colorado', 'population_year' : jobsSTdata[0].population_year, 'total_jobs' : +jobsSTdata[0].total_jobs});
-
-   var cty_jobs = [];
-     cty_jobs.push({'area_code' : jobsCTYdata[0].area_code, 'name' : countyName(jobsCTYdata[0].area_code), 'population_year' : jobsCTYdata[0].population_year, 'total_jobs' : +jobsCTYdata[0].total_jobs});
-
-	var jobsFIN = cty_jobs.concat(state_jobs);
-
-   //Median Income -- 
-    var state_income = [];
-   state_income.push({'fips' : incSTdata[0].GEO1, 'name' : incSTdata[0].NAME, 'est' : incSTdata[0].B19013_001E, 'moe' : incSTdata[0].B19013_001M});
-
-   var county_income = [];
-   county_income.push({'fips' : incCTYdata[0].GEO2, 'name' : incCTYdata[0].NAME, 'est' : incCTYdata[0].B19013_001E, 'moe' : incCTYdata[0].B19013_001M});
-   var median_income = county_income.concat(state_income); 
-   
-   //Median House Value
-   var state_home = [];
-   state_home.push({'fips' : hvalSTdata[0].GEO1, 'name' : hvalSTdata[0].NAME, 'est' : hvalSTdata[0].B25077_001E, 'moe' : hvalSTdata[0].B25077_001M});
-
-   var county_home = [];
-   county_home.push({'fips' : hvalCTYdata[0].GEO2, 'name' : hvalCTYdata[0].NAME, 'est' : hvalCTYdata[0].B25077_001E, 'moe' : hvalCTYdata[0].B25077_001M});
-   var median_home = county_home.concat(state_home);
- 
-   //pct poverty
-   var povertyST = procPCT(povSTdata,fipsArr,'B17001','state',nameArr);
-   var povertyCTY = procPCT(povCTYdata,fipsArr,'B17001',level,nameArr);
-   var poverty  = povertyCTY.concat(povertyST);
-   
-   //pct native
-   var coNativeST = procPCT(natSTdata,fipsArr,'B05002','county',nameArr);
-   var coNativeCTY = procPCT(natCTYdata,fipsArr,'B05002',level,nameArr);
-   var coNative = coNativeCTY.concat(coNativeST);
-}; //level = county   
-
-if(muniList.includes(level)){
-    var popSTdata = data[0];
-    var jobsSTdata = data[1];
-    var incSTdata = acsPrep(data[2]);
-    var hvalSTdata = acsPrep(data[3]);
-    var povSTdata = acsPrep(data[4]);
-    var natSTdata = acsPrep(data[5]);
-	
-    var popCTYdata = data[6];
-    var jobsCTYdata = data[7];
-    var incCTYdata = acsPrep(data[8]);
-    var hvalCTYdata = acsPrep(data[9]);
-    var povCTYdata = acsPrep(data[10]);
-    var natCTYdata = acsPrep(data[11]);
-    
-	var popMUNIdata = data[12];
-    var jobsMUNIdata = data[13];
-    var incMUNIdata = acsPrep(data[14]);
-    var hvalMUNIdata = acsPrep(data[15]);
-    var povMUNIdata = acsPrep(data[16]);
-    var natMUNIdata = acsPrep(data[17]);
-     
-
-//removing multi-county 
-if(popMUNIdata.length > 2){
-	var tmppop = popMUNIdata.filter(function(d) {return d.countyfips == 999});
-	var popMUNIdata = tmppop;
-	};
-
-    //Population Growth 
-   var tabgrST = calcpopGR(popSTdata,fips_list,'state',yrlist);
-   var tabgrCTY = calcpopGR(popCTYdata,fips_list,'County',yrlist);
-   var tabgrMUNI = calcpopGR(popMUNIdata,fips_list,level,yrlist);
-   var tabgrFIN =  tabgrMUNI.concat(tabgrCTY, tabgrST);
-
-   //Jobs
-  var st_jobs = [];
-    st_jobs.push({'area_code' : jobsSTdata[0].area_code, 'name' : 'Colorado', 'population_year' : jobsSTdata[0].population_year, 'total_jobs' : +jobsSTdata[0].total_jobs});
-
-  var cty_jobs = [];
-    cty_jobs.push({'area_code' : jobsCTYdata[0].area_code, 'name' : countyName(jobsCTYdata.area_code), 'population_year' : jobsCTYdata[0].population_year, 'total_jobs' : +jobsCTYdata[0].total_jobs});
-
-   var muni_jobs = [];
-     muni_jobs.push({'area_code' : +jobsMUNIdata[0].placefips, 'name' : muniName(jobsMUNIdata[0].placefips), 'population_year' : +jobsMUNIdata[0].year, 'total_jobs' : +jobsMUNIdata[0].jobs});
-
-	var jobsFIN = muni_jobs.concat(cty_jobs,st_jobs);
-    
-   //Median Income
-   var st_income = [];
-   st_income.push({'fips' : incSTdata[0].GEO2, 'name' : incSTdata[0].NAME, 'est' : incSTdata[0].B19013_001E, 'moe' : incSTdata[0].B19013_001M});
-
-   var county_income = [];
-   county_income.push({'fips' : incCTYdata[0].GEO2, 'name' : incCTYdata[0].NAME, 'est' : incCTYdata[0].B19013_001E, 'moe' : incCTYdata[0].B19013_001M});
-
-   var muni_income = [];
-   muni_income.push({'fips' : incMUNIdata[0].GEO2, 'name' : incMUNIdata[0].NAME, 'est' : incMUNIdata[0].B19013_001E, 'moe' : incMUNIdata[0].B19013_001M});
-   var median_income = muni_income.concat(county_income,st_income);
-      
-   //Median House Value
-   var st_home = [];
-   st_home.push({'fips' : hvalSTdata[0].GEO2, 'name' : hvalSTdata[0].NAME, 'est' : hvalSTdata[0].B25077_001E, 'moe' : hvalSTdata[0].B25077_001M});
-
-   var county_home = [];
-   county_home.push({'fips' : hvalCTYdata[0].GEO2, 'name' : hvalCTYdata[0].NAME, 'est' : hvalCTYdata[0].B25077_001E, 'moe' : hvalCTYdata[0].B25077_001M});
-
-   var muni_home = [];
-   muni_home.push({'fips' : hvalMUNIdata[0].GEO2, 'name' : hvalMUNIdata[0].NAME, 'est' : hvalMUNIdata[0].B25077_001E, 'moe' : hvalMUNIdata[0].B25077_001M});
-   var median_home = muni_home.concat(county_home, st_home);
-   
-   //pct poverty
-   var povertyST = procPCT(povSTdata,fipsArr,'B17001','state',nameArr);
-   var povertyCTY = procPCT(povCTYdata,fipsArr,'B17001','county',nameArr);
-   var povertyMUNI = procPCT(povMUNIdata,fipsArr,'B17001',level,nameArr);
-   var poverty  = povertyMUNI.concat(povertyCTY,povertyST);
-   
-   //pct native
-   var coNativeST = procPCT(natSTdata,fipsArr,'B05002','state',nameArr);
-   var coNativeCTY = procPCT(natCTYdata,fipsArr,'B05002','county',nameArr);
-   var coNativeMUNI = procPCT(natMUNIdata,fipsArr,'B05002',level,nameArr);
-   var coNative = coNativeMUNI.concat(coNativeCTY,coNativeST);
-
-
-}; //level = municipality   
-
-
-//Prepping output table
-//Building table data	
-
-var outData = [];
-for(i = 0; i < tabgrFIN.length; i++){
-		outData.push({
-			fips : tabgrFIN[i].fips,
-			name : tabgrFIN[i].name,
-			pop: fixNUMFMT(tabgrFIN[i].yr2,"num"),
-			pop_change : fixNUMFMT(tabgrFIN[i].popch,"num"),
-			pop_growth : fixNUMFMT(tabgrFIN[i].growth,"pct"),
-			total_jobs : fixNUMFMT(jobsFIN[i].total_jobs,"num"),
-			income_est : fixNUMFMT(median_income[i].est,"cur"),
-			income_moe : fixNUMFMT(median_income[i].moe,"cur"),
-			home_est : fixNUMFMT(median_home[i].est,"cur"),
-			home_moe : fixNUMFMT(median_home[i].moe,"cur"),
-			pov_est : fixNUMFMT(poverty[i].pct_est,"pct"),
-			pov_moe : fixNUMPCT(poverty[i].pct_moe,"pct"),
-			co_est : fixNUMPCT(coNative[i].pct_est,"pct"),
-			co_moe : fixNUMPCT(coNative[i].pct_moe,"pct")
-})
-};
-
-var curyr = yrlist[1];
-var prevyr = yrlist[0];
-
-
-var row_labels = [
-       {'title': 'Population ('+curyr+')*', 'URL_link' : muniList.includes(level) ? 'https://coloradodemography.github.io/population/data/muni-pop-housing/' : 'https://coloradodemography.github.io/population/data/county-data-lookup/'},
-       {'title': 'Population Change (' + prevyr + ' to ' + curyr + ')*', 'URL_link' : muniList.includes(level) ? 'https://coloradodemography.github.io/population/data/muni-pop-housing/' : 'https://coloradodemography.github.io/population/data/county-data-lookup/'},
-       {'title': 'Percentage Change (' + prevyr + ' to ' + curyr + ')*', 'URL_link' : muniList.includes(level) ? 'https://coloradodemography.github.io/population/data/muni-pop-housing/' : 'https://coloradodemography.github.io/population/data/county-data-lookup/'},
-       {'title': 'Total Employment (' + curyr + ')*', 'URL_link': 'https://coloradodemography.github.io/economy-labor-force/data/jobs-by-sector/#jobs-by-sector-naics'},
-       {'title': 'Median Household Income^', 'URL_link' :  genCEDSCIUrl(level,'B19013',acsYr,fipsACS)},
-       {'title': 'Median Home Value^', 'URL_link' : genCEDSCIUrl(level,'B25077',acsYr,fipsACS)},
-       {'title': 'Percentage of Population with incomes below poverty line.^', 'URL_link' : genCEDSCIUrl(level,'B17001',acsYr,fipsACS)},
-       {'title': 'Percentage of Population born in Colorado^', 'URL_link' : genCEDSCIUrl(level,'B05002',acsYr,fipsACS)}
-    ];
-
-var tab_obj = genSubjTab(level, outData,bkMark.id,row_labels,false);
-
-var fileName = nameArr[0] + " Basic Statistics";
-pgSetupPro(level,"table",outputPro,bkMark,false,false,fipsArr, nameArr, 0)
-//Table Footer
-
-var acsyr1 = acsYr - 4;
-
-var tblfoot = [
-               ["Sources: * Colorado State Demography Office"],
-               ['^U.S. Census Bureau (' + fmt_yr(curyr) + '). '+fmt_yr(acsyr1) + '-' + fmt_yr(acsYr) +' American Community Survey 5-year data set.'],
-               ['Print Date : ' + fmt_date(new Date)]
-      ];
-	  
-
-var ftrString = "<tfoot><tr>";
-for(i = 0; i < tblfoot.length; i++){
-	if(muniList.includes(level)) {
-     ftrString = ftrString + "<tr><td colspan='7'>" + tblfoot[i] + "</td></tr>";
-	} else {
-	 ftrString = ftrString + "<tr><td colspan='5'>" + tblfoot[i] + "</td></tr>";
-	}
- }; 
-ftrString = ftrString + "</tr></tfoot>";
-
-var ftrMsg = "Sources: * Colorado State Demography Office " + '^U.S. Census Bureau (' + fmt_yr(curyr) + '). '+fmt_yr(acsyr1) + '-' + fmt_yr(acsYr) +' American Community Survey 5-year data set.' +
-   "Print Date : " + fmt_date(new Date);
-
-//Initial Table
-var tabVal = 0;
-
-if(regList.includes(level)){
-   var btndown = document.getElementById("increment12");
-   var btnup = document.getElementById("increment22");
-
-DTtab("TabDiv2",tab_obj,tabVal,row_labels,ftrString,tblfoot,"summtabDT",fileName,bkMark.title) 
-
-
-   btndown.addEventListener('click', function() {
-     tabVal = tabVal - 1;
-	 if(tabVal < 0) {
-		tabVal = 5
-	 }
-		   DTtab("TabDiv2",tab_obj,tabVal,row_labels,ftrString,tblfoot,"summtabDT",fileName,bkMark.title);
-   });
-  btnup.addEventListener('click', function() {
-     tabVal = tabVal + 1;
-	 if(tabVal > 5) {
-		tabVal = 0
-	 }
-		   DTtab("TabDiv2",tab_obj,tabVal,row_labels,ftrString,tblfoot,"summtabDT",fileName,bkMark.title);
-    });
-} else {
-	DTtab("TabDiv2",tab_obj,tabVal,row_labels,ftrString,tblfoot,"summtabDT",fileName,bkMark.title);
-}
-  }); //End of Promise
-  
-};  
-// genSel1Tab
-function genReport(lvl,fipsArr,valSec, names) {
-//genReport generates the PDF report.
-
- const fmt_date = d3.timeFormat("%B %d, %Y");
-  const fmt_yr = d3.format("00");
-  const regList = ['Region', 'Regional Comparison'];
-  const ctyList = ['County', 'County Comparison'];
-  const muniList = ['Municipality', 'Municipal Comparison'];
-  const placeList = ['Census Designated Place', 'Census Designated Place Comparison'];
-  const range = (min, max) => Array.from({ length: max - min + 1 }, (_, i) => min + i);
-  
-  var yrstr = "https://gis.dola.colorado.gov/lookups/componentYRS";
- d3.json(yrstr).then(function(yeardata){  //This is the initial promise
- var maxest = yeardata.filter(function(d){return d.datatype == 'Estimate'});
- var yrsList = maxest.map(function(d){return d.year;});
- var curYr = d3.max(yrsList);
-
- var acsYr = 2021;  ///CHANGE THIS WHEN 2021 ACS is available
- 
-//This is a monster function....
-
-var proms = [];  //this holds the promises
-valSec.forEach(d => {
-	switch(d) {
-		case "sel1" :
-			//Map Promises
-			proms.push(d3.json('../data/County_GEN_2014.geojson'));
-			proms.push(d3.csv('../data/place_centroids.csv'));
-			//Table Promises
-			const yrlist = [curYr - 10, curYr];
-			if(regList.includes(lvl)) {
-			//Building fips Lists
-			  for(i = 0; i < fipsArr.length; i++) {
-				var regNum = parseInt(fipsArr[i]);
-				var tmplist = regionCOL(regNum);
-				var fips_list =  tmplist[0].fips.map(function (x) { 
-				 return parseInt(x, 10); 
-			   });
-			  }
-
-			//Generating Urls 
-			 var fipsACS = [];
-
-			 for(i = 0; i < fips_list.length; i++){
-			   fipsACS.push(fips_list[i].toString().padStart(3,'0'));
-				};
-			  //Population
-			  proms.push(d3.json('https://gis.dola.colorado.gov/lookups/components_region?reg_num=0&year=' + yrlist));
-			  proms.push(d3.json('https://gis.dola.colorado.gov/lookups/components?county=' + fips_list + '&year=' + yrlist));
-			  //Jobs
-			  proms.push(d3.json('https://gis.dola.colorado.gov/lookups/jobs?county=0&year='+ curYr +'&sector=0'));
-			  proms.push(d3.json('https://gis.dola.colorado.gov/lookups/jobs?county='+fips_list+'&year='+ curYr +'&sector=0'));
-			  
-
-			  //median Income ACS  B19013  
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B19013',1,1,'state',fipsACS)))
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B19013',1,1,lvl,fipsACS)))
-				
-				
-			  //median house value ACS B25077
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B25077',1,1,'state',fipsACS)))
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B25077',1,1,lvl,fipsACS)))
-			  
-			  //pct poverty ACS B17001
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B17001',1,59,'state',fipsACS)));
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B17001',1,59,lvl,fipsACS)));
-			  
-			  //pct native CO ACS B05002
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B05002',1,27,'state',fipsACS)));
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B05002',1,27,lvl,fipsACS)));
-			 } //Region
-			 
-			if(ctyList.includes(lvl)) {
-				var fips_list = [];
-			 var fipsACS = [];
-			  for(i = 0; i < fipsArr.length; i++) {
-				fips_list.push(parseInt(fipsArr[i]));
-				fipsACS.push(fipsArr[i]);
-			 }
-			 
-			  //Population
-			  proms.push(d3.json('https://gis.dola.colorado.gov/lookups/components_region?reg_num=0&year=' + yrlist));
-			  proms.push(d3.json('https://gis.dola.colorado.gov/lookups/components?county=' + fips_list + '&year=' + yrlist));
-			  //Jobs
-			  proms.push(d3.json('https://gis.dola.colorado.gov/lookups/jobs?county=0&year='+ curYr +'&sector=0'));
-			  proms.push(d3.json('https://gis.dola.colorado.gov/lookups/jobs?county='+fips_list+'&year='+ curYr +'&sector=0'));
-			  
-
-			  //median Income ACS  B19013  
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B19013',1,1,'state',fipsACS)))
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B19013',1,1,lvl,fipsACS)))
-				
-				
-			  //median house value ACS B25077
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B25077',1,1,'state',fipsACS)))
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B25077',1,1,lvl,fipsACS)))
-			  
-			  //pct poverty ACS B17001
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B17001',1,59,'state',fipsACS)));
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B17001',1,59,lvl,fipsACS)));
-			  
-			  //pct native CO ACS B05002
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B05002',1,27,'state',fipsACS)));
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B05002',1,27,lvl,fipsACS)));
-			} //County
-
-			 if(muniList.includes(lvl)) {
-			  var fips_list =[];
-			  var muni_cty = [];
-			   var muni_cty_acs = [];
-			  var fipsACS = [];
-			  for(i = 0; i < fipsArr.length; i++){
-			   fips_list.push(parseInt(fipsArr[i]));
-			   var ctyVal = muni_county(fipsArr[i]);
-			   muni_cty.push(parseInt(ctyVal));
-			   muni_cty_acs.push(ctyVal);
-			   fipsACS.push(fipsArr[i]);
-			  };
-			  
-			  proms.push(d3.json('https://gis.dola.colorado.gov/lookups/components_region?reg_num=0&year=' + yrlist));
-			  proms.push(d3.json('https://gis.dola.colorado.gov/lookups/components?county=' + muni_cty + '&year=' + yrlist));
-			  proms.push(d3.json('https://gis.dola.colorado.gov/lookups/munipophousing?year=' + yrlist + '&placefips=' + fips_list + '&compressed=no'));
-			   
-			  // Jobs
-			  proms.push(d3.json('https://gis.dola.colorado.gov/lookups/jobs?county=0&year='+ acsYr +'&sector=0'));
-			  proms.push(d3.json('https://gis.dola.colorado.gov/lookups/jobs?county='+ muni_cty+'&year='+ acsYr +'&sector=0'));
-			  proms.push(d3.json('https://gis.dola.colorado.gov/lookups/profilesql?table=estimates.muni_jobs_long&year='+ (acsYr - 1) + '&geo='+ fips_list))
-			 
-
-			 //median Income ACS  b19013001
-			 proms.push(d3.json(genACSUrl("profile",acsYr,'B19013',1,1,'state',fipsACS)))
-			 proms.push(d3.json(genACSUrl("profile",acsYr,'B19013',1,1,'county',muni_cty_acs)));
-			 proms.push(d3.json(genACSUrl("profile",acsYr,'B19013',1,1,lvl,fipsACS)));
-				
-			 //median house value ACS B25077
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B25077',1,1,'state',fipsACS)))
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B25077',1,1,'county',muni_cty_acs)))
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B25077',1,1,lvl,fipsACS)))
-			  
-			 //pct poverty ACS B17001
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B17001',1,59,'state',fipsACS)));
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B17001',1,59,'county',muni_cty_acs)));
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B17001',1,59,lvl,fipsACS)));
-			  
-			  //pct native CO ACS B05002
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B05002',1,27,'state',fipsACS)));
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B05002',1,27,'county',muni_cty_acs)));
-			  proms.push(d3.json(genACSUrl("profile",acsYr,'B05002',1,27,lvl,fipsACS)));
-			  }  //Muni
-			  break;
-		case "sel2" :
-		var yr_list = range(1985,curYr); 
-		var forc_yrs = range(curYr,2050); 
-		var state_list = [1,3,5,7,9,11,13,14,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49,51,53,55,57,59,61,63,65,67,69,71,73,75,77,79,81,83,85,87,89,91,93,95,97,99,101,103,105,107,109,111,113,115,117,119,121,123,125];
-		if(regList.includes(lvl)){
-			var fips_tmp = regionCOL(parseInt(fipsArr));
-			var fips_list =  fips_tmp[0].fips.map(x => parseInt(x, 10));
-			proms.push(d3.json("https://gis.dola.colorado.gov/lookups/profile?county=" + fips_list + "&year=" + yr_list + "&vars=totalpopulation,births,deaths,netmigration"))
-			proms.push(d3.json("https://gis.dola.colorado.gov/lookups/sya?county=" + fips_list + "&year=" + forc_yrs + "&choice=single&group=3"))
-			proms.push(d3.json("https://gis.dola.colorado.gov/lookups/profile?county=" + state_list + "&year=" + yr_list + "&vars=totalpopulation,births,deaths,netmigration"));
-			proms.push(d3.json("https://gis.dola.colorado.gov/lookups/sya?county=" + state_list + "&year=" + forc_yrs + "&choice=single&group=3")) 
-		}
-		if(ctyList.includes(lvl)){
-		 if(fipsArr == "000") {
-			fips_list = [1,3,5,7,9,11,13,14,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49,51,53,55,57,59,61,63,65,67,69,71,73,75,77,79,81,83,85,87,89,91,93,95,97,99,101,103,105,107,109,111,113,115,117,119,121,123,125];
-			} else {
-			fips_list = [parseInt(fipsArr)];
-			}; 
-			proms.push(d3.json("https://gis.dola.colorado.gov/lookups/profile?county=" + fips_list + "&year=" + yr_list + "&vars=totalpopulation,births,deaths,netmigration"));
-			proms.push(d3.json("https://gis.dola.colorado.gov/lookups/sya?county=" + fips_list + "&year=" + forc_yrs + "&choice=single&group=3")) 
-			proms.push(d3.json("https://gis.dola.colorado.gov/lookups/profile?county=" + state_list + "&year=" + yr_list + "&vars=totalpopulation,births,deaths,netmigration"));
-			proms.push(d3.json("https://gis.dola.colorado.gov/lookups/sya?county=" + state_list + "&year=" + forc_yrs + "&choice=single&group=3")) 
-		}
-		if(muniList.includes(lvl)){
-			var munifips = parseInt(fipsArr);   
-			var ctyfips = parseInt(muni_county(fipsArr));
-			proms.push(d3.json('https://gis.dola.colorado.gov/lookups/countymuni?placefips='+ munifips + '&year=' + yr_list +'&compressed=no'))
-			proms.push(d3.json("https://gis.dola.colorado.gov/lookups/profile?county=" + ctyfips + "&year=" + yr_list + "&vars=totalpopulation,births,deaths,netmigration"));
-			proms.push(d3.json("https://gis.dola.colorado.gov/lookups/sya?county=" + ctyfips + "&year=" + forc_yrs + "&choice=single&group=3")) 
-		}
-		break;
-		case "sel3" :
-		if(regList.includes(lvl)){
-			var fips_tmp = regionCOL(parseInt(fipsArr));
-			var fips_list =  fips_tmp[0].fips.map(function (x) { 
-			return parseInt(x, 10); 
-		});
-		} else {
-		fips_list = [parseInt(fipsArr)];
-		}; 
-		//Estimates  --For muniipalities, take  from the ACS No forecast
-		if(muniList.includes(lvl)){
-			var ctynum = muni_county(fipsArr);
-			proms.push(d3.json(genACSUrl("profile",curYr,'B01001',1,49,'County',ctynum)));
-			proms.push(d3.json(genACSUrl("profile",curYr,'B01001',1,49,lvl,fipsArr)));
-		} else {
-			var forc_yrs = curYr + "," + (curYr+ 10); 
-			proms.push(d3.json("https://gis.dola.colorado.gov/lookups/sya_regions?reg_num=0&year=" + forc_yrs + "&choice=single"))
-			proms.push(d3.json("https://gis.dola.colorado.gov/lookups/sya?county=" + fips_list + "&year=" + forc_yrs + "&choice=single&group=3"))
-		}
-		break;
-		case "sel4" :
-		  var hh_tab = ["B19051_001E", "B19051_001M", "B19051_002E", "B19051_002M", "B19052_002E", "B19052_002M",
-				"B19053_002E", "B19053_002M", "B19054_002E", "B19054_002M", "B19059_002E", "B19059_002M", "B19055_002E", "B19055_002M", 
-			 "B19056_002E", "B19056_002M", "B19057_002E", "B19057_002M", "B19058_002E", "B19058_002M",  "B19060_002E", "B19060_002M",
-			 "B20003_001E", "B20003_001M","B19061_001E", "B19061_001M", "B19062_001E", "B19062_001M", "B19063_001E", "B19063_001M", 
-			 "B19064_001E", "B19064_001M", "B19069_001E", "B19069_001M", "B19065_001E", "B19065_001M", "B19066_001E", "B19066_001M", 
-			 "B19067_001E", "B19067_001M",  "B19070_001E", "B19070_001M"]
-		  
-
-		  // Generating list of fips codes by lvl
-
-		 if(regList.includes(lvl)){
-		  var fips_tmp = regionCOL(parseInt(fipsArr));
-			 var fips_str =  fips_tmp[0].fips.map(function (x) { 
-			 return x; 
-		   });
-				var fips_list = fips_str.toString();
-			 
-		  proms.push(d3.json(genACSUrl("profile",curYr,'B19001',1,17,lvl,fips_list)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,hh_tab,1,1,lvl,fips_list)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,'B15003',1,25,lvl,fips_list)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,'B03002',1,12,lvl,fips_list)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,'B19001',1,17,'state',fips_list)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,hh_tab,1,1,'state',fips_list)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,'B15003',1,25,'state',fips_list)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,'B03002',1,12,'state',fips_list)));
-		 };
-		 
-		 if(ctyList.includes(lvl)){
-		  var fips_str =  fipsArr.map(function (x) { 
-			 return x; 
-		   });
-			   
-		  proms.push(d3.json(genACSUrl("profile",curYr,'B19001',1,17,lvl,fips_list)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,hh_tab,1,1,lvl,fips_list)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,'B15003',1,25,lvl,fips_list)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,'B03002',1,12,lvl,fips_list)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,'B19001',1,17,'state',fips_list)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,hh_tab,1,1,'state',fips_list)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,'B15003',1,25,'state',fips_list)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,'B03002',1,12,'state',fips_list)));
-		 }
-		 
-		 if(muniList.includes(lvl)){ 
-		 var ctynum = muni_county(fipsArr);
-		  var fips_str =  fipsArr.map(function (x) { 
-			 return x; 
-		   });
-		  
-		  proms.push(d3.json(genACSUrl("profile",curYr,'B19001',1,17,lvl,fipsArr)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,hh_tab,1,1,lvl,fipsArr)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,'B15003',1,25,lvl,fipsArr)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,'B03002',1,12,lvl,fipsArr)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,'B19001',1,17,'county',ctynum)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,hh_tab,1,1,'county',ctynum)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,'B15003',1,25,'county',ctynum)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,'B03002',1,12,'county',ctynum)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,'B19001',1,17,'state',fipsArr)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,hh_tab,1,1,'state',fipsArr)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,'B15003',1,25,'state',fipsArr)));
-		  proms.push(d3.json(genACSUrl("profile",curYr,'B03002',1,12,'state',fipsArr)));
-		 }
-		 break;
-		case "sel5" :
-	if(regList.includes(lvl)){
-		var fips_tmp1 = regionCOL(parseInt(fipsArr));
-		var fips_tmp =  fips_tmp1[0].fips.map(function (x) { 
-		 return parseInt(x); 
-	   });
-	   var fips_num = fips_tmp.toString();
-	   var fips_arr = fips_tmp1[0].fips;
-	  };
-
-	if(ctyList.includes(lvl)) {
-		var fips_num = parseInt(fipsArr);
-		var fips_arr = fipsArr;
-	}	
-
-	 if(muniList.includes(lvl)){
-		var fips_arr = muni_county(fipsArr)
-		var fips_num = parseInt(fips_arr);
-		} 
-		
-		var yr_list = 2021;
-		var maxYR = 2050
-		for(i = 2022; i <= maxYR; i++){
-			if(i % 10 == 0){
-			yr_list = yr_list + "," + i;
-			}
-		};
-
-	//List of All URLS
-	//Households projections 
-	var hhage_90_cty = "https://gis.dola.colorado.gov/capi/demog?limit=99999&db=c1990&schema=sf1&table=h12&sumlev=50&type=json&state=8&county=" + fips_num;
-	var hhage_00_cty = "https://gis.dola.colorado.gov/capi/demog?limit=99999&db=c2000&schema=sf1&table=h16&sumlev=50&type=json&state=8&county=" + fips_num;
-	var hhage_10_cty = "https://gis.dola.colorado.gov/capi/demog?limit=99999&db=c2010&schema=data&table=h17&sumlev=50&type=json&state=8&county=" + fips_num;
-	var hhage_for_cty = "https://gis.dola.colorado.gov/lookups/household?county="+ fips_num + "&year=" + yr_list + "&age=0,1,2,3,4&household=0&group=opt08";
-
-	var hhage_90_reg = "https://gis.dola.colorado.gov/capi/demog?limit=99999&db=c1990&schema=sf1&table=h12&sumlev=50&type=json&state=8&county=" + fips_num;
-	var hhage_00_reg = "https://gis.dola.colorado.gov/capi/demog?limit=99999&db=c2000&schema=sf1&table=h16&sumlev=50&type=json&state=8&county=" + fips_num;
-	var hhage_10_reg = "https://gis.dola.colorado.gov/capi/demog?limit=99999&db=c2010&schema=data&table=h17&sumlev=50&type=json&state=8&county=" + fips_num;
-	var hhage_for_reg = "https://gis.dola.colorado.gov/lookups/household?county="+ fips_num + "&year=" + yr_list + "&age=0,1,2,3,4&household=0&group=opt08";
-
-
-	var hhage_90_st = "https://gis.dola.colorado.gov/capi/demog?limit=99999&db=c1990&schema=sf1&table=h12&sumlev=40&type=json&state=8";
-	var hhage_00_st = "https://gis.dola.colorado.gov/capi/demog?limit=99999&db=c2000&schema=sf1&table=h16&sumlev=40&type=json&state=8";
-	var hhage_10_st = "https://gis.dola.colorado.gov/capi/demog?limit=99999&db=c2010&schema=data&table=h17&sumlev=40&type=json&state=8";
-	var hhage_for_st = "https://gis.dola.colorado.gov/lookups/household?county=0&year=" + yr_list + "&age=0,1,2,3,4&household=0&group=opt08";
-
-	//ACS Calls	
-	//B25002	OCCUPANCY STATUS
-	//B25004	VACANCY STATUS
-	//B25005	VACANCY STATS CURRENT RESIDENCY ELSEWHERE
-	//B25010	AVERAGE HOUSEHOLD SIZE OF OCCUPIED HOUSING UNITS BY TENURE
-	//B25032	TENURE BY UNITS IN STRUCTURE
-	//B25033	TOTAL POPULATION IN OCCUPIED HOUSING UNITS BY TENURE BY UNITS IN STRUCTURE
-	//B25037	MEDIAN YEAR STRUCTURE BUILT BY TENURE
-	//B25064	MEDIAN GROSS RENT (DOLLARS)
-	//B25074	HOUSEHOLD INCOME BY GROSS RENT AS A PERCENTAGE OF HOUSEHOLD INCOME IN THE PAST 12 MONTHS
-	//B25077	MEDIAN VALUE (DOLLARS)  OWNER OCCUPIED
-	//B25095	HOUSEHOLD INCOME BY SELECTED MONTHLY OWNER COSTS AS A PERCENTAGE OF HOUSEHOLD INCOME IN THE PAST 12 MONTHS
-
-
-	//State Calls
-	var B25002_st_url = genACSUrl("profile",curYr,'B25002',1,3,'state',fips_arr);
-	var B25004_st_url = genACSUrl("profile",curYr,'B25004',1,8,'state',fips_arr);
-	var B25005_st_url = genACSUrl("profile",curYr,'B25005',1,3,'state',fips_arr);
-	var B25010_st_url = genACSUrl("profile",curYr,'B25010',1,3,'state',fips_arr);
-	var B25032_st_url = genACSUrl("profile",curYr,'B25032',1,23,'state',fips_arr);
-	var B25033_st_url = genACSUrl("profile",curYr,'B25033',1,13,'state',fips_arr);
-	var B25037_st_url = genACSUrl("profile",curYr,'B25037',1,3,'state',fips_arr);
-	var B25064_st_url = genACSUrl("profile",curYr,'B25064',1,1,'state',fips_arr);
-	var B25074_st_url = genACSUrl("profile",curYr,'B25074',1,64,'state',fips_arr);
-	var B25077_st_url = genACSUrl("profile",curYr,'B25077',1,1,'state',fips_arr);
-	var B25095_st_url =  genACSUrl("profile",curYr,'B25095',1,73,'state',fips_arr);
-
-	// County Calls
-
-	var B25002_cty_url = genACSUrl("profile",curYr,'B25002',1,3,'county',fips_arr);
-	var B25004_cty_url = genACSUrl("profile",curYr,'B25004',1,8,'county',fips_arr);
-	var B25005_cty_url = genACSUrl("profile",curYr,'B25005',1,3,'county',fips_arr);
-	var B25010_cty_url = genACSUrl("profile",curYr,'B25010',1,3,'county',fips_arr);
-	var B25032_cty_url = genACSUrl("profile",curYr,'B25032',1,23,'county',fips_arr);
-	var B25033_cty_url = genACSUrl("profile",curYr,'B25033',1,13,'county',fips_arr);
-	var B25037_cty_url = genACSUrl("profile",curYr,'B25037',1,3,'county',fips_arr);
-	var B25064_cty_url = genACSUrl("profile",curYr,'B25064',1,1,'county',fips_arr);
-	var B25074_cty_url = genACSUrl("profile",curYr,'B25074',1,64,'county',fips_arr);
-	var B25077_cty_url = genACSUrl("profile",curYr,'B25077',1,1,'county',fips_arr);
-	var B25095_cty_url = genACSUrl("profile",curYr,'B25095',1,73,'county',fips_arr);
-
-	if(ctyList.includes(lvl)) {
-		var prom = [d3.json(hhage_90_st), d3.json(hhage_00_st), d3.json(hhage_10_st), d3.json(hhage_for_st), d3.json(B25002_st_url), 
-	   d3.json(B25004_st_url), d3.json(B25005_st_url), d3.json(B25010_st_url), d3.json(B25032_st_url), d3.json(B25033_st_url), 
-	   d3.json(B25037_st_url), d3.json(B25064_st_url), d3.json(B25074_st_url), d3.json(B25077_st_url), d3.json(B25095_st_url), 
-	   d3.json(hhage_90_cty), d3.json(hhage_00_cty), d3.json(hhage_10_cty), d3.json(hhage_for_cty), d3.json(B25002_cty_url), 
-	   d3.json(B25004_cty_url), d3.json(B25005_cty_url), d3.json(B25010_cty_url), d3.json(B25032_cty_url), d3.json(B25033_cty_url), 
-	   d3.json(B25037_cty_url), d3.json(B25064_cty_url), d3.json(B25074_cty_url), d3.json(B25077_cty_url), d3.json(B25095_cty_url)]
-	};
-
-	//Regional Calls
-	if(regList.includes(lvl)){
-		var B25002_reg_url = genACSUrl("profile",curYr,'B25002',1,3,'county',fips_arr);
-		var B25004_reg_url = genACSUrl("profile",curYr,'B25004',1,8,'county',fips_arr);
-		var B25005_reg_url = genACSUrl("profile",curYr,'B25005',1,3,'county',fips_arr);
-		var B25010_reg_url = genACSUrl("profile",curYr,'B25010',1,3,'county',fips_arr);
-		var B25032_reg_url = genACSUrl("profile",curYr,'B25032',1,23,'county',fips_arr);
-		var B25033_reg_url = genACSUrl("profile",curYr,'B25033',1,13,'county',fips_arr);
-		var B25037_reg_url = genACSUrl("profile",curYr,'B25037',1,3,'county',fips_arr);
-		var B25064_reg_url = genACSUrl("profile",curYr,'B25064',1,1,'county',fips_arr);
-		var B25074_reg_url = genACSUrl("profile",curYr,'B25074',1,64,'county',fips_arr);
-		var B25077_reg_url = genACSUrl("profile",curYr,'B25077',1,1,'county',fips_arr);
-		var B25095_reg_url = genACSUrl("profile",curYr,'B25095',1,73,'county',fips_arr);
-		 
-		var prom = [d3.json(hhage_90_st), d3.json(hhage_00_st), d3.json(hhage_10_st), d3.json(hhage_for_st), d3.json(B25002_st_url), 
-		   d3.json(B25004_st_url), d3.json(B25005_st_url), d3.json(B25010_st_url), d3.json(B25032_st_url), d3.json(B25033_st_url), 
-		   d3.json(B25037_st_url), d3.json(B25064_st_url), d3.json(B25074_st_url), d3.json(B25077_st_url), d3.json(B25095_st_url), 
-		   d3.json(hhage_90_reg), d3.json(hhage_00_reg), d3.json(hhage_10_reg), d3.json(hhage_for_reg), d3.json(B25002_reg_url), 
-		   d3.json(B25004_reg_url), d3.json(B25005_reg_url), d3.json(B25010_reg_url), d3.json(B25032_reg_url), d3.json(B25033_reg_url), 
-		   d3.json(B25037_reg_url), d3.json(B25064_reg_url), d3.json(B25074_reg_url), d3.json(B25077_reg_url), d3.json(B25095_reg_url)]
-	  };
-
-
-	//Municipal Calls
-	if(muniList.includes(lvl)){
-		var B25002_muni_url = genACSUrl("profile",curYr,'B25002',1,3,lvl,fipsArr);
-		var B25004_muni_url = genACSUrl("profile",curYr,'B25004',1,8,lvl,fipsArr);
-		var B25005_muni_url = genACSUrl("profile",curYr,'B25005',1,3,lvl,fipsArr);
-		var B25010_muni_url = genACSUrl("profile",curYr,'B25010',1,3,lvl,fipsArr);
-		var B25032_muni_url = genACSUrl("profile",curYr,'B25032',1,23,lvl,fipsArr);
-		var B25033_muni_url = genACSUrl("profile",curYr,'B25033',1,13,lvl,fipsArr);
-		var B25037_muni_url = genACSUrl("profile",curYr,'B25037',1,3,lvl,fipsArr);
-		var B25064_muni_url = genACSUrl("profile",curYr,'B25064',1,1,lvl,fipsArr);
-		var B25074_muni_url = genACSUrl("profile",curYr,'B25074',1,64,lvl,fipsArr);
-		var B25077_muni_url = genACSUrl("profile",curYr,'B25077',1,1,lvl,fipsArr);
-		var B25095_muni_url = genACSUrl("profile",curYr,'B25095',1,73,lvl,fipsArr);
-
-		 var prom = [d3.json(hhage_90_st),  d3.json(hhage_00_st),  d3.json(hhage_10_st),  d3.json(hhage_for_st),  d3.json(B25002_st_url),  
-		   d3.json(B25004_st_url),  d3.json(B25005_st_url),  d3.json(B25010_st_url),  d3.json(B25032_st_url),  d3.json(B25033_st_url),  
-		   d3.json(B25037_st_url),  d3.json(B25064_st_url),  d3.json(B25074_st_url),  d3.json(B25077_st_url),  d3.json(B25095_st_url),  
-		   d3.json(hhage_90_cty),  d3.json(hhage_00_cty),  d3.json(hhage_10_cty),  d3.json(hhage_for_cty),  d3.json(B25002_cty_url),  
-		   d3.json(B25004_cty_url),  d3.json(B25005_cty_url),  d3.json(B25010_cty_url),  d3.json(B25032_cty_url),  d3.json(B25033_cty_url),  
-		   d3.json(B25037_cty_url),  d3.json(B25064_cty_url),  d3.json(B25074_cty_url),  d3.json(B25077_cty_url),  d3.json(B25095_cty_url),  
-		   d3.json(B25002_muni_url),  d3.json(B25004_muni_url),  d3.json(B25005_muni_url),  d3.json(B25010_muni_url),  d3.json(B25032_muni_url),  
-		   d3.json(B25033_muni_url),  d3.json(B25037_muni_url),  d3.json(B25064_muni_url),  d3.json(B25074_muni_url),  d3.json(B25077_muni_url),  
-		   d3.json(B25095_muni_url)] 
-	}
-	proms = proms.concat(prom)
-	break;
-	} //switch
-}); //Promise Loop
-/*
-Promise.all(proms).then(data => {
-	Create outputArr
-	for each values in selVal, c
-	create object functions similar to the production Functions
-	Write to outputArr
-	Then wrie pdf document.
-*/
-}) //Initial promise
-
-
-}
-// genReport
