@@ -4443,60 +4443,86 @@ function genAgePyr(inData,level,DDsel,ageDiv, yrvalue){
 //genAgePyr  Generates age Pyramids for all geographies
 const fmt_date = d3.timeFormat("%B %d, %Y");
 
-var config = {responsive: true,
+
+var config = {responsive: false,
               displayModeBar: false};
      
-var fipsList = [], opt;
+var fipsList = [], ctyNames= [], opt;
 if(level == "Region") {
+
   var len = DDsel.options.length;
   for (var i = 0; i < len; i++) {
     opt = DDsel.options[i];
     if (opt.selected) {
       fipsList.push(+opt.value);
+	  ctyNames.push(opt.label)
     }
   }
 } else {
  fipsList = DDsel;
+ var ctyNames = [...new Set(inData.map(d => d.name))];
 }
 
 var year_data = [...new Set(inData.map(d => d.year))]; 
 var age_arr = [...new Set(inData.map(d => d.age_cat))];
-var ctyNames = [...new Set(inData.map(d => d.name))];
+
 
 //assigning main div
 
 
- var outdiv = document.getElementById(ageDiv);
- outdiv.innerHTML = "";      
-  var plotdiv = document.createElement('div');
-   plotdiv.id = 'pyramid-container';
-   plotdiv.className = 'pyramid-container';
-  outdiv.appendChild(plotdiv);
   
+     //Creating plotdivs this is based on the number of places selected
 
+var nrows = Math.ceil(fipsList.length/2)
+var nameArr = new Array(nrows)
+for(i = 0; i < nrows; i++){
+	nameArr[i] = new Array(2)
+}
+
+var rowassn = 0;
+var colassn = 0;
+for(i = 0.; i < fipsList.length; i++){
+	nameArr[rowassn][colassn] = ctyNames[i];
+	colassn = colassn + 1
+	if(i > 0 && i % 2 == 1){
+	 rowassn = rowassn + 1
+	 colassn = 0
+	}
+}
+
+debugger
+console.log(nameArr)
+
+ var plotdiv = document.createElement('div');
+ 
  var plot_array = [];  
- for(i= 0; i < fipsList.length; i++){
-    //Creating plotdiv
-  if(i < 3) {
-   var divID = "grid-item pyramid_1_" + (i + 1);
-     } else {
-  if(i < 6){
-  var divID = "grid-item pyramid_2_" + (i + 1); 
-  } else {
-   var divID = "grid-item pyramid_3_" + (i + 1);
-  }
-  };
-   
-  var plot_grid = document.createElement('div');
-  plot_grid.id = 'plotGrid'+i;
-  plot_grid.className = divID;
-  plotdiv.appendChild(plot_grid);
-  
- plot_array.push({'loc' : ctyNames[i],
- 'fName' : ctyNames[i] + " Age Pyramid.png",
- 'plot' : 'plotGrid'+i});
+ for(i= 0; i < nameArr.length; i++){
+	 var rowval = i + 1
+	 for(j = 0; j < nameArr[i].length; j++){
+	  if(nameArr[i][j] != null){
+	  var colval = j + 1
+	  var plotName = nameArr[i][j]
+	  
+	  //Write to plot_array
+		 plot_array.push({'loc' : plotName,
+						  'fName' : plotName + " Age Pyramid.png",
+						  'plot' : "plotGrid_" + rowval + "_" + colval
+						});
+						
+	 //Write to DOM
+	  var plot_grid = document.createElement('div');
+	  plot_grid.id = "plotGrid_"+ rowval + "_" + colval;
+	  plot_grid.className = "grid-item pyramid_"+ rowval + "_"+ colval;
+	  plotdiv.appendChild(plot_grid);
+     } //nameArr[i][j].length > 0
+	 } //j
  } //i
  
+ plotdiv.id = 'pyramid-container';
+ plotdiv.className = 'pyramid-container';
+ var outdiv = document.getElementById(ageDiv);
+ outdiv.innerHTML = "";    
+  outdiv.appendChild(plotdiv);
  
 var outData = [];
  if(level == "Municipality"){
@@ -4617,8 +4643,8 @@ for(j = 0; j < tick_val.length; j++){
  
  var pyr_layout = {
  title: "Age by Sex, " + year_data[0] + '<br>' + ctyNames[i],
-   width: 300,
-   height: 300, 
+   width: 200,
+   height: 200, 
    barmode :'overlay',
    bargap : 0.0,
    xaxis: {
@@ -4685,9 +4711,9 @@ for(j = 0; j < tick_val.length; j++){
  
 } else {
 
- for(i = 0; i < fipsList.length; i ++ ){
+ for(i = 0; i < plot_array.length; i ++ ){
 
- var outPlot = 'plotGrid'+i; 
+ var outPlot = plot_array[i].plot; 
     
   var pltData = inData.filter(d => d.fips == fipsList[i]);
   
@@ -4858,8 +4884,7 @@ function genAgeSetup(level, inData, pyrData, age_div0, age_div1, age_div2, age_d
  document.getElementById(age_div2).innerHTML = "";
  document.getElementById(age_div3).innerHTML = "";
  
-
-if(level == "Region") { 
+ if(level == "Region") { 
 var bkMarkArr = [{title : 'Population Estimates by Age', id : 'age01', srctxt : "State and Regional Single Year of Age Lookup", srclink : "https://coloradodemography.github.io/population/data/sya-regions/"},
 	{title: 'Population Forecasts by Age', id : 'age02', srctxt : "State and Regional Single Year of Age Lookup", srclink : "https://coloradodemography.github.io/population/data/sya-regions/"},
 	{title : 'Population Age Pyramids', id : 'age03', srctxt : "State and Regional Single Year of Age Lookup", srclink : "https://coloradodemography.github.io/population/data/sya-regions/"}
