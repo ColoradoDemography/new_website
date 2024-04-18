@@ -1141,7 +1141,7 @@ details main {
 .pyramid-container{
   display: grid;
   grid-template-rows:  0 auto; /* NEW */
-  grid-template-columns: 33% 33% 33%;
+  grid-template-columns: 30% 30% 40%;
   grid-gap: 1px;
   background-color: #7a853b; 
   padding: 1px;
