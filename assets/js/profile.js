@@ -4490,9 +4490,6 @@ for(i = 0.; i < fipsList.length; i++){
 	}
 }
 
-debugger
-console.log(nameArr)
-
  var plotdiv = document.createElement('div');
  
  var plot_array = [];  
@@ -4571,11 +4568,7 @@ if(!tick_pos.includes(tick_range[1])) {tick_pos.push(rnd_pct)}
 var tick_val = tick_neg.concat(tick_pos);
 var tick_text = [];
 for(j = 0; j < tick_val.length; j++){
-  if(tick_val[j] < 0) {
-   tick_text.push((tick_val[j] * -100) + "%");
-  } else {
-   tick_text.push((tick_val[j] * 100) + "%");
-  }
+   tick_text.push(fixNUMFMT(Math.abs(tick_val[j]),"pct"));
 }
 
  var pct_male_0 = year0.map(d => d.pct_malepopulation_e * -1);
@@ -4587,7 +4580,7 @@ for(j = 0; j < tick_val.length; j++){
   
  trace1 = {
    name: year_data[0], 
-   showlegend : true,
+   showlegend : false,
    type: 'bar', 
    x: pct_male_0,
    y: age_arr, 
@@ -4643,8 +4636,8 @@ for(j = 0; j < tick_val.length; j++){
  
  var pyr_layout = {
  title: "Age by Sex, " + year_data[0] + '<br>' + ctyNames[i],
-   width: 200,
-   height: 200, 
+   width: 600,
+   height: 400, 
    barmode :'overlay',
    bargap : 0.0,
    xaxis: {
@@ -4672,12 +4665,6 @@ for(j = 0; j < tick_val.length; j++){
   gridwidth: 2,
   linecolor: 'black',
   linewidth: 2,
-   },
-   legend : {
-	   orientation : 'h', 
-	   xanchor : "center", 
-	   x : 0, 
-	   y : 0
    },
   annotations : [
   {text :  'Men          Women' , 
@@ -4736,7 +4723,7 @@ for(j = 0; j < tick_val.length; j++){
     
  trace1 = {
    name: year_data[0], 
-   showlegend : true,
+   showlegend : false,
    type: 'bar', 
    x: pct_male_0,
    y: age_arr, 
@@ -4744,7 +4731,7 @@ for(j = 0; j < tick_val.length; j++){
    hovertemplate : '%{customdata}',
    hoverlabel : {namelength :0},
    marker: {
-  color : 'white',
+  color : 'lightblue',
   line: {
     opacity : 1,
     color: 'black',
@@ -4762,7 +4749,7 @@ for(j = 0; j < tick_val.length; j++){
    hovertemplate : '%{customdata}',
    hoverlabel : {namelength :0},
    marker: {
-  color : 'white',
+  color : 'lightblue',
   line: {
     opacity : 1,
     color: 'black',
@@ -4770,6 +4757,7 @@ for(j = 0; j < tick_val.length; j++){
    } }, 
    orientation: 'h'
  };
+ /*
  trace3 = {
    name: year_data[1], 
    showlegend : true,
@@ -4808,11 +4796,11 @@ for(j = 0; j < tick_val.length; j++){
     } }, 
    orientation: 'h'
  };
- 
- var pyr_data = [trace1, trace2, trace3, trace4];
+*/ 
+ var pyr_data = [trace1, trace2];
  
  var pyr_layout = {
- title: "Age by Sex, " + year_data[0] + ' and ' + year_data[1] + '<br>' + ctyNames[0],
+ title: "Age by Sex, " + year_data[0]  + '<br>' + ctyNames[0],
    width: 600,
    height: 400, 
    barmode :'overlay',
