@@ -4286,14 +4286,16 @@ var PlaceNames = [...new Set(pltData.map(d => d.name))];
 
 
  } //i
- 
+
 //Creating Source citation
 if(level == "Municipality"){
  var yrrange = (yrvalue - 4) + "-"+ yrvalue;
- var citation = 'U.S. Census Bureau. ' + yrrange + ' American Community Survey, 5-year data file. Table B01001. Print Date: ' +  fmt_date(new Date); 
+ var citation = 'U.S. Census Bureau. ' + yrrange + ' American Community Survey, 5-year data file. Table B01001.'; 
 } else {
- var citation = 'Data and Visualization by the Colorado State Demography Office.  Print Date: ' +  fmt_date(new Date);
+ var citation = 'Data and Visualization by the Colorado State Demography Office.';
 }
+ debugger;
+ console.log(citation)
 
 if(PlaceNames.length == 1){
   var PltTitle = "Age Estimates, " + year_data[0] + ": " + PlaceNames[0];
