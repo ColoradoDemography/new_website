@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<!-- LODES On the Map Application 4/2024 AB-->
+<html lang="en">
+
+<head>
+<title>Colorado Commuting Profile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
+<!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<!-- SDO CSS -->
+<link type="text/css" rel="stylesheet" href="../css/common.css" async=""> 
+<!-- adding d3.js  for data manipulation-->
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<!-- Adding Plotly.js for  charting -->
+
+<!-- Adding jquery and datatables for table production -->
+<script src="https://code.jquery.com/jquery-3.7.0.js" integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM=" crossorigin="anonymous"></script>
+ <script src="https://cdn.plot.ly/plotly-2.24.1.min.js" charset="utf-8"></script>
+ 
+<!-- Datatables -->
+<link href="https://cdn.datatables.net/v/dt/dt-1.13.5/b-2.4.1/datatables.min.css" rel="stylesheet"/>
+<script src="https://cdn.datatables.net/v/dt/dt-1.13.5/b-2.4.1/datatables.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+
+<!-- SDO suport functions, genSYA, insertHTML, -->
+<script type="text/javascript" src="../js/funct.js"></script>
+<script type="text/javascript" src="../js/lookup.js"></script>
+<!-- GoogleAnalytics Script -->
+<script defer src="../js/googleAnalytics.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W27DQ8VRCX"></script>
+<a href="#mainx" class="skip-main" tabindex='1'>Skip to main content</a>
+</head>
+<body>
+<div>
+<a href="https://demography.dola.colorado.gov/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt='State Demography Office Homepage'></a>
+</div>
+<div>
+<div w3-include-html="./navheader.html"></div>
+<!-- First Grid, linked images -->
+<div class="grid-container2">
+  <div class="grid-item panel2_1_1">
+		<div w3-include-html="./sdotitle.html"></div>  
+  </div>
+   <div class="grid-item app-panel_2_1" id="leftHand">
+	<div w3-include-html="./left_hand_index.html"></div>
+  </div> <!-- Grid  panel2_2_1 -->
+  <div class="grid-item app-panel_2_2">
+  <h1 class='h1_style' id='mainx' title='Colorado Commuting Profile' aria-label='Colorado Commuting Profile'>Colorado Commuting Profile</h1>
+  <h2 class='h2_style' title='Commuting Flows Dashboard' aria-label='Commuting Flows Dashboard'>Commuting Flows Dashboard</h2>
+   <p>
+   The following page shows commuting data from the <a href="https://onthemap.ces.census.gov/" target='_blank"
+         title='U.S. Census Brueau On the Map Application' aria-label='U.S. Census Brueau On the Map Application'>U.S. Census Brueau On the Map Application</a>
+  
+   </p>
+   <p>
+   This application uses data from the LEHD Origin-Destination Employment Statistics (LODES) dataset, showing where people work and where workers live, 
+   based on a selected Colorado County, Municipality or Census Designated Place (CDP). 
+   Employment patterns for broad industry categories are also available.
+
+   
+   </p>
+	<p>
+	See the <a href='https://lehd.ces.census.gov/applications/help/onthemap.html#!what_is_onthemap' target='_blank'
+	     title='On the Map Documenation' aria-label='On the Map Documentation'>On the Map Documentation</a> for more information.
+   <h3 class='h3_style' title='Instructions:' aria-label='Instructions:'>Instructions:</h3>
+   <ul>
+   <li style='color:black;'>Select the geography type and geography from the list below.</li> 
+   <li style='color:black;'>Click on the download icon on the left of each chart to download the chart, the underlying data, and links to the data source.</li>
+   </ul>
+   </p>
+   <p>
+   <i>To improve visibility of the charts only the top 20 residential ane work locations are shown.  
+   The entire, unsupressed, dataset can be downloaded by clicking ion the download button to the left of each chart.</i>
+   </p>
+   <p>
+   <i>This data visualization can only be viewed on a tablet or desktop.</i>
+   </p>
+   <br><br>
+  
+   <table style="border-collapse: collapse; border : none;">
+   <tr>
+	<td style="border : none; width: 25%;">
+	 <label class="entry_text" for='geo-dropdown'>Select Geography:</label> 
+	 </td>
+	 <td style="border : none; width: 25%;">
+	 <label class="entry_text" for='loc-dropdown'>Select Location:</label> 
+	 </td>
+	 <td style="border : none; width: 25%;">
+	 <label class="entry_text" for='sector-dropdown'>Select Job Sector:</label> 
+	 </td>
+	 <td style="border : none; width: 25%;">
+	 </td>
+	</tr>
+	<tr>
+	<td style="border : none; width: 25%;">
+	<select class="geo-dropdown" id="geo-dropdown">
+		<option value='county' selected="selected">County</option>
+		<option value='municipality'>Municipality</option>
+		<option value='place'>Census Designated Place (CDP)</option>
+	</select>
+	</td>
+	<td style="border : none; width: 25%;">
+	<select class="loc-dropdown" id="loc-dropdown">
+    </select>
+	</td>
+	<td style="border : none; width: 25%;">
+	<select class="sector-dropdown" id="sector-dropdown">
+		<option value='total' selected="selected">Total Jobs</option>
+		<option value='goods'>Goods Jobs</option>
+		<option value='trade'>Trade Jobs</option>
+		<option value='services'>Service Jobs</option>
+	</select>
+	</td>
+	<td style="border : none; width: 25%;">
+	  <button class='databutton' id="submit">Generate Profile</button>
+	</td>
+	</tr>
+	</table>
+  <div class="grid-item app-panel_3_2">
+      <div class="dropdown AClass">
+		  <button class="dropbtn"  id="barchart" aria-label='Bar Chart Download Button'><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+		  <div class="dropdown-content">
+		  	<ul class='dd-list'>
+			<li style='color:black;'><a href='#' id='barchart_csv'>Download Data (CSV)</a></li>
+			<li style='color:black;'><a href='#' id='barchart_png'>Download Image (PNG)</a></li>
+			<li style='color:black;'><a href='https://onthemap.ces.census.gov/' id='barchart_src' target='_blank'>OnTheMap Homepage</a></li>
+			</ul>
+		  </div>
+	  </div>
+	 <div id="barchart_output"></div>
+  </div>
+  <div class="grid-item app-panel_4_2">
+	<div class="dropdown AClass">
+		<button class="dropbtn" id="sankey" aria-label='Commuting Flow Diagram' ><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+	<div class="dropdown-content">
+	    <ul class='dd-list'>
+		<li style='color:black;'><a href="#" id='sankey_csv'>Download Data (CSV)</a></li>
+		<li style='color:black;'><a href='#' id='sankey_png'>Download Image (PNG)</a></li>
+			<li style='color:black;'><a href='https://onthemap.ces.census.gov/' id='sankey_src' target='_blank'>OnTheMap Homepage</a></li>
+		</ul>
+	 </div>
+	</div>
+    <div id="sankey_output"></div>
+  </div>
+  <div class="grid-item app-panel_5_2">
+  </div>
+
+</div>  <!-- End of Grid -->
+
+
+<script>
+//Setting HTML include and Accordion
+includeHTML(); 
+
+/* Populate County Dropdown */
+
+popDropdown('county','loc-dropdown','profile')
+var urlstr = "https://gis.dola.colorado.gov/lookups/componentYRS";
+
+d3.json(urlstr).then(function(yeardata){
+    var maxest = yeardata.filter(function(d){return d.datatype == 'Estimate'});
+	var yrsList = maxest.map(function(d){return d.year;});
+    var yrvalue = d3.max(yrsList); 
+	
+/* this current version pulls data from 2021 LODES data, still considering if future versions will allow year selection */
+d3.select("#geo-dropdown").on("change", function(d,i) {
+	  var selectgeo = d3.select("#geo-dropdown").property('value');
+	  if(selectgeo == 'county'){
+		popDropdown(selectgeo,'loc-dropdown','profile')
+	  } else {
+	  	popDropdown(selectgeo,'loc-dropdown','')
+	  }
+})
+
+d3.select("#submit").on("click", function(d,i) {
+	var selectgeo = d3.select("#geo-dropdown").property('value');
+	var selectloc = d3.select("#loc-dropdown").property('value');
+	var selectname = d3.select("#loc-dropdown option:checked").text();
+	var selectsector = d3.select("#sector-dropdown").property('value');
+	/* this current version pulls data from 2021 LODES data, still considering if future versions will allow year selection */
+	var CHART0 = document.getElementById("barchart_output");
+	var CHART1 = document.getElementById("sankey_output");
+
+	genLODES(selectgeo, selectloc, selectname, 2021, selectsector,CHART0, CHART1)
+})
+
+}); //end of maximum year value
+</script>
+
+</body>
+</html> 
