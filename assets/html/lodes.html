@@ -54,11 +54,22 @@
   
    </p>
    <p>
-   This application uses data from the LEHD Origin-Destination Employment Statistics (LODES) dataset, showing where people work and where workers live, 
+   This application uses data from the LEHD Origin-Destination Employment Statistics (LODES) dataset, showing where residents work and where workers live, 
    based on a selected Colorado County, Municipality or Census Designated Place (CDP). 
    Employment patterns for broad industry categories are also available.
-
-   
+   </p>
+   <p>
+   Detailed data is shown for these geographies:
+   <ul>
+   <li>Colorado</li>
+   <li>Arizona,</li>
+   <li>Kansas,</li>
+   <li>Nebraska,</li>
+   <li>New Mexico,</li>
+   <li>Oklahoma,</li>
+   <li>Wyoming, and</li>
+   <li>Utah</li>
+   </ul>
    </p>
 	<p>
 	See the <a href='https://lehd.ces.census.gov/applications/help/onthemap.html#!what_is_onthemap' target='_blank'
@@ -163,6 +174,12 @@ d3.json(urlstr).then(function(yeardata){
 	var yrsList = maxest.map(function(d){return d.year;});
     var yrvalue = d3.max(yrsList); 
 	
+/* Hide buttons */
+var bar_btn = document.getElementById('barchart');
+var sankey_btn = document.getElementById('sankey');
+bar_btn.style.visibility = 'hidden';
+sankey_btn.style.visibility = 'hidden';
+	
 /* this current version pulls data from 2021 LODES data, still considering if future versions will allow year selection */
 d3.select("#geo-dropdown").on("change", function(d,i) {
 	  var selectgeo = d3.select("#geo-dropdown").property('value');
@@ -182,6 +199,8 @@ d3.select("#submit").on("click", function(d,i) {
 	var CHART0 = document.getElementById("barchart_output");
 	var CHART1 = document.getElementById("sankey_output");
 
+	bar_btn.style.visibility = "visible"
+	sankey_btn.style.visibility = "visible"
 	genLODES(selectgeo, selectloc, selectname, 2021, selectsector,CHART0, CHART1)
 })
 
