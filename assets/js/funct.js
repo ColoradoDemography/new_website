@@ -654,6 +654,62 @@ return(regionNum);
 }; 
 // RegionNum
 
+function stateName(st){
+//stateName  Returns a State name from the numeric fips code
+if(st =='01') {state = 'Alabama'};
+if(st =='02') {state = 'Alaska'};
+if(st =='04') {state = 'Arizona'};
+if(st =='05') {state = 'Arkansas'};
+if(st =='06') {state = 'California'};
+if(st =='08') {state = 'Colorado'};
+if(st =='09') {state = 'Connecticut'};
+if(st =='10') {state = 'Delaware'};
+if(st =='11') {state = 'District Of Columbia'};
+if(st =='12') {state = 'Florida'};
+if(st =='13') {state = 'Georgia'};
+if(st =='15') {state = 'Hawaii'};
+if(st =='16') {state = 'Idaho'};
+if(st =='17') {state = 'Illinois'};
+if(st =='18') {state = 'Indiana'};
+if(st =='19') {state = 'Iowa'};
+if(st =='20') {state = 'Kansas'};
+if(st =='21') {state = 'Kentucky'};
+if(st =='22') {state = 'Louisiana'};
+if(st =='23') {state = 'Maine'};
+if(st =='24') {state = 'Maryland'};
+if(st =='25') {state = 'Massachusetts'};
+if(st =='26') {state = 'Michigan'};
+if(st =='27') {state = 'Minnesota'};
+if(st =='28') {state = 'Mississippi'};
+if(st =='29') {state = 'Missouri'};
+if(st =='30') {state = 'Montana'};
+if(st =='31') {state = 'Nebraska'};
+if(st =='32') {state = 'Nevada'};
+if(st =='33') {state = 'New Hampshire'};
+if(st =='34') {state = 'New Jersey'};
+if(st =='35') {state = 'New Mexico'};
+if(st =='36') {state = 'New York'};
+if(st =='37') {state = 'North Carolina'};
+if(st =='38') {state = 'North Dakota'};
+if(st =='39') {state = 'Ohio'};
+if(st =='40') {state = 'Oklahoma'};
+if(st =='41') {state = 'Oregon'};
+if(st =='42') {state = 'Pennsylvania'};
+if(st =='44') {state = 'Rhode Island'};
+if(st =='45') {state = 'South Carolina'};
+if(st =='46') {state = 'South Dakota'};
+if(st =='47') {state = 'Tennessee'};
+if(st =='48') {state = 'Texas'};
+if(st =='49') {state = 'Utah'};
+if(st =='50') {state = 'Vermont'};
+if(st =='51') {state = 'Virginia'};
+if(st =='53') {state = 'Washington'};
+if(st =='54') {state = 'West Virginia'};
+if(st =='55') {state = 'Wisconsin'};
+if(st =='56') {state = 'Wyoming'};
+return state
+}
+//stateName
 
 function regionName(reg) {
 //RegionName takes the region number and returns the name
@@ -2299,6 +2355,12 @@ function genFilename(outname, type, ext, yr) {
 		case 'outflow' :
 			var fileName = outname + " ACS Out Migration Flows." + ext
 		break;
+		case 'LODESBAR' :
+			var fileName = outname + " LODES Commuting Summary." + ext
+		break;
+		case 'LODESFLOW' :
+			var fileName = outname + " LODES Commuting Flows." + ext
+		break;
 		} //switch
 		
 	
@@ -2405,6 +2467,7 @@ function exportToPng(cname, type, graphDiv, yr){
 	    case 'netflow':
 		case 'inflow' : 
 		case 'outflow':
+		case 'LODESFLOW' :
 		{
 		    Plotly.toImage(graphDiv, { format: 'png', width: 900, height: 900}).then(function (dataURL) {
 				var a = document.createElement('a');
@@ -2589,8 +2652,17 @@ rows.append('td')
 function genCOC(fips,yrvalue){
 //genCOC generates components of change data for home page table
 	var fmt_pct = d3.format(".2%")
-	var fmt_comma = d3.format(",");
-// Extracts and summarizes COC data for output table
+//Add Header
+       CHART0.innerHTML = ''
+        var titlehead = document.createElement('h3');
+		    titlehead.innerHTML = venn_title
+			titlehead.id = 'venn_title'
+			titlehead.className = 'h3_style'
+		var titlediv = document.createElement('div')
+		titlediv.appendChild(titlehead)
+		CHART0.appendChild(titlediv)
+
+const svg = d3.select(CHART0).append('svg').attr('width', 600).attr('height', 300);// Extracts and summarizes COC data for output table
 //Specify fips_list
 var fips_list = parseInt(fips); 
    
@@ -6474,19 +6546,19 @@ var colorArr = ["blue","orange","green","gray"]
 //Chart Title
  if((yr_arr.length == 1) && (fips_Arr.length == 1)){
 	 var NetMigTitle = "Net Migration by Age -- Net Migrants " + datafilt[0].county + " " + yr_arr[0] + " to " + (parseInt(yr_arr[0]) + 10).toString();
-	 var NetMigRateTitle = "Net Migration by Age -- Net Migration Rate<br>" + datafilt[0].county + " " +yr_arr[0] + " to " + (parseInt(yr_arr[0]) + 10).toString()+ "<br>per 100 Population";
+	 var NetMigRateTitle = "Net Migration by Age -- Net Migration Rate " + datafilt[0].county + " " +yr_arr[0] + " to " + (parseInt(yr_arr[0]) + 10).toString()+ " per 100 Population";
  } 
 if((yr_arr.length > 1) && (fips_Arr.length == 1)){
 	 var NetMigTitle = "Net Migration by Age -- Net Migrants " + datafilt[0].county;
-	 var NetMigRateTitle = "Net Migration by Age -- Net Migration Rate<br>" + datafilt[0].county +"<br>per 100 Population";
+	 var NetMigRateTitle = "Net Migration by Age -- Net Migration Rate " + datafilt[0].county +" per 100 Population";
  } 
 if((yr_arr.length == 1) && (fips_Arr.length > 1)){
 	 var NetMigTitle = "Net Migration by Age -- Net Migrants " + " " + yr_arr[0] + " to " + (parseInt(yr_arr[0]) + 10).toString();
-	 var NetMigRateTitle = "Net Migration by Age -- Net Migration Rate<br>" + yr_arr[0] + " to " + (parseInt(yr_arr[0]) + 10).toString()+ "<br>per 100 Population";
+	 var NetMigRateTitle = "Net Migration by Age -- Net Migration Rate " + yr_arr[0] + " to " + (parseInt(yr_arr[0]) + 10).toString()+ " per 100 Population";
 }
 if((yr_arr.length > 1) && (fips_Arr.length > 1)){
 	 var NetMigTitle = "Net Migration by Age -- Net Migrants ";
-	 var NetMigRateTitle = "Net Migration by Age -- Net Migration Rate<br>per 100 Population";
+	 var NetMigRateTitle = "Net Migration by Age -- Net Migration Rate per 100 Population";
 }
  
 //Chart Objects 
@@ -6515,7 +6587,7 @@ if(chart == "bar"){
                x: age_arr,
                y : netmig,
 			   name : yr_title,
-			   name: nameVal + "<br>  " + yr_title,
+			   name: nameVal + "   " + yr_title,
 			   type : 'bar', 
 			   marker :{
 				color : colorArr[a],
@@ -6528,7 +6600,7 @@ if(chart == "bar"){
 	var ind_traceRT = {
                x: age_arr,
                y : migrate,
-			   name: nameVal + "<br>  " + yr_title,
+			   name: nameVal + "   " + yr_title,
 			   type : 'bar', 
 			   marker :{
 				color : colorArr[a],
@@ -6545,7 +6617,7 @@ if(chart == "line"){
                y : netmig,
 			   name : yr_title,
 			   mode: 'lines+markers',
-			   name: nameVal + "<br>  " + yr_title,
+			   name: nameVal + "   " + yr_title,
 			   line: {
                  dash: lineArr[i],
                  width: 3,
@@ -6558,7 +6630,7 @@ if(chart == "line"){
 	var ind_traceRT = {
                x: age_arr,
                y : migrate,
-			   name: nameVal + "<br>  " + yr_title,
+			   name: nameVal + "   " + yr_title,
 			   mode : 'lines+markers',
 			   line: {
                  dash: lineArr[i],
@@ -6740,11 +6812,11 @@ if(ctyName.length == 1) {
    
 //Creating second line of title
 if(ageSeries == "ageall"){	   
-	 var titStrTot = titStr + "<br>Total Population Counts";
-	 var  titStrRate = titStr + "<br>Total Population Rate per 100";
+	 var titStrTot = titStr + " Total Population Counts";
+	 var  titStrRate = titStr + " Total Population Rate per 100";
 	} else {
-		var titStrTot = titStr + "<br>Working Age Population Counts (Age 18-64)";
-		var titStrRate = titStr + "<br>Working Age Population Rate per 100 (Age 18-64)";
+		var titStrTot = titStr + " Working Age Population Counts (Age 18-64)";
+		var titStrRate = titStr + " Working Age Population Rate per 100 (Age 18-64)";
 	};
 
 
@@ -7389,7 +7461,7 @@ var ch_layout = [];
 
 if(varType == "hhold") {
 for(i = 0; i < hh_arr.length; i++){
-	var tit_str = "Projected Households by Age and Household Type " + ctyName + " 2010 to 2050<br>Household Type: " + hh_arr[i];
+	var tit_str = "Projected Households by Age and Household Type " + ctyName + " 2010 to 2050 Household Type: " + hh_arr[i];
 	if(seriesType == "num") {
 		tit_str = tit_str + " Number of Households";
 		y_title = "Households";
@@ -7436,7 +7508,7 @@ ch_layout.push(layout);
 };
 } else {
 	for(i = 0; i < age_arr.length; i++){
-	var tit_str = "Projected Households by Household Type and Age " + ctyName + " 2010 to 2050<br> Age Group: " + age_arr[i];
+	var tit_str = "Projected Households by Household Type and Age " + ctyName + " 2010 to 2050  Age Group: " + age_arr[i];
 	if(seriesType == "num") {
 		tit_str = tit_str + " Number of Households";
 		y_title = "Households";
@@ -7689,14 +7761,14 @@ d3.json(huURL).then(data => {
 			tr_occ_hu.push(out_sort[j].occupiedhu);
 			tr_occ_lab.push('Occupied Housing Units, ' + out_sort[j].year + ': ' + fmt_comma(out_sort[j].occupiedhu));
 			tr_vac_hu.push(out_sort[j].vacanthu);
-			tr_occ_pct_lab.push('Occupancy Rate, ' + out_sort[j].year + ': ' + fmt_pct(out_sort[j].pct_occ) + '<br>Occupied Housing Units: ' + fmt_comma(out_sort[j].occupiedhu));
-			tr_vac_pct_lab.push('Vacancy Rate, ' + out_sort[j].year + ': ' + fmt_pct(out_sort[j].pct_vac) + '<br>Vacant Housing Units: ' + fmt_comma(out_sort[j].vacanthu));
+			tr_occ_pct_lab.push('Occupancy Rate, ' + out_sort[j].year + ': ' + fmt_pct(out_sort[j].pct_occ) + ' Occupied Housing Units: ' + fmt_comma(out_sort[j].occupiedhu));
+			tr_vac_pct_lab.push('Vacancy Rate, ' + out_sort[j].year + ': ' + fmt_pct(out_sort[j].pct_vac) + ' Vacant Housing Units: ' + fmt_comma(out_sort[j].vacanthu));
  		  if(j > 0){
 			 yty.push(out_sort[j].year);
 			 tr_tot_yty.push(out_sort[j].totalhu - out_sort[j-1].totalhu);
-			 tr_tot_yty_lab.push('Year over Year Difference<br>Total Housing Units ' + out_sort[j-1].year + " to " + out_sort[j].year + ': ' + fmt_comma(out_sort[j].totalhu - out_sort[j-1].totalhu));
+			 tr_tot_yty_lab.push('Year over Year Difference Total Housing Units ' + out_sort[j-1].year + " to " + out_sort[j].year + ': ' + fmt_comma(out_sort[j].totalhu - out_sort[j-1].totalhu));
 	         tr_occ_yty.push(out_sort[j].occupiedhu - out_sort[j-1].occupiedhu);
-			 tr_occ_yty_lab.push('Year over Year Difference<br>Occupied Housing Units ' + out_sort[j-1].year + " to " + out_sort[j].year + ': ' + fmt_comma(out_sort[j].occupiedhu - out_sort[j-1].occupiedhu));	         
+			 tr_occ_yty_lab.push('Year over Year Difference Occupied Housing Units ' + out_sort[j-1].year + " to " + out_sort[j].year + ': ' + fmt_comma(out_sort[j].occupiedhu - out_sort[j-1].occupiedhu));	         
 		     yty_data.push({
 				 'fips' : out_sort[j].fips, 
 			     'name' : out_sort[j].name, 
@@ -7957,16 +8029,15 @@ function genFLOWYR(inYR){
 
 
 function parsePhrase (phrase){
-//genFLOWYR parsePhrase returns an adjusted total from the summary record
-
+//genFLOWYR parsePhrase returns an adjusted total from the summary record  removes comma
 	var outphrase = phrase.split(" ")
 	var outval = parseInt(outphrase[3].replaceAll(",",""))
 	return(outval)
 }
 //parsePhrase
 
-function supressData(inData, fips, type){
-// genFLOWYR supressData compresses data sets to have a maximum of 35 entires (20 px per entry in a chart with 700 px) OR entry with 10 or fewer movers
+function supressData(inData, fips, geo_name, type){
+// genFLOWYR and genLODSS supressData compresses data sets to have a maximum of 35 entires (20 px per entry in a chart with 700 px) OR entry with 10 or fewer movers
 
 	var fmt_comma = d3.format(",");
 	var outname = countyName(parseInt(fips))
@@ -8130,6 +8201,94 @@ function supressData(inData, fips, type){
 		var outdata = outfin;
 		break;
 	} //out
+	case "lodes" : {
+ 		  var posdata = inData.filter(d => d.value >= 0)
+          var possort = posdata.sort(function(a, b){return d3.descending(a['value'], b['value']); })
+		  var posvalue = 0;
+		  var posfin = [];
+          var posphrase = ""
+          if(posdata.length >= 20){
+		  for(i = 0; i < 20; i++) {  //the individual records output
+				  posfin[i] = possort[i];
+				  posvalue = possort[i].value
+			 }
+			 var posfin2 = posfin.filter(d => d.value != posvalue)
+			 var possort2 = possort.filter(d =>  d.value <= posvalue)
+			 
+			 //summing up
+			 var poscnt = 0;
+		     var posmax = 0;
+			 possort2.forEach(d =>{
+				      poscnt++
+				      posmax =  posmax + d.value;
+			 })
+			  if(poscnt == 1){
+				var posphrase = fmt_comma(poscnt) + ' location with ' + fmt_comma(posmax)+ ' workers';
+				} else {
+				  var posphrase = fmt_comma(poscnt) + ' locations with ' + fmt_comma(posmax)+ ' workers'
+			  }  
+
+
+		//adding record for supression
+		 if(poscnt > 0 && posmax > 0){
+			  posfin2.push({
+				"residence_location" : posphrase.length > 0 ? posphrase : "",
+				"work_location" : geo_name,
+			  "value" : posmax})
+			  }
+		  }
+		  
+ 		  var negdata = inData.filter(d => d.value < 0)
+          var negsort = negdata.sort(function(a, b){return d3.ascending(a['value'], b['value']); })
+		  
+		  var negvalue = 0;
+		  var negfin = [];
+          var negphrase = ""
+          if(negdata.length >= 20){
+		  for(i = 0; i < 20; i++) {  //the individual records output
+				  negfin[i] = negsort[i];
+				  negvalue = negsort[i].value
+			 }
+			 var negfin2 = negfin.filter(d => d.value != negvalue)
+			 var negsort2 = negsort.filter(d =>  d.value <= negvalue)
+			 
+			 //summing up
+			 var negcnt = 0;
+		     var negmax = 0;
+			 negsort2.forEach(d =>{
+				      negcnt++
+				      negmax =  negmax + Math.abs(d.value);
+			 })
+			  if(negcnt == 1){
+				var negphrase = fmt_comma(negcnt) + ' location with ' + fmt_comma(negmax)+ ' workers';
+				} else {
+				  var negphrase = fmt_comma(negcnt) + ' locations with ' + fmt_comma(negmax)+ ' workers'
+			  }  
+			 
+
+		//adding record for supression
+		 if(negcnt > 0 && negmax > 0){
+			  negfin2.push({
+				"residence_location" : geo_name,
+				"work_location" : negphrase.length > 0 ? negphrase : "",
+			  "value" : (negmax * -1)})
+			  }
+		  }
+
+		if(posdata.length >= 25 && negdata.length >= 25) {
+		     var outdata = posfin2.concat(negfin2);
+		} 
+		if(posdata.length >= 25 && negdata.length < 25) {
+		     var outdata = posfin2.concat(negdata);
+		} 
+		if(posdata.length < 25 && negdata.length >= 25) {
+		     var outdata = posdata.concat(negfin2);
+		} 
+		if(posdata.length < 25 && negdata.length < 25) {
+		     var outdata = inData;
+		} 
+		break;
+	} //lodes
 	} //switch
 return(outdata)
 } 
@@ -8154,7 +8313,7 @@ function genFLOWS(fips, name, yearval){
 	var titleVal_out = plname + " Out Migration " +  (yearval - 4) + "-" + yearval;
 	var titleVal_in = plname + " In Migration " + (yearval - 4) + "-" + yearval;
 	var citStr = "U.S. Census Bureau ("+ citval + ") County to County Migration Flows " + (yearval - 4) + "-" + yearval +
-	           "<br>Print Date: "+ fmt_date(new Date);
+	           " Print Date: "+ fmt_date(new Date);
 
 	var flowcall = "/acs/flows?get=GEOID1,GEOID2,FULL1_NAME,FULL2_NAME,MOVEDIN,MOVEDIN_M,MOVEDOUT,MOVEDOUT_M,MOVEDNET,MOVEDNET_M"
 	var censKey = '08fe07c2a7bf781b7771d7cccb264fe7ff8965ce'
@@ -8281,21 +8440,22 @@ if(fips == "000"){
   
 	var outchartun = instate_sum.concat(bindata);
 }
-var outchart_net = supressData(outchartun, fips, "net")
-var outchart_in = supressData(outchartun, fips, "in")
-var outchart_out = supressData(outchartun, fips, "out")
+var outchart_net = supressData(outchartun, fips, "", "net")
+var outchart_in = supressData(outchartun, fips, "", "in")
+var outchart_out = supressData(outchartun, fips, "", "out")
 
 // Creating Nodeslist
+
 var nodeslist_net = [];
 outchart_net.forEach(obj => { 
-	nodeslist_net.push({'location1' : obj.NAME1, 'location2' : obj.NAME2,  'value' : obj.MOVEDNET_EST})
+	nodeslist_net.push({'residence_location' : obj.NAME1, 'work_location' : obj.NAME2,  'value' : obj.MOVEDNET_EST})
 })
 
 var labarr_net = [];
-//labarr_net.push(nodeslist_net[0].location1);
+//labarr_net.push(nodeslist_net[0].residence_location);
 labarr_net.push("");
 for(i = 0; i < nodeslist_net.length; i++){
-	labarr_net.push(nodeslist_net[i].location2);
+	labarr_net.push(nodeslist_net[i].work_location);
 }
 		
 
@@ -8319,47 +8479,46 @@ var y_net_neg = 0.12;
 
 // Prepping _net migration data
 
-
 for(i = 0; i < nodeslist_net.length;i++){
 		if(nodeslist_net[i].value < 0) {
-			nodeslist_net[i].src = labarr_net.indexOf(nodeslist_net[i].location1)
-			nodeslist_net[i].tgt = labarr_net.indexOf(nodeslist_net[i].location2)
+			nodeslist_net[i].src = labarr_net.indexOf(nodeslist_net[i].residence_location)
+			nodeslist_net[i].tgt = labarr_net.indexOf(nodeslist_net[i].work_location)
 			nodeslist_net[i].val = Math.abs(nodeslist_net[i].value)
-			if(nodeslist_net[i].location2.includes("movers")){
-				nodeslist_net[i].lablink = nodeslist_net[i].location2;
+			if(nodeslist_net[i].work_location.includes("movers")){
+				nodeslist_net[i].lablink = nodeslist_net[i].work_location;
 			} else {
-				nodeslist_net[i].lablink = nodeslist_net[i].location1 + " to " + nodeslist_net[i].location2 + ": " + fmt_comma(Math.abs(nodeslist_net[i].value));	
+				nodeslist_net[i].lablink = nodeslist_net[i].residence_location + " to " + nodeslist_net[i].work_location + ": " + fmt_comma(Math.abs(nodeslist_net[i].value));	
 			}
 			nodeslist_net[i].xpos =  0.9;
 			nodeslist_net[i].labposx = 0.95;
 			nodeslist_net[i].labposy = 1 - parseFloat(y_net_neg.toFixed(3));
-			nodeslist_net[i].lab = nodeslist_net[i].location2;
+			nodeslist_net[i].lab = nodeslist_net[i].work_location;
 			nodeslist_net[i].ypos =  parseFloat(y_net_neg.toFixed(3));
-			if(nodeslist_net[i].location2.includes("movers")){
-				total_neg_netmig = total_neg_netmig + Math.abs(parsePhrase(nodeslist_net[i].location2));
+			if(nodeslist_net[i].work_location.includes("movers")){
+				total_neg_netmig = total_neg_netmig + Math.abs(parsePhrase(nodeslist_net[i].work_location));
 			} else {
 			     total_neg_netmig = total_neg_netmig + Math.abs(nodeslist_net[i].value);
 			}
 			y_net_neg = y_net_neg + incr;
 		} else {
-			nodeslist_net[i].src = labarr_net.indexOf(nodeslist_net[i].location2)
-			nodeslist_net[i].tgt = labarr_net.indexOf(nodeslist_net[i].location1)
+			nodeslist_net[i].src = labarr_net.indexOf(nodeslist_net[i].work_location)
+			nodeslist_net[i].tgt = labarr_net.indexOf(nodeslist_net[i].residence_location)
 			nodeslist_net[i].val = Math.abs(nodeslist_net[i].value)
 
 			
-			if(nodeslist_net[i].location2.includes("movers")){
-				nodeslist_net[i].lablink = nodeslist_net[i].location2;
+			if(nodeslist_net[i].work_location.includes("movers")){
+				nodeslist_net[i].lablink = nodeslist_net[i].work_location;
 			} else {
-				nodeslist_net[i].lablink = nodeslist_net[i].location2 + " to " + nodeslist_net[i].location1 + ": " + fmt_comma(Math.abs(nodeslist_net[i].value));	
+				nodeslist_net[i].lablink = nodeslist_net[i].work_location + " to " + nodeslist_net[i].residence_location + ": " + fmt_comma(Math.abs(nodeslist_net[i].value));	
 			}
 			nodeslist_net[i].xpos =  0.1;
 			nodeslist_net[i].labposx = -0.05;
 			nodeslist_net[i].labposy = 1 - parseFloat(y_net_neg.toFixed(3));
-			nodeslist_net[i].lab = nodeslist_net[i].location2;
-			nodeslist_net[i].lab = nodeslist_net[i].location2;
+			nodeslist_net[i].lab = nodeslist_net[i].work_location;
+			nodeslist_net[i].lab = nodeslist_net[i].work_location;
 			nodeslist_net[i].ypos =  parseFloat(y_net_pos.toFixed(3));
-			if(nodeslist_net[i].location2.includes("movers")){
-				total_pos_netmig = total_pos_netmig + parsePhrase(nodeslist_net[i].location2);
+			if(nodeslist_net[i].work_location.includes("movers")){
+				total_pos_netmig = total_pos_netmig + parsePhrase(nodeslist_net[i].work_location);
 			} else {
 			     total_pos_netmig = total_pos_netmig + nodeslist_net[i].value;
 			}
@@ -8369,8 +8528,8 @@ for(i = 0; i < nodeslist_net.length;i++){
 		if(nodeslist_net[i].src == -1) { nodeslist_net[i].src = 0}
 } //i
 var nodes_1 = []
-nodes_1.push({"location1" : countyName(parseInt(fips)),
-		"location2" : countyName(parseInt(fips)),
+nodes_1.push({"residence_location" : countyName(parseInt(fips)),
+		"work_location" : countyName(parseInt(fips)),
 		"value" : 0,
 		"src" :0,
 		"tgt" : 0,
@@ -8468,13 +8627,13 @@ annotations : [
 // Prepping in migration data
 var nodeslist_in = [];
 outchart_in.forEach(obj => { 
-	nodeslist_in.push({'location1' : obj.NAME1, 'location2' : obj.NAME2,  'value' : obj.MOVEDIN_EST})
+	nodeslist_in.push({'residence_location' : obj.NAME1, 'work_location' : obj.NAME2,  'value' : obj.MOVEDIN_EST})
 })
 
 var labarr_in = [];
 labarr_in.push("");
 for(i = 0; i < nodeslist_in.length; i++){
-	labarr_in.push(nodeslist_in[i].location2);
+	labarr_in.push(nodeslist_in[i].work_location);
 }
 		
 	var inc = 1/nodeslist_in.length;
@@ -8489,19 +8648,19 @@ var y_in_pos = 0.1;
 
 // Prepping _in migration data
 for(i = 0; i < nodeslist_in.length;i++){
-			nodeslist_in[i].src = labarr_in.indexOf(nodeslist_in[i].location2)
-			nodeslist_in[i].tgt = labarr_in.indexOf(nodeslist_in[i].location1)
+			nodeslist_in[i].src = labarr_in.indexOf(nodeslist_in[i].work_location)
+			nodeslist_in[i].tgt = labarr_in.indexOf(nodeslist_in[i].residence_location)
 			nodeslist_in[i].val = Math.abs(nodeslist_in[i].value)
-			if(nodeslist_in[i].location2.includes("movers")){
-				nodeslist_in[i].lablink = nodeslist_in[i].location2;
+			if(nodeslist_in[i].work_location.includes("movers")){
+				nodeslist_in[i].lablink = nodeslist_in[i].work_location;
 			} else {
-				nodeslist_in[i].lablink = nodeslist_in[i].location2 + " to " + nodeslist_in[i].location1 + ": " + fmt_comma(Math.abs(nodeslist_in[i].value));	
+				nodeslist_in[i].lablink = nodeslist_in[i].work_location + " to " + nodeslist_in[i].residence_location + ": " + fmt_comma(Math.abs(nodeslist_in[i].value));	
 			}			
 			nodeslist_in[i].xpos =  0.1;
 			nodeslist_in[i].ypos =  parseFloat(y_in_pos.toFixed(3));
-			nodeslist_in[i].lab = nodeslist_in[i].location2
-			if(nodeslist_in[i].location2.includes("movers")){
-				total_pos_inmig = total_pos_inmig + parsePhrase(nodeslist_in[i].location2);
+			nodeslist_in[i].lab = nodeslist_in[i].work_location
+			if(nodeslist_in[i].work_location.includes("movers")){
+				total_pos_inmig = total_pos_inmig + parsePhrase(nodeslist_in[i].work_location);
 			} else {
 			     total_pos_inmig = total_pos_inmig + nodeslist_in[i].value;
 			}
@@ -8511,8 +8670,8 @@ for(i = 0; i < nodeslist_in.length;i++){
 		if(nodeslist_in[i].src == -1) { nodeslist_in[i].src = 0}
 } //i
 var nodes_1 = []
-nodes_1.push({"location1" : countyName(parseInt(fips)),
-		"location2" : countyName(parseInt(fips)),
+nodes_1.push({"residence_location" : countyName(parseInt(fips)),
+		"work_location" : countyName(parseInt(fips)),
 		"value" : 0,
 		"src" :0,
 		"tgt" : 0,
@@ -8589,13 +8748,13 @@ annotations : [{text :  citStr ,
 var nodeslist_out = [];
 var nodesuniq_out = [];
 outchart_out.forEach(obj => { 
-	nodeslist_out.push({'location1' : obj.NAME1, 'location2' : obj.NAME2,  'value' : obj.MOVEDOUT_EST})
+	nodeslist_out.push({'residence_location' : obj.NAME1, 'work_location' : obj.NAME2,  'value' : obj.MOVEDOUT_EST})
 })
 
 var labarr_out = [];
 labarr_out.push("");
 for(i = 0; i < nodeslist_out.length; i++){
-	labarr_out.push(nodeslist_out[i].location2);
+	labarr_out.push(nodeslist_out[i].work_location);
 }
 		
 	var inc = 1/nodeslist_out.length;
@@ -8610,19 +8769,19 @@ var y_out_pos = 0.1;
 // Prepping _out migration data
 
 for(i = 0; i < nodeslist_out.length;i++){
-			nodeslist_out[i].src = labarr_out.indexOf(nodeslist_out[i].location1)
-			nodeslist_out[i].tgt = labarr_out.indexOf(nodeslist_out[i].location2)
+			nodeslist_out[i].src = labarr_out.indexOf(nodeslist_out[i].residence_location)
+			nodeslist_out[i].tgt = labarr_out.indexOf(nodeslist_out[i].work_location)
 			nodeslist_out[i].val = Math.abs(nodeslist_out[i].value)
-			if(nodeslist_out[i].location2.includes("movers")){
-				nodeslist_out[i].lablink = nodeslist_out[i].location2;
+			if(nodeslist_out[i].work_location.includes("movers")){
+				nodeslist_out[i].lablink = nodeslist_out[i].work_location;
 			} else {
-				nodeslist_out[i].lablink = nodeslist_out[i].location1 + " to " + nodeslist_out[i].location2 + ": " + fmt_comma(nodeslist_out[i].value);	
+				nodeslist_out[i].lablink = nodeslist_out[i].residence_location + " to " + nodeslist_out[i].work_location + ": " + fmt_comma(nodeslist_out[i].value);	
 			}
 			nodeslist_out[i].xpos =  0.9;
 			nodeslist_out[i].ypos =  parseFloat(y_out_pos.toFixed(3));
-			nodeslist_out[i].lab = nodeslist_out[i].location2;
-			if(nodeslist_out[i].location2.includes("movers")){
-				total_pos_outmig = total_pos_outmig + parsePhrase(nodeslist_out[i].location2);
+			nodeslist_out[i].lab = nodeslist_out[i].work_location;
+			if(nodeslist_out[i].work_location.includes("movers")){
+				total_pos_outmig = total_pos_outmig + parsePhrase(nodeslist_out[i].work_location);
 			} else {
 			     total_pos_outmig = total_pos_outmig + nodeslist_out[i].value;
 			}			
@@ -8631,8 +8790,8 @@ for(i = 0; i < nodeslist_out.length;i++){
 		if(nodeslist_out[i].src == -1) { nodeslist_out[i].src = 0}
 } //i
 var nodes_1 = []
-nodes_1.push({"location1" : countyName(parseInt(fips)),
-		"location2" : countyName(parseInt(fips)),
+nodes_1.push({"residence_location" : countyName(parseInt(fips)),
+		"work_location" : countyName(parseInt(fips)),
 		"value" : 0,
 		"src" :0,
 		"tgt" : 0,
@@ -8728,15 +8887,13 @@ chartout_png.onclick = function() {exportToPng(plname, 'outflow', CHART2,0)};
 } 
 //genFLOWS
 
-function genLODES(geo, loc, geo_name, year, sector){
+
+function genLODES(geo, loc, geo_name, year, sector, CHART0, CHART1){
 // genLODES Generates LODES Dashboard
 // this current version pulls data from 2021 LODES data, still considering if future versions will allow year selection
 
 	var fmt_comma = d3.format(",");
 	const fmt_date = d3.timeFormat("%B %d, %Y");
-	var CHART0 = document.getElementById("venn_output");
-	var CHART1 = document.getElementById("sankey_output");
-	
 
 	var fips_code = "08" + loc;
 	if(geo == 'county') {
@@ -8744,22 +8901,22 @@ function genLODES(geo, loc, geo_name, year, sector){
     } else {
 	  var geostr = 'place'
 	}
-	//creating venn diagram data pull
-	var vennstr = 'https://gis.dola.colorado.gov/lookups/lodes?geo=' + geostr + '&geonum=' + fips_code + '&year=2021&choice=summary'
+	//creating barchart diagram data pull
+	var barchartstr = 'https://gis.dola.colorado.gov/lookups/lodes?geo=' + geostr + '&geonum=' + fips_code + '&year=2021&choice=summary'
 	var sankeystr = 'https://gis.dola.colorado.gov/lookups/lodes?geo=' + geostr + '&geonum=' + fips_code + '&year=2021&choice=place'
 	
-	var prom = [d3.json(vennstr),d3.json(sankeystr)];
+	var prom = [d3.json(barchartstr),d3.json(sankeystr)];
 	
 	Promise.all(prom).then(function(data){
 
 		//Creating analysis data 
-		var venn_data = [];
+		var barchart_data = [];
 		var sankey_data = [];
 		switch(sector){
 		case 'total' :
-		 var venn_title = geo_name + " All Jobs, " + year;
+		 var barchart_title = geo_name + " All Jobs, " + year;
 		 for (i = 0; i < data[0].length; i++) {
-			venn_data.push({"work_in_home_in" : parseInt(data[0][i].work_in_home_in_total),
+			barchart_data.push({"work_in_home_in" : parseInt(data[0][i].work_in_home_in_total),
 							"work_in_home_out" : parseInt(data[0][i].work_in_home_out_total),
 							"work_out_home_in" : parseInt(data[0][i].work_out_home_in_total)
 			})
@@ -8787,9 +8944,9 @@ function genLODES(geo, loc, geo_name, year, sector){
 		 }
 		break;
 		case 'goods' :
-		 var venn_title = geo_name + " Goods Producing industry Jobs, " + year;
+		 var barchart_title = geo_name + " Goods Producing industry Jobs, " + year;
 		 for (i = 0; i < data[0].length; i++) {
-			venn_data.push({"work_in_home_in" : parseInt(data[0][i].work_in_home_in_goods),
+			barchart_data.push({"work_in_home_in" : parseInt(data[0][i].work_in_home_in_goods),
 							"work_in_home_out" : parseInt(data[0][i].work_in_home_out_goods),
 							"work_out_home_in" : parseInt(data[0][i].work_out_home_in_goods)
 			})
@@ -8817,9 +8974,9 @@ function genLODES(geo, loc, geo_name, year, sector){
 		 }
 		break;
 		case 'trade' :
-		 var venn_title = geo_name + " Trade, Transportation,\nand Utilities industry Jobs, " + year;
+		 var barchart_title = geo_name + " Trade, Transportation,\nand Utilities industry Jobs, " + year;
 		 for (i = 0; i < data[0].length; i++) {
-			venn_data.push({"work_in_home_in" : parseInt(data[0][i].work_in_home_in_trade),
+			barchart_data.push({"work_in_home_in" : parseInt(data[0][i].work_in_home_in_trade),
 							"work_in_home_out" : parseInt(data[0][i].work_in_home_out_trade),
 							"work_out_home_in" : parseInt(data[0][i].work_out_home_in_trade)
 			})
@@ -8847,9 +9004,9 @@ function genLODES(geo, loc, geo_name, year, sector){
 		 }
 		break;
 		case 'services' :
-		var venn_title = geo_name + " All Other Services Industry Jobs, " + year;
+		var barchart_title = geo_name + " All Other Services Industry Jobs, " + year;
 		 for (i = 0; i < data[0].length; i++) {
-			venn_data.push({"work_in_home_in" : parseInt(data[0][i].work_in_home_in_services),
+			barchart_data.push({"work_in_home_in" : parseInt(data[0][i].work_in_home_in_services),
 							"work_in_home_out" : parseInt(data[0][i].work_in_home_out_services),
 							"work_out_home_in" : parseInt(data[0][i].work_out_home_in_services)
 			})
@@ -8878,43 +9035,375 @@ function genLODES(geo, loc, geo_name, year, sector){
 		break;
 		} //Switch
 		
-		//Create Venn Diagram
-		var sets = [ {sets: ['A'], size: venn_data[0].work_out_home_in}, 
-             {sets: ['B'], size: venn_data[0].work_in_home_out},
-             {sets: ['A','B'], size: venn_data[0].work_in_home_in}];
+//Create barchart Data
+var labs= ["Employed and Live<br>in Selected Area",
+		   "Live in Selected Area,<br>Employed Outside Area",
+		   "Employed in Selected Area,<br>Live Outside Area"]
 
-		var chart = venn.VennDiagram()
-		d3.select(CHART0).datum(sets).call(chart);
-       //Adding title and legend  https://d3-graph-gallery.com/graph/custom_legend.html
-	   var posX = 50;
-	   var posY = 200;
-	   var opac = "0.25";
-       var legend = [{"color" : "#FFFFFF", "boxcolor" : "#FFFFFF", "opacity" : opac, "text" : venn_title, "xpos" : posX, "ypos" : posY},
-		          {"color" : "#FFFFFF", "boxcolor" : "#4777B4", "opacity" : opac, "text" : "Employed in Selected Area, Live Outside Area: " + fmt_comma(venn_data[0].work_in_home_out), "xpos" : posX, "ypos" : posY - 14},
-				  {"color" : "#FFFFFF", "boxcolor" : "#FF7F0E", "opacity" : opac, "text" : "Live in Selected Area, Employed Outside Area: " + fmt_comma(venn_data[0].work_out_home_in), "xpos" : posX, "ypos" : posY + 28},
-				  {"color" : "#FFFFFF", "boxcolor" : "#444444", "opacity" : opac, "text" : "Employed and Live in Selected Area: " + fmt_comma(venn_data[0].work_in_home_in), "xpos" : posX, "ypos" : posY + 42},
-				  {"color" : "#FFFFFF", "boxcolor" : "#FFFFFF", "opacity" : opac, "text" : "Source: U.S. Census Bureau, On the Map visualizaton.  Date Printed:" + fmt_date(new Date), "xpos" : posX, "ypos" : posY + 56}]
-		var table =  d3.select(CHART0).append("g")
-	     .attr("class","tabobj");
-		 
-		table.selectAll("rect")
-			.data(legend)
-			.enter()
-			.append("rect")
-			.attr("x", function(d) {return d.xpos;})
-			.attr("y", function(d) {return d.ypos;})
-			.attr("fill", function(d) { return d.color;})
-			.attr("fill-opacity", function(d) { return d.opacity;});
+var vals = [barchart_data[0].work_in_home_in, barchart_data[0].work_out_home_in, barchart_data[0].work_in_home_out]
+var fmtvals = [
+ "Employed and Live in Selected Area " + fmt_comma(barchart_data[0].work_in_home_in),
+ "Live in Selected Area, Employed Outside Area " + fmt_comma(barchart_data[0].work_out_home_in), 
+ "Employed in Selected Area, Live Outside Area " + fmt_comma(barchart_data[0].work_in_home_out) 
+]
+var barcolor = ["#b2df8a", "#1f78b4", "#a6cee3"]
 
-		table.selectAll("text")
-			.data(legend)
-			.enter()
-			.append("text")
-			.attr("x", function(d) {return d.xos;})
-			.attr("y", function(d) {return d.ypos;})
-			.text( function(d) { return d.text;})
-			.style("font", "10pt sans-serif");
+// Generate Sankey Data
+ 
+//Summarizing out out of state and adjoining state residents
+var out_state_home = sankey_data.filter(d =>  !['08','04','20','31','35','40','49','56'].includes(d.home_st))
+var out_adjoining_home = sankey_data.filter(d => ['04','20','31','35','40','49','56'].includes(d.home_st))
+
+var out_state_home_val = d3.rollup(out_state_home, v => d3.sum(v, d => d.jobs));
+
+var out_state_home = [{"work_st" : "08",
+					  "work_loc" : fips_code,
+					 "work_loc_name" : geo_name,
+					 "home_st" : "99",
+					 "home_loc" : "99000",
+					 "home_loc_name" : "Other, non-Adjoining States",
+					 "jobs" : out_state_home_val
+ }];
+
+var out_state_work = sankey_data.filter(d => !['08','04','20','31','35','40','49','56'].includes(d.work_st))
+var out_adjoining_work = sankey_data.filter(d => ['04','20','31','35','40','49','56'].includes(d.work_st))
+
+var out_state_work_val = d3.rollup(out_state_work, v => d3.sum(v, d => d.jobs));
+
+var out_state_work =[{"work_st" : "99",
+					  "work_loc" : "99000",
+					 "work_loc_name" : "Other, non-Adjoining States",
+					 "home_st" : "08",
+					 "home_loc" : fips_code,
+					 "home_loc_name" : geo_name,
+					 "jobs" : out_state_work_val
+ }];
+
+var in_state = sankey_data.filter(d => d.home_st == "08" & d.work_st == "08")
+var out_work =  in_state.filter(d => d.work_loc == fips_code);
+var out_home = in_state.filter(d => d.home_loc == fips_code);
+
+var total_work = out_work.concat(out_adjoining_home,out_state_home).sort(function(a, b){ return d3.ascending(a['home_loc'], b['home_loc']); })
+       .sort(function(a, b){ return d3.descending(a['jobs'], b['jobs']); });
+
+var total_home = out_home.concat(out_adjoining_work, out_state_work).sort(function(a, b){ return d3.ascending(a['work_loc'], b['work_loc']); })
+       .sort(function(a, b){ return d3.descending(a['jobs'], b['jobs']); });;
+	   
+//Building Final Data Set
+
+var sankey_fin = total_work.concat(total_home)
+
+// Creating Nodeslist
+
+var nodeslist_tmp = [];
+var sankey_out = []  //sankey output data
+sankey_fin.forEach(d => {
+	nodeslist_tmp.push({
+		residence_location : d.home_loc == fips_code ? geo_name : d.home_loc_name.replace(", CO",""),
+		work_location : d.work_loc == fips_code ? geo_name : d.work_loc_name.replace(", CO",""),
+		value : d.work_loc == fips_code ? d.jobs : d.jobs * -1
+	})
+	sankey_out.push({
+		residence_location : d.home_loc == fips_code ? geo_name : d.home_loc_name.replace(", CO",""),
+		work_location : d.work_loc == fips_code ? geo_name : d.work_loc_name.replace(", CO",""),
+		value : d.jobs 
+	})
+})
+
+
+
+var nodeslist_tmp2 = supressData(nodeslist_tmp, fips_code, geo_name, 'lodes');
+
+
+// Remove work in live in and summary records
+
+var label_dat = nodeslist_tmp2.filter(d => (d.residence_location.includes("workers")) || (d.work_location.includes("workers")) || (d.residence_location == d.work_location))
+label_dat = label_dat.filter((value, index, self) =>
+  index === self.findIndex((t) => (
+    t.residence_location === value.residence_location && t.work_location === value.work_location && t.value == value.value
+  ))
+)
+
+var same_loc =[];
+var annot_lab = [];
+label_dat.forEach(d => {
+	if(d.residence_location == d.work_location){
+		same_loc.push({
+			residence_location : d.residence_location,
+			work_location : d.work_location,
+		value : d.value})
+		annot_lab.push({outlab : "Work and Live in " + d.residence_location + ": " + fmt_comma(d.value)})
+	}
+	if(d.residence_location.includes('workers')){
+		annot_lab.push({outlab: "In Commuters: " + d.residence_location + ": " + fmt_comma(d.value)})
+	}
+	if(d.work_location.includes('workers')){
+		annot_lab.push({outlab : "Out Commuters: " + d.work_location + ": " + fmt_comma(Math.abs(d.value))})
+	}
+})
+
+
+var nodeslist_tmp3 = nodeslist_tmp2.filter(d => !d.residence_location.includes("workers"))
+                      .filter(d => !d.work_location.includes("workers")) 
+                      .filter(d => d.residence_location != d.work_location)
+
+var nodeslist_dat = same_loc.concat(nodeslist_tmp3)
+
+
+var labarr_dat = [];
+var lab1_tmp = []
+var lab2_tmp = []
+nodeslist_dat.forEach(obj => { 
+	lab1_tmp.push(obj.residence_location)
+	lab2_tmp.push(obj.work_location)
+})
+
+var lab1_dat = [...new Set(lab1_tmp)];
+var lab2_dat = [...new Set(lab2_tmp)];
+var labarr_dat = lab1_dat.concat(lab2_dat);
+
+
+var neg = nodeslist_dat.filter(d => d.value <= 0).length
+var pos = nodeslist_dat.filter(d => d.value > 0).length
+
+if(neg < pos) {
+	var inc = 1/pos;
+} else {
+	var inc = 1/neg;
+}
+var incr = parseFloat(inc.toFixed(3))
+
+
+
+// Prepping nodelsist data
+
+var total_pos_datmig = 0;
+var total_neg_datmig = 0;
+var y_dat_pos = 0.1;
+var y_dat_neg = 0.1;
+var titleVal_dat = "Commuting Profile "+ geo_name;
+var citStr = annot('U.S. Census Bureau. LEHD Origin-Destination Employment Statistics (2002-2021)');
+var lab_annotation = [];
+
+// Prepping nodeslist data
+var tgt_neg = pos;
+
+for(i = 0; i < nodeslist_dat.length;i++){
+		if(nodeslist_dat[i].value < 0) {  //live in area work elsewhere
+			nodeslist_dat[i].src = labarr_dat.indexOf(nodeslist_dat[i].residence_location)
+			nodeslist_dat[i].tgt = tgt_neg
+			nodeslist_dat[i].val = Math.abs(nodeslist_dat[i].value)
+			nodeslist_dat[i].lablink = nodeslist_dat[i].residence_location + " to " + nodeslist_dat[i].work_location + ": " + fmt_comma(Math.abs(nodeslist_dat[i].value));	
+			nodeslist_dat[i].xpos =  0.9;
+			nodeslist_dat[i].labposx = 1;
+			nodeslist_dat[i].ypos =  parseFloat(y_dat_neg.toFixed(3));
+			nodeslist_dat[i].labposy = parseFloat(y_dat_neg.toFixed(3));
+			nodeslist_dat[i].lab = nodeslist_dat[i].work_location;
+			y_dat_neg = y_dat_neg + incr;
+			tgt_neg++
+			
+		} else {
+			nodeslist_dat[i].src = labarr_dat.indexOf(nodeslist_dat[i].residence_location)
+			nodeslist_dat[i].tgt = 0
+			nodeslist_dat[i].val = Math.abs(nodeslist_dat[i].value)
+			nodeslist_dat[i].lablink = nodeslist_dat[i].residence_location + " to " + nodeslist_dat[i].work_location + ": " + fmt_comma(Math.abs(nodeslist_dat[i].value));	
+			nodeslist_dat[i].xpos =  0.1;
+			nodeslist_dat[i].ypos =  parseFloat(y_dat_pos.toFixed(3));
+			nodeslist_dat[i].labposx = 0;
+			nodeslist_dat[i].labposy =  parseFloat(y_dat_pos.toFixed(3));
+			nodeslist_dat[i].lab = nodeslist_dat[i].residence_location;
+			y_dat_pos = y_dat_pos + incr;
+		}
+		if(nodeslist_dat[i].residence_location == nodeslist_dat[i].work_location){
+			nodeslist_dat[i].src = 0;
+			nodeslist_dat[i].tgt = 0;
+			nodeslist_dat[i].xpos =  0.5;
+			nodeslist_dat[i].ypos =  0.5;
+			nodeslist_dat[i].labposx = 0;
+			nodeslist_dat[i].labposy =  0;
+			nodeslist_dat[i].lab = nodeslist_dat[i].residence_location;
+			nodeslist_dat[i].lablink = "Work and Live in " + nodeslist_dat[i].residence_location + ": "+ fmt_comma(Math.abs(nodeslist_dat[i].value))
+		}
 		
-	}) //Promise
+		//Build Label Annotations
+			lab_annotation.push({text: nodeslist_dat[i].residence_location,
+				font : {size : 11, color : 'black'},    
+				x : nodeslist_dat[i].xpos,
+				y : nodeslist_dat[i].ypos,
+				showarrow : false})
+} //i
+
+
+var data_dat = {
+  type: "sankey",
+  orientation: "h",
+  arrangement : "fixed",
+  node: {
+    thickness: 35,
+    line: {
+      color: "black",
+      width: 0.5
+    },
+   label: nodeslist_dat.map(d => d.lab),
+   x : nodeslist_dat.map(d => d.xpos),
+   y : nodeslist_dat.map(d => d.ypos),
+   pad : 20,
+   hoverinfo: 'none'
+      },
+  link: {
+    source: nodeslist_dat.map(d => d.src),
+    target: nodeslist_dat.map(d => d.tgt),
+    value:  nodeslist_dat.map(d => d.val),
+	customdata : nodeslist_dat.map(d => d.lablink),
+	hovertemplate : '%{customdata}<extra></extra>'
+  }
+}
+
+
+var data_datp = [data_dat];
+
+var layout_dat = {
+  title: titleVal_dat, autosize : false, 
+  width: 1000,
+  height: 1000,
+  font: {
+    size: 11,
+	family : 'Arial Black'
+  },
+annotations : [
+      {text :  citStr , 
+      font: { size : 9, color: 'black'},
+      xref : 'paper', 
+	  yref : 'paper', 
+	  xanchor : 'left',
+	  yanchor : 'bottom',
+      x : 0, 
+      y : -0.135, 
+      align : 'left', 
+      showarrow : false}]
+}
+
+
+//Bar Chart Section
+//Plotting 
+var config = {responsive: true,
+              displayModeBar: false};
+			  
+ CHART0.innerHTML = ''
+
+var bardata = [{
+	 x: vals,
+	 y: labs,
+	 type: 'bar',
+	 marker : {color : barcolor},
+	 customdata : fmtvals,
+	 hovertemplate : '%{customdata}',
+	 hoverlabel : {namelength :0},
+     orientation: 'h'
+}]
+
+var barlayout = {
+	title: barchart_title,
+  autosize: false,
+  width: 1000,
+  height: 500,
+  margin: {
+    l: 200,
+    r: 50,
+    b: 100,
+    t: 100,
+    pad: 4
+  },
+  xaxis : {
+	title : 'Jobs'
+  },
+ 	annotations : [annot('U.S. Census Bureau. LEHD Origin-Destination Employment Statistics (2002-2021)')]
+};
+
+
+Plotly.newPlot(CHART0, bardata,barlayout,config);
+var barchart_csv = document.getElementById('barchart_csv');
+var barchart_png = document.getElementById('barchart_png');
+barchart_csv.onclick = function() {exportToCsv(geo_name, 'LODESBAR', barchart_data,0)};
+barchart_png.onclick = function() {exportToPng(geo_name, 'LODESBAR', CHART0,0)};
+
+//Sankey Chart
+
+var data_net = {
+  type: "sankey",
+  orientation: "h",
+  arrangement : "fixed",
+  node: {
+    thickness: 30,
+    line: {
+      color: "black",
+      width: 0.5
+    },
+   label: nodeslist_dat.map(d => d.lab),
+   x : nodeslist_dat.map(d => d.xpos),
+   y : nodeslist_dat.map(d => d.ypos),
+   pad : 35,
+   hoverinfo: 'none'
+      },
+
+  link: {
+    source: nodeslist_dat.map(d => d.src),
+    target: nodeslist_dat.map(d => d.tgt),
+    value:  nodeslist_dat.map(d => d.val),
+	customdata : nodeslist_dat.map(d => d.lablink),
+	hovertemplate : '%{customdata}<extra></extra>'
+  }
+}
+
+var data_commut = [data_net];
+
+var layout_commut = {
+  title: barchart_title + " Commuting Flows", 
+  autosize : false, 
+  width: 1000,
+  height: 1000,
+  font: {
+    size: 11,
+	family : 'Arial Black'
+  },
+annotations : [
+      {text :  annot('U.S. Census Bureau. LEHD Origin-Destination Employment Statistics (2002-2021)') , 
+      font: { size : 9, color: 'black'},
+      xref : 'paper', 
+	  yref : 'paper', 
+	  xanchor : 'left',
+	  yanchor : 'bottom',
+      x : 0, 
+      y : -0.135, 
+      align : 'left', 
+      showarrow : false},
+		{text : annot_lab[1].outlab,
+        font : {size : 10, color : 'black'},      
+		xref : 'paper', 
+	    yref : 'paper', 
+	    xanchor : 'left',
+	    yanchor : 'bottom',
+        x : 0,
+        y : 1,
+		showarrow : false },
+		{text : annot_lab[2].outlab,
+        font : {size : 10, color : 'black'},      
+		xref : 'paper', 
+	    yref : 'paper', 
+	    xanchor : 'left',
+	    yanchor : 'bottom',
+        x : 0.6,
+        y : 1,
+		showarrow : false }
+
+
+]
+}
+Plotly.newPlot(CHART1, data_commut,layout_commut,config);
+var sankey_csv = document.getElementById('sankey_csv');
+var sankey_png = document.getElementById('sankey_png');
+sankey_csv.onclick = function() {exportToCsv(geo_name, 'LODESFLOW', sankey_out,0)};
+sankey_png.onclick = function() {exportToPng(geo_name, 'LODESFLOW', CHART1,0)};
+}) //Promise
 }
 //genLODES
