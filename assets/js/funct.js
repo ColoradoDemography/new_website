@@ -9135,10 +9135,10 @@ label_dat.forEach(d => {
 		annot_lab.push({outlab : "Work and Live in " + d.residence_location + ": " + fmt_comma(d.value)})
 	}
 	if(d.residence_location.includes('workers')){
-		annot_lab.push({outlab: "In Commuters: " + d.residence_location + ": " + fmt_comma(d.value)})
+		annot_lab.push({outlab: "In Commuters: " + d.residence_location
 	}
 	if(d.work_location.includes('workers')){
-		annot_lab.push({outlab : "Out Commuters: " + d.work_location + ": " + fmt_comma(Math.abs(d.value))})
+		annot_lab.push({outlab : "Out Commuters: " + d.work_location 
 	}
 })
 
