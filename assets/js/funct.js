@@ -8275,16 +8275,16 @@ function supressData(inData, fips, geo_name, type){
 			  }
 		  }
 
-		if(posdata.length >= 25 && negdata.length >= 25) {
+		if(posdata.length >= 20 && negdata.length >= 20) {
 		     var outdata = posfin2.concat(negfin2);
 		} 
-		if(posdata.length >= 25 && negdata.length < 25) {
+		if(posdata.length >= 20 && negdata.length < 20) {
 		     var outdata = posfin2.concat(negdata);
 		} 
-		if(posdata.length < 25 && negdata.length >= 25) {
+		if(posdata.length < 20 && negdata.length >= 20) {
 		     var outdata = posdata.concat(negfin2);
 		} 
-		if(posdata.length < 25 && negdata.length < 25) {
+		if(posdata.length < 20 && negdata.length < 20) {
 		     var outdata = inData;
 		} 
 		break;
@@ -9132,16 +9132,14 @@ label_dat.forEach(d => {
 			residence_location : d.residence_location,
 			work_location : d.work_location,
 		value : d.value})
-		annot_lab.push({outlab : "Work and Live in " + d.residence_location + ": " + fmt_comma(d.value)})
 	}
 	if(d.residence_location.includes('workers')){
-		annot_lab.push({outlab: "In Commuters: " + d.residence_location
+		annot_lab.push({outlab: "In Commuters: " + d.residence_location})
 	}
 	if(d.work_location.includes('workers')){
-		annot_lab.push({outlab : "Out Commuters: " + d.work_location 
+		annot_lab.push({outlab : "Out Commuters: " + d.work_location})
 	}
 })
-
 
 var nodeslist_tmp3 = nodeslist_tmp2.filter(d => !d.residence_location.includes("workers"))
                       .filter(d => !d.work_location.includes("workers")) 
@@ -9182,7 +9180,22 @@ var total_neg_datmig = 0;
 var y_dat_pos = 0.1;
 var y_dat_neg = 0.1;
 var titleVal_dat = "Commuting Profile "+ geo_name;
-var citStr = annot('U.S. Census Bureau. LEHD Origin-Destination Employment Statistics (2002-2021)');
+var citStr = "U.S. Census Bureau. LEHD Origin-Destination Employment Statistics (2002-2021) " +
+	           " Print Date: "+ fmt_date(new Date);
+
+
+
+//setting annotation labels
+var annot_in = ""
+var annot_out = ""
+annot_lab.forEach(d => {
+	if(d.outlab.includes("In Commuters")){
+		annot_in = d.outlab
+	}
+	if(d.outlab.includes("Out Commuters")){
+		annot_out = d.outlab
+	}
+})
 var lab_annotation = [];
 
 // Prepping nodeslist data
@@ -9317,7 +9330,16 @@ var barlayout = {
   xaxis : {
 	title : 'Jobs'
   },
- 	annotations : [annot('U.S. Census Bureau. LEHD Origin-Destination Employment Statistics (2002-2021)')]
+ 	annotations : [{text :  citStr, 
+      font: { size : 9, color: 'black'},
+      xref : 'paper', 
+	  yref : 'paper', 
+	  xanchor : 'left',
+	  yanchor : 'bottom',
+      x : 0, 
+      y : -0.25, 
+      align : 'left', 
+      showarrow : false}]
 };
 
 
@@ -9360,40 +9382,40 @@ var data_commut = [data_net];
 var layout_commut = {
   title: barchart_title + " Commuting Flows", 
   autosize : false, 
-  width: 1000,
-  height: 1000,
+  width: 900,
+  height: 900, 
   font: {
     size: 11,
 	family : 'Arial Black'
   },
 annotations : [
-      {text :  annot('U.S. Census Bureau. LEHD Origin-Destination Employment Statistics (2002-2021)') , 
+      {text :  citStr, 
       font: { size : 9, color: 'black'},
       xref : 'paper', 
 	  yref : 'paper', 
 	  xanchor : 'left',
 	  yanchor : 'bottom',
       x : 0, 
-      y : -0.135, 
+      y : -0.11, 
       align : 'left', 
       showarrow : false},
-		{text : annot_lab[1].outlab,
+		{text : annot_in,
         font : {size : 10, color : 'black'},      
 		xref : 'paper', 
 	    yref : 'paper', 
 	    xanchor : 'left',
 	    yanchor : 'bottom',
         x : 0,
-        y : 1,
+        y : -0.09,
 		showarrow : false },
-		{text : annot_lab[2].outlab,
+		{text : annot_out,
         font : {size : 10, color : 'black'},      
 		xref : 'paper', 
 	    yref : 'paper', 
 	    xanchor : 'left',
 	    yanchor : 'bottom',
         x : 0.6,
-        y : 1,
+        y : -0.09,
 		showarrow : false }
 
 
