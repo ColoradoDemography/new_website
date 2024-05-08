@@ -2299,6 +2299,12 @@ function genFilename(outname, type, ext, yr) {
 		case 'outflow' :
 			var fileName = outname + " ACS Out Migration Flows." + ext
 		break;
+		case 'LODESBAR' :
+			var fileName = outname + " LODES Commuting Summary." + ext
+		break;
+		case 'LODESFLOW' :
+			var fileName = outname + " LODES Communting Flows." + ext
+		break;
 		} //switch
 		
 	
@@ -2407,6 +2413,18 @@ function exportToPng(cname, type, graphDiv, yr){
 		case 'outflow':
 		{
 		    Plotly.toImage(graphDiv, { format: 'png', width: 900, height: 900}).then(function (dataURL) {
+				var a = document.createElement('a');
+				a.href = dataURL;
+				a.download = fn;
+				document.body.appendChild(a);
+				 a.click();
+				document.body.removeChild(a);
+			});
+		} 
+		break;
+		case 'LODESFLOW' :
+		{
+		    Plotly.toImage(graphDiv, { format: 'png', width: 900, height: 930}).then(function (dataURL) {
 				var a = document.createElement('a');
 				a.href = dataURL;
 				a.download = fn;
@@ -8152,7 +8170,7 @@ function supressData(inData, fips, geo_name, type){
 		//adding record for supression
 		 if(posdata.length > 20){
 			  postmp.push({
-				"residential_location" : fmt_comma(poscnt) + ' location with ' + fmt_comma(Math.abs(posmax))+ ' workers',
+				"residential_location" : fmt_comma(poscnt) + ' locations with ' + fmt_comma(Math.abs(posmax))+ ' workers',
 				"work_location" : geo_name,
 				"value" : posmax
 				})
@@ -8177,7 +8195,7 @@ function supressData(inData, fips, geo_name, type){
 		 if(negdata.length > 20){
 			  negtmp.push({
 				"residential_location" : geo_name,
-				"work_location" : fmt_comma(negcnt) + ' location with ' + fmt_comma(Math.abs(negmax))+ ' workers',
+				"work_location" : fmt_comma(negcnt) + ' locations with ' + fmt_comma(Math.abs(negmax))+ ' workers',
 				"value" : negmax })
 			  }
 			  
@@ -9164,56 +9182,6 @@ for(i = 0; i < nodeslist_dat.length;i++){
 } //i
 
 
-var data_dat = {
-  type: "sankey",
-  orientation: "h",
-  arrangement : "fixed",
-  node: {
-    thickness: 35,
-    line: {
-      color: "black",
-      width: 0.5
-    },
-   label: nodeslist_dat.map(d => d.lab),
-   x : nodeslist_dat.map(d => d.xpos),
-   y : nodeslist_dat.map(d => d.ypos),
-   pad : 20,
-   hoverinfo: 'none'
-      },
-  link: {
-    source: nodeslist_dat.map(d => d.src),
-    target: nodeslist_dat.map(d => d.tgt),
-    value:  nodeslist_dat.map(d => d.val),
-	customdata : nodeslist_dat.map(d => d.lablink),
-	hovertemplate : '%{customdata}<extra></extra>'
-  }
-}
-
-
-var data_datp = [data_dat];
-
-var layout_dat = {
-  title: titleVal_dat, autosize : false, 
-  width: 1000,
-  height: 1000,
-  font: {
-    size: 11,
-	family : 'Arial Black'
-  },
-annotations : [
-      {text :  citStr , 
-      font: { size : 9, color: 'black'},
-      xref : 'paper', 
-	  yref : 'paper', 
-	  xanchor : 'left',
-	  yanchor : 'bottom',
-      x : 0, 
-      y : -0.135, 
-      align : 'left', 
-      showarrow : false}]
-}
-
-
 //Bar Chart Section
 //Plotting 
 var config = {responsive: true,
@@ -9268,12 +9236,12 @@ barchart_png.onclick = function() {exportToPng(geo_name, 'LODESBAR', CHART0,0)};
 
 //Sankey Chart
 
-var data_net = {
+var data_com = {
   type: "sankey",
   orientation: "h",
   arrangement : "fixed",
   node: {
-    thickness: 30,
+    thickness: 50,
     line: {
       color: "black",
       width: 0.5
@@ -9294,13 +9262,13 @@ var data_net = {
   }
 }
 
-var data_commut = [data_net];
+var data_commut = [data_com];
 
 var layout_commut = {
   title: barchart_title + " Commuting Flows", 
   autosize : false, 
   width: 900,
-  height: 900, 
+  height: 930, 
   font: {
     size: 11,
 	family : 'Arial Black'
