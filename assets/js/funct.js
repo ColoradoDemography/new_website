@@ -9106,7 +9106,8 @@ if(neg < pos) {
 }
 var incr = parseFloat(inc.toFixed(3))
 
-
+//Calculating total jobs from the vals array to scale the linewidths
+var tot_jobs = vals.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
 
 // Prepping nodelsist data
 
@@ -9147,6 +9148,7 @@ for(i = 0; i < nodeslist_dat.length;i++){
 			nodeslist_dat[i].ypos =  parseFloat(y_dat_neg.toFixed(3));
 			nodeslist_dat[i].labposy = parseFloat(y_dat_neg.toFixed(3));
 			nodeslist_dat[i].lab = nodeslist_dat[i].work_location;
+			nodeslist_dat[i].linewidth = parseFloat((Math.abs(nodeslist_dat[i].value)/tot_jobs).toFixed(2))
 			y_dat_neg = y_dat_neg + incr;
 			tgt_neg++
 			
@@ -9160,6 +9162,7 @@ for(i = 0; i < nodeslist_dat.length;i++){
 			nodeslist_dat[i].labposx = 0;
 			nodeslist_dat[i].labposy =  parseFloat(y_dat_pos.toFixed(3));
 			nodeslist_dat[i].lab = nodeslist_dat[i].residential_location;
+			nodeslist_dat[i].linewidth = parseFloat((Math.abs(nodeslist_dat[i].value)/tot_jobs).toFixed(2))
 			y_dat_pos = y_dat_pos + incr;
 		}
 		if(nodeslist_dat[i].residential_location == nodeslist_dat[i].work_location){
@@ -9171,6 +9174,7 @@ for(i = 0; i < nodeslist_dat.length;i++){
 			nodeslist_dat[i].labposy =  0;
 			nodeslist_dat[i].lab = nodeslist_dat[i].residential_location;
 			nodeslist_dat[i].lablink = "Work and Live in " + nodeslist_dat[i].residential_location + ": "+ fmt_comma(Math.abs(nodeslist_dat[i].value))
+			nodeslist_dat[i].linewidth = parseFloat((Math.abs(nodeslist_dat[i].value)/tot_jobs).toFixed(2))
 		}
 		
 		//Build Label Annotations
@@ -9181,6 +9185,8 @@ for(i = 0; i < nodeslist_dat.length;i++){
 				showarrow : false})
 } //i
 
+debugger
+console.log(nodeslist_dat)
 
 //Bar Chart Section
 //Plotting 
@@ -9244,7 +9250,7 @@ var data_com = {
     thickness: 50,
     line: {
       color: "black",
-      width: 0.5
+      width: nodeslist_dat.map(d => d.linewidth)
     },
    label: nodeslist_dat.map(d => d.lab),
    x : nodeslist_dat.map(d => d.xpos),
