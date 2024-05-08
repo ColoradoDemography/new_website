@@ -7965,11 +7965,14 @@ function parsePhrase (phrase){
 }
 //parsePhrase
 
-function supressData(inData, fips, type){
-// genFLOWYR supressData compresses data sets to have a maximum of 35 entires (20 px per entry in a chart with 700 px) OR entry with 10 or fewer movers
+function supressData(inData, fips, geo_name, type){
+// genFLOWYR and genLODES supressData compresses data sets to have a maximum of 35 entires (20 px per entry in a chart with 700 px) OR entry with 10 or fewer movers
 
 	var fmt_comma = d3.format(",");
-	var outname = countyName(parseInt(fips))
+
+	if(geo_name ==""){
+		geo_name = countyName(fips)
+	}
 
 		switch(type) {
 		case 'net' :{
@@ -7999,7 +8002,7 @@ function supressData(inData, fips, type){
 			  posfin.push({
 				"GEOID1" : "",
 				"GEOID2" : "",
-				"NAME1" : outname,
+				"NAME1" : geo_name,
 				"STATE1" : "",
 				"NAME2" : posphrase.length > 0 ? posphrase : "",
 				"STATE2" : "",
@@ -8038,7 +8041,7 @@ function supressData(inData, fips, type){
 			  negfin.push({
 				"GEOID1" : "",
 				"GEOID2" : "",
-				"NAME1" : outname,
+				"NAME1" : geo_name,
 				"STATE1" : "",
 				"NAME2" : negphrase.length > 0 ? negphrase : "",
 				"STATE2" : "",
@@ -8077,7 +8080,7 @@ function supressData(inData, fips, type){
 			  infin.push({
 				"GEOID1" : "",
 				"GEOID2" : "",
-				"NAME1" : outname,
+				"NAME1" : geo_name,
 				"STATE1" : "",
 				"NAME2" : inphrase.length > 0 ? inphrase : "",
 				"STATE2" : "",
@@ -8116,7 +8119,7 @@ function supressData(inData, fips, type){
 			  outfin.push({
 				"GEOID1" : "",
 				"GEOID2" : "",
-				"NAME1" : outname,
+				"NAME1" : geo_name,
 				"STATE1" : "",
 				"NAME2" : outphrase.length > 0 ? outphrase : "",
 				"STATE2" : "",
@@ -8130,6 +8133,57 @@ function supressData(inData, fips, type){
 		var outdata = outfin;
 		break;
 	} //out
+	case 'lodes' :{
+ 		  var posdata = inData.filter(d => d.value >= 0)
+          var possort = posdata.sort(function(a, b){return d3.descending(a['value'], b['value']); })
+		  var poscnt = 0;
+		  var posmax = 0;
+		  var postmp = [];
+          var posphrase = ""
+			  for(i = 0; i < possort.length; i++) {
+				  if(i < 21){
+					  postmp[i] = possort[i];
+				  } else {
+				      poscnt++
+				      posmax =  posmax + possort[i].value;
+			      }
+			  }
+
+		//adding record for supression
+		 if(posdata.length > 20){
+			  postmp.push({
+				"residential_location" : fmt_comma(poscnt) + ' location with ' + fmt_comma(Math.abs(posmax))+ ' workers',
+				"work_location" : geo_name,
+				"value" : posmax
+				})
+			  }
+  
+		  var negdata = inData.filter(d => d.value < 0)
+          var negsort = negdata.sort(function(a, b){return d3.ascending(a['value'], b['value']); })
+		  var negcnt = 0;
+		  var negmax = 0;
+		  var negtmp = [];
+		  var negphrase = "";
+			  for(i = 0; i < negsort.length; i++) {
+				  if(i < 21){
+					  negtmp[i] = negsort[i];
+				  } else {
+				      negcnt++
+				      negmax =  negmax + Math.abs(negsort[i].value);
+			      }
+			  }
+		
+		//adding record for supression
+		 if(negdata.length > 20){
+			  negtmp.push({
+				"residential_location" : geo_name,
+				"work_location" : fmt_comma(negcnt) + ' location with ' + fmt_comma(Math.abs(negmax))+ ' workers',
+				"value" : negmax })
+			  }
+			  
+		var outdata = postmp.concat(negtmp);
+		break;
+		}  //lodes
 	} //switch
 return(outdata)
 } 
@@ -8281,9 +8335,9 @@ if(fips == "000"){
   
 	var outchartun = instate_sum.concat(bindata);
 }
-var outchart_net = supressData(outchartun, fips, "net")
-var outchart_in = supressData(outchartun, fips, "in")
-var outchart_out = supressData(outchartun, fips, "out")
+var outchart_net = supressData(outchartun, fips, "", "net")
+var outchart_in = supressData(outchartun, fips, "", "in")
+var outchart_out = supressData(outchartun, fips, "","out")
 
 // Creating Nodeslist
 var nodeslist_net = [];
@@ -8939,51 +8993,74 @@ var nodeslist_tmp = [];
 var sankey_out = []  //sankey output data
 sankey_fin.forEach(d => {
 	nodeslist_tmp.push({
-		residence_location : d.home_loc == fips_code ? geo_name : d.home_loc_name.replace(", CO",""),
+		residential_location : d.home_loc == fips_code ? geo_name : d.home_loc_name.replace(", CO",""),
 		work_location : d.work_loc == fips_code ? geo_name : d.work_loc_name.replace(", CO",""),
 		value : d.work_loc == fips_code ? d.jobs : d.jobs * -1
 	})
 	sankey_out.push({
-		residence_location : d.home_loc == fips_code ? geo_name : d.home_loc_name.replace(", CO",""),
+		residential_location : d.home_loc == fips_code ? geo_name : d.home_loc_name.replace(", CO",""),
 		work_location : d.work_loc == fips_code ? geo_name : d.work_loc_name.replace(", CO",""),
 		value : d.jobs 
 	})
 })
 
-
-
 var nodeslist_tmp2 = supressData(nodeslist_tmp, fips_code, geo_name, 'lodes');
 
 
 // Remove work in live in and summary records
+var label_dat = [];
+for(i = 0; i < nodeslist_tmp2.length ;i++){
+	var res_str = nodeslist_tmp2[i].residential_location
+	var work_str = nodeslist_tmp2[i].work_location
+   if(res_str.indexOf("workers") != -1){
+	   label_dat.push({
+		   residential_location : nodeslist_tmp2[i].residential_location,
+		   work_location : nodeslist_tmp2[i].work_location,
+		   value : nodeslist_tmp2[i].value
+	   })
+   }
+   if(work_str.indexOf("workers") != -1){
+	   label_dat.push({
+		   residential_location : nodeslist_tmp2[i].residential_location,
+		   work_location : nodeslist_tmp2[i].work_location,
+		   value : nodeslist_tmp2[i].value
+	   })
+   }
+   if(nodeslist_tmp2[i].residential_location == nodeslist_tmp2[i].work_location){
+	   label_dat.push({
+		   residential_location : nodeslist_tmp2[i].residential_location,
+		   work_location : nodeslist_tmp2[i].work_location,
+		   value : nodeslist_tmp2[i].value
+	   })
+   }
+}
 
-var label_dat = nodeslist_tmp2.filter(d => (d.residence_location.includes("workers")) || (d.work_location.includes("workers")) || (d.residence_location == d.work_location))
 label_dat = label_dat.filter((value, index, self) =>
   index === self.findIndex((t) => (
-    t.residence_location === value.residence_location && t.work_location === value.work_location && t.value == value.value
+    t.residential_location === value.residential_location && t.work_location === value.work_location && t.value == value.value
   ))
 )
 
 var same_loc =[];
 var annot_lab = [];
 label_dat.forEach(d => {
-	if(d.residence_location == d.work_location){
+	if(d.residential_location == d.work_location){
 		same_loc.push({
-			residence_location : d.residence_location,
+			residential_location : d.residential_location,
 			work_location : d.work_location,
 		value : d.value})
 	}
-	if(d.residence_location.includes('workers')){
-		annot_lab.push({outlab: "In Commuters: " + d.residence_location})
+	if(d.residential_location.includes('workers')){
+		annot_lab.push({outlab: "In Commuters: " + d.residential_location})
 	}
 	if(d.work_location.includes('workers')){
 		annot_lab.push({outlab : "Out Commuters: " + d.work_location})
 	}
 })
 
-var nodeslist_tmp3 = nodeslist_tmp2.filter(d => !d.residence_location.includes("workers"))
+var nodeslist_tmp3 = nodeslist_tmp2.filter(d => !d.residential_location.includes("workers"))
                       .filter(d => !d.work_location.includes("workers")) 
-                      .filter(d => d.residence_location != d.work_location)
+                      .filter(d => d.residential_location != d.work_location)
 
 var nodeslist_dat = same_loc.concat(nodeslist_tmp3)
 
@@ -8992,7 +9069,7 @@ var labarr_dat = [];
 var lab1_tmp = []
 var lab2_tmp = []
 nodeslist_dat.forEach(obj => { 
-	lab1_tmp.push(obj.residence_location)
+	lab1_tmp.push(obj.residential_location)
 	lab2_tmp.push(obj.work_location)
 })
 
@@ -9043,10 +9120,10 @@ var tgt_neg = pos;
 
 for(i = 0; i < nodeslist_dat.length;i++){
 		if(nodeslist_dat[i].value < 0) {  //live in area work elsewhere
-			nodeslist_dat[i].src = labarr_dat.indexOf(nodeslist_dat[i].residence_location)
+			nodeslist_dat[i].src = labarr_dat.indexOf(nodeslist_dat[i].residential_location)
 			nodeslist_dat[i].tgt = tgt_neg
 			nodeslist_dat[i].val = Math.abs(nodeslist_dat[i].value)
-			nodeslist_dat[i].lablink = nodeslist_dat[i].residence_location + " to " + nodeslist_dat[i].work_location + ": " + fmt_comma(Math.abs(nodeslist_dat[i].value));	
+			nodeslist_dat[i].lablink = nodeslist_dat[i].residential_location + " to " + nodeslist_dat[i].work_location + ": " + fmt_comma(Math.abs(nodeslist_dat[i].value));	
 			nodeslist_dat[i].xpos =  0.9;
 			nodeslist_dat[i].labposx = 1;
 			nodeslist_dat[i].ypos =  parseFloat(y_dat_neg.toFixed(3));
@@ -9056,30 +9133,30 @@ for(i = 0; i < nodeslist_dat.length;i++){
 			tgt_neg++
 			
 		} else {
-			nodeslist_dat[i].src = labarr_dat.indexOf(nodeslist_dat[i].residence_location)
+			nodeslist_dat[i].src = labarr_dat.indexOf(nodeslist_dat[i].residential_location)
 			nodeslist_dat[i].tgt = 0
 			nodeslist_dat[i].val = Math.abs(nodeslist_dat[i].value)
-			nodeslist_dat[i].lablink = nodeslist_dat[i].residence_location + " to " + nodeslist_dat[i].work_location + ": " + fmt_comma(Math.abs(nodeslist_dat[i].value));	
+			nodeslist_dat[i].lablink = nodeslist_dat[i].residential_location + " to " + nodeslist_dat[i].work_location + ": " + fmt_comma(Math.abs(nodeslist_dat[i].value));	
 			nodeslist_dat[i].xpos =  0.1;
 			nodeslist_dat[i].ypos =  parseFloat(y_dat_pos.toFixed(3));
 			nodeslist_dat[i].labposx = 0;
 			nodeslist_dat[i].labposy =  parseFloat(y_dat_pos.toFixed(3));
-			nodeslist_dat[i].lab = nodeslist_dat[i].residence_location;
+			nodeslist_dat[i].lab = nodeslist_dat[i].residential_location;
 			y_dat_pos = y_dat_pos + incr;
 		}
-		if(nodeslist_dat[i].residence_location == nodeslist_dat[i].work_location){
+		if(nodeslist_dat[i].residential_location == nodeslist_dat[i].work_location){
 			nodeslist_dat[i].src = 0;
 			nodeslist_dat[i].tgt = 0;
 			nodeslist_dat[i].xpos =  0.5;
 			nodeslist_dat[i].ypos =  0.5;
 			nodeslist_dat[i].labposx = 0;
 			nodeslist_dat[i].labposy =  0;
-			nodeslist_dat[i].lab = nodeslist_dat[i].residence_location;
-			nodeslist_dat[i].lablink = "Work and Live in " + nodeslist_dat[i].residence_location + ": "+ fmt_comma(Math.abs(nodeslist_dat[i].value))
+			nodeslist_dat[i].lab = nodeslist_dat[i].residential_location;
+			nodeslist_dat[i].lablink = "Work and Live in " + nodeslist_dat[i].residential_location + ": "+ fmt_comma(Math.abs(nodeslist_dat[i].value))
 		}
 		
 		//Build Label Annotations
-			lab_annotation.push({text: nodeslist_dat[i].residence_location,
+			lab_annotation.push({text: nodeslist_dat[i].residential_location,
 				font : {size : 11, color : 'black'},    
 				x : nodeslist_dat[i].xpos,
 				y : nodeslist_dat[i].ypos,
