@@ -9106,9 +9106,6 @@ if(neg < pos) {
 }
 var incr = parseFloat(inc.toFixed(3))
 
-//Calculating total jobs from the vals array to scale the linewidths
-var tot_jobs = vals.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-
 // Prepping nodelsist data
 
 var total_pos_datmig = 0;
@@ -9184,9 +9181,6 @@ for(i = 0; i < nodeslist_dat.length;i++){
 				y : nodeslist_dat[i].ypos,
 				showarrow : false})
 } //i
-
-debugger
-console.log(nodeslist_dat)
 
 //Bar Chart Section
 //Plotting 
