@@ -9148,7 +9148,7 @@ for(i = 0; i < nodeslist_dat.length;i++){
 			nodeslist_dat[i].ypos =  parseFloat(y_dat_neg.toFixed(3));
 			nodeslist_dat[i].labposy = parseFloat(y_dat_neg.toFixed(3));
 			nodeslist_dat[i].lab = nodeslist_dat[i].work_location;
-			nodeslist_dat[i].linewidth = parseFloat((Math.abs(nodeslist_dat[i].value)/tot_jobs).toFixed(2))
+			nodeslist_dat[i].linewidth = parseFloat((Math.abs(nodeslist_dat[i].value)/vals[2]).toFixed(2))
 			y_dat_neg = y_dat_neg + incr;
 			tgt_neg++
 			
@@ -9162,7 +9162,7 @@ for(i = 0; i < nodeslist_dat.length;i++){
 			nodeslist_dat[i].labposx = 0;
 			nodeslist_dat[i].labposy =  parseFloat(y_dat_pos.toFixed(3));
 			nodeslist_dat[i].lab = nodeslist_dat[i].residential_location;
-			nodeslist_dat[i].linewidth = parseFloat((Math.abs(nodeslist_dat[i].value)/tot_jobs).toFixed(2))
+			nodeslist_dat[i].linewidth = parseFloat((Math.abs(nodeslist_dat[i].value)/vals[1]).toFixed(2))
 			y_dat_pos = y_dat_pos + incr;
 		}
 		if(nodeslist_dat[i].residential_location == nodeslist_dat[i].work_location){
@@ -9174,7 +9174,7 @@ for(i = 0; i < nodeslist_dat.length;i++){
 			nodeslist_dat[i].labposy =  0;
 			nodeslist_dat[i].lab = nodeslist_dat[i].residential_location;
 			nodeslist_dat[i].lablink = "Work and Live in " + nodeslist_dat[i].residential_location + ": "+ fmt_comma(Math.abs(nodeslist_dat[i].value))
-			nodeslist_dat[i].linewidth = parseFloat((Math.abs(nodeslist_dat[i].value)/tot_jobs).toFixed(2))
+			nodeslist_dat[i].linewidth = parseFloat((Math.abs(nodeslist_dat[i].value)/vals[0]).toFixed(2))
 		}
 		
 		//Build Label Annotations
@@ -9273,8 +9273,8 @@ var data_commut = [data_com];
 var layout_commut = {
   title: barchart_title + " Commuting Flows", 
   autosize : false, 
-  width: 900,
-  height: 930, 
+  width: 1000,
+  height: 1000, 
   font: {
     size: 11,
 	family : 'Arial Black'
@@ -9287,7 +9287,7 @@ annotations : [
 	  xanchor : 'left',
 	  yanchor : 'bottom',
       x : 0, 
-      y : -0.11, 
+      y : -0.10, 
       align : 'left', 
       showarrow : false},
 		{text : annot_in,
