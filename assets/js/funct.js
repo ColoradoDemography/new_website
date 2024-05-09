@@ -9079,9 +9079,17 @@ label_dat.forEach(d => {
 var nodeslist_tmp3 = nodeslist_tmp2.filter(d => !d.residential_location.includes("workers"))
                       .filter(d => !d.work_location.includes("workers")) 
                       .filter(d => d.residential_location != d.work_location)
+var zero_node = []
+zero_node.push({residential_location : geo_name,
+				work_location : geo_name,
+				value : 1
+})
 
-var nodeslist_dat = same_loc.concat(nodeslist_tmp3)
-
+if(vals[0] == 0){
+	var nodeslist_dat = zero_node.concat(same_loc,nodeslist_tmp3)
+} else {
+	var nodeslist_dat = same_loc.concat(nodeslist_tmp3)
+}
 
 var labarr_dat = [];
 var lab1_tmp = []
