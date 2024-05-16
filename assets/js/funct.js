@@ -2183,14 +2183,11 @@ function genFilename(outname, type, ext, yr) {
 		case 'netmig' :
 			var fileName = outname + " Net Migration by Age." + ext;
 		break;
-		case 'mig' :
-			var fileName = outname + " Long Term Net Migration." + ext;
+		case 'linecoc' :
+			var fileName = outname + " Long Term Components of Change." + ext;
 		break;
-		case 'birth' :
-			var fileName = outname + " Long Term Births." + ext;
-		break;
-		case 'death' :
-			var fileName = outname + " Long term Deaths." + ext;
+		case 'barcoc' :
+			var fileName = outname + " Long Term Components of Change Barchart." + ext;
 		break;
 		case 'age' :
 			var fileName = outname + " Age Categories." + ext;
@@ -4263,7 +4260,7 @@ if(fips == "000") {
 	   var homestr_prev = genACSUrl("homepage",prevyr, "B25097", 1, 3, "county",fips);
 	   
        var rentstr_cur = genACSUrl("homepage",curyr, "B25064", 1, 1, "county",fips);
-	   var rentstr_prev = genACSUrl("homepage",curyr, "B25064", 1, 1, "county",fips);;
+	   var rentstr_prev = genACSUrl("homepage",prevyr, "B25064", 1, 1, "county",fips);;
    };
    
  
@@ -4610,7 +4607,8 @@ function genHousing(fips, yrvalue) {
 //genHousing generates housing data for home Page table From the SDO County Profile
 	var fmt_pct = d3.format(".2%")
 	var fmt_comma = d3.format(",");
-	var fmt_dec = d3.format(".2");
+	var fmt_dec = d3.format(".2f");
+
 
 //Specify fips_list
 var fips_list = parseInt(fips); 
@@ -4694,7 +4692,7 @@ for(i = 1; i < housing_fint.length; i++){
 														   pctVal = " ";
 														 };
 	}
-	if(housing_fint[i][0][0].name == 'hhldpoptothuratio') { out_name = "Household to Population Ratio";
+	if(housing_fint[i][0][0].name == 'hhldpoptothuratio') { out_name = " Household Population to Housing Unit Ratio";
 	                                                     cVal = fmt_dec(currentVal);
 														 pctVal = " ";
 														 };
@@ -5212,7 +5210,6 @@ var popchng_trace = {
 			  textposition: 'auto',
 			  hoverinfo: 'none',
 			  marker: {
-				color: 'blue',
 				opacity: 0.9,
 				line: {
 				  color: 'blue',
@@ -5242,7 +5239,6 @@ var popchng_trace = {
 			  textposition : 'auto',
 			  hoverinfo: 'none',
 			  marker: {
-				color: 'blue',
 				opacity: 0.9,
 				line: {
 				  color: 'blue',
@@ -6940,58 +6936,84 @@ netmigrwa_png.onclick = function() {
 
 //cat Long term components of change dashboard (netmighist.html)
 
-function genCOCHIST(fipsVal, ctyName) {
+function genCOCHIST(fipsVal,  yrs, stats, DIV0, DIV1) {
 //genCOCHIST generates long-term COC charts
 	
 const fmt_date = d3.timeFormat("%B %d, %Y");
 
 //Generating urls
 var ctyfips  = parseInt(fipsVal);
-var yrlist = 1970;
-for(i = 1971; i <= 2050; i++){
-	yrlist = yrlist + "," + i;
+var ctyName = countyName(ctyfips);
+
+var yrlist = yrs[0];
+for(i = 1; i < yrs.length; i++){
+	yrlist = yrlist + "," + yrs[i];
 };
+debugger
+console.log(yrlist)
 
 if(fipsVal == "000") {
 	 var dataurl = 'https://gis.dola.colorado.gov/lookups/components_region?reg_num=' + ctyfips + '&year=' + yrlist;
 } else {
 	var dataurl = 'https://gis.dola.colorado.gov/lookups/components?county=' + ctyfips + '&year=' + yrlist;
 }
+
+
 var year_est = [];
 var year_forc = [];
+var year_tot = []
 var birth_est = [];
 var birth_forc = [];
 var death_est = [];
 var death_forc = [];
 var mig_est = [];
 var mig_forc = [];
+var natincr_est = [];
+var natincr_forc = [];
 var out_data = [];
 
 d3.json(dataurl).then(function(data){
+
 	   for(i = 0; i < data.length; i++){
-		   out_data.push({'Year' : data[i].year, 'County' : ctyName, 'Births' : Number(data[i].births), 'Deaths' : Number(data[i].deaths), 
+		   out_data.push({ 'FIPS' : fipsVal[0], 'County' : ctyName, 'Year' : data[i].year, 'Births' : Number(data[i].births), 'Deaths' : Number(data[i].deaths), "Natural Increase" : Number(data[i].births) - Number(data[i].deaths),
 		                  'Net Migration' : Number(data[i].netmig), 'Data Type' : data[i].datatype});
 		   if(data[i].datatype == "Estimate"){
 			year_est.push(data[i].year);
 		    birth_est.push(Number(data[i].births));
 			death_est.push(Number(data[i].deaths));
 			mig_est.push(Number(data[i].netmig));
+			natincr_est.push(Number(data[i].births) - Number(data[i].deaths));
 		   } else {
 			year_forc.push(data[i].year);
 		    birth_forc.push(Number(data[i].births));
 			death_forc.push(Number(data[i].deaths));
 			mig_forc.push(Number(data[i].netmig));
+			natincr_forc.push(Number(data[i].births) - Number(data[i].deaths));
 		   };
+		  if(yrs.length > 5){
+		  if(i == 0 || data[i].year % 5 == 0){
+			  year_tot.push(data[i].year); 
+		  }
+		  } else {
+			year_tot.push(data[i].year);
+		  }
 	   };
-//Traces
+	   
+
+var min_yr = Math.min(...year_est);
+var max_yr = Math.max(...year_est);
+var tit1 = "Components of Population Change "
+var bar_title =  tit1.concat(min_yr.toString(), " to ", max_yr.toString(), ": ", ctyName) 
+
+//Line Traces
 var birth_tmp1 = { 
 					   x: year_est,
 					   y : birth_est,
-					   name : 'Estimate',
+					   name : 'Births Estimate',
 					   mode : 'lines',
 					   line: {
 						dash: 'solid',
-						color : 'black',
+						color : 'blue',
 						width: 3
 						}
 					};
@@ -6999,24 +7021,23 @@ var birth_tmp1 = {
 var birth_tmp2 = { 
 					   x: year_forc,
 					   y : birth_forc,
-					   name : 'Forecast',
+					   name : 'Births Forecast',
 					   mode : 'lines',
 					   line: {
 						dash: 'dash',
-						color : 'black',
+						color : 'blue',
 						width: 3
 						}
 					};
-var birth_trace = [birth_tmp1, birth_tmp2];
 
 var death_tmp1 = { 
 					   x: year_est,
 					   y : death_est,
-					   name : 'Estimate',
+					   name : 'Deaths Estimate',
 					   mode : 'lines',
 					   line: {
 						dash: 'solid',
-						color : 'grey',
+						color : 'red',
 						width: 3
 						}
 					};
@@ -7024,20 +7045,19 @@ var death_tmp1 = {
 var death_tmp2 = { 
 					   x: year_forc,
 					   y : death_forc,
-					   name : 'Forecast',
+					   name : 'Deaths Forecast',
 					   mode : 'lines',
 					   line: {
 						dash: 'dash',
-						color : 'grey',
+						color : 'red',
 						width: 3
 						}
 					};
-var death_trace = [death_tmp1, death_tmp2];
 
 var mig_tmp1 = { 
 					   x: year_est,
 					   y : mig_est,
-					   name : 'Estimate',
+					   name : 'Net Migraton Estimate',
 					   mode : 'lines',
 					   line: {
 						dash: 'solid',
@@ -7049,7 +7069,7 @@ var mig_tmp1 = {
 var mig_tmp2 = { 
 					   x: year_forc,
 					   y : mig_forc,
-					   name : 'Forecast',
+					   name : ' Net Migration Forecast',
 					   mode : 'lines',
 					   line: {
 						dash: 'dash',
@@ -7057,7 +7077,75 @@ var mig_tmp2 = {
 						width: 3
 						}
 					};
-var mig_trace = [mig_tmp1, mig_tmp2];
+
+var natincr_tmp1 = { 
+					   x: year_est,
+					   y : natincr_est,
+					   name : 'Natural Increase Estimate',
+					   mode : 'lines',
+					   line: {
+						dash: 'solid',
+						color : 'grey',
+						width: 3
+						}
+					};
+
+var natincr_tmp2 = { 
+					   x: year_forc,
+					   y : natincr_forc,
+					   name : 'Natural Increase Forecast',
+					   mode : 'lines',
+					   line: {
+						dash: 'dash',
+						color : 'grey',
+						width: 3
+						}
+					};
+
+//Creating the line chart trace
+
+var line_trace = []
+stats.forEach( d => {
+	switch(d){
+		case "births":
+		line_trace.push(birth_tmp1, birth_tmp2);
+		break;
+		case "deaths":
+		line_trace.push(death_tmp1, death_tmp2);
+		break;
+		case "netmig":
+		line_trace.push(mig_tmp1, mig_tmp2);
+		break;
+		case "natincr":
+		line_trace.push(natincr_tmp1, natincr_tmp2);
+		break;
+		}
+})
+
+//Genearing Bar chart trace
+
+var mig_bar = { 
+					   x: year_est,
+					   y : mig_est,
+					   name : 'Net Migration',
+					   type : 'bar',
+					   marker: {
+						color : '#C0504D'
+					   }
+					};
+
+var natincr_bar = { 
+					   x: year_est,
+					   y : natincr_est,
+					   name : 'Natural Increase',
+					   type : 'bar',
+					   marker : {
+						color : '#4F81BD'
+					   }
+					};
+					
+
+var bar_trace = [natincr_bar, mig_bar]
 
 //Generating Chart	
 var config = {responsive: true,
@@ -7065,16 +7153,13 @@ var config = {responsive: true,
 			  
 	
 //Clearing out Divs
-var BIRTH = document.getElementById("birth_output");
-var DEATH = document.getElementById("death_output");
-var MIG = document.getElementById("netmig_output");
 
-BIRTH.innerHTML = "";
-DEATH.innerHTML = "";
-MIG.innerHTML = "";
+DIV0.innerHTML = "";
+DIV1.innerHTML = "";
 
-var birth_layout = {
-		title: "Birth Estimate and Forecast " + ctyName,
+
+var line_layout = {
+		title: "Components of Change Estimate and Forecast: " + ctyName,
 		  autosize: false,
 		  width: 1000,
 		  height: 500,
@@ -7087,7 +7172,9 @@ var birth_layout = {
 			gridcolor: '#bdbdbd',
 			gridwidth: 1,
 			linecolor: 'black',
-			linewidth: 2
+			linewidth: 2,
+			tickmode: "array", 
+			tickvals : year_tot,
 		  },
 		  yaxis: {
 			  title : 'Persons',
@@ -7104,52 +7191,27 @@ var birth_layout = {
 			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
 		
-var death_layout = {
-		title: "Death Estimate and Forecast " + ctyName,
-		  autosize: false,
-		  width: 1000,
-		  height: 500,
-		  xaxis: {
-			title : 'Year',
-			showgrid: true,
-			zeroline: true,
-			showline: true,
-			mirror: 'ticks',
-			gridcolor: '#bdbdbd',
-			gridwidth: 1,
-			linecolor: 'black',
-			linewidth: 2
-		  },
-		  yaxis: {
-			  title : 'Persons',
-			  automargin : true,
-			showgrid: true,
-			showline: true,
-			mirror: 'ticks',
-			gridcolor: '#bdbdbd',
-			gridwidth: 1,
-			linecolor: 'black',
-			linewidth: 2,
-			 tickformat: ','
-		  },
-			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
-		};
 		
-var mig_layout = {
-		title: "Net Migration Estimate and Forecast " + ctyName,
+var bar_layout = {
+		title: bar_title,
 		  autosize: false,
 		  width: 1000,
 		  height: 500,
+		  barmode : 'relative',
 		  xaxis: {
 			title : 'Year',
 			showgrid: true,
 			zeroline: true,
 			showline: true,
-			mirror: 'ticks',
+//			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
 			gridwidth: 1,
 			linecolor: 'black',
-			linewidth: 2
+			linewidth: 2,
+			tickmode: "array", 
+			tickvals: year_est,
+			tickangle: 45,
+			tickfont: { size: 10}
 		  },
 		  yaxis: {
 			  title : 'Persons',
@@ -7163,43 +7225,33 @@ var mig_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
+		  legend : { x : 0.3, y : 1.1, 'orientation' : 'h', font:{size: 10}},
 			annotations : [annot('Data and Visualization by the Colorado State Demography Office.')]
 		};
 		
 
-Plotly.newPlot(BIRTH, birth_trace, birth_layout, config);
-Plotly.newPlot(DEATH, death_trace, death_layout, config);
-Plotly.newPlot(MIG, mig_trace, mig_layout, config);
+Plotly.newPlot(DIV0, line_trace, line_layout, config);
+Plotly.newPlot(DIV1, bar_trace, bar_layout, config);
 
 //Button Events
-//Net Migration Chart
 
-var birth_csv = document.getElementById('birth_csv');
-var birth_png = document.getElementById('birth_png');
-birth_csv.onclick = function() {
-	  exportToCsv(ctyName, 'nethist', out_data, 0);
+var linecoc_csv = document.getElementById('linecoc_csv');
+var linecoc_png = document.getElementById('linecoc_png');
+linecoc_csv.onclick = function() {
+	  exportToCsv(ctyName, 'linecoc', out_data, 0);
      }; 
-birth_png.onclick = function() {
-	   exportToPng(ctyName, 'birth', BIRTH, 0);
+linecoc_png.onclick = function() {
+	   exportToPng(ctyName, 'linecoc', DIV0, 0);
      };
 	 
 
-var death_csv = document.getElementById('death_csv');
-var death_png = document.getElementById('death_png');
-death_csv.onclick = function() {
-	  exportToCsv(ctyName, 'nethist', out_data, 0);
+var barcoc_csv = document.getElementById('barcoc_csv');
+var barcoc_png = document.getElementById('barcoc_png');
+barcoc_csv.onclick = function() {
+	  exportToCsv(ctyName, 'barcoc', out_data, 0);
      }; 
-death_png.onclick = function() {
-	   exportToPng(ctyName, 'death', DEATH, 0);
-     };
-	 
-var mig_csv = document.getElementById('netmig_csv');
-var mig_png = document.getElementById('netmig_png');
-mig_csv.onclick = function() {
-	  exportToCsv(ctyName, 'nethist', out_data, 0);
-     }; 
-mig_png.onclick = function() {
-	   exportToPng(ctyName, 'mig', MIG, 0);
+barcoc_png.onclick = function() {
+	   exportToPng(ctyName, 'barcoc', DIV1, 0);
      };
 	 
 }); //end of d3 json
@@ -8856,7 +8908,7 @@ function genLODES(geo, loc, geo_name, year, sector, CHART0, CHART1){
 		 }
 		break;
 		case 'goods' :
-		 var barchart_title = geo_name + " Goods Producing industry Jobs, " + year;
+		 var barchart_title = geo_name + " Goods Producing Jobs, " + year;
 		 for (i = 0; i < data[0].length; i++) {
 			barchart_data.push({"work_in_home_in" : parseInt(data[0][i].work_in_home_in_goods),
 							"work_in_home_out" : parseInt(data[0][i].work_in_home_out_goods),
@@ -8886,7 +8938,7 @@ function genLODES(geo, loc, geo_name, year, sector, CHART0, CHART1){
 		 }
 		break;
 		case 'trade' :
-		 var barchart_title = geo_name + " Trade, Transportation,\nand Utilities industry Jobs, " + year;
+		 var barchart_title = geo_name + " Trade, Transportation,\nand Utilities Jobs, " + year;
 		 for (i = 0; i < data[0].length; i++) {
 			barchart_data.push({"work_in_home_in" : parseInt(data[0][i].work_in_home_in_trade),
 							"work_in_home_out" : parseInt(data[0][i].work_in_home_out_trade),
@@ -8916,7 +8968,7 @@ function genLODES(geo, loc, geo_name, year, sector, CHART0, CHART1){
 		 }
 		break;
 		case 'services' :
-		var barchart_title = geo_name + " All Other Services Industry Jobs, " + year;
+		var barchart_title = geo_name + " Service Industry Jobs, " + year;
 		 for (i = 0; i < data[0].length; i++) {
 			barchart_data.push({"work_in_home_in" : parseInt(data[0][i].work_in_home_in_services),
 							"work_in_home_out" : parseInt(data[0][i].work_in_home_out_services),
