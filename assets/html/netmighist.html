@@ -32,7 +32,7 @@
 </head>
 <body>
 <div>
-<a href="https://coloradodemography.github.io/new_website/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt='State Demography Office Homepage'></a>
+<a href="https://demography.dola.colorado.gov/"><img class="logoSDO" src="../img/SDO-1600x400.jpg" alt='State Demography Office Homepage'></a>
 </div>
 	<div w3-include-html="./navheader.html"></div>
 <!-- First Grid, linked images -->
@@ -44,8 +44,8 @@
 	<div w3-include-html="./left_hand_index.html"></div>
   </div> <!-- Grid  panel2_2_1 -->
   <div class="grid-item app-panel_2_2">
-  <h1 class='h1_style' id='mainx'>SDO Long Term Net Migration Visualization</h1>
-  <h2 class='h2_style'>Long Term Trends: Births, Deaths, and Net Migration by County</h2>
+  <h1 class='h1_style' id='mainx' title='SDO Long Term Net Migration Visualization' aria-label='SDO Long Term Net Migration Visualization'>SDO Long Term Net Migration Visualization</h1>
+  <h2 class='h2_style' title='Long Term Trends: Births, Deaths, and Net Migration by County' aria-label='Long Term Trends: Births, Deaths, and Net Migration by County'>Long Term Trends: Births, Deaths, and Net Migration by County</h2>
    <br><br>INSTRUCTIONS:
    <p>
    The following page shows births, deaths, and net migration estimates and forecasts for counties from 1970 to 2050.
@@ -54,42 +54,69 @@
    <br><br>
    <b><i>This data visualization can only be viewed on a tablet or desktop.</i></b>
    <br><br>
- 	 <label for="county-dropdown" for='county-dropdown'><b>Select County:</b></label>
-	 <select class="county-dropdown" id="county-dropdown"></select>
+   <table style="border-collapse: collapse; border : none;">
+   <tr>
+		<td style="border : none; width: 25%;">
+		 <label for="county-dropdown" for='county-dropdown'><b>Select County:</b></label>
+		</td>
+		<td style="border : none; width: 25%;">
+		 <label for="year-dropdown" for='year-dropdown'><b>Select Year:</b></label>
+		</td>
+		<td style="border : none; width: 25%;">
+		 <label for="stat-dropdown" for='stat-dropdown'><b>Select Data Series:</b></label>
+		</td>
+		<td style="border : none; width: 25%;">
+		</td>
+	</tr>
+	<tr>
+		<td style="border : none; width: 25%; vertical-align:top">
+			<select class="county-dropdown" id="county-dropdown"></select>
+		</td>
+		<td style="border : none; width: 25%; vertical-align:top">
+		<input type="radio" id="year_all" name="year_spec" value="all" onchange="checkYR(this.value)" checked />
+		<label for="all">All Years (1970 to 2050)</label><br>
+		<input type="radio" id="year_sel" name="year_spec" value="sel" onchange="checkYR(this.value)" />
+		<label for="sel">Select Specific Years</label><br>
+		<select class="year-dropdown" id="year-dropdown" style='width:100px;' size="6" multiple role='listbox'>
+		</td>
+		<td style="border : none; width: 25%; vertical-align:top">
+		 <select class="stat-dropdown" id="stat-dropdown" size="4" multiple role='listbox'>
+		 <option value='births' selected="selected">Births</option>
+		 <option value='deaths' selected="selected">Deaths</option>
+		 <option value='netmig' selected="selected">Net Migration</option>
+		 <option value='natincr' >Natural Increase</option>
+
+		 </select>
+		</td>
+	   <td style="border : none; width: 25%; vertical-align:top">
+		<button class='databutton' id="submit">Generate Charts</button>
+		</td>
+	</tr>
+	</table>
   </div>
   <div class="grid-item app-panel_3_2">
       <div class="dropdown AClass">
-		  <button class="dropbtn"  id="births" aria-label='Long Term Births Download Button'><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+		  <button class="dropbtn"  id="linecoc" aria-label='Births, Deaths, New Migraton Download Button'><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
 		  <div class="dropdown-content">
-			<a href="#" id='birth_csv'>Download Data (CSV)</a>
-			<a href='#' id='birth_png'>Download Image (PNG)</a>
-		<a href='../lookups/county_coc_lookup.html' id='birth_src' target='_blank'><u>Data Source:</u>County Births, Deaths, and Migration Lookup</a>
-
+			<a href="#" id='linecoc_csv'>Download Data (CSV)</a>
+			<a href='#' id='linecoc_png'>Download Image (PNG)</a>
+			<a href='../lookups/county_coc_lookup.html' id='linecoc_src' target='_blank'><u>Data Source:</u>County Births, Deaths, and Migration Lookup</a>
 		  </div>
 	  </div>
-	 <div id="birth_output"></div>
+	 <div id="linecoc_output"></div>
   </div>
   <div class="grid-item app-panel_4_2">
 	<div class="dropdown AClass">
-		<button class="dropbtn" id="death" aria-label='Long Term Deaths Download Button'><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
-	<div class="dropdown-content">
-		<a href="#" id='death_csv'>Download Data (CSV)</a>
-		<a href='#' id='death_png'>Download Image (PNG)</a>
-		<a href='../lookups/county_coc_lookup.html' id='death_src' target='_blank'><u>Data Source:</u>County Births, Deaths, and Migration Lookup</a>
-	 </div>
+		<button class="dropbtn" id="barcoc" aria-label='Components of Change Download Button'><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+		<div class="dropdown-content">
+			<a href="#" id='barcoc_csv'>Download Data (CSV)</a>
+			<a href='#' id='barcoc_png'>Download Image (PNG)</a>
+			<a href='../lookups/county_coc_lookup.html' id='death_src' target='_blank'><u>Data Source:</u>County Births, Deaths, and Migration Lookup</a>
+		</div>
 	</div>
-    <div id="death_output"></div>
+    <div id="barcoc_output"></div>
   </div>
   <div class="grid-item app-panel_5_2">
-  	<div class="dropdown AClass">
-		<button class="dropbtn" id="netmig" aria-label='Long Term Net Migration Download Button><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
-	<div class="dropdown-content">
-		<a href="#" id='netmig_csv'>Download Data (CSV)</a>
-		<a href='#' id='netmig_png'>Download Image (PNG)</a>
-		<a href='../lookups/county_coc_lookup.html' id='netmig_src' target='_blank'><u>Data Source:</u>County Births, Deaths, and Migration Lookup</a>
-	 </div>
-	</div>
-    <div id="netmig_output"></div>
   </div>
 </div>  <!-- End of Grid -->
 
@@ -100,27 +127,77 @@
 includeHTML(); 
 
 hideButtons();
+
+document.getElementById('linecoc').style.display = 'block';
+document.getElementById('barcoc').style.display = 'block';
+
 /* Populate County Dropdown */
 popDropdown('county','county-dropdown','')
 
 //generating maximum year value for estimates
 var urlstr = "https://gis.dola.colorado.gov/lookups/componentYRS";
 d3.json(urlstr).then(function(yeardata){
-    var maxest = yeardata.filter(function(d){return d.datatype == 'Estimate'});
-	var yrsList = maxest.map(function(d){return d.year;});
-    var yrvalue = d3.max(yrsList);
+    var yrsList = yeardata.filter(function(d){return d.year >= 1970});
+    popDropdown('county','county-dropdown','');
+
+    popYrdd("year-dropdown",yrsList);  //Change this range to match data
+    document.getElementById('year-dropdown').style.visibility = 'hidden';
 	
-//Generate Initial Tables
-showButtons();
-genCOCHIST("000","Colorado");
+var CHART0 = document.getElementById("linecoc_output");
+var CHART1 = document.getElementById("barcoc_output");
+	
+document.getElementById('submit').addEventListener("click", chkInputs)
 
-d3.select("#county-dropdown").on("change", function(d,i) {
-        var selectedfips = d3.select("#county-dropdown").property('value');
-		var selectedcounty = d3.select('#county-dropdown option:checked').text();
+//Check and Generate output
+function chkInputs(){
+    CHART0.innerHTML = ""
+    CHART1.innerHTML = ""
+	var complete = true;
+	var outputmsg = "";
+	var fipsdd = document.getElementById('county-dropdown');
+	var selectedfips = getSelectValues(fipsdd);
 
-        genCOCHIST(selectedfips,selectedcounty);
-    });
+	
+	var statdd = document.getElementById('stat-dropdown');
+	var selectedstat = getSelectValues(statdd);
+
+	if((selectedfips.length == 0)){
+		    outputmsg = outputmsg +  " > Please select a County\n";
+			complete = false;
+	}
+
+	if(document.getElementById('year_all').checked){
+	 var selectedyr = [...new Set(yrsList.map(item => item.year))];
+	} else {
+	var yrdd = document.getElementById('year-dropdown');
+	var selectedyr = getSelectValues(yrdd);
+	if((selectedyr.length < 2)){
+	    outputmsg = outputmsg +  " > Please select two or more years\n";
+		complete = false;
+	}
+}
+	if((selectedstat.length == 0)){
+	    outputmsg = outputmsg +  " > Please select one or more data series\n";
+		complete = false;
+	}
+    if(complete){
+	      genCOCHIST(selectedfips, selectedyr, selectedstat, CHART0, CHART1)
+	} else {
+		 window.alert(outputmsg);
+	}
+} //chkinputs
+
 }); //end of maximum year value
+
+//Radio Button Function
+function checkYR(year_spec){
+	if(document.getElementById('year_all').checked) {
+		document.getElementById('year-dropdown').style.visibility = 'hidden';
+	} else {
+	    document.getElementById('year-dropdown').style.visibility = 'visible';
+	}
+}
+
 
 </script>
 
