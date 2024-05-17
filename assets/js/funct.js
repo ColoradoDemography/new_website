@@ -7024,7 +7024,7 @@ var birth_tmp1 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'solid',
-						color : 'blue',
+						color : '#d81b60',
 						width: 3
 						}
 					};
@@ -7036,7 +7036,7 @@ var birth_tmp2 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'dash',
-						color : 'blue',
+						color : '#d81b60',
 						width: 3
 						}
 					};
@@ -7048,7 +7048,7 @@ var death_tmp1 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'solid',
-						color : 'red',
+						color : '#1e88e5',
 						width: 3
 						}
 					};
@@ -7060,7 +7060,7 @@ var death_tmp2 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'dash',
-						color : 'red',
+						color : '#1e88e5',
 						width: 3
 						}
 					};
@@ -7072,7 +7072,7 @@ var mig_tmp1 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'solid',
-						color : 'brown',
+						color : '#8B8000',
 						width: 3
 						}
 					};
@@ -7084,7 +7084,7 @@ var mig_tmp2 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'dash',
-						color : 'brown',
+						color : '#8B8000',
 						width: 3
 						}
 					};
@@ -7096,7 +7096,7 @@ var natincr_tmp1 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'solid',
-						color : 'grey',
+						color : '#004d40',
 						width: 3
 						}
 					};
@@ -7108,7 +7108,7 @@ var natincr_tmp2 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'dash',
-						color : 'grey',
+						color : '#004d40',
 						width: 3
 						}
 					};
@@ -7182,7 +7182,7 @@ var line_layout = {
 			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
 			gridwidth: 1,
-			linecolor: 'black',
+			linecolor: '#D3D3D3',
 			linewidth: 2,
 			tickmode: "array", 
 			tickvals : year_tick,
@@ -7219,7 +7219,7 @@ var bar_layout = {
 //			mirror: 'ticks',
 			gridcolor: '#bdbdbd',
 			gridwidth: 1,
-			linecolor: 'black',
+			linecolor: '#D3D3D3',
 			linewidth: 2,
 			tickmode: "array", 
 			tickvals: year_tick,
