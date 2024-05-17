@@ -48,19 +48,27 @@
   <h2 class='h2_style' title='Long Term Trends: Births, Deaths, and Net Migration by County' aria-label='Long Term Trends: Births, Deaths, and Net Migration by County'>Long Term Trends: Births, Deaths, and Net Migration by County</h2>
    <br><br>INSTRUCTIONS:
    <p>
-   The following page shows births, deaths, and net migration estimates and forecasts for counties from 1970 to 2050.
+   The following page shows births, deaths, net migration, and natural increase estimates and forecasts for counties between from 1970 to 2050.
    </p>
+   <p>
+   You can select a county, a range of years, and multiple data series.
+   </p>
+   <p>
    Click on the download icon on the left of each chart to download the chart, the underlying data and links to the data source.
-   <br><br>
+   </p>
+   <p>
    <b><i>This data visualization can only be viewed on a tablet or desktop.</i></b>
-   <br><br>
+   </p>
+   <hr>
    <table style="border-collapse: collapse; border : none;">
    <tr>
 		<td style="border : none; width: 25%;">
 		 <label for="county-dropdown" for='county-dropdown'><b>Select County:</b></label>
 		</td>
 		<td style="border : none; width: 25%;">
-		 <label for="year-dropdown" for='year-dropdown'><b>Select Year:</b></label>
+		 <b>Select Year Series:</b>
+		</td>
+		<td style="border : none; width: 25%;">
 		</td>
 		<td style="border : none; width: 25%;">
 		 <label for="stat-dropdown" for='stat-dropdown'><b>Select Data Series:</b></label>
@@ -73,11 +81,12 @@
 			<select class="county-dropdown" id="county-dropdown"></select>
 		</td>
 		<td style="border : none; width: 25%; vertical-align:top">
-		<input type="radio" id="year_all" name="year_spec" value="all" onchange="checkYR(this.value)" checked />
-		<label for="all">All Years (1970 to 2050)</label><br>
-		<input type="radio" id="year_sel" name="year_spec" value="sel" onchange="checkYR(this.value)" />
-		<label for="sel">Select Specific Years</label><br>
-		<select class="year-dropdown" id="year-dropdown" style='width:100px;' size="6" multiple role='listbox'>
+		<label for="beg-year">Select Beginning Year: </label><br>
+		<select class="year-dropdown" id="beg-year" style='width:100px;' size="3">
+		</td>
+		<td style="border : none; width: 25%; vertical-align:top">
+		<label for="end-year">Select Ending Year: </label><br>
+		<select class="year-dropdown" id="end-year" style='width:100px;' size="3">
 		</td>
 		<td style="border : none; width: 25%; vertical-align:top">
 		 <select class="stat-dropdown" id="stat-dropdown" size="4" multiple role='listbox'>
@@ -138,11 +147,15 @@ popDropdown('county','county-dropdown','')
 var urlstr = "https://gis.dola.colorado.gov/lookups/componentYRS";
 d3.json(urlstr).then(function(yeardata){
     var yrsList = yeardata.filter(function(d){return d.year >= 1970});
-    popDropdown('county','county-dropdown','');
 
-    popYrdd("year-dropdown",yrsList);  //Change this range to match data
-    document.getElementById('year-dropdown').style.visibility = 'hidden';
-	
+    popYrdd("beg-year",yrsList);  //Change this range to match data
+    popYrdd("end-year",yrsList);  //Change this range to match data
+
+	var min_yr = Math.min(...yrsList.map(o => o.year))
+	document.getElementById('beg-year').value = min_yr;
+	var max_yr = Math.max(...yrsList.map(o => o.year))
+	document.getElementById('end-year').value = max_yr;
+
 var CHART0 = document.getElementById("linecoc_output");
 var CHART1 = document.getElementById("barcoc_output");
 	
@@ -166,38 +179,25 @@ function chkInputs(){
 			complete = false;
 	}
 
-	if(document.getElementById('year_all').checked){
-	 var selectedyr = [...new Set(yrsList.map(item => item.year))];
-	} else {
-	var yrdd = document.getElementById('year-dropdown');
-	var selectedyr = getSelectValues(yrdd);
-	if((selectedyr.length < 2)){
-	    outputmsg = outputmsg +  " > Please select two or more years\n";
+
+    var stYr = document.getElementById('beg-year').value
+	var endYr = document.getElementById('end-year').value
+	if(endYr <= stYr){
+		outputmsg = outputmsg +  " > Please an Ending Year value later than the Beginning Year value.\n";
 		complete = false;
 	}
-}
 	if((selectedstat.length == 0)){
 	    outputmsg = outputmsg +  " > Please select one or more data series\n";
 		complete = false;
 	}
     if(complete){
-	      genCOCHIST(selectedfips, selectedyr, selectedstat, CHART0, CHART1)
+	      genCOCHIST(selectedfips, stYr, endYr, selectedstat, CHART0, CHART1)
 	} else {
 		 window.alert(outputmsg);
 	}
 } //chkinputs
 
 }); //end of maximum year value
-
-//Radio Button Function
-function checkYR(year_spec){
-	if(document.getElementById('year_all').checked) {
-		document.getElementById('year-dropdown').style.visibility = 'hidden';
-	} else {
-	    document.getElementById('year-dropdown').style.visibility = 'visible';
-	}
-}
-
 
 </script>
 
