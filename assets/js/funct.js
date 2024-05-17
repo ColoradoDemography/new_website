@@ -6936,7 +6936,7 @@ netmigrwa_png.onclick = function() {
 
 //cat Long term components of change dashboard (netmighist.html)
 
-function genCOCHIST(fipsVal,  yrs, stats, DIV0, DIV1) {
+function genCOCHIST(fipsVal,  byrs, eyrs, stats, DIV0, DIV1) {
 //genCOCHIST generates long-term COC charts
 	
 const fmt_date = d3.timeFormat("%B %d, %Y");
@@ -6945,12 +6945,13 @@ const fmt_date = d3.timeFormat("%B %d, %Y");
 var ctyfips  = parseInt(fipsVal);
 var ctyName = countyName(ctyfips);
 
-var yrlist = yrs[0];
-for(i = 1; i < yrs.length; i++){
-	yrlist = yrlist + "," + yrs[i];
+var yrlist = parseInt(byrs);
+for(i = parseInt(byrs)+1; i <= parseInt(eyrs); i++){
+	yrlist = yrlist + "," + i;
 };
-debugger
-console.log(yrlist)
+
+
+
 
 if(fipsVal == "000") {
 	 var dataurl = 'https://gis.dola.colorado.gov/lookups/components_region?reg_num=' + ctyfips + '&year=' + yrlist;
@@ -6961,15 +6962,18 @@ if(fipsVal == "000") {
 
 var year_est = [];
 var year_forc = [];
-var year_tot = []
+var year_bars = [];
+var year_tick = []
 var birth_est = [];
 var birth_forc = [];
 var death_est = [];
 var death_forc = [];
 var mig_est = [];
 var mig_forc = [];
+var mig_bars = [];
 var natincr_est = [];
 var natincr_forc = [];
+var natincr_bars = []
 var out_data = [];
 
 d3.json(dataurl).then(function(data){
@@ -6990,18 +6994,25 @@ d3.json(dataurl).then(function(data){
 			mig_forc.push(Number(data[i].netmig));
 			natincr_forc.push(Number(data[i].births) - Number(data[i].deaths));
 		   };
-		  if(yrs.length > 5){
-		  if(i == 0 || data[i].year % 5 == 0){
-			  year_tot.push(data[i].year); 
-		  }
-		  } else {
-			year_tot.push(data[i].year);
-		  }
+		   //Dealing with axis ticks
+
+		   if((eyrs-byrs) >= 50){
+			  if(data[i].year % 2 == 0){
+				year_tick.push(data[i].year); 
+				}
+		   } else {
+			  year_tick.push(data[i].year); 
+		  } 
+		  year_bars.push(data[i].year);
+		  mig_bars.push(Number(data[i].netmig));
+		  natincr_bars.push(Number(data[i].births) - Number(data[i].deaths));
+
 	   };
 	   
 
-var min_yr = Math.min(...year_est);
-var max_yr = Math.max(...year_est);
+
+var min_yr = Math.min(...year_tick);
+var max_yr = Math.max(...year_tick);
 var tit1 = "Components of Population Change "
 var bar_title =  tit1.concat(min_yr.toString(), " to ", max_yr.toString(), ": ", ctyName) 
 
@@ -7125,8 +7136,8 @@ stats.forEach( d => {
 //Genearing Bar chart trace
 
 var mig_bar = { 
-					   x: year_est,
-					   y : mig_est,
+					   x: year_bars,
+					   y : mig_bars,
 					   name : 'Net Migration',
 					   type : 'bar',
 					   marker: {
@@ -7135,8 +7146,8 @@ var mig_bar = {
 					};
 
 var natincr_bar = { 
-					   x: year_est,
-					   y : natincr_est,
+					   x: year_bars,
+					   y : natincr_bars,
 					   name : 'Natural Increase',
 					   type : 'bar',
 					   marker : {
@@ -7174,7 +7185,9 @@ var line_layout = {
 			linecolor: 'black',
 			linewidth: 2,
 			tickmode: "array", 
-			tickvals : year_tot,
+			tickvals : year_tick,
+			tickangle: 45,
+			tickfont: { size: 10}
 		  },
 		  yaxis: {
 			  title : 'Persons',
@@ -7209,7 +7222,7 @@ var bar_layout = {
 			linecolor: 'black',
 			linewidth: 2,
 			tickmode: "array", 
-			tickvals: year_est,
+			tickvals: year_tick,
 			tickangle: 45,
 			tickfont: { size: 10}
 		  },
