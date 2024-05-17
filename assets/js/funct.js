@@ -7072,7 +7072,7 @@ var mig_tmp1 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'solid',
-						color : 'green',
+						color : 'brown',
 						width: 3
 						}
 					};
@@ -7084,7 +7084,7 @@ var mig_tmp2 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'dash',
-						color : 'green',
+						color : 'brown',
 						width: 3
 						}
 					};
