@@ -7080,7 +7080,7 @@ var mig_tmp1 = {
 var mig_tmp2 = { 
 					   x: year_forc,
 					   y : mig_forc,
-					   name : ' Net Migration Forecast',
+					   name : 'Net Migration Forecast',
 					   mode : 'lines',
 					   line: {
 						dash: 'dash',
