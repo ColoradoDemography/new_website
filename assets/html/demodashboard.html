@@ -118,7 +118,7 @@
 		<div class="dropdown-content">
 			<a href="#" id='barcoc_csv'>Download Data (CSV)</a>
 			<a href='#' id='barcoc_png'>Download Image (PNG)</a>
-			<a href='../lookups/county_coc_lookup.html' id='death_src' target='_blank'><u>Data Source:</u>County Births, Deaths, and Migration Lookup</a>
+			<a href='../lookups/county_coc_lookup.html' id='barcoc_src' target='_blank'><u>Data Source:</u>County Births, Deaths, and Migration Lookup</a>
 		</div>
 	</div>
     <div id="barcoc_output"></div>
@@ -202,12 +202,11 @@ var selectedunit = d3.select("#unit-dropdown").property('value');
 
 genDEMO("county", "000", selectedunit,"Colorado", yrvalue);
 d3.select("#geo-dropdown").on("change", function(d,i) {
-debugger
       var selectedGeo = d3.select("#geo-dropdown").property('value');
 	  // update link
 	  var estlink = document.getElementById('est_src');
-	  var forelink = document.getElementById('fore_src');
-	  var coclink = document.getElementById('coc_src');
+	  var linecoclink = document.getElementById('linecoc_src');
+	  var barcoclink = document.getElementById('barcoc_src');
 	  var miglink = document.getElementById('migr_src');
 	  var agelink = document.getElementById('age_src');
 	  var popchnglink = document.getElementById('popchng_src');
@@ -215,16 +214,16 @@ debugger
 	  switch(selectedGeo){
 	  case "region" :
 			estlink.setAttribute("href","../lookups/region_totpop_lookup.html");
-			forelink.setAttribute("href","../lookups/region_totpop_lookup.html"); 
-			coclink.setAttribute("href","../lookups/region_coc_lookup.html");
+			linecoclink .setAttribute("href","../lookups/region_coc_lookup.html"); 
+			barcoclink.setAttribute("href","../lookups/region_coc_lookup.html");
 			miglink.setAttribute("href","../lookups/region_netmig_lookup.html");
 			agelink.setAttribute("href","../lookups/region_sya_lookup.html");
 			popchnglink.setAttribute("href","../lookups/region_sya_lookup.html");
 		   break;
 	  case "county" :
 			estlink.setAttribute("href","../lookups/county_totpop_lookup.html");
-			forelink.setAttribute("href","../lookups/county_totpop_lookup.html"); 
-			coclink.setAttribute("href","../lookups/county_coc_lookup.html");
+			linecoclink .setAttribute("href","../lookups/county_coc_lookup.html"); 
+			barcoclink.setAttribute("href","../lookups/county_coc_lookup.html");
 			miglink.setAttribute("href","../lookups/county_netmig_lookup.html");
 			agelink.setAttribute("href","../lookups/county_sya_lookup.html");
 			popchnglink.setAttribute("href","../lookups/county_sya_lookup.html");
