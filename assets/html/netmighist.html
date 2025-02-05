@@ -62,42 +62,52 @@
    <hr>
    <table style="border-collapse: collapse; border : none;">
    <tr>
-		<td style="border : none; width: 25%;">
+		<td style="border : none; width: 20%;">
 		 <label for="county-dropdown" for='county-dropdown'><b>Select County:</b></label>
 		</td>
-		<td style="border : none; width: 25%;">
+		<td style="border : none; width: 20%;">
 		 <b>Select Year Series:</b>
 		</td>
-		<td style="border : none; width: 25%;">
+		<td style="border : none; width: 20%;">
 		</td>
-		<td style="border : none; width: 25%;">
+		<td style="border : none; width: 20%;">
 		 <label for="stat-dropdown" for='stat-dropdown'><b>Select Data Series:</b></label>
 		</td>
-		<td style="border : none; width: 25%;">
+		<td style="border : none; width: 20%;">
+		 <label for="axis-btn" for='stat-dropdown'><b>Select Year Units:</b></label>
+		</td>
+		<td style="border : none; width: 20%;">
 		</td>
 	</tr>
 	<tr>
-		<td style="border : none; width: 25%; vertical-align:top">
+		<td style="border : none; width: 20%; vertical-align:top">
 			<select class="county-dropdown" id="county-dropdown"></select>
 		</td>
-		<td style="border : none; width: 25%; vertical-align:top">
+		<td style="border : none; width: 20%; vertical-align:top">
 		<label for="beg-year">Select Beginning Year: </label><br>
 		<select class="year-dropdown" id="beg-year" style='width:100px;' size="3">
 		</td>
-		<td style="border : none; width: 25%; vertical-align:top">
+		<td style="border : none; width: 20%; vertical-align:top">
 		<label for="end-year">Select Ending Year: </label><br>
 		<select class="year-dropdown" id="end-year" style='width:100px;' size="3">
 		</td>
-		<td style="border : none; width: 25%; vertical-align:top">
+		<td style="border : none; width: 20%; vertical-align:top">
 		 <select class="stat-dropdown" id="stat-dropdown" size="4" multiple role='listbox'>
 		 <option value='births' selected="selected">Births</option>
 		 <option value='deaths' selected="selected">Deaths</option>
 		 <option value='netmig' selected="selected">Net Migration</option>
 		 <option value='natincr' >Natural Increase</option>
-
 		 </select>
 		</td>
-	   <td style="border : none; width: 25%; vertical-align:top">
+		<td style="border : none; width: 20%; vertical-align:top; font-size: 12px;">
+			<input type="radio" id="yr5" name="axis_type" value="yr5" checked/>
+			<label for="yr5">Five Year Increments (e.g., 2000, 2005, 2010)</label><br>
+			<input type="radio" id="yr2" name="axis_type" value="yr2"/>
+			<label for="yr2">Two Year Increments (e.g., 2000, 2002, 2004)</label><br>
+			<input type="radio" id="yr1" name="axis_type" value="yr1"/>
+			<label for="yr1">Single Year Increments</label><br>
+		</td>
+	   <td style="border : none; width: 20%; vertical-align:top">
 		<button class='databutton' id="submit">Generate Charts</button>
 		</td>
 	</tr>
@@ -105,7 +115,7 @@
   </div>
   <div class="grid-item app-panel_3_2">
       <div class="dropdown AClass">
-		  <button class="dropbtn"  id="linecoc" aria-label='Births, Deaths, New Migraton Download Button'><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
+		  <button class="dropbtn"  id="linecoc" aria-label='Births, Deaths, Net Migraton Download Button'><i class="fas fas fa-download fa-2x" style='color: black;'></i></button>
 		  <div class="dropdown-content">
 			<a href="#" id='linecoc_csv'>Download Data (CSV)</a>
 			<a href='#' id='linecoc_png'>Download Image (PNG)</a>
@@ -142,6 +152,7 @@ document.getElementById('barcoc').style.display = 'block';
 
 /* Populate County Dropdown */
 popDropdown('county','county-dropdown','')
+document.getElementById('county-dropdown').size = "3";
 
 //generating maximum year value for estimates
 var urlstr = "https://gis.dola.colorado.gov/lookups/componentYRS";
@@ -158,7 +169,8 @@ d3.json(urlstr).then(function(yeardata){
 
 var CHART0 = document.getElementById("linecoc_output");
 var CHART1 = document.getElementById("barcoc_output");
-	
+
+
 document.getElementById('submit').addEventListener("click", chkInputs)
 
 //Check and Generate output
@@ -169,7 +181,8 @@ function chkInputs(){
 	var outputmsg = "";
 	var fipsdd = document.getElementById('county-dropdown');
 	var selectedfips = getSelectValues(fipsdd);
-
+	var selectedaxis = document.querySelector('input[name="axis_type"]:checked').value;
+	
 	
 	var statdd = document.getElementById('stat-dropdown');
 	var selectedstat = getSelectValues(statdd);
@@ -191,7 +204,7 @@ function chkInputs(){
 		complete = false;
 	}
     if(complete){
-	      genCOCHIST(selectedfips, stYr, endYr, selectedstat, CHART0, CHART1)
+	      genCOCHIST(selectedfips, stYr, endYr, selectedstat, selectedaxis, CHART0, CHART1)
 	} else {
 		 window.alert(outputmsg);
 	}
