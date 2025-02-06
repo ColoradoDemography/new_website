@@ -5816,7 +5816,7 @@ var netmig_data = [];
 //Plotting 
 
 	estPlot(est_data, "dashboard", "County",  "est_output", "", yrvalue, fips, ctyName);
-	genCOCHIST(fips,  1970, yrvalue, ['births','deaths','netmig'], "yr5", "linecoc_output", "barcoc_output") 
+	genCOCHIST(geotype, fips,  1970, yrvalue, ['births','deaths','netmig'], "yr5", "linecoc_output", "barcoc_output") 
 	netmigPlot(netmig_data, "dashboard","mig_output", fips, yrvalue,ctyName);
     agePlot(forecast_data,"dashboard", "ageest_output", yrvalue, fips, ctyName);
     popchngPlot(forecast_data,"dashboard", unit, "popchng_output", yrvalue, fips, ctyName);
@@ -7029,25 +7029,39 @@ netmigrwa_png.onclick = function() {
 
 //cat Long term components of change dashboard (netmighist.html)
 
-function genCOCHIST(fipsVal,  byrs, eyrs, stats, axis, DIV0, DIV1) {
+function genCOCHIST(geotype,fipsVal,  byrs, eyrs, stats, axis, DIV0, DIV1) {
 //genCOCHIST generates long-term COC charts
 	
 const fmt_date = d3.timeFormat("%B %d, %Y");
 
 //Generating urls
 var ctyfips  = parseInt(fipsVal);
-var ctyName = countyName(ctyfips);
-
+if(geotype == "region"){
+  var regName = regionName(ctyfips);
+} else {
+  var ctyName = countyName(ctyfips);
+} 
 var yrlist = parseInt(byrs);
 for(i = parseInt(byrs)+1; i <= parseInt(eyrs); i++){
 	yrlist = yrlist + "," + i;
 };
 
-if(fipsVal == "000") {
-	 var dataurl = 'https://gis.dola.colorado.gov/lookups/components_region?reg_num=' + ctyfips + '&year=' + yrlist;
-} else {
-	var dataurl = 'https://gis.dola.colorado.gov/lookups/components?county=' + ctyfips + '&year=' + yrlist;
-}
+	if(geotype == "region"){
+		var fips_tmp = regionCOL(parseInt(fipsVal));
+	    fips_list = fips_tmp[0].fips;
+		for(i = 0; i < fips_list.length; i++){
+			 fips_list[i] = parseInt(fips_list[i]);
+		}
+		var dataurl = 'https://gis.dola.colorado.gov/lookups/components?county=' + fips_list + '&year=' + yrlist;
+	} else {
+		if(fipsVal == "000") {
+			 var dataurl = 'https://gis.dola.colorado.gov/lookups/components_region?reg_num=' + ctyfips + '&year=' + yrlist;
+		} else {
+			var dataurl = 'https://gis.dola.colorado.gov/lookups/components?county=' + ctyfips + '&year=' + yrlist;
+		}
+	};
+
+
 
 var year_est = [];
 var year_forc = [];
@@ -7066,51 +7080,69 @@ var natincr_bars = []
 var out_data = [];
 
 d3.json(dataurl).then(function(data){
-	   for(i = 0; i < data.length; i++){
-		   out_data.push({ 'FIPS' : fipsVal[0], 'County' : ctyName, 'Year' : data[i].year, 'Births' : Number(data[i].births), 'Deaths' : Number(data[i].deaths), "Natural Increase" : Number(data[i].births) - Number(data[i].deaths),
-		                  'Net Migration' : Number(data[i].netmig), 'Data Type' : data[i].datatype});
-		   if(data[i].datatype == "Estimate"){
-			year_est.push(data[i].year);
-		    birth_est.push(Number(data[i].births));
-			death_est.push(Number(data[i].deaths));
-			mig_est.push(Number(data[i].netmig));
-			natincr_est.push(Number(data[i].births) - Number(data[i].deaths));
+
+	if(geotype == "region"){
+	var columnsEst = ['births','deaths','netmig'];
+ 	var data_sum =   d3.rollup(data, v => Object.fromEntries(columnsEst.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year);
+//Flatten Arrays
+	var data2 = [];
+	for (let [key, value] of data_sum) {
+	  data2.push({'geo' : 'region', 'fips' : fipsVal, 'name' : regName, 'year' : key, 'births' : value.births, 'deaths' : value.deaths,
+	      'netmig' : value.netmig,  'datatype' : key <= eyrs ? "Estimate" : "Forecast"});
+		}
+	} else {
+        var data2 = data
+	}
+		
+	   for(i = 0; i < data2.length; i++){
+		   out_data.push({ 'FIPS' : fipsVal, 'Name' : data2[i].name, 'Year' : data2[i].year, 'Births' : Number(data2[i].births), 'Deaths' : Number(data2[i].deaths), 
+		                   "Natural Increase" : Number(data2[i].births) - Number(data2[i].deaths),
+		                  'Net Migration' : Number(data2[i].netmig), 'Data Type' : data2[i].datatype});
+		   if(data2[i].datatype == "Estimate"){
+			year_est.push(data2[i].year);
+		    birth_est.push(Number(data2[i].births));
+			death_est.push(Number(data2[i].deaths));
+			mig_est.push(Number(data2[i].netmig));
+			natincr_est.push(Number(data2[i].births) - Number(data2[i].deaths));
 		   } else {
-			year_forc.push(data[i].year);
-		    birth_forc.push(Number(data[i].births));
-			death_forc.push(Number(data[i].deaths));
-			mig_forc.push(Number(data[i].netmig));
-			natincr_forc.push(Number(data[i].births) - Number(data[i].deaths));
+			year_forc.push(data2[i].year);
+		    birth_forc.push(Number(data2[i].births));
+			death_forc.push(Number(data2[i].deaths));
+			mig_forc.push(Number(data2[i].netmig));
+			natincr_forc.push(Number(data2[i].births) - Number(data2[i].deaths));
 		   };
 		   //Dealing with axis ticks
 			switch(axis) {
 				case "yr5" :
 				   if(i % 5 == 0){
-					   year_tick.push(data[i].year)
+					   year_tick.push(data2[i].year)
 				   }
 				   break;
 				case "yr2" : 
 				   if(i % 2 == 0){
-					   year_tick.push(data[i].year)
+					   year_tick.push(data2[i].year)
 				   }
 				   break;
 				case "yr1" :
-					   year_tick.push(data[i].year)
+					   year_tick.push(data2[i].year)
 					   break;
 			}
 
-		  year_bars.push(data[i].year);
-		  mig_bars.push(Number(data[i].netmig));
-		  natincr_bars.push(Number(data[i].births) - Number(data[i].deaths));
+		  year_bars.push(data2[i].year);
+		  mig_bars.push(Number(data2[i].netmig));
+		  natincr_bars.push(Number(data2[i].births) - Number(data2[i].deaths));
 
 	   };
 	   
 
-
 var min_yr = Math.min(...year_tick);
 var max_yr = Math.max(...year_tick);
 var tit1 = "Components of Population Change "
-var bar_title =  tit1.concat(min_yr.toString(), " to ", max_yr.toString(), ": ", ctyName) 
+if (geotype == "region") {
+	var chart_title =  tit1.concat(byrs, " to ", eyrs, ": ", regName) 
+} else {
+	var chart_title =  tit1.concat(byrs, " to ", eyrs, ": ", ctyName) 
+}
 
 //Line Traces
 var birth_tmp1 = { 
@@ -7120,7 +7152,7 @@ var birth_tmp1 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'solid',
-						color : '#d81b60',
+						color : '#00008B',
 						width: 3
 						}
 					};
@@ -7132,7 +7164,7 @@ var birth_tmp2 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'dash',
-						color : '#d81b60',
+						color : '#00008B',
 						width: 3
 						}
 					};
@@ -7144,7 +7176,7 @@ var death_tmp1 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'solid',
-						color : '#1e88e5',
+						color : '#880808',
 						width: 3
 						}
 					};
@@ -7156,7 +7188,7 @@ var death_tmp2 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'dash',
-						color : '#1e88e5',
+						color : '#880808',
 						width: 3
 						}
 					};
@@ -7168,7 +7200,7 @@ var mig_tmp1 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'solid',
-						color : '#8B8000',
+						color : '#245d38',  
 						width: 3
 						}
 					};
@@ -7180,7 +7212,7 @@ var mig_tmp2 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'dash',
-						color : '#8B8000',
+						color : '#245d38',
 						width: 3
 						}
 					};
@@ -7269,7 +7301,7 @@ DIV1.innerHTML = "";
 
 
 var line_layout = {
-		title: "Components of Change: " + ctyName,
+		title: chart_title,
 		  autosize: false,
 		  width: 1000,
 		  height: 500,
@@ -7305,7 +7337,7 @@ var line_layout = {
 		
 		
 var bar_layout = {
-		title: bar_title,
+		title: chart_title,
 		  autosize: false,
 		  width: 1000,
 		  height: 500,
