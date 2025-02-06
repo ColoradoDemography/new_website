@@ -204,7 +204,7 @@ function chkInputs(){
 		complete = false;
 	}
     if(complete){
-	      genCOCHIST(selectedfips, stYr, endYr, selectedstat, selectedaxis, CHART0, CHART1)
+	      genCOCHIST('county',selectedfips, stYr, endYr, selectedstat, selectedaxis, CHART0, CHART1)
 	} else {
 		 window.alert(outputmsg);
 	}
