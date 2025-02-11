@@ -117,7 +117,7 @@ function citation(source,vintage,table) {
 	const fmt_date = d3.timeFormat("%B %d, %Y");
 		ypos = -0.23;
 	if(source == 'SDO'){
-		annTxt = 'Source: Colorado State Demography Office, Vintage '+ vintage + ' estimates.'
+		annTxt = 'Source: Colorado State Demography Office, Vintage '+ vintage + ' Estimates'
 	} 
 	if(source == 'ACS'){
 		annTxt = 'U.S. Census Bureau, “American Community Survey 5-Year Estimates: Detailed Tables '+ table + '", ' + vintage + ', <http://api.census.gov/data/2022/acs/acs5>'
@@ -137,7 +137,15 @@ function citation(source,vintage,table) {
 	  
 return(outAnnot);
 }
-// annot
+// citation
+
+function colorRamp() {
+//colorRamp  returns SDO colors for charts
+	var colors = ["#00008B", "#007ADE", "#5BB5FF", "#000000", "#808080", "#BFBFBF", "#359A7E", 
+	                              "#7A853B", "#245D38", "#7A853B", "#FFD100", "#C0504D", "#FF8199", "#6D3A5D", "#9F7FB3"]
+return(colors)
+}
+// colorRamp
 
 function muni_county(muni){
 //muni_county provides county designation for municipalities (based on largest population for multi-county munis
@@ -4950,7 +4958,7 @@ rows.append('td')
 
 //cat Demographic Dashboard Functions
 
-function estPlot(inData, app, level, plotdiv, bkmark, yrvalue, fips, ctyName){
+function estPlot(inData, app, level, plotdiv, bkmark, yrvalue, fips, ctyName,colors){
 //estPlot Component Functions for Demograpic Dashboard : Estimates Plot
     const fmt_date = d3.timeFormat("%B %d, %Y");
 	const fmt_comma = d3.format(",");
@@ -5001,10 +5009,10 @@ var est_trace = {
 			   type: 'scatter',
 			   mode: 'lines+markers',
 			  marker: {
-				color: 'rgb(0, 25, 112)',
+				color: colors[1],
 				size: 2,
 				line: {
-				  color: 'rgb(0, 25, 112)',
+				  color: colors[1],
 				  width: 3
 				}
 		}}
@@ -5018,11 +5026,12 @@ var for_trace = {
 			   type: 'scatter',
 			   mode: 'lines+markers',
 			  marker: {
-				color: 'rgb(128, 128, 128)',
+				symbol : 'diamond',  
+				color: colors[4],
 				size: 2,
 				line: {
 				  dash: 'dash',
-				  color: 'rgb(128, 128, 128)',
+				  color: colors[4],
 				  width: 3
 				}
 		}}
@@ -5075,7 +5084,7 @@ est_png.onclick = function() {exportToPng(ctyName, 'estimate', ESTIMATE,0)};
 }; 
 // estPlot
 
-function agePlot (inData, app, plotdiv,yrvalue,fips,ctyName) {
+function agePlot (inData, app, plotdiv,yrvalue,fips,ctyName, colors) {
 //agePlot Component Functions for Demograpic Dashboard: Age Plot 
 	    const fmt_date = d3.timeFormat("%B %d, %Y");
 	const fmt_pct = d3.format(".0%");
@@ -5158,6 +5167,7 @@ var age_trace = {
                x: pct_arr,
                y : age_arr,
 			   type : 'bar',
+			   color: colors[1],
 			   orientation : 'h'
 			};
 
@@ -5223,7 +5233,7 @@ age_png.onclick = function() {exportToPng(ctyName, 'age', AGEPLOT,0)};
 } 
 // agePlot
 
-function popchngPlot(inData, app, unit, plotdiv,yrvalue,fips,ctyName) {
+function popchngPlot(inData, app, unit, plotdiv,yrvalue,fips,ctyName,colors) {
 //popchngPlot Component Functions for Demograpic Dashboard: Population Change Plot 
 	const fmt_date = d3.timeFormat("%B %d, %Y");
 	const fmt_pct = d3.format(".0%");
@@ -5321,7 +5331,7 @@ var popchng_trace = {
 			  marker: {
 				opacity: 0.9,
 				line: {
-				  color: 'blue',
+				  color: colors[1],
 				  width: 1.5
 				}
 			  }
@@ -5433,7 +5443,7 @@ popchng_png.onclick = function() {exportToPng(ctyName, 'popchng', POPCHNG,0)};
 // popchngPlot
 
 
-function netmigPlot(inData, app, plotdiv, fips, yrvalue, ctyName) {
+function netmigPlot(inData, app, plotdiv, fips, yrvalue, ctyName,colors) {
 //netmigPlot Component Functions for Demograpic Dashboard: Net Migration by Age 
 
 	const fmt_date = d3.timeFormat("%B %d, %Y");
@@ -5462,7 +5472,8 @@ var NetMig1020_bar = {
                x: NetMigAge,
                y : NetMig1020,
 			   name : '2010 to 2020',
-			   type : 'bar'
+			   type : 'bar',
+			   color: colors[1]
 			};
 var NetMig_chart = [NetMig1020_bar];
 
@@ -5691,6 +5702,9 @@ function genDEMO(geotype, fips, unit, ctyName, yrvalue){
 	const fmt_comma = d3.format(",");
     var endyr = yrvalue + 10;
 	var fips_list; 
+	
+	var colors = colorRamp()
+
 
 // chartdivs
 var CHART0 = document.getElementById("linecoc_output");
@@ -5815,11 +5829,11 @@ var netmig_data = [];
 
 //Plotting 
 
-	estPlot(est_data, "dashboard", "County",  "est_output", "", yrvalue, fips, ctyName);
+	estPlot(est_data, "dashboard", "County",  "est_output", "", yrvalue, fips, ctyName, colors);
 	genCOCHIST(geotype, fips,  1970, yrvalue, ['births','deaths','netmig'], "yr5", "linecoc_output", "barcoc_output") 
-	netmigPlot(netmig_data, "dashboard","mig_output", fips, yrvalue,ctyName);
-    agePlot(forecast_data,"dashboard", "ageest_output", yrvalue, fips, ctyName);
-    popchngPlot(forecast_data,"dashboard", unit, "popchng_output", yrvalue, fips, ctyName);
+	netmigPlot(netmig_data, "dashboard","mig_output", fips, yrvalue,ctyName, colors);
+    agePlot(forecast_data,"dashboard", "ageest_output", yrvalue, fips, ctyName, colors);
+    popchngPlot(forecast_data,"dashboard", unit, "popchng_output", yrvalue, fips, ctyName,colors);
  
 }); //end of promise
 } 
@@ -5836,6 +5850,7 @@ function genRACEVIS(geotype, fips,ctyName, yrvalue) {
 		geotype = 'county'
 	}
 
+var colors = colorRamp()
 //Specify fips_list
  var fips_list; 
 	
@@ -6003,7 +6018,7 @@ var white_line = {
 			   name : 'White, NH',
 			   mode : 'lines', 
 			   line : {
-					color: 'blue',
+					color: colors[1],
 					width : 3
 				}
 			};
@@ -6014,7 +6029,7 @@ var hisp_line = {
 			   name : 'Hispanic',
 			   mode : 'lines', 
 			   line : {
-					color: 'orange',
+					color: colors[9],
 					width : 3
 				}
 			};
@@ -6025,7 +6040,7 @@ var black_line = {
 			   name : 'Black or African American, NH',
 			   mode : 'lines', 
 			   line : {
-					color: 'green',
+					color: colors[4],
 					width : 3
 				}
 			};
@@ -6036,7 +6051,7 @@ var asian_line = {
 			   name : 'Asian, NH',
 			   mode : 'lines', 
 			   line : {
-					color: 'red',
+					color: colors[13],
 					width : 3
 				}
 			};
@@ -6047,7 +6062,7 @@ var nhpi_line = {
 			   name : 'Native Hawaiian or Other Pacific Islander, NH',
 			   mode : 'lines', 
 			   line : {
-					color: 'brown',
+					color: colors[14],
 					width : 3
 				}
 			};
@@ -6057,7 +6072,7 @@ var amind_line = {
 			   name : 'American Indian and Alaska Native, NH',
 			   mode : 'lines', 
     		   line : {
-					color: 'purple',
+					color: colors[2],
 					width : 3
 				}
 			};
@@ -6068,7 +6083,7 @@ var multi_line = {
 			   name : 'Two or More Races, NH',
 			   mode : 'lines', 
     		   line : {
-					color: 'grey',
+					color: colors[5],
 					width : 3
 				}
 			};
@@ -6077,49 +6092,49 @@ var white_bar = {
                x: age_line_arr_w,
                y : pop_line_arr_w,
 			   type : 'bar',
-			   marker : { color: 'blue' }
+			   marker : { color: colors[1] }
 			};
 
 var hisp_bar = { 
                x: age_line_arr_h,
                y : pop_line_arr_h,
 			   type : 'bar',
-			   marker : { color : 'orange'}
+			   marker : { color : colors[9]}
 			};
 
 var black_bar = { 
                x: age_line_arr_b,
                y : pop_line_arr_b,
 			   type : 'bar',
-			   marker : { color: 'green' }
+			   marker : { color: colors[4] }
 			};
 
 var asian_bar = { 
                x: age_line_arr_as,
                y : pop_line_arr_as,
 			   type : 'bar',
-			   marker : { color : 'red' }
+			   marker : { color : colors[13] }
 			};
 
 var nhpi_bar = { 
                x: age_line_arr_nh,
                y : pop_line_arr_nh,
 			   type : 'bar',
-			   marker : { color : 'brown' }
+			   marker : { color : colors[14] }
 			};
 
 var amind_bar = { 
                x: age_line_arr_ai,
                y : pop_line_arr_ai,
 			   type : 'bar',
-			   marker : { color : 'purple' }
+			   marker : { color : colors[2] }
 			};
 			
 var multi_bar = { 
                x: age_line_arr_mu,
                y : pop_line_arr_mu,
 			   type : 'bar',
-			   marker : { color : 'grey' }
+			   marker : { color : colors[5] }
 			};
 //aDD FOR NEW RACES
 var line_data = [white_line, hisp_line, black_line, asian_line, nhpi_line, amind_line, multi_line];
@@ -6501,6 +6516,7 @@ function genNETMIGCOMP(geotype, fips_Arr, yrvalue, chart) {
 
 const fmt_date = d3.timeFormat("%B %d, %Y");
 var yr_arr = yrvalue;
+var colors = colorRamp()
 
 //Reading Raw data
 var data_csv = "https://storage.googleapis.com/co-publicdata/Colorado_Age_Migration_By_Decade.csv";
@@ -6576,7 +6592,7 @@ var datasort = datafilt.sort(function(a, b){ return d3.ascending(a['year'], b['y
 //Linetypes for line Charts
 var patternArr = ["","/","-","+"]
 var lineArr = ['solid','dash','dashdot',"dot"]
-var colorArr = ["blue","orange","green","gray"]
+var colorArr = [colors[1],colors[11],colors[9],colors[5]]
 
 //Chart Title
  if((yr_arr.length == 1) && (fips_Arr.length == 1)){
@@ -6823,7 +6839,7 @@ function genNETMIG1864(fipsVal, ctyName, ageSeries, chartType, yrvalue){
 const fmt_date = d3.timeFormat("%B %d, %Y");
 
 var data_csv = "../data/netmig_1864x.csv";
-
+var colors = colorRamp()
 	
 //Building Chart Title and filename
 
@@ -6890,26 +6906,30 @@ if(chartType == 'bar'){
 					   x: xDataYear,
 					   y :  yDataTot,
 					   name : ctyName[i],
-					   type : 'bar'
+					   type : 'bar',
+					   color: colors[1]
 					};
 		var rate_tmp = { 
 					   x: xDataYear,
 					   y : yDataRate,
 					   name : ctyName[i],
-					   type : 'bar'
+					   type : 'bar',
+					   color : colors[11]
 					};			
 	} else {
 		var tot_tmp = { 
 					   x: xDataYear,
 					   y : yDataTot,
 					   name : ctyName[i],
-					   mode : 'lines+markers'
+					   mode : 'lines+markers',
+					   color: colors[1]
 					};
 		var rate_tmp = { 
 					   x: xDataYear,
 					   y : yDataRate,
 					   name : ctyName[i],
-					   mode : 'lines+markers'
+					   mode : 'lines+markers',
+					   color : colors[11]
 					};			
 };
 
@@ -7033,7 +7053,7 @@ function genCOCHIST(geotype,fipsVal,  byrs, eyrs, stats, axis, DIV0, DIV1) {
 //genCOCHIST generates long-term COC charts
 	
 const fmt_date = d3.timeFormat("%B %d, %Y");
-
+var colors = colorRamp()
 //Generating urls
 var ctyfips  = parseInt(fipsVal);
 if(geotype == "region"){
@@ -7152,7 +7172,7 @@ var birth_tmp1 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'solid',
-						color : '#00008B',
+						color : colors[2],
 						width: 3
 						}
 					};
@@ -7164,7 +7184,7 @@ var birth_tmp2 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'dash',
-						color : '#00008B',
+						color : colors[2],
 						width: 3
 						}
 					};
@@ -7176,7 +7196,7 @@ var death_tmp1 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'solid',
-						color : '#880808',
+						color : colors[9],
 						width: 3
 						}
 					};
@@ -7188,7 +7208,7 @@ var death_tmp2 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'dash',
-						color : '#880808',
+						color : colors[9],
 						width: 3
 						}
 					};
@@ -7200,7 +7220,7 @@ var mig_tmp1 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'solid',
-						color : '#245d38',  
+						color : colors[11],  
 						width: 3
 						}
 					};
@@ -7212,7 +7232,7 @@ var mig_tmp2 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'dash',
-						color : '#245d38',
+						color : colors[11],
 						width: 3
 						}
 					};
@@ -7224,7 +7244,7 @@ var natincr_tmp1 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'solid',
-						color : '#004d40',
+						color : colors[1],
 						width: 3
 						}
 					};
@@ -7236,7 +7256,7 @@ var natincr_tmp2 = {
 					   mode : 'lines',
 					   line: {
 						dash: 'dash',
-						color : '#004d40',
+						color : colors[1],
 						width: 3
 						}
 					};
@@ -7272,7 +7292,7 @@ var mig_bar = {
 					   name : 'Net Migration',
 					   type : 'bar',
 					   marker: {
-						color : '#C0504D'
+						color : colors[11]
 					   }
 					};
 
@@ -7282,7 +7302,7 @@ var natincr_bar = {
 					   name : 'Natural Increase',
 					   type : 'bar',
 					   marker : {
-						color : '#4F81BD'
+						color : colors[1]
 					   }
 					};
 					
@@ -7407,7 +7427,7 @@ barcoc_png.onclick = function() {
 function genHOUSEAGE(fipsVal,ctyName, varType, seriesType){
 //genHOUSEAGE  Household forecast by age and household type
 	const fmt_date = d3.timeFormat("%B %d, %Y");
-
+    var colors = colorRamp()
 	var fips_list = parseInt(fipsVal);
 
    var yr_trace = [2010];
@@ -7500,35 +7520,40 @@ for(i = 0; i < hh_arr.length; i++){
    	tr_0 = {x: yr_trace,
 			y :  yData,
 			name : age_arr[j],
-			mode : 'lines+markers'
+			mode : 'lines+markers',
+			color : colors[1]
 			};
 	};
 	if(j == 1){
    	tr_1 = {x: yr_trace,
 			y :  yData,
 			name : age_arr[j],
-			mode : 'lines+markers'
+			mode : 'lines+markers',
+			color : colors[4]
 			};
 	};
 	if(j == 2){
    	tr_2 = {x: yr_trace,
 			y :  yData,
 			name : age_arr[j],
-			mode : 'lines+markers'
+			mode : 'lines+markers',
+			color: colors[6]
 			};
 	};	
 	if(j == 3){
    	tr_3 = {x: yr_trace,
 			y :  yData,
 			name : age_arr[j],
-			mode : 'lines+markers'
+			mode : 'lines+markers',
+			color : colors[8]
 			};
 	};
 	if(j == 4){
    	tr_4 = {x: yr_trace,
 			y :  yData,
 			name : age_arr[j],
-			mode : 'lines+markers'
+			mode : 'lines+markers',
+			color: colors[11]
 			};
 	};
    	} //J loop
@@ -7557,35 +7582,41 @@ for(i = 0; i < hh_arr.length; i++){
    	tr_0 = {x: yr_trace,
 			y :  yData,
 			name : hh_arr[j],
-			mode : 'lines+markers'
+			mode : 'lines+markers',
+			color: colors[1]
 			};
 	};
 	if(j == 1){
    	tr_1 = {x: yr_trace,
 			y :  yData,
 			name : hh_arr[j],
-			mode : 'lines+markers'
+			mode : 'lines+markers',
+			color: colors[4]
 			};
 	};
 	if(j == 2){
    	tr_2 = {x: yr_trace,
 			y :  yData,
 			name : hh_arr[j],
-			mode : 'lines+markers'
+			mode : 'lines+markers',
+			color: colors[6]
+			
 			};
 	};	
 	if(j == 3){
    	tr_3 = {x: yr_trace,
 			y :  yData,
 			name : hh_arr[j],
-			mode : 'lines+markers'
+			mode : 'lines+markers',
+			color: colors[8]
 			};
 	};
 	if(j == 4){
    	tr_4 = {x: yr_trace,
 			y :  yData,
 			name : hh_arr[j],
-			mode : 'lines+markers'
+			mode : 'lines+markers',
+			color: colors[11]
 			};
 	};
    	} //J loop
@@ -7769,6 +7800,7 @@ function genHOUSEDASH(geotype,fips,plName,yrvalue) {
 	const fmt_pct = d3.format(".2%")
 	const fmt_comma = d3.format(",");
     const fmt_date = d3.timeFormat("%B %d, %Y");
+	var colors = colorRamp()
 	
 	//Verifying if region is input
 	if(geotype =='region'){
@@ -7953,8 +7985,8 @@ var tit_str2 = "Occupied and Vacant Housing Units " + plName;
 			hovertemplate : '%{customdata}',
 			hoverlabel : {namelength :0},
 			name : 'Total Housing Units',
-			marker: {color: 'green'},
-			mode : 'lines+markers'
+			mode : 'lines+markers',
+			color : colors[1]
 			};
 
 	tr_occ = {x: yearList,
@@ -7963,8 +7995,8 @@ var tit_str2 = "Occupied and Vacant Housing Units " + plName;
 			hovertemplate : '%{customdata}',
 			hoverlabel : {namelength :0},
 			name : 'Occupied Housing Units',
-			marker: {color: 'blue'},
-			mode : 'lines+markers'
+			mode : 'lines+markers',
+			color : colors[11]
 			};
  var ch_0 = [tr_total, tr_occ];
  
@@ -7975,8 +8007,8 @@ var tit_str2 = "Occupied and Vacant Housing Units " + plName;
 			hovertemplate : '%{customdata}',
 			hoverlabel : {namelength :0},
 			name : 'Total Housing Units',
-			marker: {color: 'green'},
-			mode : 'lines+markers'
+			mode : 'lines+markers',
+			color : colors[1]
 			};
 	
 	yty_occ = {x: yty,
@@ -7985,8 +8017,8 @@ var tit_str2 = "Occupied and Vacant Housing Units " + plName;
 			hovertemplate : '%{customdata}',
 			hoverlabel : {namelength :0},
 			name : 'Occupied Housing Units',
-			marker: {color: 'blue'},
-			mode : 'lines+markers'
+			mode : 'lines+markers',
+			color : colors[11]
 			};
  var ch_1 = [yty_total, yty_occ];
 
@@ -7996,9 +8028,9 @@ var tit_str2 = "Occupied and Vacant Housing Units " + plName;
 			customdata : tr_occ_pct_lab,
 			hovertemplate : '%{customdata}',
 			hoverlabel : {namelength :0},
-			marker: {color: 'blue', opacity : 0.8},
 			name : 'Occupied Housing Units',
-			type : 'bar'
+			type : 'bar',
+			color : colors[1]
 			};
 
 	vac_bar = {x: yearList,
@@ -8008,7 +8040,8 @@ var tit_str2 = "Occupied and Vacant Housing Units " + plName;
 			hoverlabel : {namelength :0},
 			marker: {color: 'brown', opacity : 0.8},
 			name : 'Vacant Housing Units',
-			type : 'bar'
+			type : 'bar',
+			color : colors[4]
 			};
  var ch_2 = [occ_bar, vac_bar];
  
@@ -8409,6 +8442,7 @@ function genFLOWS(fips, name, yearval){
 	var fmt_comma = d3.format(",");
 	const fmt_date = d3.timeFormat("%B %d, %Y");
 	var CHART0 = document.getElementById("net_output");
+	
 	var CHART1 = document.getElementById("in_output");
 	var CHART2 = document.getElementById("out_output");
 
