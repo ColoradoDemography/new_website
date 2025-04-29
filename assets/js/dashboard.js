@@ -2015,34 +2015,36 @@ var ctymuni = [{'location' : 'Aguilar', 'fips' : '07100760'}, {'location' : 'Akr
 		{'location' : 'Unincorporated Yuma County', 'fips' : '12599990'}]
 		
 //CSGB Agencies
-var csbg = [{'location' : 'Adams County', 'fips' : '12CWtEhEuUfYb5kCqhWXMBt2rE_OT7Gnh'},  
-			{'location' : 'Arapahoe County', 'fips' : '1EKnDWKt1NGb-tI2B2ilL9g2Ft9E-HGAV'},
-			{'location' : 'Baca County', 'fips' : '1qyegE16cva6Fcs7jnXW_adF7K9PbZ7oj'},
-			{'location' : 'Boulder County', 'fips' : '1qgVLq_6Rkn7nmZiLHjKDH2y84sL2jYQ_'},
-			{'location' : 'Broomfield City and County', 'fips' : '1VuJIixOLc5RPwgKq-Pa_H_A_EZQpkEv9'},
-			{'location' : 'Colorado East Community Action Agency', 'fips' : '1h0lb8wQs0am6DPwlQyp4FA6YaR2dAPv_'},
-			{'location' : 'Delta County Health Department', 'fips' : '1S5Ma0OGVju473vQf8vWQTrPPVWzDNhme'},
-			{'location' : 'Denver City and County', 'fips' : '1L6-Drl9F1ikoS7vWuK8ND3-pIE4VNNKN'},
-			{'location' : 'Douglas County', 'fips' : '1oUAHe94WDEcW9fWm-V7mt0emMagxCdZM'},
-			{'location' : 'El Paso County', 'fips' : '1zavHeKewo8SXxFwFswQz4dj8XUhNS_IU'},
-			{'location' : 'Garfield County Department of Human Services', 'fips' : '16i9Nlobj5lWnB-nCDkSb1jIRGMUS0Qeo'},
-			{'location' : 'Gunnison County CSBG', 'fips' : '1_FXqENRhSW1IAkeFuJ90bBeiLZpVJ4eh'},
-			{'location' : 'Housing Solutions for the Southwest', 'fips' : '12_ecSPM74rDJiWJUEmDPRtcNB9zgRIB-'},
-			{'location' : 'Jefferson County CSBG', 'fips' : '1TKJLWKmbrWZiDFBaGn0v1w-764oiFSAw'},
-			{'location' : 'Kiowa County', 'fips' : '157APWxQwPv2fkIlTJZ25dOPo8YycKs1M'},
-			{'location' : 'Larimer County', 'fips' : '19dwfeR0PNkwvd_gdunEDTLhxDkWg5-P6'},
-			{'location' : 'Mesa County', 'fips' : '1KIhFQLjCDbmLaWvNZ2ZeJ6eOGaNXv1Yg'},
-			{'location' : 'Mountain Family Center', 'fips' : '1xphNGd784zvwPQT60Oyi88qHEkZW0CKU'},
-			{'location' : 'Northeastern Colorado Association of Local Governments', 'fips' : '10GJ-Jhru5z6ktnsBu7fyFOZw5gM013_Y'},
-			{'location' : 'Otero County Department of Human Services', 'fips' : '1-MI6pzamIvGLP6DHlkKhqbwAj7URyxPP'},
-			{'location' : 'Prowers County', 'fips' : '1dqY7cq3KGRUnJlMnHpG9WsvfIOzrKn14'},
-			{'location' : 'Pueblo County', 'fips' : '16iYh7ZluRsFfRbZHHjXJaMHAfEg6Kq7L'},
-			{'location' : 'Rio Blanco County', 'fips' : '1AGHTTOhEP5xM2S2K5gs--Gm-I-6NA2ZP'},
-			{'location' : 'SLV Community Solutions', 'fips' : '1cXRhXNKOOBOhdYgzo_3gRCBC83JZjyii'},
-			{'location' : 'Summit County CSBG', 'fips' : '1ypaOCZyMnqbk2VPfCkYFR0Gh_9CwFgmn'},
-			{'location' : 'Upper Arkansas Area Council of Governments', 'fips' : '1WSKDInqMTy7KrhM6rzViD5iNaIfK__zU'},
-			{'location' : 'Weld County', 'fips' : '19t37G_0O62jAubl_6XbSMOLFw8LbemUP'},
-			{'location' : 'Balance of State', 'fips' : '1nxEJJrcS7LlAoaL-5arhwlogUipfCdzw'}]
+var csbg = [
+		{'location' :  'Adams County', 'fips' : '11riMRpReXocorCgvKeryZoC0W3uc7vAs'},
+		{'location' :  'Arapahoe County', 'fips' : '1P6SNmQANJ-Wz_9mex0aeyzgXzPQ5RKlO'},
+		{'location' :  'Baca County', 'fips' : '1YvKqArpPyRnYZQeOgLQGtW47upkLl3a5'},
+		{'location' :  'Boulder County', 'fips' : '1yquBK1pOTYLxHrawkbkNHCrL5Kvq8rKC'},
+		{'location' :  'Broomfield City and County', 'fips' : '1xLhMnJOCBnY9YmfQDJq9GoKlGyg4MGbi'},
+		{'location' :  'Colorado East Community Action Agency', 'fips' : '1KjceKced0R5TQT1IEYCnbSfDIGsBSxI4'},
+		{'location' :  'Delta County Health Department', 'fips' : '1foVI4Fs7KKuwsclNJt5RWFybb1XSzev1'},
+		{'location' :  'Denver City and County', 'fips' : '10jkFL8KqMF5LNXNm4ySLW2uGH2vTl2iL'},
+		{'location' :  'Douglas County', 'fips' : '1wxtiBRXVQJZ80mgd289azP5iwl-zwftu'},
+		{'location' :  'El Paso County', 'fips' : '1tsZRYyNzW2wBv6xN0Miyk3-sYQm5jpu9'},
+		{'location' :  'Garfield County Department of Human Services', 'fips' : '1oBxvwj7KckUJvxQCj06OndXd6Q20Xay_'},
+		{'location' :  'Gunnison County CSBG', 'fips' : '1qScn10K_qi8IctsnGRyzZQJItfJZpmS1'},
+		{'location' :  'Housing Solutions for the Southwest', 'fips' : '10VZ_aPoM9Pd7WcuFGd-vr_eRug6JBqkw'},
+		{'location' :  'Jefferson County CSBG', 'fips' : '19oighKfzg41y5-Xk67P6dj02nTzdt2T0'},
+		{'location' :  'Kiowa County', 'fips' : '10V8iuOBEaxFV_8PgL5ACW85Zb7tbLyCa'},
+		{'location' :  'Larimer County', 'fips' : '1amGODok21BpFZLT_Ce6p3AxdPc3paVQp'},
+		{'location' :  'Mesa County', 'fips' : '1XNmRhjSUxi_tzQaTRrjW5DqzkfLqjBP2'},
+		{'location' :  'Mountain Family Center', 'fips' : '1nO8Mp8TOkwud0y0b9o6OEtqXSoYP8FQi'},
+		{'location' :  'Northeastern Colorado Association of Local Governments', 'fips' : '119nTBwNl-Hf5mOPB_WMR2n_0fGHiOTP3'},
+		{'location' :  'Otero County Department of Human Services', 'fips' : '1BmmtDCxDUkHXf2Ry3XOnxBPfeaOFF2FU'},
+		{'location' :  'Prowers County', 'fips' : '1ol9CCBaQEJ27q5aPFZmIUBa4p3lKQ3n0'},
+		{'location' :  'Pueblo County', 'fips' : '1kQEUAn3XybDGu5emEU8OWXgPUwpXJC4y'},
+		{'location' :  'Rio Blanco County', 'fips' : '1UGtYpcy5KrOIEtb066fNI-ORaeZXIhbn'},
+		{'location' :  'SLV Community Solutions', 'fips' : '1Ycvg8JV4o8JcJRpHzZhqd5wcMYsLLCCk'},
+		{'location' :  'Summit County CSBG', 'fips' : '1PhtoRjnyipJKBEMACUwIA7k8C4-sJYm-'},
+		{'location' :  'Upper Arkansas Area Council of Governments', 'fips' : '1liyxONR__wtITAW9JsWMz6kEnqRaEmCq'},
+		{'location' :  'Weld County', 'fips' : '1g1xyfW2gZ3v4fMkpznJxaTQxMuZspQuz'},
+		{'location' :  'Balance of State', 'fips' : '14eg91TU5jvi7XuYr7SnvxFIupGqT_ual'},
+			]
 
 if(level == 'CSBG') { var locarr = csbg};
 
@@ -2147,8 +2149,11 @@ function downloadLinks(urls) {
 var outDiv = document.getElementById('download_links')
 outDiv.innerHTML = ""
 var olist = document.createElement('ul');
+debugger
+console.log(urls)
 urls.forEach(links => {
 	var url = "https://drive.google.com/uc?export=download&id=" + links.id
+	console.log(url)
 	var textName = "Download " + links.name + " Data Package";
 	var outlink = document.createElement('a');
     var li_line = document.createElement('li');
