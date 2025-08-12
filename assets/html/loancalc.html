@@ -1,18 +1,20 @@
 <!-- This script has been in the http://www.javascripts.com Javascript Public Library! -->
 <!-- Note that though this material may have been in a public depository, certain author copyright restrictions may apply. -->
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
-<html>
+<html lang="en">
 
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="GENERATOR" content="Microsoft FrontPage 12.0">
-<title>JavaScript Mortgage Loan Calculator - by Steven Witkop</title>
+<title>Energy and Mineral Impact Program Severance Loan Calculator</title>
 <!-- Copyright -->
 </head>
-
+<style>body {
+    font-family: "Trebuchet MS",sans-serif;line-height:1.5;
+}</style>
 <body bgcolor="#FFFFFF" link="#0000FF" vlink="#0000FF" alink="#0000FF" onload="setfocus()">
-<font face="Arial"><script language="JavaScript">
+<script language="JavaScript">
 //<font face="Comic Sans MS"><script language="JavaScript">
 
 <!--
@@ -361,7 +363,7 @@ var nperiods = 0;
 
 function Create() {
 
-   Mortgage = new Loan(50000, 8, 30, 0, 0, 1, 1 );
+   Mortgage = new Loan(50000, 8, 20, 0, 0, 1, 1 );
 
    return(true)
 
@@ -470,7 +472,7 @@ function createRecords(){
    currStart = get_selection(document.MORTGAGE.START);
   
    // let the loops begin
-   for(i=1;i<=30;i++) {
+   for(i=1;i<=Mortgage.Term;i++) {
 
       for(j=1;j<=Mortgage.Periods;j++) {
 
@@ -540,7 +542,7 @@ function showAmortize(oForm) {
 
    text = ("<HEAD><TITLE>Amortization Table</TITLE></HEAD>");
 
-   text = (text +"<BODY style='font-family:Arial' BGCOLOR =  "+bColor+"><BR><BR>");
+   text = (text +"<BODY style=BGCOLOR =  "+bColor+"><BR><BR>");
 
    text = (text +"<H2 ALIGN=CENTER><FONT COLOR="+hColor+">Amortization Table</FONT></H2>");
 
@@ -834,7 +836,6 @@ function setfocus() {
 // --></script>
 
 
-</font>
 
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation">
@@ -842,25 +843,23 @@ function setfocus() {
     <td><table border="0" cellpadding="2" width="53%" role="presentation">
       <tr>
         <td valign="top" width="492"><form name="MORTGAGE" align="right">
-          <table border="1" cellpadding="6" width="487" role="presentation">
+          <table border="1" cellpadding="6" width="600" role="presentation">
             <tr>
-              <td align="right" bordercolor="#C8B995" bordercolordark="#C8B995"
+              <td bordercolor="#C8B995" bordercolordark="#C8B995"
               bordercolorlight="#C8B995" colspan="2">
-				<h2 align="center" style="line-height: .6em;">
-				<font face="Arial" size="5" color="#843758"><strong>Water Project Loan <br>
-				Program Calculator</strong></font></h2>
-				<p align="center"><font face="Arial" size="2" color="#393931" >
-	Calculate <b>annual</b> payments based on <br>
-	principal, interest and term.</font></p></td>
-<font face="Arial" color="#843758">
+				<h1 align="center">Energy and Mineral Impact Program <br>
+				Severance Loan Calculator</h1>
+				<p>
+	Calculate estimated annual payments of principal and interest depending on amount and term of the loan. Loans may be made for public water and wastewater projects.</p></td>
+
             </tr>
             <tr>
               <td align="right" bordercolor="#C8B995" bordercolordark="#C8B995"
               bordercolorlight="#C8B995" width="210">
-				<label for="first-payment-year"><font size="2" face="Arial" color="#393931"><strong>First Payment Year&nbsp;</strong></font></label></td>
+				<label for="first-payment-year"><strong>First Payment Year&nbsp;</strong></label></td>
               <td align="left" valign="top" bgcolor="#92c5d1" bordercolor="#C8B995" bordercolordark="#C8B995"
               bordercolorlight="#336633" width="247">
-				<font face="Arial" color="#843758">&nbsp;<select id="first-payment-year" name="START" size="1">
+				&nbsp;<select id="first-payment-year" name="START" size="1">
           		<option selected>2025</option>
 			<option>2026</option>
 			<option>2027</option>
@@ -868,48 +867,39 @@ function setfocus() {
 			<option>2029</option>
               </select></td>
             </tr>
-<font face="Arial" color="#843758">
+
             <tr>
               <td align="right" bordercolor="#C8B995" bordercolordark="#C8B995"
               bordercolorlight="#C8B995" width="210" style="height: 33px"><b>
-				<label for="principal-amount"><font size="2" face="Arial" color="#393931">Principal Amount&nbsp;</font></label></b></td>
-</font>
-<font face="Arial" color="#843758">
+				<label for="principal-amount">Principal Amount&nbsp;</label></b></td>
+
+
               <td align="left" valign="top" bgcolor="#92c5d1" bordercolor="#C8B995" bordercolordark="#C8B995"
               bordercolorlight="#C8B995" width="247" style="height: 33px">&nbsp;<input id="principal-amount" type="text" size="12" name="AMOUNT" value="0"></td>
             </tr>
             <tr>
               <td align="right" bordercolor="#C8B995" bordercolordark="#C8B995"
               bordercolorlight="#C8B995" width="210">
-				<font size="2" face="Arial" color="#393931"><strong><span id="interest-rate-label">Interest Rate&nbsp;</span></strong></font></td>
+				<strong><span id="interest-rate-label">Interest Rate&nbsp;</span></strong></td>
               <td align="left" valign="top" bgcolor="#92c5d1" bordercolor="#C8B995" bordercolordark="#C8B995"
               bordercolorlight="#C8B995" width="247">&nbsp;<input aria-labelledby="interest-rate-label interest-rate-percent" type="text" size="4" name="RATE" value="0"> 
-				<font
-              color="#393931" face="Arial" size="2"><strong><span id="interest-rate-percent">%</span></strong></font></td>
+				<strong><span id="interest-rate-percent">%</span></strong></td>
             </tr>
-<font face="Arial" color="#843758" size="2">
             <tr>
               <td align="right" bordercolor="#C8B995" bordercolordark="#C8B995"
               bordercolorlight="#C8B995" width="210"><b>
-				<font face="Arial" color="#393931" size="2"><span id="term-label">Term&nbsp;</span></font></b></td>
-</font>
-<font face="Arial" color="#843758">
+				<span id="term-label">Term&nbsp;</span></b></td>
               <td align="left" valign="top" bgcolor="#92c5d1" bordercolor="#C8B995" bordercolordark="#C8B995"
               bordercolorlight="#C8B995" width="247">&nbsp;<select aria-labelledby="term-label term-years" name="YEARS" size="1">
-                <option>40</option>
-                <option selected>30</option>
-                <option>27</option>
-                <option>20</option>
-				<option>15</option>
+                <option selected>20</option>
+                <option>15</option>
 				<option>10</option>
-              </select> <font color="#393931" face="Arial" size="2"><strong><span id="term-years">Years&nbsp;</span></strong></font></td>
+				<option>5</option></td>
             </tr>
             <tr>
               <td align="right" bordercolor="#C8B995" bordercolordark="#C8B995"
               bordercolorlight="#C8B995" width="210">
-				<font face="Arial" size="1" color="#393931"><span id="amortize-description">You will need to 
-				hold down the Ctrl key when clicking the Amortize button to open 
-				the amortization schedule</span></font></td>
+				<strong><span id="amortize-description">Calculate and Reset&nbsp;</span></strong></td>
               <td align="left" valign="top" bgcolor="#92c5d1" bordercolor="#C8B995" bordercolordark="#C8B995"
               bordercolorlight="#C8B995" width="247">&nbsp;<input type="button" name="cmdCalc" value="  Calculate  "
               onclick="controller(this.form, this)" style="font-family: Arial">&nbsp;<input type="reset" name="cmdReset"
@@ -919,13 +909,13 @@ function setfocus() {
             <tr>
               <td align="right" bordercolor="#C8B995" bordercolordark="#C8B995"
               bordercolorlight="#C8B995" width="210">
-				<label id="annual-payment-amount-label"><font size="2" face="Arial" color="#393931"><strong>Annual Payment Amount&nbsp;</strong></font></label></td>
+				<label id="annual-payment-amount-label"><strong>Annual Payment Amount&nbsp;</strong></label></td>
               <td align="left" valign="top" bgcolor="#92c5d1" bordercolor="#C8B995" bordercolordark="#C8B995"
               bordercolorlight="#C8B995" width="247">&nbsp;<input aria-labelledby="annual-payment-amount-label"  aria-describedby="payment-amount-description" type="text" size="12" name="PAYMENT" value="0"></td>
             </tr>
             <tr>
               <td align="right" width="210">
-				<label for="total-interest"><font size="2" face="Arial" color="#393931"><strong>Total Interest to Be Paid on Loan&nbsp;</strong></font></label></td>
+				<label for="total-interest"><strong>Total Interest to Be Paid on Loan&nbsp;</strong></label></td>
               <td align="left" bgcolor="#92c5d1" width="247">&nbsp;<input id="total-interest" type="text" size="12" name="INTEREST" value="0"></td>
             </tr>
           </table>
@@ -935,21 +925,12 @@ function setfocus() {
       </tr>
       <tr>
         <td valign="top" width="492">
-		<p align="center" id="payment-amount-description"><b><font face="Arial" size="1" color="#393931">
-		Payment amounts are approximate.&nbsp; Accurate figures are determined upon processing 
-		of a loan.</font></b></td>
+		<p id="payment-amount-description">
+		Payment amounts are approximate.  Accurate figures are determined upon processing of a loan. to All payments shown above and on any amortization schedule are estimated. Please work with your <a href="https://dlg.colorado.gov/regional-managers-and-regional-assistants" target="_blank">Regional Manager</a> to discuss loan options for your community.</td>
       </tr>
     </table>
     </td>
   </tr>
 </table>
-
-<p><br>
-<br>
-</p>
-</font>
-</font>
-</font>
 </body>
 </html>
-
