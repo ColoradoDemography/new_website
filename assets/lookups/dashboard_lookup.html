@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title> SDO Data Package Lookup</title>
+<title> SDO Data Bundle Lookup</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" http-equiv="content-type" content="text/html; charset=utf-8">
 <!-- FONT AWESOME CSS  Source for buttons the list of icons is here: https://fontawesome.com/icons?d=gallery&p=2 -->
 <!-- angle-down, angle-double-down, angle-circle-down, angle-right, angle-circle-right, the new button is in common.css --> 
@@ -35,12 +35,13 @@
 	<div w3-include-html="../html/left_hand_index.html"></div>
   </div> <!-- Grid  panel2_2_1 -->
   <div class="grid-item app-panel_2_2">
-  <h1 class='h1_style' id='mainx' title='SDO Data Package Lookup' aria-label='SDO Data Package Lookup'>SDO Data Package Lookup</h1>
+  <h1 class='h1_style' id='mainx' title='SDO Data Bundle Lookup' aria-label='SDO Data Bundle Lookup'>SDO Data Bundle Lookup</h1>
   <h2 class='h2_style' title='INSTRUCTIONS:' aria-label='INSTRUCTIONS:'>INSTRUCTIONS:</h2>
    <p class="lookup_p">
-   This application downloads packaged data summaries for 
+   This application downloads bundled data summaries for 
    <ul>
-   <li class='accordion_link'>The Community Services Block Grant Program.</li>
+   <li class='accordion_link'>The Community Services Block Grant Program</li>
+   <li class='accordion_link'>Housing Needs Assessment Data Bundles</li>
    </ul>
    </p>
    <p>
@@ -50,36 +51,49 @@
    The zipped file can also be permanently expanded by right-clicking on the file icon and selecting the "Extract All..." option on the menu that appears.
    </p>
    <p>
-   <b>It may take a few seconds for the compressed file to dowkload.</b> Please be patient.
+   <b>It may take a few seconds for the compressed file(s) to dowkload.</b> Please be patient.
    </p>
    <table class='lookup_tab' cellspacing="0" cellpadding="0">
    <tr>
 	<td class="look_cll">
 		<label class="entry_text" for="program-dropdown" id="program-lbl"  alt='Select a Program' aria-label='Select a Program'>Select a Program:</label> 
 	</td>
-	<td class="look_cll">
-		<label class="entry_text" for="geo-dropdown" id="geo-lbl"  alt='Select one or more Agencies or Geographies' aria-label='Select one or more Agencies or Geographies'>Select one or more Agencies or Geographies:</label>
-	</td>
-	<td class="look_cll">
-	</td>
-	<td class="look_cll">
-	</td>
 	</tr>
+	</table>
+	<table class='lookup_tab' cellspacing="0" cellpadding="0">
 	<tr>
 	<td class="look_cll"> 
 	<select class="program-dropdown" id="program-dropdown" size="3"  role='listbox'>
-		<option value='CSBG' selected>Community Services Block Grant (CSBG)</option>
+		<option value='CSBG'>Community Services Block Grant (CSBG)</option>
+		<option value='HNA'>Housing Needs Assessment Data Bundles (HNA)</option>
 	</select>
-	 </td>
+	</td>
 	<td class="look_cll">
+		<button class='databutton' id='genBundle' aria-label='Download Data Bundle'>Download Selected Data Bundle(s)</button><br>
+		<button class='databutton' id='cleartable' aria-label='Reset Selections'>Reset Selections</button><br>
+	</td>
+	</tr>
+	</table>
+	<table class='lookup_tab' cellspacing="0" cellpadding="0">
+	<tr>
+	<td class="look_cll">
+		<label class="entry_text" for="geo-dropdown" id="geo-lbl"></label>
+	</td>
+	<td class="look_cll">
+		<label class="entry_text" for="loc-dropdown" id="loc-lbl"></label>
+	</td>
+ 	</tr>
+	</table>
+	<table class='lookup_tab' cellspacing="0" cellpadding="0">
+	<tr>
+	<td class="look_cll" style="vertical-align: top;">
 	<select class="geo-dropdown" id="geo-dropdown" style='width:400px;' multiple size="8"  role='listbox'>
 		<option></option>
 	</select>
 	<td class="look_cll">
-	</td>
-	<td class="look_cll">
-		<button class='databutton' id='genpackage' aria-label='Download Data Package'>Download Selected Data Package(s)</button><br>
-		<button class='databutton' id='cleartable' aria-label='Reset Selections'>Reset Selections</button><br>
+		<select class="loc-dropdown" id="loc-dropdown" style='width:400px;' multiple size="8"  role='listbox'>
+		<option></option>
+	</select>
 	</td>
 	</tr>
 	</table>
@@ -100,31 +114,58 @@
  <script> 
 
  includeHTML();
+    document.getElementById('geo-dropdown').hidden = true;
+	document.getElementById('loc-dropdown').hidden = true;
 	var complete = true;
- 	var e = document.getElementById("program-dropdown");
-    var selectedtype = e.value;
-	popDropdown(selectedtype,'geo-dropdown','dashboard'); 
- //Update Geo-Dropdown
-d3.select("#program-dropdown").on("change", function(d,i) {
-	var e = document.getElementById("program-dropdown");
-    var selectedtype = e.value;
-       document.getElementById('geo-dropdown').style.display = "block";
-	   document.getElementById('geo-dropdown').innerHTML = null;
-       popDropdown(selectedtype,'geo-dropdown','dashboard'); 
- });  //D3_json
 
- document.getElementById('genpackage').addEventListener("click", dwnPackage)
+ //Update program-Dropdown
+d3.select("#program-dropdown").on("change", function(d,i) {
+	var selectedprg = document.getElementById("program-dropdown").value;
+    if(selectedprg == "CSBG"){
+	    document.getElementById('geo-lbl').innerHTML = "Select CSBG Program Entity"
+	    document.getElementById('geo-dropdown').hidden = false;
+    	popDropdown(selectedprg,'geo-dropdown','dashboard'); 
+	  } else {
+	  	document.getElementById('geo-lbl').innerHTML = "Select Geography Type"
+	    document.getElementById('geo-dropdown').hidden = false;	
+        document.getElementById('geo-dropdown').size = 3;
+		document.getElementById('geo-dropdown').multiple = false;
+       var sel = document.getElementById('geo-dropdown');
+			var el = document.createElement("option");
+			el.textContent = "County";
+			el.value = "county";
+			sel.appendChild(el);
+		    var el = document.createElement("option");
+			el.textContent = "Municipality";
+			el.value = "municipality";
+			sel.appendChild(el);
+		}
+		sel.remove(0)
+ });  //D3 Program Selection
+ //Selection of Location
+d3.select("#geo-dropdown").on("change", function(d,i) {
+	var selectedprg = document.getElementById("program-dropdown").value;
+     if(selectedprg != "CSBG"){
+	 	document.getElementById('loc-lbl').innerHTML = "Select Location"
+	    document.getElementById('loc-dropdown').hidden = false;			
+		var selectedgeo = document.getElementById("geo-dropdown").value;
+        popDropdown(selectedgeo,'loc-dropdown','dashboard'); 
+     }
+}); //D3 Location Selection	 
+
+ document.getElementById('genBundle').addEventListener("click", dwnBundle)
  document.getElementById('cleartable').addEventListener("click", clearInputs)
 
-function dwnPackage() {
-    const dropdown = document.getElementById('geo-dropdown');
+function dwnBundle(prg) {
+    var selectedprg = document.getElementById("program-dropdown").value;
+	var dropdown = document.getElementById('loc-dropdown');
     var select_ids = getSelectValues(dropdown);
 	if(select_ids.length == 0){
 		    outputmsg = outputmsg +  " > Please select one or more agencies or geographies.\n";
 			complete = false;
 		}
 	if(complete){
-		     downloadLinks(select_ids);
+		     downloadLinks(selectedprg,select_ids);
 	 } else {
 		 window.alert(outputmsg);
 	 }
@@ -136,6 +177,12 @@ function clearInputs() {
 	}
 	var outDiv = document.getElementById('download_links')
     outDiv.innerHTML = ""
+	document.getElementById('geo-dropdown').size = 8;
+	document.getElementById('geo-dropdown').multiple = true;
+	document.getElementById('geo-dropdown').hidden = true;
+	document.getElementById('loc-dropdown').hidden = true;
+	document.getElementById('geo-lbl').innerHTML = ""
+	document.getElementById('loc-lbl').innerHTML = ""
 }; //clearInputs
 
 
