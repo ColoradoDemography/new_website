@@ -162,6 +162,8 @@ d3.select("#geo-dropdown").on("change", function(d,i) {
 	    document.getElementById('loc-dropdown').hidden = false;			
 		var selectedgeo = document.getElementById("geo-dropdown").value;
         popDropdown(selectedgeo,'loc-dropdown','dashboard'); 
+		var outDiv = document.getElementById('download_links')
+        outDiv.innerHTML = ""
      }
 	 var outDiv = document.getElementById('download_links')
     outDiv.innerHTML = ""
