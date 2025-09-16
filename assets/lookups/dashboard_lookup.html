@@ -163,6 +163,8 @@ d3.select("#geo-dropdown").on("change", function(d,i) {
 		var selectedgeo = document.getElementById("geo-dropdown").value;
         popDropdown(selectedgeo,'loc-dropdown','dashboard'); 
      }
+	 var outDiv = document.getElementById('download_links')
+    outDiv.innerHTML = ""
 }); //D3 Location Selection	 
 
  document.getElementById('genBundle').addEventListener("click", dwnBundle)
