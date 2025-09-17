@@ -40,30 +40,18 @@
    <p class="lookup_p">
    This application downloads bundled data summaries for 
    <ul>
-   <li class='accordion_link'>Community Services Block Grant Program</li>
+   <li class='accordion_link'>The Community Services Block Grant Program</li>
    <li class='accordion_link'>Housing Needs Assessment Data Bundles</li>
    </ul>
    </p>
    <p>
-   You can download data bundles for different programs:
-   <ul>
-   <li>The <i>Community Services Block Grant Program</i> provides bundled data files for specific CSBG agencies.</li>
-   <li>The <i>Housing Needs Assessment Data Bundles</i> provide county-level bundles containing data workbooks for a selected county and the municipalities within that county.  
-       Providing data bundles for counties facilitates analyses of regions (which are collections of counties) and muncipalites (which are sub-sections of counties).</li>
-   <ul>	
-   <li>To generate bundles for the counties in a region, select the appropriate counties and click on the "Generate Selected Data Bundle(s)" button.  A bundle for each county will be generated for downloading.</li>
-   <li>To generate buldles for municipalities, select the appropriate municipality and click on the "Generate Selected Data Bundle(s)" button. A bundle for each county that the municipality is in will be generated for downloading.</li>
-   </ul>
-   </ul>
-   </p>   
-   <p>
    Selecting a bundled data type will download a compressed file (*.zip) that contains reports, data files, and charts, depending on the selection. <br>
-   Clicking on the bundle link will download the bundle to the "Downloads" folder on your computer. <br>
+   This compressed bundle file(s) will be downloaded to the "Downloads" folder on your computer. <br>
    To access the individual files in the bundle, double-click on the compressed bundle file icon. <br>
    The compressed bundle file can also be permanently expanded by right-clicking on the file icon and selecting the "Extract All..." option on the menu that appears.
    </p>
    <p>
-   <b>It may take a few seconds for the compressed bundle file(s) to download to your computer.</b> Please be patient.
+   <b>It may take a few seconds for the compressed file(s) to download.</b> Please be patient.
    </p>
    <table class='lookup_tab' cellspacing="0" cellpadding="0">
    <tr>
@@ -81,7 +69,7 @@
 	</select>
 	</td>
 	<td class="look_cll">
-		<button class='databutton' id='genBundle' aria-label='Generate Data Bundle'>Generate Selected Data Bundle(s)</button><br>
+		<button class='databutton' id='genBundle' aria-label='Download Data Bundle'>Download Selected Data Bundle(s)</button><br>
 		<button class='databutton' id='cleartable' aria-label='Reset Selections'>Reset Selections</button><br>
 	</td>
 	</tr>
@@ -140,6 +128,7 @@ d3.select("#program-dropdown").on("change", function(d,i) {
 	  } else {
 	  	document.getElementById('geo-lbl').innerHTML = "Select Geography Type"
 	    document.getElementById('geo-dropdown').hidden = false;	
+		document.getElementById('geo-dropdown').innerHTML = "";
         document.getElementById('geo-dropdown').size = 3;
 		document.getElementById('geo-dropdown').multiple = false;
        var sel = document.getElementById('geo-dropdown');
@@ -162,11 +151,7 @@ d3.select("#geo-dropdown").on("change", function(d,i) {
 	    document.getElementById('loc-dropdown').hidden = false;			
 		var selectedgeo = document.getElementById("geo-dropdown").value;
         popDropdown(selectedgeo,'loc-dropdown','dashboard'); 
-		var outDiv = document.getElementById('download_links')
-        outDiv.innerHTML = ""
      }
-	 var outDiv = document.getElementById('download_links')
-    outDiv.innerHTML = ""
 }); //D3 Location Selection	 
 
  document.getElementById('genBundle').addEventListener("click", dwnBundle)
