@@ -50,9 +50,10 @@
    <li>The <i>Community Services Block Grant Program (CSBG)</i> option provides data bundles for specific CSBG agencies.</li>
    <li>The <i>Housing Needs Assessment Data Bundles (HNA)</i> option provides county data bundles for selected counties to facilitate Housing Needs Assessments analysis.</li>
    <ul>
-   <li>Regional Housing Needs Assessments are based on a collection of Counties.</li>
+   <li>Multi-County Regional Housing Needs Assessments are based on a collection of Counties.</li>
    <li>County Housing Needs Assessments are based on selected Counties.</li>
    <li>Municipality Housing Needs Assessments are based on the County a Municipality is part of.</li>
+   <li>Sub-County Regional Needs Assessments are based on the Census County Division (CCD) geography provided by the U.S. Census Bureau.</li>
    </ul>
    </ul>
    </p>
@@ -70,43 +71,47 @@
 	<td class="look_cll">
 		<label class="entry_text" for="program-dropdown" id="program-lbl"  alt='Select a Program' aria-label='Select a Program'>Select a Program:</label> 
 	</td>
+	<td class="look_cll">
+		<label class="entry_text" for="geo-dropdown" id="geo-lbl"></label>
+	</td>
+	<td class="look_cll"></td>
 	</tr>
-	</table>
-	<table class='lookup_tab' cellspacing="0" cellpadding="0">
 	<tr>
 	<td class="look_cll"> 
-	<select class="program-dropdown" id="program-dropdown" size="3"  role='listbox'>
+	<select class="program-dropdown" id="program-dropdown" size="2"  role='listbox'>
 		<option value='CSBG'>Community Services Block Grant (CSBG)</option>
 		<option value='HNA'>Housing Needs Assessment Data Bundles (HNA)</option>
 	</select>
 	</td>
-	<td class="look_cll">
-		<button class='databutton' id='genBundle' aria-label='Generate Data Bundle'>Generate Selected Data Bundle(s)</button><br>
-		<button class='databutton' id='cleartable' aria-label='Reset Selections'>Reset Selections</button><br>
-	</td>
-	</tr>
-	</table>
-	<table class='lookup_tab' cellspacing="0" cellpadding="0">
-	<tr>
-	<td class="look_cll">
-		<label class="entry_text" for="geo-dropdown" id="geo-lbl"></label>
-	</td>
-	<td class="look_cll">
-		<label class="entry_text" for="loc-dropdown" id="loc-lbl"></label>
-	</td>
- 	</tr>
-	</table>
-	<table class='lookup_tab' cellspacing="0" cellpadding="0">
-	<tr>
 	<td class="look_cll" style="vertical-align: top;">
 	<select class="geo-dropdown" id="geo-dropdown" style='width:400px;' multiple size="8"  role='listbox'>
 		<option></option>
 	</select>
 	<td class="look_cll">
+		<button class='databutton' id='genBundle' aria-label='Download Data Bundle'>Download Selected Data Bundle(s)</button><br>
+		<button class='databutton' id='cleartable' aria-label='Reset Selections'>Reset Selections</button><br>
+	</td>
+	</tr>
+	<td class="look_cll">
+		<label class="entry_text" for="loc-dropdown" id="loc-lbl"  ></label> 
+	</td>
+	<td class="look_cll">
+		<label class="entry_text" for="ccd-dropdown" id="ccd-lbl"></label>
+	</td>
+	<td class="look_cll"></td>
+	</tr>
+	<tr>
+	<td class="look_cll">
 		<select class="loc-dropdown" id="loc-dropdown" style='width:400px;' multiple size="8"  role='listbox'>
 		<option></option>
-	</select>
+		</select>
 	</td>
+	<td class="look_cll">
+		<select class="ccd-dropdown" id="ccd-dropdown" style='width:400px;' multiple size="8"  role='listbox'>
+		<option></option>
+		</select>
+	</td>
+	<td class="look_cll"></td>
 	</tr>
 	</table>
 	<hr>
@@ -128,15 +133,19 @@
  includeHTML();
     document.getElementById('geo-dropdown').hidden = true;
 	document.getElementById('loc-dropdown').hidden = true;
+	document.getElementById('ccd-dropdown').hidden = true;
 	var complete = true;
+	
+	document.getElementById('genBundle').addEventListener("click", dwnBundle)
+	document.getElementById('cleartable').addEventListener("click", clearInputs)
 
  //Update program-Dropdown
 d3.select("#program-dropdown").on("change", function(d,i) {
 	var selectedprg = document.getElementById("program-dropdown").value;
     if(selectedprg == "CSBG"){
-	    document.getElementById('geo-lbl').innerHTML = "Select CSBG Program Entity"
-	    document.getElementById('geo-dropdown').hidden = false;
-    	popDropdown(selectedprg,'geo-dropdown','dashboard'); 
+	    document.getElementById('loc-lbl').innerHTML = "Select CSBG Program Entity"
+	    document.getElementById('loc-dropdown').hidden = false;
+    	popDropdown(selectedprg,'loc-dropdown','dashboard'); 
 	  } else {
 	  	document.getElementById('geo-lbl').innerHTML = "Select Geography Type"
 	    document.getElementById('geo-dropdown').hidden = false;	
@@ -152,29 +161,71 @@ d3.select("#program-dropdown").on("change", function(d,i) {
 			el.textContent = "Municipality";
 			el.value = "municipality";
 			sel.appendChild(el);
+			var el = document.createElement("option");
+			el.textContent = "Census County Division (CCD)";
+			el.value = "CCD";
+			sel.appendChild(el);
 		}
  });  //D3 Program Selection
  //Selection of Location
+ //geo drop dowl only for non CSBG bundles
 d3.select("#geo-dropdown").on("change", function(d,i) {
 	var selectedprg = document.getElementById("program-dropdown").value;
+	var selectedgeo = document.getElementById("geo-dropdown").value;
      if(selectedprg != "CSBG"){
-	 	document.getElementById('loc-lbl').innerHTML = "Select Location"
-	    document.getElementById('loc-dropdown').hidden = false;			
-		var selectedgeo = document.getElementById("geo-dropdown").value;
-        popDropdown(selectedgeo,'loc-dropdown','dashboard'); 
+		if(selectedgeo == "municipality") {
+			 document.getElementById('loc-lbl').innerHTML = "Select Location"
+		     document.getElementById('loc-dropdown').hidden = false;	
+		     popDropdown(selectedgeo,'loc-dropdown','dashboard'); 
+	     } else {
+		 	 document.getElementById('loc-lbl').innerHTML = "Select Location"
+		 	 document.getElementById('loc-dropdown').hidden = false;	
+		     if(selectedgeo == "CCD"){
+			  document.getElementById('loc-dropdown').multiple = false;
+			  popDropdown('county','loc-dropdown','dashboard'); 
+			 } else {
+			 document.getElementById('loc-dropdown').multiple = true;
+			 popDropdown('county','loc-dropdown','dashboard'); 
+			 }
+		}
      }
 }); //D3 Location Selection	 
 
- document.getElementById('genBundle').addEventListener("click", dwnBundle)
- document.getElementById('cleartable').addEventListener("click", clearInputs)
+ //Selection of CCD
+d3.select("#loc-dropdown").on("change", function(d,i) {
 
-function dwnBundle(prg) {
+    var selectedgeo = document.getElementById("geo-dropdown").value;
+	var selectedcty = getSelectedDropdownText('loc-dropdown');
+	if(selectedgeo == "CCD") {
+	    document.getElementById('ccd-lbl').innerHTML = "Select CCD"
+	    document.getElementById('ccd-dropdown').hidden = false;
+		document.getElementById('ccd-dropdown').innerHTML = "";
+        document.getElementById('ccd-dropdown').size = 8;
+		document.getElementById('ccd-dropdown').multiple = false;
+		popCCDDrop(selectedcty,'ccd-dropdown'); 		
+	}
+	}); //D3 CCD Selection	 
+
+function dwnBundle() {
     var selectedprg = document.getElementById("program-dropdown").value;
+    if(selectedprg == "CSBG") {
 	var dropdown = document.getElementById('loc-dropdown');
     var select_ids = getSelectValues(dropdown);
+	}
+	if(selectedprg == "HNA") {
+	 var selectedgeo = document.getElementById("geo-dropdown").value;
+	 if(selectedgeo == "CCD"){
+	   var dropdown = document.getElementById('ccd-dropdown');
+       var select_ids = getSelectValues(dropdown);
+	} else {
+	var dropdown = document.getElementById('loc-dropdown');
+    var select_ids = getSelectValues(dropdown);
+		}
+	}
+	
 	if(select_ids.length == 0){
-		    outputmsg = outputmsg +  " > Please select one or more agencies or geographies.\n";
-			complete = false;
+		outputmsg = outputmsg +  " > Please select one or more agencies or geographies.\n";
+		complete = false;
 		}
 	if(complete){
 		     downloadLinks(selectedprg,select_ids);
@@ -189,15 +240,29 @@ function clearInputs() {
 	}
 	var outDiv = document.getElementById('download_links')
     outDiv.innerHTML = ""
-	document.getElementById('geo-dropdown').size = 8;
-	document.getElementById('geo-dropdown').multiple = true;
-	document.getElementById('geo-dropdown').hidden = true;
-	document.getElementById('loc-dropdown').hidden = true;
 	document.getElementById('geo-lbl').innerHTML = ""
 	document.getElementById('loc-lbl').innerHTML = ""
+	document.getElementById('ccd-lbl').innerHTML = ""
+	document.getElementById('geo-dropdown').hidden = true;
+	document.getElementById('loc-dropdown').hidden = true;
+	document.getElementById('ccd-dropdown').hidden = true;
 }; //clearInputs
 
 
+function getSelectedDropdownText(selectElementId) {
+  const selectElement = document.getElementById(selectElementId);
+
+  // Check if an option is actually selected
+  if (selectElement.selectedIndex === -1) {
+    return null; // No option is selected
+  }
+
+  // Get the selected option element
+  const selectedOption = selectElement.options[selectElement.selectedIndex];
+
+  // Return the text content of the selected option
+  return selectedOption.text;
+}
  
  </script>
 </body>
