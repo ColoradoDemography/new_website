@@ -88,8 +88,8 @@
 		<option></option>
 	</select>
 	<td class="look_cll">
-		<button class='databutton' id='genBundle' aria-label='Select Data Bundle'>Select Data Bundle(s)</button><br>
 		<button class='databutton' id='cleartable' aria-label='Reset Selections'>Reset Selections</button><br>
+		<button class='databutton' id='genBundle' aria-label='Select Data Bundle(s) to Download'>Select Data Bundle(s) to Download</button><br>
 	</td>
 	</tr>
 	<td class="look_cll">
@@ -134,6 +134,7 @@
     document.getElementById('geo-dropdown').hidden = true;
 	document.getElementById('loc-dropdown').hidden = true;
 	document.getElementById('ccd-dropdown').hidden = true;
+	document.getElementById('genBundle').style.display = 'none';
 	var complete = true;
 	
 	document.getElementById('genBundle').addEventListener("click", dwnBundle)
@@ -170,6 +171,7 @@ d3.select("#program-dropdown").on("change", function(d,i) {
  //Selection of Location
  //geo drop dowl only for non CSBG bundles
 d3.select("#geo-dropdown").on("change", function(d,i) {
+    document.getElementById('genBundle').style.display = 'block'
 	var selectedprg = document.getElementById("program-dropdown").value;
 	var selectedgeo = document.getElementById("geo-dropdown").value;
      if(selectedprg != "CSBG"){
@@ -246,6 +248,7 @@ function clearInputs() {
 	document.getElementById('geo-dropdown').hidden = true;
 	document.getElementById('loc-dropdown').hidden = true;
 	document.getElementById('ccd-dropdown').hidden = true;
+	document.getElementById('genBundle').style.display = 'none';
 }; //clearInputs
 
 
