@@ -171,6 +171,8 @@ d3.select("#program-dropdown").on("change", function(d,i) {
  //Selection of Location
  //geo drop dowl only for non CSBG bundles
 d3.select("#geo-dropdown").on("change", function(d,i) {
+	document.getElementById('ccd-dropdown').hidden = true;
+	document.getElementById('ccd-lbl').innerHTML = ""
     document.getElementById('genBundle').style.display = 'block'
 	var selectedprg = document.getElementById("program-dropdown").value;
 	var selectedgeo = document.getElementById("geo-dropdown").value;
