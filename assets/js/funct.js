@@ -141,8 +141,22 @@ return(outAnnot);
 
 function colorRamp() {
 //colorRamp  returns SDO colors for charts
-	var colors = ["#00008B", "#007ADE", "#5BB5FF", "#000000", "#808080", "#BFBFBF", "#359A7E", 
-	                              "#7A853B", "#245D38", "#7A853B", "#FFD100", "#C0504D", "#FF8199", "#6D3A5D", "#9F7FB3"]
+	var colors = ['#001970', //Dark Blue
+				'#007ADE', //Mid Blue
+				'#5BB5FF', //Light Blue
+				'#000000', //Black
+				'#808080', //Mid Grey
+				'#BFBFBF', //Light Grey
+				'#35647E', //Right Mountain Teal
+				'#5D99BD', //Light Right Mountain Teal
+				'#245D38', //Tree Green
+				'#7A853B', //Left Mountain Green
+				'#E1D100', //Yellow
+				'#C3002F', //Red
+				'#FF8199', //Pink
+				'#6D3A5D', //Purple
+				'#9F7FB3' //Light Purple
+					]
 return(colors)
 }
 // colorRamp
@@ -191,7 +205,7 @@ if(muni == '12415'){cty_n = '035'};
 if(muni == '12635'){cty_n = '029'};
 if(muni == '12815'){cty_n = '005'};
 if(muni == '12855'){cty_n = '109'};
-if(muni == '12910'){cty_n = '047'};
+if(muni == '12900'){cty_n = '047'};
 if(muni == '13460'){cty_n = '089'};
 if(muni == '13845'){cty_n = '005'};
 if(muni == '14175'){cty_n = '017'};
@@ -662,7 +676,7 @@ if(nam == 'Steamboat Springs') {regionNum = 35};
 if(nam == 'Sterling') {regionNum = 36};
 if(nam == 'Denver PMSA') {regionNum = 37};
 if(nam == 'Denver-Boulder Metro Area') {regionNum = 38};
-if(nam == 'Denver-Boulder-Greely CMSA') {regionNum = 39};
+if(nam == 'Denver-Boulder-Greeley CMSA') {regionNum = 39};
 
 return(regionNum);
 }; 
@@ -672,45 +686,47 @@ return(regionNum);
 function regionName(reg) {
 //RegionName takes the region number and returns the name
 if(reg == 0) {name =  'Colorado'};
-if(reg == 1) {name =  'Central Mountains'};
-if(reg == 2) {name =  'Eastern Plains'};
-if(reg == 3) {name =  'Front Range'};
-if(reg == 4) {name =  'San Luis Valley'};
-if(reg == 5) {name =  'Western Slope'};
-if(reg == 6) {name = 'Region 1: Northern Eastern Plains'};
-if(reg == 7) {name = 'Region 2: Northern Front Range'};
-if(reg == 8) {name = 'Region 3: Denver Metropolitan Area'};
-if(reg == 9) {name = 'Region 4: Southern Front Range'};
-if(reg == 10) {name = 'Region 5: Central Eastern Plains'};
-if(reg == 11) {name = 'Region 6: Southern Eastern Plains'};
-if(reg == 12) {name = 'Region 7: Pueblo County'};
-if(reg == 13) {name = 'Region 8: San Luis Valley'};
-if(reg == 14) {name = 'Region 9: Southern Western Slope'};
-if(reg == 15) {name = 'Region 10: Central Western Slope'};
-if(reg == 16) {name = 'Region 11: Northern Western Slope'};
-if(reg == 17) {name = 'Region 12: Northern Mountains'};
-if(reg == 18) {name = 'Region 13: Central Mountains'};
-if(reg == 19) {name = 'Region 14: Southern Mountains'};
-if(reg == 20) {name =  'Boulder'};
-if(reg == 21) {name =  'Colorado Springs'};
-if(reg == 22) {name =  'Denver-Aurora-Lakewood'};
-if(reg == 23) {name =  'Fort Collins'};
-if(reg == 24) {name =  'Grand Junction'};
-if(reg == 25) {name =  'Greeley'};
-if(reg == 26) {name =  'Pueblo'};
-if(reg == 27) {name =  'Breckenridge'};
-if(reg == 28) {name =  'Ca\u00f1on City'};
-if(reg == 29) {name =  'Craig'};
-if(reg == 30) {name =  'Durango'};
-if(reg == 31) {name =  'Edwards'};
-if(reg == 32) {name =  'Fort Morgan'};
-if(reg == 33) {name =  'Glenwood Springs'};
-if(reg == 34) {name = 'Montrose'};
-if(reg == 35) {name =  'Steamboat Springs'};
-if(reg == 36) {name =  'Sterling'};
-if(reg == 37) {name =  'Denver PMSA'};
-if(reg == 38) {name =  'Denver-Boulder Metro Area'};
-if(reg == 39) {name =  'Denver-Boulder-Greely CMSA'};
+if(reg == 1) {name = 'Region 1: Northern Eastern Plains'};
+if(reg == 2) {name = 'Region 2: Northern Front Range'};
+if(reg == 3) {name = 'Region 3: Denver Metropolitan Area'};
+if(reg == 4) {name = 'Region 4: Southern Front Range'};
+if(reg == 5) {name = 'Region 5: Central Eastern Plains'};
+if(reg == 6) {name = 'Region 6: Southern Eastern Plains'};
+if(reg == 7) {name = 'Region 7: Pueblo County'};
+if(reg == 8) {name = 'Region 8: San Luis Valley'};
+if(reg == 9) {name = 'Region 9: Southern Western Slope'};
+if(reg == 10) {name = 'Region 10: Central Western Slope'};
+if(reg == 11) {name = 'Region 11: Northern Western Slope'};
+if(reg == 12) {name = 'Region 12: Northern Mountains'};
+if(reg == 13) {name = 'Region 13: Central Mountains'};
+if(reg == 14) {name = 'Region 14: Southern Mountains'};
+if(reg == 15) {name =  'Central Mountains'};
+if(reg == 16) {name =  'Eastern Plains'};
+if(reg == 17) {name =  'Front Range'};
+if(reg == 18) {name =  'San Luis Valley'};
+if(reg == 19) {name =  'Western Slope'};
+if(reg == 20) {name =  'Denver PMSA'};
+if(reg == 21) {name =  'Denver-Boulder Metro Area'};
+if(reg == 22) {name =  'Denver-Boulder-Greeley CMSA'};
+if(reg == 23) {name =  'Denver Metro (10-County)'};
+if(reg == 24) {name =  'Boulder'};
+if(reg == 25) {name =  'Colorado Springs'};
+if(reg == 26) {name =  'Denver-Aurora-Lakewood'};
+if(reg == 27) {name =  'Fort Collins'};
+if(reg == 28) {name =  'Grand Junction'};
+if(reg == 29) {name =  'Greeley'};
+if(reg == 30) {name =  'Pueblo'};
+if(reg == 31) {name =  'Breckenridge'};
+if(reg == 32) {name =  'Ca\u00f1on City'};
+if(reg == 33) {name =  'Craig'};
+if(reg == 34) {name =  'Durango'};
+if(reg == 35) {name =  'Edwards'};
+if(reg == 36) {name =  'Fort Morgan'};
+if(reg == 37) {name =  'Glenwood Springs'};
+if(reg == 38) {name = 'Montrose'};
+if(reg == 39) {name =  'Steamboat Springs'};
+if(reg == 40) {name =  'Sterling'};
+
 return name;
 }; 
 // Regionname
@@ -833,7 +849,7 @@ function muniName(muni){
 	if(muni == 12635){name = 'Cedaredge'};
 	if(muni == 12815){name = 'Centennial'};
 	if(muni == 12855){name = 'Center'};
-	if(muni == 12910){name = 'Central City'};
+	if(muni == 12900){name = 'Central City'};
 	if(muni == 13460){name = 'Cheraw'};
 	if(muni == 13845){name = 'Cherry Hills Village'};
 	if(muni == 14175){name = 'Cheyenne Wells'};
@@ -1189,7 +1205,7 @@ function muniNum(name) {
 	if(name2 == 'Cedaredge'){num = 12635};
 	if(name2 == 'Centennial'){num = 12815};
 	if(name2 == 'Center'){num = 12855};
-	if(name2 == 'Central City'){num = 12910};
+	if(name2 == 'Central City'){num = 12900};
 	if(name2 == 'Cheraw'){num = 13460};
 	if(name2 == 'Cherry Hills Village'){num = 13845};
 	if(name2 == 'Cheyenne Wells'){num = 14175};
@@ -1624,7 +1640,7 @@ return name;
 
 function popDropdown(level,ddid,callpg) {
 //popDropdown populates drop down boxes based on input geography Type
-   
+
    //Counties
 var county = [  {'location':'Colorado', 'fips': '000'}, {'location':'Adams County', 'fips': '001'},
                 {'location':'Alamosa County', 'fips': '003'},{'location':'Arapahoe County', 'fips': '005'},
@@ -1700,45 +1716,46 @@ if(callpg == "jobs"){
 //regions
 
 var region =  [
-				{'optgroup' : 'Geographic Region','location' : 'Central Mountains', 'regnum' : '01'},	
-				{'optgroup' : 'Geographic Region','location' : 'Eastern Plains', 'regnum' : '02'},
-				{'optgroup' : 'Geographic Region','location' : 'Front Range', 'regnum' : '03'},
-				{'optgroup' : 'Geographic Region','location' : 'San Luis Valley', 'regnum' : '04'},
-				{'optgroup' : 'Geographic Region','location' : 'Western Slope', 'regnum' : '05'},
-				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 1: Northern Eastern Plains', 'regnum' : '06'},
-				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 2: Northern Front Range', 'regnum' : '07'},
-				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 3: Denver Metropolitan Area', 'regnum' : '08'},
-				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 4: Southern Front Range', 'regnum' : '09'},
-				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 5: Central Eastern Plains', 'regnum' : '10'},
-				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 6: Southern Eastern Plains', 'regnum' : '11'},
-				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 7: Pueblo County', 'regnum' : '12'},
-				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 8: San Luis Valley', 'regnum' : '13'},
-				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 9: Southern Western Slope', 'regnum' : '14'},
-				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 10: Central Western Slope', 'regnum' : '15'},
-				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 11: Northern Western Slope', 'regnum' : '16'},
-				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 12: Northern Mountains', 'regnum' : '17'},
-				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 13: Central Mountains', 'regnum' : '18'},
-				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 14: Southern Mountains', 'regnum' : '19'},
-				{'optgroup' : 'Census Metropolitan Statistical Areas', 'location' : 'Boulder', 'regnum' : '20'},
-				{'optgroup' : 'Census Metropolitan Statistical Areas', 'location' : 'Colorado Springs', 'regnum' : '21'},
-				{'optgroup' : 'Census Metropolitan Statistical Areas', 'location' : 'Denver-Aurora-Lakewood', 'regnum' : '22'},
-				{'optgroup' : 'Census Metropolitan Statistical Areas', 'location' : 'Fort Collins', 'regnum' : '23'},
-				{'optgroup' : 'Census Metropolitan Statistical Areas', 'location' : 'Grand Junction', 'regnum' : '24'},
-				{'optgroup' : 'Census Metropolitan Statistical Areas', 'location' : 'Greeley', 'regnum' : '25'},
-				{'optgroup' : 'Census Metropolitan Statistical Areas', 'location' : 'Pueblo', 'regnum' : '26'},
-				{'optgroup' : 'Census Micropolitan Statistical Areas', 'location' : 'Breckenridge', 'regnum' : '27'},
-				{'optgroup' : 'Census Micropolitan Statistical Areas', 'location' : 'Ca\u00f1on City', 'regnum' : '28'},
-				{'optgroup' : 'Census Micropolitan Statistical Areas', 'location' : 'Craig', 'regnum' : '29'},
-				{'optgroup' : 'Census Micropolitan Statistical Areas', 'location' : 'Durango', 'regnum' : '30'},
-				{'optgroup' : 'Census Micropolitan Statistical Areas', 'location' : 'Edwards', 'regnum' : '31'},
-				{'optgroup' : 'Census Micropolitan Statistical Areas', 'location' : 'Fort Morgan', 'regnum' : '32'},
-				{'optgroup' : 'Census Micropolitan Statistical Areas', 'location' : 'Glenwood Springs', 'regnum' : '33'},
-				{'optgroup' : 'Census Micropolitan Statistical Areas', 'location' : 'Montrose', 'regnum' : '34'},
-				{'optgroup' : 'Census Micropolitan Statistical Areas', 'location' : 'Steamboat Springs', 'regnum' : '35'},
-				{'optgroup' : 'Census Micropolitan Statistical Areas', 'location' : 'Sterling', 'regnum' : '36'},
-				{'optgroup' : 'Denver Regions','location' : 'Denver PMSA', 'regnum' : '37'},
-				{'optgroup' : 'Denver Regions','location' : 'Denver-Boulder Metro Area', 'regnum' : '38'},
-				{'optgroup' : 'Denver Regions','location' : 'Denver-Boulder-Greely CMSA', 'regnum' : '39'},
+				{'optgroup' : 'Geographic Region','location' : 'Central Mountains', 'regnum' : '15'},	
+				{'optgroup' : 'Geographic Region','location' : 'Eastern Plains', 'regnum' : '16'},
+				{'optgroup' : 'Geographic Region','location' : 'Front Range', 'regnum' : '17'},
+				{'optgroup' : 'Geographic Region','location' : 'San Luis Valley', 'regnum' : '18'},
+				{'optgroup' : 'Geographic Region','location' : 'Western Slope', 'regnum' : '19'},
+				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 1: Northern Eastern Plains', 'regnum' : '01'},
+				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 2: Northern Front Range', 'regnum' : '02'},
+				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 3: Denver Metropolitan Area', 'regnum' : '03'},
+				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 4: Southern Front Range', 'regnum' : '04'},
+				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 5: Central Eastern Plains', 'regnum' : '05'},
+				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 6: Southern Eastern Plains', 'regnum' : '06'},
+				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 7: Pueblo County', 'regnum' : '07'},
+				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 8: San Luis Valley', 'regnum' : '08'},
+				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 9: Southern Western Slope', 'regnum' : '09'},
+				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 10: Central Western Slope', 'regnum' : '10'},
+				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 11: Northern Western Slope', 'regnum' : '11'},
+				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 12: Northern Mountains', 'regnum' : '12'},
+				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 13: Central Mountains', 'regnum' : '13'},
+				{'optgroup' : 'Colorado Planning and Management Regions','location' : 'Region 14: Southern Mountains', 'regnum' : '14'},
+				{'optgroup' : 'Denver Regions','location' : 'Denver PMSA', 'regnum' : '20'},
+				{'optgroup' : 'Denver Regions','location' : 'Denver-Boulder Metro Area', 'regnum' : '21'},
+				{'optgroup' : 'Denver Regions','location' : 'Denver-Boulder-Greeley CMSA', 'regnum' : '22'},
+				{'optgroup' : 'Denver Regions','location' : 'Denver Metro (10-County)', 'regnum' : '23'},
+				{'optgroup' : 'Census Metropolitan Statistical Areas', 'location' : 'Boulder', 'regnum' : '24'},
+				{'optgroup' : 'Census Metropolitan Statistical Areas', 'location' : 'Colorado Springs', 'regnum' : '25'},
+				{'optgroup' : 'Census Metropolitan Statistical Areas', 'location' : 'Denver-Aurora-Lakewood', 'regnum' : '26'},
+				{'optgroup' : 'Census Metropolitan Statistical Areas', 'location' : 'Fort Collins', 'regnum' : '27'},
+				{'optgroup' : 'Census Metropolitan Statistical Areas', 'location' : 'Grand Junction', 'regnum' : '28'},
+				{'optgroup' : 'Census Metropolitan Statistical Areas', 'location' : 'Greeley', 'regnum' : '29'},
+				{'optgroup' : 'Census Metropolitan Statistical Areas', 'location' : 'Pueblo', 'regnum' : '30'},
+				{'optgroup' : 'Census Micropolitan Statistical Areas', 'location' : 'Breckenridge', 'regnum' : '31'},
+				{'optgroup' : 'Census Micropolitan Statistical Areas', 'location' : 'Ca\u00f1on City', 'regnum' : '32'},
+				{'optgroup' : 'Census Micropolitan Statistical Areas', 'location' : 'Craig', 'regnum' : '33'},
+				{'optgroup' : 'Census Micropolitan Statistical Areas', 'location' : 'Durango', 'regnum' : '34'},
+				{'optgroup' : 'Census Micropolitan Statistical Areas', 'location' : 'Edwards', 'regnum' : '35'},
+				{'optgroup' : 'Census Micropolitan Statistical Areas', 'location' : 'Fort Morgan', 'regnum' : '36'},
+				{'optgroup' : 'Census Micropolitan Statistical Areas', 'location' : 'Glenwood Springs', 'regnum' : '37'},
+				{'optgroup' : 'Census Micropolitan Statistical Areas', 'location' : 'Montrose', 'regnum' : '38'},
+				{'optgroup' : 'Census Micropolitan Statistical Areas', 'location' : 'Steamboat Springs', 'regnum' : '39'},
+				{'optgroup' : 'Census Micropolitan Statistical Areas', 'location' : 'Sterling', 'regnum' : '40'},
 ];
 
 //Municipalities and places
@@ -1763,7 +1780,7 @@ var municipality = [{'location' :  'Aguilar' , 'fips' : '00760'}, {'location' : 
 		{'location' :  'Carbonate' , 'fips' : '12030'},{'location' :  'Carbondale' , 'fips' : '12045'}, {'location' :  'Castle Pines' , 'fips' : '12387'},
 		{'location' :  'Castle Rock' , 'fips' : '12415'}, {'location' :  'Cedaredge' , 'fips' : '12635'},
 		{'location' :  'Centennial' , 'fips' : '12815'}, {'location' :  'Center' , 'fips' : '12855'},
-		{'location' :  'Central City' , 'fips' : '12910'}, {'location' :  'Cheraw' , 'fips' : '13460'},
+		{'location' :  'Central City' , 'fips' : '12900'}, {'location' :  'Cheraw' , 'fips' : '13460'},
 		{'location' :  'Cherry Hills Village' , 'fips' : '13845'}, {'location' :  'Cheyenne Wells' , 'fips' : '14175'},
 		{'location' :  'City of Creede' , 'fips' : '14765'}, {'location' :  'Coal Creek' , 'fips' : '15330'},
 		{'location' :  'Cokedale' , 'fips' : '15550'}, {'location' :  'Collbran' , 'fips' : '15605'},
@@ -1992,10 +2009,10 @@ var ctymuni = [{'location' : 'Aguilar', 'fips' : '07100760'}, {'location' : 'Akr
 		{'location' : 'Brush', 'fips' : '08709555'}, {'location' : 'Buena Vista', 'fips' : '01510105'},
 		{'location' : 'Burlington', 'fips' : '06310600'}, {'location' : 'Calhan', 'fips' : '04111260'},
 		{'location' : 'Campo', 'fips' : '00911645'}, {'location' : 'Cañon City', 'fips' : '04311810'},
-		{'location' : 'Carbondale', 'fips' : '04512045'}, {'location' : 'Castle Pines North', 'fips' : '03512390'},
+		{'location' : 'Carbondale', 'fips' : '04512045'}, {'location' : 'Castle Pines', 'fips' : '03512390'},
 		{'location' : 'Castle Rock', 'fips' : '03512415'}, {'location' : 'Cedaredge', 'fips' : '02912635'},
 		{'location' : 'Centennial', 'fips' : '00512815'}, {'location' : 'Center', 'fips' : '10512855'},
-		{'location' : 'Central City', 'fips' : '01912910'}, {'location' : 'Cheraw', 'fips' : '08913460'},
+		{'location' : 'Central City', 'fips' : '01912900'}, {'location' : 'Cheraw', 'fips' : '08913460'},
 		{'location' : 'Cherry Hills Village', 'fips' : '00513845'}, {'location' : 'Cheyenne Wells', 'fips' : '01714175'},
 		{'location' : 'City of Creede', 'fips' : '07914765'}, {'location' : 'Coal Creek', 'fips' : '04315330'},
 		{'location' : 'Cokedale', 'fips' : '07115550'}, {'location' : 'Collbran', 'fips' : '07715605'},
@@ -2264,50 +2281,48 @@ function regionCOL(regnum) {
 //Micro Regions DOLA Left Mountain Greens
 //Denver DOLA Rignh Mountain Teal
 	var fips = []; 
-if(regnum == 0) {fips.push({'fips' : ['001', '003', '005', '007', '009', '011', '013', '014', '015', '017', '019', '021', '023', '025', '027', 
-									'029', '031', '033', '035', '037', '039', '041', '043', '045', '047', '049', '051', '053', '055', '057', 
-									'059', '061', '063', '065', '067', '069', '071', '073', '075', '077', '079', '081', '083', '085', '087', 
-									'089', '091', '093', '095', '097', '099', '101', '103', '105', '107', '109', '111', '113', '115', '117', 
-									'119', '121', '123', '125'], 'color' : ''})};
-if(regnum == 1) {fips.push({'fips' : ['015', '019', '027', '043', '047', '055', '065', '071', '093'], 'color' : '#EE6677'})};
-if(regnum == 2) {fips.push({'fips' : ['009', '011', '017', '025', '039', '061', '063', '073', '075', '087', '089', '095', '099', '115', '121', '125'],  'color' : '#228833'})};
-if(regnum == 3) {fips.push({'fips' : ['001', '005', '013', '014', '031', '035', '041', '059', '069', '101','119','123'],  'color' : '#4477AA'})};
-if(regnum == 4) {fips.push({'fips' : ['003', '021', '023', '079', '105', '109'],  'color' : '#CCBB44'})};
-if(regnum == 5) {fips.push({'fips' : ['007', '029', '033', '037', '045', '049', '051', '053', '057', '067', '077', '081', '083', '085', '091', '097', '103', '107', '111', '113', '117'],  'color' : '#66CCEE'})};
-if(regnum == 6) {fips.push({'fips' : ['075','087','095','115','121','125'], 'color' : '#AA3377'})};
-if(regnum == 7) {fips.push({'fips' : ['069','123'],  'color' : '#BBBBBB'})};
-if(regnum == 8) {fips.push({'fips' : ['001','005','013','014','019','031','035','047','059'], 'color' : '#505050'})};
-if(regnum == 9) {fips.push({'fips' : ['041','093','119'],  'color' : '#44AA99'})};
-if(regnum == 10) {fips.push({'fips' : ['017','039','063','073'], 'color' : '#117733'})};
-if(regnum == 11) {fips.push({'fips' : ['009','011','025','061','089','099'],  'color' : '#332288'})};
-if(regnum == 12) {fips.push({'fips' : ['101'],  'color' : '#DDCC77'})};
-if(regnum == 13) {fips.push({'fips' : ['003','021','023','079','105','109'],  'color' : '#999933'})};
-if(regnum == 14) {fips.push({'fips' : ['007','033','067','083','111'],  'color' : '#CC6677'})};
-if(regnum == 15) {fips.push({'fips' : ['029','051','053','085','091','113'], 'color' : '#F8F8F8'})};
-if(regnum == 16) {fips.push({'fips' : ['045','077','081','103'],  'color' : '#AA4499'})};
-if(regnum == 17) {fips.push({'fips' : ['037','049','057','097','107','117'], 'color' : '#DDDDDD'})};
-if(regnum == 18) {fips.push({'fips' : ['015','027','043','065'], 'color' : '#BBCC33'})};
-if(regnum == 19) {fips.push({'fips' : ['055','071'],  'color' : '#AAAA00'})};
-if(regnum == 20) {fips.push({'fips' : ['013'], 'color' : '#77AADD'})};
-if(regnum == 21) {fips.push({'fips' : ['041','119'], 'color' : '#EE8866'})};
-if(regnum == 22) {fips.push({'fips' : ['001','005','014','019','031','035','039','047','059','093'],  'color' : '#EEDD88'})};
-if(regnum == 23) {fips.push({'fips' : ['069'],  'color' : '#FFAABB'})};
-if(regnum == 24) {fips.push({'fips' : ['077'],  'color' : '#99DDFF'})};
-if(regnum == 25) {fips.push({'fips' : ['123'],  'color' : '#44BB99'})};
-if(regnum == 26) {fips.push({'fips' : ['101'],  'color' : '#DDCC77'})};
-if(regnum == 27) {fips.push({'fips' : ['117'], 'color' : '#E69F00'})};
-if(regnum == 28) {fips.push({'fips' : ['043'],  'color' : '#56B4E9'})};
-if(regnum == 29) {fips.push({'fips' : ['081'],  'color' : '#009E73'})};
-if(regnum == 30) {fips.push({'fips' : ['067'],  'color' : '#F0E442'})};
-if(regnum == 31) {fips.push({'fips' : ['037'],  'color' : '#0072B2'})};
-if(regnum == 32) {fips.push({'fips' : ['087'],  'color' : '#D55E00'})};
-if(regnum == 33) {fips.push({'fips' : ['045','097'],  'color' : '#CC79A7'})};
-if(regnum == 34) {fips.push({'fips' : ['085','091'],  'color' : '#696969'})};
-if(regnum == 35) {fips.push({'fips' : ['107'], 'color' : '#808080'})};
-if(regnum == 36) {fips.push({'fips' : ['075'],  'color' : '#A9A9A9'})};
-if(regnum == 37) {fips.push({'fips' : ['001', '005', '014', '031', '035', '059'],  'color' : '#505050'})};
-if(regnum == 38) {fips.push({'fips' : ['001', '005', '013', '014', '031', '035', '059'], 'color' : '#C0C0C0'})};
-if(regnum == 39) {fips.push({'fips' : ['001', '005', '013', '014', '031', '035', '059', '123'],  'color' : '#D3D3D3'})};
+if(regnum == 0) {fips.push({'fips' : ['001', '003', '005', '007', '009', '011', '013', '014', '015', '017', '019', '021', '023', '025', '027',  '029', '031', '033', '035', '037', '039', '041', '043', '045', '047', '049', '051', '053', '055', '057',  '059', '061', '063', '065', '067', '069', '071', '073', '075', '077', '079', '081', '083', '085', '087',  '089', '091', '093', '095', '097', '099', '101', '103', '105', '107', '109', '111', '113', '115', '117',  '119', '121', '123', '125'], 'color' : ''})};
+if(regnum == 1) {fips.push({'fips' : ['075','087','095','115','121','125'], 'color' : '#AA3377'})};
+if(regnum == 2) {fips.push({'fips' : ['069','123'],  'color' : '#BBBBBB'})};
+if(regnum == 3) {fips.push({'fips' : ['001','005','013','014','019','031','035','047','059'], 'color' : '#505050'})};
+if(regnum == 4) {fips.push({'fips' : ['041','093','119'],  'color' : '#44AA99'})};
+if(regnum == 5) {fips.push({'fips' : ['017','039','063','073'], 'color' : '#117733'})};
+if(regnum == 6) {fips.push({'fips' : ['009','011','025','061','089','099'],  'color' : '#332288'})};
+if(regnum == 7) {fips.push({'fips' : ['101'],  'color' : '#DDCC77'})};
+if(regnum == 8) {fips.push({'fips' : ['003','021','023','079','105','109'],  'color' : '#999933'})};
+if(regnum == 9) {fips.push({'fips' : ['007','033','067','083','111'],  'color' : '#CC6677'})};
+if(regnum == 10) {fips.push({'fips' : ['029','051','053','085','091','113'], 'color' : '#F8F8F8'})};
+if(regnum == 11) {fips.push({'fips' : ['045','077','081','103'],  'color' : '#AA4499'})};
+if(regnum == 12) {fips.push({'fips' : ['037','049','057','097','107','117'], 'color' : '#DDDDDD'})};
+if(regnum == 13) {fips.push({'fips' : ['015','027','043','065'], 'color' : '#BBCC33'})};
+if(regnum == 14) {fips.push({'fips' : ['055','071'],  'color' : '#AAAA00'})};
+if(regnum == 15) {fips.push({'fips' : ['015', '019', '027', '043', '047', '055', '065', '071', '093'], 'color' : '#EE6677'})};
+if(regnum == 16) {fips.push({'fips' : ['009', '011', '017', '025', '039', '061', '063', '073', '075', '087', '089', '095', '099', '115', '121', '125'],  'color' : '#228833'})};
+if(regnum == 17) {fips.push({'fips' : ['001', '005', '013', '014', '031', '035', '041', '059', '069', '101','119','123'],  'color' : '#4477AA'})};
+if(regnum == 18) {fips.push({'fips' : ['003', '021', '023', '079', '105', '109'],  'color' : '#CCBB44'})};
+if(regnum == 19) {fips.push({'fips' : ['007', '029', '033', '037', '045', '049', '051', '053', '057', '067', '077', '081', '083', '085', '091', '097', '103', '107', '111', '113', '117'],  'color' : '#66CCEE'})};
+if(regnum == 20) {fips.push({'fips' : ['001', '005', '014', '031', '035', '059'],  'color' : '#505050'})};
+if(regnum == 21) {fips.push({'fips' : ['001', '005', '013', '014', '031', '035', '059'], 'color' : '#C0C0C0'})};
+if(regnum == 22) {fips.push({'fips' : ['001', '005', '013', '014', '031', '035', '059', '123'],  'color' : '#D3D3D3'})}
+if(regnum == 23) {fips.push({'fips' : ['001', '003', '014', '019', '031', '035', '039', '047', '059', '093'],  'color' : '#D3D3D3'})}
+if(regnum == 24) {fips.push({'fips' : ['013'], 'color' : '#77AADD'})};
+if(regnum == 25) {fips.push({'fips' : ['041','119'], 'color' : '#EE8866'})};
+if(regnum == 26) {fips.push({'fips' : ['001','005','014','019','031','035','039','047','059','093'],  'color' : '#EEDD88'})};
+if(regnum == 27) {fips.push({'fips' : ['069'],  'color' : '#FFAABB'})};
+if(regnum == 28) {fips.push({'fips' : ['077'],  'color' : '#99DDFF'})};
+if(regnum == 29) {fips.push({'fips' : ['123'],  'color' : '#44BB99'})};
+if(regnum == 30) {fips.push({'fips' : ['101'],  'color' : '#DDCC77'})};
+if(regnum == 31) {fips.push({'fips' : ['117'], 'color' : '#E69F00'})};
+if(regnum == 32) {fips.push({'fips' : ['043'],  'color' : '#56B4E9'})};
+if(regnum == 33) {fips.push({'fips' : ['081'],  'color' : '#009E73'})};
+if(regnum == 34) {fips.push({'fips' : ['067'],  'color' : '#F0E442'})};
+if(regnum == 35) {fips.push({'fips' : ['037'],  'color' : '#0072B2'})};
+if(regnum == 36) {fips.push({'fips' : ['087'],  'color' : '#D55E00'})};
+if(regnum == 37) {fips.push({'fips' : ['045','097'],  'color' : '#CC79A7'})};
+if(regnum == 38) {fips.push({'fips' : ['085','091'],  'color' : '#696969'})};
+if(regnum == 39) {fips.push({'fips' : ['107'], 'color' : '#808080'})};
+if(regnum == 40) {fips.push({'fips' : ['075'],  'color' : '#A9A9A9'})};
+;
 
 	 return fips;
 	};
@@ -2326,7 +2341,7 @@ function restructureRace(inData) {
 				  if( tmp[j].race_eth == "Hispanic") { HP = tmp[j].population};
 				  if( tmp[j].race_eth == "Black or African American alone NH") { BL = tmp[j].population};
 				  if( tmp[j].race_eth == "Asian alone NH") {AS = tmp[j].population};
-				  if( tmp[j].race_eth == "Native Hawaiian or Other Pacific Islander alone NH") {NH = tmp[j].population};
+				  if( tmp[j].race_eth == "Native Hawaiian and Other Pacific Islander alone NH") {NH = tmp[j].population};
 				  if( tmp[j].race_eth == "American Indian and Alaska Native alone NH") {AM = tmp[j].population};
 		          if( tmp[j].race_eth == "Two or more NH") {MULTI = tmp[j].population};
 				}
@@ -2925,9 +2940,12 @@ urlstr_nonhispest = "https://gis.dola.colorado.gov/lookups/county_sya_race_estim
 //var prom = [d3.json(urlstr_hispest),d3.json(urlstr_nonhispest),d3.json(urlstr_for)];
 var prom = [d3.json(urlstr_hispest),d3.json(urlstr_nonhispest)];
 
+
 Promise.all(prom).then(function(data){
 	var hisp_est = [];
 	var nonhisp_est = []
+	
+
 //push out vars and count to number
 data[0].forEach(function(obj) {
 hisp_est.push({'year' : obj.year, 'sex' : obj.sex, 'population' : Math.round(+obj.count)});
@@ -2935,6 +2953,10 @@ hisp_est.push({'year' : obj.year, 'sex' : obj.sex, 'population' : Math.round(+ob
     data[1].forEach(function(obj) {
      nonhisp_est.push({'year' : obj.year, 'sex' : obj.sex, 'race' : obj.race, 'population' : Math.round(+obj.count)});
 });
+
+debugger
+console.log(hisp_est)
+console.log(nonhisp_est)
 /*
     data[2].forEach(function(obj) {
      raceeth_for.push({'year' : obj.year, 'race_eth' : obj.race, 'population' : parseInt(obj.count)});
@@ -2975,10 +2997,11 @@ raceeth_est.concat(raceeth_for).forEach(function(obj) {
 */
 
 // Create table array for output
+
 var tbl_arr = []
 var race_eth_sum = d3.sum(raceeth_est, d => d.population);
 var raceth = ['Hispanic', 'White alone NH', 'Black or African American alone NH',
-			'Asian alone NH', 'Native Hawaiian or Other Pacific Islander alone NH', 
+			'Asian alone NH', 'Native Hawaiian and Other Pacific Islander alone NH', 
 			'American Indian and Alaska Native alone NH', 'Two or more NH'];
 			
 
@@ -2987,7 +3010,6 @@ for(i = 0; i < raceth.length; i++) {
 	//tbl_arr.push({'race_eth' : raceth[i], 'percent' : fmt_pct(filt[0].population/race_eth_sum), 'curval' : fmt_comma(filt[0].population), 'forval' : fmt_comma(filt[1].population)});
    tbl_arr.push({'race_eth' : raceth[i], 'percent' : fmt_pct(filt[0].population/race_eth_sum), 'curval' : fmt_comma(filt[0].population)});
   };
-
 
 //Generate Table
 d3.select('#RaceTab').html("");
@@ -4461,6 +4483,7 @@ Promise.all(prom).then(function(data){
 	var cpipre = data[10].filter(function(d) {return d.YEAR == preyrst;});
 	var cpicur = data[10].filter(function(d) {return d.YEAR == curyrst;});
 
+
 	var cpipreval = Number(cpipre[0]['AVG'])
 	var cpicurval = Number(cpicur[0]['AVG'])
 	
@@ -4958,7 +4981,7 @@ rows.append('td')
 
 //cat Demographic Dashboard Functions
 
-function estPlot(inData, app, level, plotdiv, bkmark, yrvalue, fips, ctyName,colors){
+function estPlot(inData, app, level, plotdiv, bkmark, yrvalue, maxYr,fips, ctyName,colors){
 //estPlot Component Functions for Demograpic Dashboard : Estimates Plot
     const fmt_date = d3.timeFormat("%B %d, %Y");
 	const fmt_comma = d3.format(",");
@@ -5038,7 +5061,7 @@ var for_trace = {
 
 var est_data = [est_trace, for_trace];
 var est_layout = {
-		title: "Population Estimates and Forecasts 1990 to 2050, " + ctyName,
+		title: "Population Estimates and Forecasts 1990 to " + maxYr + ", " + ctyName,
 		  autosize: false,
 		  width: 1000,
 		  height: 500,
@@ -5691,7 +5714,7 @@ if(app == 'profile') {
 // cocPlot
 
 
-function genDEMO(geotype, fips, unit, ctyName, yrvalue){
+function genDEMO(geotype, fips, unit, ctyName, yrvalue, maxYr){
 //genDEMO outputs Plotly charts for the Demographic Dashboard
 //genDEMO Creates 3 datasets, one for estimates (pop by year), 
 // one for net migration by age for 2010-2020, and
@@ -5726,7 +5749,7 @@ var CHART1 = document.getElementById("barcoc_output");
 //Estimates and components of change chart
 
 	var yr_list = 1990;
-	for(i = 1991; i <= 2050; i++){
+	for(i = 1991; i <= maxYr; i++){
 		yr_list = yr_list + "," + i;
 	};
 	
@@ -5734,7 +5757,7 @@ var CHART1 = document.getElementById("barcoc_output");
 	
 //forecasts and age projections
    var forc_yrs = 2010;
-   	for(i = 2011; i <= 2050; i++){
+   	for(i = 2011; i <= maxYr; i++){
 		forc_yrs = forc_yrs + "," + i;
 	};
 		var forcurl = "https://gis.dola.colorado.gov/lookups/sya?county=" + fips_list + "&year=" + forc_yrs + "&choice=single&group=3"
@@ -5829,9 +5852,9 @@ var netmig_data = [];
 
 //Plotting 
 
-	estPlot(est_data, "dashboard", "County",  "est_output", "", yrvalue, fips, ctyName, colors);
-	genCOCHIST(geotype, fips,  1970, yrvalue, ['births','deaths','netmig'], "yr5", "linecoc_output", "barcoc_output") 
-	netmigPlot(netmig_data, "dashboard","mig_output", fips, yrvalue,ctyName, colors);
+	estPlot(est_data, "dashboard", "County",  "est_output", "", yrvalue, maxYr, fips, ctyName, colors);
+	genCOCHIST(geotype, fips, yrvalue, 1970, endyr, ['births','deaths','netmig'], "yr5", "linecoc_output", "barcoc_output") 
+	netmigPlot(netmig_data, "dashboard","mig_output", fips, yrvalue, ctyName, colors);
     agePlot(forecast_data,"dashboard", "ageest_output", yrvalue, fips, ctyName, colors);
     popchngPlot(forecast_data,"dashboard", unit, "popchng_output", yrvalue, fips, ctyName,colors);
  
@@ -5841,7 +5864,7 @@ var netmig_data = [];
 
 //cat Race by Age Dashboard Functions
 
-function genRACEVIS(geotype, fips,ctyName, yrvalue) {
+function genRACEVIS(geotype, fips,ctyName, vintYR, yrvalue) {
 //genRACEVIS Generates the Race/Ethncity by Age Dashboard
 	const fmt_comma = d3.format(",");
     const fmt_date = d3.timeFormat("%B %d, %Y");
@@ -5998,7 +6021,7 @@ for(i = 0; i < race_flat.length; i++){
 		age_line_arr_as.push(race_flat[i].age);
 		pop_line_arr_as.push(race_flat[i].population);
 	};
-	if(race_flat[i].race_eth == "Native Hawaiian or Other Pacific Islander alone NH" && race_flat[i].age < 85){
+	if(race_flat[i].race_eth == "Native Hawaiian and Other Pacific Islander alone NH" && race_flat[i].age < 85){
 		age_line_arr_nh.push(race_flat[i].age);
 		pop_line_arr_nh.push(race_flat[i].population);
 	};
@@ -6059,7 +6082,7 @@ var asian_line = {
 var nhpi_line = { 
                x: age_line_arr_nh,
                y : pop_line_arr_nh,
-			   name : 'Native Hawaiian or Other Pacific Islander, NH',
+			   name : 'Native Hawaiian and Other Pacific Islander, NH',
 			   mode : 'lines', 
 			   line : {
 					color: colors[14],
@@ -6174,7 +6197,7 @@ var line_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [citation('SDO',yrvalue,'')]
+			annotations : [citation('SDO',vintYR,'')]
 		};
  
 Plotly.newPlot(LINE, line_data, line_layout,config);
@@ -6207,7 +6230,7 @@ var white_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [citation('SDO',yrvalue,'')]
+			annotations : [citation('SDO',vintYR,'')]
 		};
  
 Plotly.newPlot(WHITE, white_trace, white_layout,config);
@@ -6240,7 +6263,7 @@ var hisp_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [citation('SDO',yrvalue,'')]
+			annotations : [citation('SDO',vintYR,'')]
 		};
  
 Plotly.newPlot(HISPANIC, hisp_trace, hisp_layout,config);
@@ -6273,7 +6296,7 @@ var black_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [citation('SDO',yrvalue,'')]
+			annotations : [citation('SDO',vintYR,'')]
 		};
  
 Plotly.newPlot(BLACK, black_trace, black_layout,config);
@@ -6306,13 +6329,13 @@ var asian_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [citation('SDO',yrvalue,'')]
+			annotations : [citation('SDO',vintYR,'')]
 		};
  
 Plotly.newPlot(ASIAN, asian_trace, asian_layout,config);
 
 var nhpi_layout = {
-		title: "Single Year of Age by Race/Ethnicity: " + ctyName + ", " + yrvalue + " Native Hawaiian or Other Pacific Islander, NH",
+		title: "Single Year of Age by Race/Ethnicity: " + ctyName + ", " + yrvalue + " Native Hawaiian and Other Pacific Islander, NH",
 		  autosize: false,
 		  width: 1000,
 		  height: 500,
@@ -6339,7 +6362,7 @@ var nhpi_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [citation('SDO',yrvalue,'')]
+			annotations : [citation('SDO',vintYR,'')]
 		};
  
 Plotly.newPlot(NHPI, nhpi_trace, nhpi_layout,config);
@@ -6372,7 +6395,7 @@ var amind_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [citation('SDO',yrvalue,'')]
+			annotations : [citation('SDO',vintYR,'')]
 		};
  
 Plotly.newPlot(AMIND, amind_trace, amind_layout,config);
@@ -6405,7 +6428,7 @@ var multi_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [citation('SDO',yrvalue,'')]
+			annotations : [citation('SDO',vintYR,'')]
 		};
  
 Plotly.newPlot(MULTI, multi_trace, multi_layout,config);
@@ -6469,7 +6492,7 @@ asian_png.onclick = function() {
 var nhpi_csv = document.getElementById('nhpi_csv');
 var nhpi_png = document.getElementById('nhpi_png');
 nhpi_csv.onclick = function() {
-	  exportToCsv(ctyName, 'nhpi', race_flat.filter(function(d) {return d.race_eth == "Native Hawaiian or Other Pacific Islander NH";}), yrvalue);
+	  exportToCsv(ctyName, 'nhpi', race_flat.filter(function(d) {return d.race_eth == "Native Hawaiian and Other Pacific Islander NH";}), yrvalue);
      }; 
 nhpi_png.onclick = function() {
 	   exportToPng(ctyName, 'nhpi', NHPI,yrvalue);
@@ -7049,7 +7072,7 @@ netmigrwa_png.onclick = function() {
 
 //cat Long term components of change dashboard (netmighist.html)
 
-function genCOCHIST(geotype,fipsVal,  byrs, eyrs, stats, axis, DIV0, DIV1) {
+function genCOCHIST(geotype,fipsVal,  vintyrs, byrs, eyrs, stats, axis, DIV0, DIV1) {
 //genCOCHIST generates long-term COC charts
 	
 const fmt_date = d3.timeFormat("%B %d, %Y");
@@ -7292,7 +7315,7 @@ var mig_bar = {
 					   name : 'Net Migration',
 					   type : 'bar',
 					   marker: {
-						color : colors[11]
+						color : colors[5]
 					   }
 					};
 
@@ -7302,7 +7325,7 @@ var natincr_bar = {
 					   name : 'Natural Increase',
 					   type : 'bar',
 					   marker : {
-						color : colors[1]
+						color : colors[2]
 					   }
 					};
 					
@@ -7338,7 +7361,7 @@ var line_layout = {
 			tickmode: "array", 
 			tickvals : year_tick,
 			tickangle: 45,
-			tickfont: { size: 10}
+			tickfont: { size: 18}
 		  },
 		  yaxis: {
 			  title : 'Persons',
@@ -7352,7 +7375,7 @@ var line_layout = {
 			linewidth: 2,
 			 tickformat: ','
 		  },
-			annotations : [citation('SDO',eyrs,'')]
+			annotations : [citation('SDO',vintyrs,'')]
 		};
 		
 		
@@ -7387,10 +7410,11 @@ var bar_layout = {
 			gridwidth: 1,
 			linecolor: 'black',
 			linewidth: 2,
-			 tickformat: ','
+			 tickformat: ',',
+			 tickfont: { size: 10}
 		  },
-		  legend : { x : 0.3, y : 1.1, 'orientation' : 'h', font:{size: 10}},
-			annotations : [citation('SDO',eyrs,'')]
+		  legend : { x : 0.3, y : 1.1, 'orientation' : 'h', font:{size: 15}},
+			annotations : [citation('SDO',vintyrs,'')]
 		};
 		
 
@@ -7429,11 +7453,11 @@ function genHOUSEAGE(fipsVal,ctyName, varType, seriesType){
 	const fmt_date = d3.timeFormat("%B %d, %Y");
     var colors = colorRamp()
 	var fips_list = parseInt(fipsVal);
-
+  var maxYr = 2050  //UPDATE THIS ONCE FORECAST IS EXTENDED
    var yr_trace = [2010];
 
  	var yr_list = 2010;
-	for(i = 2011; i <= 2050; i++){
+	for(i = 2011; i <= maxYr; i++){
 		yr_list = yr_list + "," + i;
 		yr_trace.push(Number(i));
 	};
@@ -7455,7 +7479,7 @@ d3.json(urlstr).then(function(data){
  });
  //Calculating Age by Housing Type percentage
 
-for(i = 2010; i <= 2050;i++){
+for(i = 2010; i <= maxYr;i++){
 	var tmp = dataplot.filter(function(d) {return d.year == i;});
 
 	for(j = 0; j < 5;j++){
@@ -7473,7 +7497,7 @@ for(i = 2010; i <= 2050;i++){
 
  //Calculating Housing Type by Age Group percentage
 
-for(i = 2010; i <= 2050;i++){
+for(i = 2010; i <= maxYr;i++){
 	var tmp = dataplot.filter(function(d) {return d.year == i;});
 
 	for(j = 0; j < 5;j++){
@@ -7634,7 +7658,7 @@ var ch_layout = [];
 
 if(varType == "hhold") {
 for(i = 0; i < hh_arr.length; i++){
-	var tit_str = "Projected Households by Age and Household Type " + ctyName + " 2010 to 2050<br>Household Type: " + hh_arr[i];
+	var tit_str = "Projected Households by Age and Household Type " + ctyName + " 2010 to maxYr<br>Household Type: " + hh_arr[i];
 	if(seriesType == "num") {
 		tit_str = tit_str + " Number of Households";
 		y_title = "Households";
@@ -7681,7 +7705,7 @@ ch_layout.push(layout);
 };
 } else {
 	for(i = 0; i < age_arr.length; i++){
-	var tit_str = "Projected Households by Household Type and Age " + ctyName + " 2010 to 2050<br> Age Group: " + age_arr[i];
+	var tit_str = "Projected Households by Household Type and Age " + ctyName + " 2010 to maxYr<br> Age Group: " + age_arr[i];
 	if(seriesType == "num") {
 		tit_str = tit_str + " Number of Households";
 		y_title = "Households";
