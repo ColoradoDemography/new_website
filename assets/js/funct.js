@@ -5851,6 +5851,8 @@ var netmig_data = [];
 }; 
 
 //Plotting 
+debugger
+console.log(est_data)
 
 	estPlot(est_data, "dashboard", "County",  "est_output", "", yrvalue, maxYr, fips, ctyName, colors);
 	genCOCHIST(geotype, fips, yrvalue, 1970, endyr, ['births','deaths','netmig'], "yr5", "linecoc_output", "barcoc_output") 
