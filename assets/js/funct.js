@@ -5750,9 +5750,11 @@ var CHART1 = document.getElementById("barcoc_output");
 	for(i = 1991; i <= maxYr; i++){
 		yr_list = yr_list + "," + i;
 	};
-	
+
 	var esturl = "https://gis.dola.colorado.gov/lookups/sya?county=" + fips_list + "&year=" + yr_list + "&choice=single&group=3"
-	
+		debugger
+		console.log(maxYr)
+		console.log(esturl)
 //forecasts and age projections
    var forc_yrs = 2010;
    	for(i = 2011; i <= maxYr; i++){
