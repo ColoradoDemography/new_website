@@ -5752,9 +5752,7 @@ var CHART1 = document.getElementById("barcoc_output");
 	};
 
 	var esturl = "https://gis.dola.colorado.gov/lookups/sya?county=" + fips_list + "&year=" + yr_list + "&choice=single&group=3"
-		debugger
-		console.log(maxYr)
-		console.log(esturl)
+
 //forecasts and age projections
    var forc_yrs = 2010;
    	for(i = 2011; i <= maxYr; i++){
@@ -5818,9 +5816,6 @@ var netmig_data = [];
 	  est_data.push({'geo' : 'state', 'fips' : parseInt(fips), 'name' : ctyName, 'year' : key, 'totalpopulation' : value.totalpopulation, 
 	      'type' : key <= yrvalue ? "Estimate" : "Forecast"});
 		}
-debugger
-console.log(est_data);
-console.log(data[0])
 
 	//Forecast
 	var columnsFor = ['totalpopulation'];
