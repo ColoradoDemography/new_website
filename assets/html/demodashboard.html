@@ -170,9 +170,6 @@
 	 </select>
     <div id="popchng_output"></div> 
  </div>
- <div class="grid-item app-panel_9_2">
- <p></p>
- </div>
 </div>  <!-- End of Grid -->
 
 
@@ -193,17 +190,21 @@ popDropdown('county','location-dropdown','')
 var urlstr = "https://gis.dola.colorado.gov/lookups/componentYRS";
 
 d3.json(urlstr).then(function(yeardata){
-
+    var allyrs = yeardata.map(function(d){return d.year;});
+    var max_year = d3.max(allyrs)
     var maxest = yeardata.filter(function(d){return d.datatype == 'Estimate'});
 	var yrsList = maxest.map(function(d){return d.year;});
     var yrvalue = d3.max(yrsList); 
 
+debugger
+console.log(allyrs)
+console.log(max_year)
 //Generate Initial Tables
 showButtons();
 
 var selectedunit = d3.select("#unit-dropdown").property('value');
 
-genDEMO("county", "000", selectedunit,"Colorado", yrvalue);
+genDEMO("county", "000", selectedunit,"Colorado", yrvalue, max_year);
 d3.select("#geo-dropdown").on("change", function(d,i) {
       var selectedGeo = d3.select("#geo-dropdown").property('value');
 	  // update link
@@ -236,7 +237,7 @@ d3.select("#geo-dropdown").on("change", function(d,i) {
 	  var selectedfips = d3.select("#location-dropdown").property('value');
 	  var selectedregion = d3.select("#location-dropdown option:checked").text();
 	  var selectedunit = d3.select("#unit-dropdown").property('value');
-	  genDEMO(selectedGeo,selectedfips,selectedunit, selectedregion,yrvalue);
+	  genDEMO(selectedGeo,selectedfips,selectedunit, selectedregion,yrvalue, max_year);
 //Display drilldown boxes
 	  if(selectedGeo == 'region') {
 	    if (ctyDrop.style.display === "none") {
@@ -258,7 +259,7 @@ d3.select("#location-dropdown").on("change", function(d,i) {
         var selectedfips = d3.select("#location-dropdown").property('value');
 		var selectedcounty = d3.select('#location-dropdown option:checked').text();
 		var selectedunit = d3.select("#unit-dropdown").property('value');
-        genDEMO(selectedGeo,selectedfips,selectedunit,selectedcounty,yrvalue);
+        genDEMO(selectedGeo,selectedfips,selectedunit,selectedcounty,yrvalue,max_year);
 		if(selectedGeo == 'region') {
 		   popCtyDrop(selectedfips,'county-dropdown');
 		}
@@ -269,7 +270,7 @@ d3.select("#unit-dropdown").on("change", function(d,i) {
         var selectedfips = d3.select("#location-dropdown").property('value');
 		var selectedcounty = d3.select('#location-dropdown option:checked').text();
 		var selectedunit = d3.select("#unit-dropdown").property('value');
-        genDEMO(selectedGeo,selectedfips,selectedunit,selectedcounty,yrvalue);
+        genDEMO(selectedGeo,selectedfips,selectedunit,selectedcounty,yrvalue,max_year);
 		if(selectedGeo == 'region') {
 		   popCtyDrop(selectedfips,'county-dropdown');
 		}
@@ -280,9 +281,9 @@ d3.select("#county-dropdown").on("change", function(d,i) {
 		var selectedcounty = d3.select('#county-dropdown option:checked').text();
 		var selectedunit = d3.select("#unit-dropdown").property('value');
 		if(selectedcounty.includes("County")){
-              genDEMO("county",selectedfips,selectedunit,selectedcounty,yrvalue); 
+              genDEMO("county",selectedfips,selectedunit,selectedcounty,yrvalue, max_year); 
 			 } else {
-			  genDEMO("region",selectedfips,selectedunit,selectedcounty,yrvalue); 
+			  genDEMO("region",selectedfips,selectedunit,selectedcounty,yrvalue,max_year); 
 			  }
 		});
 }); //end of maximum year value
