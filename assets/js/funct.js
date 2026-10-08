@@ -2954,9 +2954,7 @@ hisp_est.push({'year' : obj.year, 'sex' : obj.sex, 'population' : Math.round(+ob
      nonhisp_est.push({'year' : obj.year, 'sex' : obj.sex, 'race' : obj.race, 'population' : Math.round(+obj.count)});
 });
 
-debugger
-console.log(hisp_est)
-console.log(nonhisp_est)
+
 /*
     data[2].forEach(function(obj) {
      raceeth_for.push({'year' : obj.year, 'race_eth' : obj.race, 'population' : parseInt(obj.count)});
@@ -5804,17 +5802,23 @@ var netmig_data = [];
 	  netmig_data.push({'type' : 'region', 'fips' : parseInt(fips), 'name' : ctyName, 'age' : key,   'netmigration' : value.netmigration});
 		}
 
-} else {
+} else {  //counties
 	if(fips == "000") { //Colorado as a whole
+	
+
 //Estimates
 	var columnsEst = ['totalpopulation'];
  	var est_sum =      d3.rollup(data[0], v => Object.fromEntries(columnsEst.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year);
+
 //Flatten Arrays
 	var est_data = [];
 	for (let [key, value] of est_sum) {
 	  est_data.push({'geo' : 'state', 'fips' : parseInt(fips), 'name' : ctyName, 'year' : key, 'totalpopulation' : value.totalpopulation, 
 	      'type' : key <= yrvalue ? "Estimate" : "Forecast"});
 		}
+debugger
+console.log(est_data);
+console.log(data[0])
 
 	//Forecast
 	var columnsFor = ['totalpopulation'];
@@ -5833,6 +5837,7 @@ var netmig_data = [];
 //Estimates
 	var columnsEst = ['totalpopulation'];
  	var est_sum =      d3.rollup(data[0], v => Object.fromEntries(columnsEst.map(col => [col, d3.sum(v, d => +d[col])])), d => d.year);
+
 //Flatten Arrays
 	var est_data = [];
 	for (let [key, value] of est_sum) {
@@ -5851,8 +5856,7 @@ var netmig_data = [];
 }; 
 
 //Plotting 
-debugger
-console.log(est_data)
+
 
 	estPlot(est_data, "dashboard", "County",  "est_output", "", yrvalue, maxYr, fips, ctyName, colors);
 	genCOCHIST(geotype, fips, yrvalue, 1970, endyr, ['births','deaths','netmig'], "yr5", "linecoc_output", "barcoc_output") 
